@@ -38,4 +38,17 @@ public interface TODO {
      */
     public void completeRepl(); // TODO
 
+    /**
+     * Prepare for long time things
+     * 
+     * Subprojects:
+     * 
+     * <ul>
+     *   <li>miniconnect-core</li>
+     *   <li>miniconnect-jdbc (bridge for using miniConnect API through JDBD)</li>
+     *   <li>miniconnect-? (implementation framework)</li>
+     * </ul>
+     */
+    public void prepareLongTime(); // TODO
+
 }
