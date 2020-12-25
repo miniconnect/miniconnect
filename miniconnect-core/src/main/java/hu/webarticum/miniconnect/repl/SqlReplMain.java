@@ -12,8 +12,6 @@ public class SqlReplMain {
         try (MiniConnection connection = MiniDriverManager.openConnection(args[0], new Properties())) {
             Repl repl = new SqlRepl(
                     connection,
-                    () -> "SQL > ",
-                    () -> "    > ",
                     System.out, // NOSONAR
                     System.err); // NOSONAR
             new ReplRunner(repl, System.in).run();

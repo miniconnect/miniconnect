@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.repl;
 
 import java.io.PrintStream;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -22,10 +23,6 @@ public class SqlRepl implements Repl {
     
 
     private final MiniConnection connection;
-
-    private final Supplier<String> prompt;
-
-    private final Supplier<String> prompt2;
     
     private final PrintStream out;
     
@@ -34,13 +31,9 @@ public class SqlRepl implements Repl {
 
     public SqlRepl(
             MiniConnection connection,
-            Supplier<String> prompt,
-            Supplier<String> prompt2,
             PrintStream out,
             PrintStream err) {
         this.connection = connection;
-        this.prompt = prompt;
-        this.prompt2 = prompt2;
         this.out = out;
         this.err = err;
     }
@@ -58,12 +51,12 @@ public class SqlRepl implements Repl {
 
     @Override
     public void prompt() {
-        out.print(prompt.get());
+        out.println("SQL > ");
     }
 
     @Override
     public void prompt2() {
-        out.print(prompt2.get());
+        out.println("    > ");
     }
     
     @Override
