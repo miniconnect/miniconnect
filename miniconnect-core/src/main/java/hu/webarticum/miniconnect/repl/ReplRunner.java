@@ -35,7 +35,7 @@ public class ReplRunner implements Runnable {
         
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
         String line;
-        while ((line = readLineSilently(bufferedReader)) != null) {
+        while ((line = readLineSilently(bufferedReader)) != null) { // NOSONAR
             currentQueryBuilder.append(line);
             String query = currentQueryBuilder.toString();
             if (queryPattern != null && !queryPattern.matcher(query).matches()) {
