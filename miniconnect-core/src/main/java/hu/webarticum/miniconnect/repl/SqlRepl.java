@@ -1,6 +1,6 @@
 package hu.webarticum.miniconnect.repl;
 
-import java.io.IOException;
+import java.io.PrintStream;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -19,17 +19,17 @@ public class SqlRepl implements Repl {
 
     private final Supplier<String> prompt2;
     
-    private final Appendable out;
+    private final PrintStream out;
     
-    private final Appendable err;
+    private final PrintStream err;
     
 
     public SqlRepl(
             MiniConnection connection,
             Supplier<String> prompt,
             Supplier<String> prompt2,
-            Appendable out,
-            Appendable err) {
+            PrintStream out,
+            PrintStream err) {
         this.connection = connection;
         this.prompt = prompt;
         this.prompt2 = prompt2;
@@ -40,25 +40,17 @@ public class SqlRepl implements Repl {
     
     @Override
     public void welcome() {
-        writeSilently(out, "\nWelcome in miniConnect SQL REPL!\n\n");
+        out.println("\nWelcome in miniConnect SQL REPL!\n");
     }
 
     @Override
     public void prompt() {
-        writeSilently(out, prompt.get());
+        out.print(prompt.get());
     }
 
     @Override
     public void prompt2() {
-        writeSilently(out, prompt2.get());
-    }
-    
-    private void writeSilently(Appendable out, String text) {
-        try {
-            out.append(text);
-        } catch (IOException e) {
-            // nothing to do
-        }
+        out.print(prompt2.get());
     }
     
     @Override
@@ -67,14 +59,14 @@ public class SqlRepl implements Repl {
             return false;
         }
         
-        writeSilently(out, String.format("  Your command was: '%s'%n", command));
+        out.println(String.format("  Your command was: '%s'", command));
 
         return true;
     }
     
     @Override
     public void bye() {
-        writeSilently(out, "\nBye-bye!\n\n");
+        out.println("\nBye-bye!\n");
     }
     
 }
