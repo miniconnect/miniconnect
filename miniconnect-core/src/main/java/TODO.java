@@ -31,6 +31,7 @@ public interface TODO {
      * Complete REPL
      * 
      * <ul>
+     *   <li>better handling of quit vs semicolon etc.</li>
      *   <li>run the query on the connection</li>
      *   <li>print result set as table</li>
      *   <li>print error messages</li>
