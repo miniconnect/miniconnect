@@ -31,9 +31,9 @@ public interface TODO {
      * Complete REPL
      * 
      * <ul>
-     *   <li>pretty print reslut set as table</li>
+     *   <li>run the query on the connection</li>
+     *   <li>print result set as table</li>
      *   <li>print error messages</li>
-     *   <li>(handle multiline queries?)</li>
      * </ul>
      */
     public void completeRepl(); // TODO
