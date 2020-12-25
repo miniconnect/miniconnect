@@ -12,18 +12,11 @@ public class ReplRunner implements Runnable {
     private final Repl repl;
 
     private final InputStream in;
-
-    private final Pattern queryPattern;
     
 
     public ReplRunner(Repl repl, InputStream in) {
-        this(repl, in, null);
-    }
-    
-    public ReplRunner(Repl repl, InputStream in, Pattern queryPattern) {
         this.repl = repl;
         this.in = in;
-        this.queryPattern = queryPattern;
     }
     
     @Override
@@ -33,12 +26,13 @@ public class ReplRunner implements Runnable {
 
         StringBuilder currentQueryBuilder = new StringBuilder();
         
+        Pattern commandPattern = repl.commandPattern();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
         String line;
         while ((line = readLineSilently(bufferedReader)) != null) { // NOSONAR
             currentQueryBuilder.append(line);
             String query = currentQueryBuilder.toString();
-            if (queryPattern != null && !queryPattern.matcher(query).matches()) {
+            if (!commandPattern.matcher(query).matches()) {
                 currentQueryBuilder.append('\n');
                 repl.prompt2();
                 continue;

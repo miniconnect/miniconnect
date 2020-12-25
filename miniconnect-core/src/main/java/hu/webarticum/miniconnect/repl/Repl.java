@@ -1,6 +1,10 @@
 package hu.webarticum.miniconnect.repl;
 
+import java.util.regex.Pattern;
+
 public interface Repl {
+    
+    public Pattern commandPattern();
     
     public void welcome();
     
