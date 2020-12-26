@@ -1,0 +1,6 @@
+
+rootProject.name = 'miniconnect-util'
+
+// FIXME
+include ':miniconnect-api'
+project(':miniconnect-api').projectDir = new File('../miniconnect-api')
