@@ -51,12 +51,12 @@ public class SqlRepl implements Repl {
 
     @Override
     public void prompt() {
-        out.println("SQL > ");
+        out.print("SQL > ");
     }
 
     @Override
     public void prompt2() {
-        out.println("    > ");
+        out.print("    > ");
     }
     
     @Override
