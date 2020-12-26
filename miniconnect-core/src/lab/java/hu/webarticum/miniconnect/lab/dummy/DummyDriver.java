@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.dummy;
+package hu.webarticum.miniconnect.lab.dummy;
 
 import java.util.Map;
 
