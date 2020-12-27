@@ -10,6 +10,7 @@ Minimalistic DB connector framework and JDBC bridge
 - - structure:
 - - - header (type description, etc.)
 - - - content (byte array)
+- - add a value interpreter (only the end user need it)
 - Complete the basic API
 - Design and implement the client-server protocol
 - Create dummy implementation
