@@ -11,6 +11,8 @@ Minimalistic DB connector framework and JDBC bridge
 - - - header (type description, etc.)
 - - - content (byte array)
 - - add a value interpreter (only the end user need it)
+- - how to handle large values?
+- - - lazy/async loading?
 - Complete the basic API
 - Design and implement the client-server protocol
 - Create dummy implementation
