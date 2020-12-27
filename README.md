@@ -4,7 +4,7 @@ Minimalistic DB connector framework and JDBC bridge
 
 ## TODO:
 
-- Reimplement `MiniValue`
+- Redesign `MiniValue`
 - - to be serializable between client and server
 - - - in a java-independent way
 - - structure:
