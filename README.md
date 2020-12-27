@@ -16,8 +16,9 @@ Minimalistic DB connector framework and JDBC bridge
 - - send without header
 - - - less overhead
 - - - no-header magic byte?
-- - - - entire-column header definition for the result set?
-- - - - transport only? (add header explicitly only if different than entire-column)
+- - - - entire-column default header definition for the result set?
+- - - - transport only? (add header explicitly only if different from default)
+- - - - ResultSet.columnHeaders() (the default)
 - Complete the basic API
 - Design and implement the client-server protocol
 - Create dummy implementation
