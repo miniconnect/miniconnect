@@ -6,8 +6,12 @@ import java.math.BigInteger;
 import java.time.temporal.Temporal;
 import java.util.function.Supplier;
 
-// TODO: simplified, client-server serializable version
 public interface MiniValue {
+
+    // TODO: simplified, client-server serializable version
+    // public int contentLength();
+    // public byte[] content();
+    // public InputStream inputStream();
     
     public boolean isNull();
 
