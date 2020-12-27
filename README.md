@@ -21,6 +21,7 @@ Minimalistic DB connector framework and JDBC bridge
 - - - - ResultSet.columnHeaders() (the default)
 - - - column header only?
 - - - - a null value could be just empty
+- - - - - empty string? etc.?
 - Complete the basic API
 - Design and implement the client-server protocol
 - Create dummy implementation
