@@ -6,7 +6,10 @@ import java.math.BigInteger;
 import java.time.temporal.Temporal;
 import java.util.function.Supplier;
 
+// TODO: simplified, client-server serializable version
 public interface MiniValue {
+    
+    public boolean isNull();
 
     public boolean asBoolean();
     

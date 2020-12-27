@@ -99,9 +99,7 @@ public class SqlRepl implements Repl {
             return;
         }
         
-        // TODO
-        out.println(result);
-        
+        new ResultSetPrinter().print(result.resultSet(), out);
     }
     
     private void help() {

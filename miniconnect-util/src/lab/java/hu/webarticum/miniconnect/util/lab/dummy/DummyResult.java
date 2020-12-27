@@ -1,13 +1,11 @@
 package hu.webarticum.miniconnect.util.lab.dummy;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniResultSet;
 
-// FIXME
 public class DummyResult implements MiniResult {
     
     private final boolean success;
@@ -15,9 +13,6 @@ public class DummyResult implements MiniResult {
     private final String errorMessage;
     
     private final DummyResultSet resultSet;
-    
-    
-    private volatile boolean closed = false;
     
 
     public DummyResult() {
@@ -57,16 +52,6 @@ public class DummyResult implements MiniResult {
     @Override
     public MiniResultSet resultSet() {
         return resultSet;
-    }
-
-    @Override
-    public void close() throws IOException {
-        closed = true;
-    }
-    
-    @Override
-    public boolean isClosed() {
-        return closed;
     }
 
 }

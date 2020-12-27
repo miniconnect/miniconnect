@@ -18,6 +18,7 @@ public class DummyConnection implements MiniConnection {
     public DummyConnection() {
         queryRunners = new ArrayList<>();
         queryRunners.add(new DescribeQueryExecutor());
+        queryRunners.add(new SelectQueryExecutor());
     }
     
     
@@ -27,17 +28,15 @@ public class DummyConnection implements MiniConnection {
             throw new IllegalStateException("Already closed");
         }
         
-        MiniResult result = null;
         for (QueryExecutor queryRunner : queryRunners) {
-            result = queryRunner.execute(query);
+            MiniResult result = queryRunner.execute(query);
+            if (result != null) {
+                return result;
+            }
         }
         
-        if (result != null) {
-            return result;
-        } else {
-            // FIXME: unsuccessful result?
-            throw new RuntimeException("Unknow command"); // NOSONAR
-        }
+        // FIXME: unsuccessful result?
+        throw new RuntimeException("Unknow command"); // NOSONAR
     }
 
     @Override

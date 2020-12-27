@@ -1,9 +1,8 @@
 package hu.webarticum.miniconnect.api;
 
-import java.io.Closeable;
 import java.util.List;
 
-public interface MiniResult extends Closeable {
+public interface MiniResult {
 
     public boolean isSuccess(); // FIXME: status? exception?
     
@@ -12,7 +11,5 @@ public interface MiniResult extends Closeable {
     public List<String> warnings();
 
     public MiniResultSet resultSet();
-    
-    public boolean isClosed();
     
 }

@@ -5,6 +5,7 @@ plugins {
 group 'hu.webarticum.holodb'
 version '1.0-SNAPSHOT'
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
     jcenter()
