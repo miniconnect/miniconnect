@@ -13,6 +13,11 @@ Minimalistic DB connector framework and JDBC bridge
 - - add a value interpreter (only the end user need it)
 - - how to handle large values?
 - - - lazy/async loading?
+- - send without header
+- - - less overhead
+- - - no-header magic byte?
+- - - - entire-column header definition for the result set?
+- - - - transport only? (add header explicitly only if different than entire-column)
 - Complete the basic API
 - Design and implement the client-server protocol
 - Create dummy implementation
