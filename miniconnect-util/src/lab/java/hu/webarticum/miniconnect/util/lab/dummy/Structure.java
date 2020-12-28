@@ -1,11 +1,12 @@
 package hu.webarticum.miniconnect.util.lab.dummy;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniValue;
+import hu.webarticum.miniconnect.util.value.StoredColumnHeader;
+import hu.webarticum.miniconnect.util.value.XxxValueEncoder;
 
 
 public final class Structure {
@@ -15,14 +16,23 @@ public final class Structure {
     }
     
 
-    public static List<String> getMetaColumnNames() {
-        return Arrays.asList("Field", "Type", "Null", "Key", "Default", "Extra");
+    public static List<MiniColumnHeader> getMetaColumnHeaders() {
+        List<MiniColumnHeader> result = new ArrayList<>();
+        result.add(new StoredColumnHeader("Field", String.class.getName()));
+        result.add(new StoredColumnHeader("Type", String.class.getName()));
+        result.add(new StoredColumnHeader("Null", String.class.getName()));
+        result.add(new StoredColumnHeader("Key", String.class.getName()));
+        result.add(new StoredColumnHeader("Default", String.class.getName()));
+        result.add(new StoredColumnHeader("Extra", String.class.getName()));
+        return result;
     }
 
-    public static List<String> getColumnNames() {
-        return getColumnData().stream()
-                .map(row -> row.get(0).asString())
-                .collect(Collectors.toList());
+    public static List<MiniColumnHeader> getColumnHeaders() {
+        List<MiniColumnHeader> result = new ArrayList<>();
+        result.add(new StoredColumnHeader("id", Integer.class.getName()));
+        result.add(new StoredColumnHeader("label", String.class.getName()));
+        result.add(new StoredColumnHeader("description", String.class.getName()));
+        return result;
     }
     
     public static List<List<MiniValue>> getColumnData() {
@@ -41,13 +51,15 @@ public final class Structure {
             String defaultValue,
             String extra) {
         
+        XxxValueEncoder stringEncoder = new XxxValueEncoder(String.class);
+        
         List<MiniValue> row = new ArrayList<>(6);
-        row.add(new StringValue(field));
-        row.add(new StringValue(type));
-        row.add(new StringValue(isNullable ? "YES" : "NO"));
-        row.add(new StringValue(key));
-        row.add(defaultValue != null ? new StringValue(defaultValue) : new NullValue());
-        row.add(new StringValue(extra));
+        row.add(stringEncoder.encode(field));
+        row.add(stringEncoder.encode(type));
+        row.add(stringEncoder.encode(isNullable ? "YES" : "NO"));
+        row.add(stringEncoder.encode(key));
+        row.add(stringEncoder.encode(defaultValue));
+        row.add(stringEncoder.encode(extra));
         return row;
     }
 
@@ -61,10 +73,13 @@ public final class Structure {
     }
     
     private static List<MiniValue> createRow(int id, String label, String desription) {
+        XxxValueEncoder intEncoder = new XxxValueEncoder(Integer.class);
+        XxxValueEncoder stringEncoder = new XxxValueEncoder(String.class);
+        
         List<MiniValue> row = new ArrayList<>(3);
-        row.add(new LongValue(id));
-        row.add(new StringValue(label));
-        row.add(new StringValue(desription));
+        row.add(intEncoder.encode(id));
+        row.add(stringEncoder.encode(label));
+        row.add(stringEncoder.encode(desription));
         return row;
     }
     

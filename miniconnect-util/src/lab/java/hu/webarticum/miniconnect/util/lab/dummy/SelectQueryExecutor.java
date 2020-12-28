@@ -25,7 +25,7 @@ public class SelectQueryExecutor implements QueryExecutor {
         }
 
         DummyResultSet resultSet = new DummyResultSet(
-                Structure.getColumnNames(), Structure.getRows());
+                Structure.getColumnHeaders(), Structure.getRows());
         
         return new DummyResult(resultSet);
     }

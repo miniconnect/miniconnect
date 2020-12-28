@@ -5,10 +5,7 @@ import java.util.List;
 
 public interface MiniResultSet extends Closeable, Iterable<List<MiniValue>> {
 
-    // TODO: client-server serialization...
-    // public ??? columnHeaders();
-    
-    public List<String> columnNames();
+    public List<MiniColumnHeader> columnHeaders();
     
     public boolean isClosed();
     

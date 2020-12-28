@@ -26,7 +26,7 @@ public class DescribeQueryExecutor implements QueryExecutor {
         }
         
         DummyResultSet resultSet = new DummyResultSet(
-                Structure.getMetaColumnNames(), Structure.getColumnData());
+                Structure.getMetaColumnHeaders(), Structure.getColumnData());
         
         return new DummyResult(resultSet);
     }
