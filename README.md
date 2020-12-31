@@ -5,6 +5,7 @@ Minimalistic DB connector framework and JDBC bridge
 ## TODO:
 
 - Finalize api design
+- Design exception policy
 - Design and implement the client-server protocol
 - - subprojects:
 - - - miniconnect-protocol (with the main documentation)
