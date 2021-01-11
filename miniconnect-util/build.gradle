@@ -15,7 +15,6 @@ configurations {
     lab
 }
 
-
 sourceSets {
     lab {
         java {
