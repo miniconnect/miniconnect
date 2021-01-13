@@ -1,8 +1,11 @@
-package hu.webarticum.miniconnect.protocol;
+package hu.webarticum.miniconnect.protocol.channel.in;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+
+import hu.webarticum.miniconnect.protocol.block.Block;
+import hu.webarticum.miniconnect.protocol.common.ByteString;
 
 public class BlockReader {
 
@@ -34,7 +37,7 @@ public class BlockReader {
                     finalByte, checkByte));
         }
 
-        return new Block(new ByteString(contentBytes));
+        return new Block(ByteString.wrap(contentBytes));
     }
     
     private int readInt() throws IOException {

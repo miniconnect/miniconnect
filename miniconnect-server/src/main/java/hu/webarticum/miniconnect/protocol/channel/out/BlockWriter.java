@@ -1,8 +1,11 @@
-package hu.webarticum.miniconnect.protocol;
+package hu.webarticum.miniconnect.protocol.channel.out;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+
+import hu.webarticum.miniconnect.protocol.block.Block;
+import hu.webarticum.miniconnect.protocol.common.ByteString;
 
 public class BlockWriter {
 
@@ -23,6 +26,7 @@ public class BlockWriter {
         out.write(lengthBytes);
         content.writeTo(out);
         out.write(checkByte);
+        out.flush();
     }
 
 }

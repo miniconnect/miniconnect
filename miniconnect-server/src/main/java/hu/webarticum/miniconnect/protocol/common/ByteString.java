@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.protocol;
+package hu.webarticum.miniconnect.protocol.common;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -15,12 +15,20 @@ public class ByteString {
     private final byte[] bytes;
     
 
-    public ByteString(byte[] bytes) {
+    private ByteString(byte[] bytes) {
         Objects.requireNonNull(bytes);
         this.bytes = bytes;
     }
     
+    public static ByteString wrap(byte[] bytes) {
+        return new ByteString(bytes);
+    }
+    
 
+    public boolean isEmpty() {
+        return (bytes.length == 0);
+    }
+    
     public int length() {
         return bytes.length;
     }
@@ -33,6 +41,10 @@ public class ByteString {
         return Arrays.copyOf(bytes, bytes.length);
     }
 
+    public byte[] extract(int position) {
+        return extract(position, bytes.length - position);
+    }
+    
     public byte[] extract(int position, int length) {
         checkExtraction(position, length);
         byte[] extractedBytes = new byte[length];
