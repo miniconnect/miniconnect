@@ -1,15 +1,15 @@
-package hu.webarticum.miniconnect.protocol.channel.out;
+package hu.webarticum.miniconnect.protocol.io.target;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 import hu.webarticum.miniconnect.protocol.block.Block;
 
-public class SingleStreamBlockOutputChannel implements BlockOutputChannel {
+public class SingleStreamBlockTarget implements BlockTarget {
 
     private final OutputStream out;
     
-    public SingleStreamBlockOutputChannel(OutputStream out) {
+    public SingleStreamBlockTarget(OutputStream out) {
         this.out = out;
     }
     

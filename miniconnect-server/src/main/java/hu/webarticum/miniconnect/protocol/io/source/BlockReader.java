@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.protocol.channel.in;
+package hu.webarticum.miniconnect.protocol.io.source;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.protocol.request;
+package hu.webarticum.miniconnect.protocol.message;
 
 import hu.webarticum.miniconnect.protocol.common.ByteString;
 

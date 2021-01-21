@@ -1,10 +1,10 @@
-package hu.webarticum.miniconnect.protocol.channel.in;
+package hu.webarticum.miniconnect.protocol.io.source;
 
 import java.io.IOException;
 
 import hu.webarticum.miniconnect.protocol.block.Block;
 
-public interface BlockInputChannel {
+public interface BlockSource {
 
     public Block fetch() throws IOException;
     

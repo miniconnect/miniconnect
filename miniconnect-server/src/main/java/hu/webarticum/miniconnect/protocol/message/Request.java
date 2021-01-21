@@ -1,8 +1,8 @@
-package hu.webarticum.miniconnect.protocol.request;
+package hu.webarticum.miniconnect.protocol.message;
 
 import hu.webarticum.miniconnect.protocol.common.ByteString;
 
-public interface Request {
+public interface Request extends Message {
 
     public enum Type {
         
@@ -19,7 +19,7 @@ public interface Request {
 
             @Override
             CloseRequest decode(ByteString content) {
-                return new CloseRequest();
+                return CloseRequest.decode(content);
             }
 
         },
@@ -28,7 +28,7 @@ public interface Request {
 
             @Override
             PingRequest decode(ByteString content) {
-                return new PingRequest();
+                return PingRequest.decode(content);
             }
 
         },
@@ -86,7 +86,5 @@ public interface Request {
     
     
     public Type type();
-    
-    public ByteString encode();
     
 }
