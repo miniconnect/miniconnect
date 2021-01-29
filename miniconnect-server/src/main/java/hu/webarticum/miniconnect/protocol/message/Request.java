@@ -56,7 +56,7 @@ public interface Request extends Message {
         public static Type of(byte flag) {
             int typeIndex = Byte.toUnsignedInt(flag);
             Type[] types = Type.values();
-            if (typeIndex <= types.length) {
+            if (typeIndex >= types.length) {
                 throw new IllegalArgumentException(String.format(
                         "Unknown type index: %d",
                         typeIndex));
