@@ -14,6 +14,15 @@ public interface Response extends Message {
             }
 
         },
+
+        RESULT {
+
+            @Override
+            ResultResponse decode(ByteString content) {
+                return ResultResponse.decode(content);
+            }
+
+        },
         
         ;
 
