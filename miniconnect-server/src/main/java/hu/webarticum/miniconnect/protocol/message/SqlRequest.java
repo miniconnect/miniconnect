@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets;
 import hu.webarticum.miniconnect.protocol.common.ByteString;
 import hu.webarticum.miniconnect.protocol.util.ByteUtil;
 
-// TODO: query id?
 public class SqlRequest implements SessionRequest {
 
     private static final Type TYPE = Request.Type.SQL;
@@ -15,20 +14,26 @@ public class SqlRequest implements SessionRequest {
 
 
     private final int sessionId;
+
+    private final int queryId;
     
     private final String sql;
 
     
-    public SqlRequest(int sessionId, String sql) {
+    public SqlRequest(int sessionId, int queryId, String sql) {
         this.sessionId = sessionId;
+        this.queryId = queryId;
         this.sql = sql;
     }
     
     static SqlRequest decode(ByteString content) {
-        int sessionId = ByteUtil.bytesToInt(content.extract(1, 4));
-        String sql = new String(content.extract(5), CHARSET);
+        ByteString.Reader reader = content.reader().skip(1);
         
-        return new SqlRequest(sessionId, sql);
+        int sessionId = ByteUtil.bytesToInt(reader.read(4));
+        int queryId = ByteUtil.bytesToInt(reader.read(4));
+        String sql = new String(reader.readRemaining(), CHARSET);
+        
+        return new SqlRequest(sessionId, queryId, sql);
     }
     
     
@@ -42,20 +47,18 @@ public class SqlRequest implements SessionRequest {
         return sessionId;
     }
 
+    public int queryId() {
+        return queryId;
+    }
+
     @Override
     public ByteString encode() {
-        byte[] sqlBytes = sql.getBytes(CHARSET);
-        
-        byte[] contentBytes = new byte[sqlBytes.length + 5];
-        
-        contentBytes[0] = TYPE.flag();
-        
-        byte[] sessionIdBytes = ByteUtil.intToBytes(sessionId);
-        System.arraycopy(sessionIdBytes, 0, contentBytes, 1, sessionIdBytes.length);
-
-        System.arraycopy(sqlBytes, 0, contentBytes, 5, sqlBytes.length);
-        
-        return ByteString.wrap(contentBytes);
+        return ByteString.builder()
+                .append(TYPE.flag())
+                .append(ByteUtil.intToBytes(sessionId))
+                .append(ByteUtil.intToBytes(queryId))
+                .append(sql.getBytes(CHARSET))
+                .build();
     }
     
     public String sql() {

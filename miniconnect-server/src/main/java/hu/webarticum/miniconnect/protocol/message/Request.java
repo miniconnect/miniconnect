@@ -33,10 +33,6 @@ public interface Request extends Message {
 
         },
 
-        // TODO: LOB -->  FIXME: initial + parts
-
-        // TODO: LOB_FREE ?
-        
         SQL {
 
             @Override
@@ -45,10 +41,46 @@ public interface Request extends Message {
             }
 
         },
+
+        LOB_INIT {
+
+            @Override
+            Request decode(ByteString content) {
+                // TODO
+                throw new UnsupportedOperationException();
+            }
+
+        },
+
+        LOB_PART {
+
+            @Override
+            Request decode(ByteString content) {
+                // TODO
+                throw new UnsupportedOperationException();
+            }
+
+        },
+
+        LOB_FREE {
+
+            @Override
+            Request decode(ByteString content) {
+                // TODO
+                throw new UnsupportedOperationException();
+            }
+
+        },
         
-        // TODO: FETCH_POS (?)
-        
-        // TODO: FETCH_HINT (?, READ_HINT?)
+        FETCH_HINT {
+
+            @Override
+            Request decode(ByteString content) {
+                // TODO
+                throw new UnsupportedOperationException();
+            }
+
+        }
         
         ;
 
@@ -58,7 +90,7 @@ public interface Request extends Message {
             Type[] types = Type.values();
             if (typeIndex >= types.length) {
                 throw new IllegalArgumentException(String.format(
-                        "Unknown type index: %d",
+                        "Unknown request type index: %d",
                         typeIndex));
             }
             

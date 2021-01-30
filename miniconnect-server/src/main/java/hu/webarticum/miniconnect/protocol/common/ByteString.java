@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -22,6 +24,10 @@ public class ByteString {
     
     public static ByteString wrap(byte[] bytes) {
         return new ByteString(bytes);
+    }
+    
+    public static Builder builder() {
+        return new Builder();
     }
     
 
@@ -85,11 +91,82 @@ public class ByteString {
     
     @Override
     public String toString() {
-        return toString(Charset.defaultCharset());
+        return toString(Charset.defaultCharset()); // FIXME: UTF-8?
     }
 
     public String toString(Charset charset) {
         return new String(bytes, charset);
+    }
+    
+    public Reader reader() {
+        return new Reader();
+    }
+    
+    
+    // TODO: we could do a more efficient version with using some low-level stuff
+    public static class Builder {
+        
+        private final List<byte[]> parts = new ArrayList<>();
+        
+
+        public Builder append(ByteString part) {
+            return this.append(part.bytes);
+        }
+
+        public Builder append(byte part) {
+            parts.add(new byte[] { part });
+            return this;
+        }
+        
+        public Builder append(byte[] part) {
+            parts.add(part);
+            return this;
+        }
+        
+        public ByteString build() {
+            int length = 0;
+            for (byte[] part : parts) {
+                length += part.length;
+            }
+            
+            byte[] bytes = new byte[length];
+            int position = 0;
+            for (byte[] part : parts) {
+                System.arraycopy(part, 0, bytes, position, part.length);
+                position += part.length;
+            }
+            
+            return ByteString.wrap(bytes);
+        }
+        
+    }
+    
+    
+    public class Reader {
+        
+        private int position = 0;
+        
+        public Reader skip(int length) {
+            position += length;
+            return this;
+        }
+
+        public byte read() {
+            byte result = byteAt(position);
+            position++;
+            return result;
+        }
+        
+        public byte[] read(int length) {
+            byte[] result = extract(position, length);
+            position += length;
+            return result;
+        }
+        
+        public byte[] readRemaining() {
+            return read(bytes.length - position);
+        }
+        
     }
     
 }

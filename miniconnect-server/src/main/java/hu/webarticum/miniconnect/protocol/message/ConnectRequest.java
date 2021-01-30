@@ -14,8 +14,7 @@ public class ConnectRequest implements Request {
 
     @Override
     public ByteString encode() {
-        byte[] contentBytes = { TYPE.flag() };
-        return ByteString.wrap(contentBytes);
+        return ByteString.builder().append(TYPE.flag()).build();
     }
 
 }

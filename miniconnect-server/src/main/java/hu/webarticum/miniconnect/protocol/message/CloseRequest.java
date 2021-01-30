@@ -16,7 +16,9 @@ public class CloseRequest implements SessionRequest {
     }
     
     static CloseRequest decode(ByteString content) {
-        int sessionId = ByteUtil.bytesToInt(content.extract(1, 4));
+        ByteString.Reader reader = content.reader().skip(1);
+
+        int sessionId = ByteUtil.bytesToInt(reader.read(4));
         
         return new CloseRequest(sessionId);
     }
@@ -34,14 +36,10 @@ public class CloseRequest implements SessionRequest {
 
     @Override
     public ByteString encode() {
-        byte[] contentBytes = new byte[5];
-        
-        contentBytes[0] = TYPE.flag();
-        
-        byte[] sessionIdBytes = ByteUtil.intToBytes(sessionId);
-        System.arraycopy(sessionIdBytes, 0, contentBytes, 1, sessionIdBytes.length);
-        
-        return ByteString.wrap(contentBytes);
+        return ByteString.builder()
+                .append(TYPE.flag())
+                .append(ByteUtil.intToBytes(sessionId))
+                .build();
     }
 
 }

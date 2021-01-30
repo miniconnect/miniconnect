@@ -34,12 +34,12 @@ public class ServerTestMain {
 
         BlockTarget target = new SingleStreamBlockTarget(out);
         send(new ConnectRequest(), target);
-        send(new SqlRequest(1, "AAA"), target);
-        send(new SqlRequest(1, "BBB"), target);
+        send(new SqlRequest(1, 1, "AAA"), target);
+        send(new SqlRequest(1, 2, "BBB"), target);
         send(new PingRequest(1), target);
-        send(new SqlRequest(1, "CCC"), target);
-        send(new SqlRequest(1, "Hello, Request!"), target);
-        send(new SqlRequest(1, "xxx\\yyy"), target);
+        send(new SqlRequest(1, 3, "CCC"), target);
+        send(new SqlRequest(1, 4, "Hello, Request!"), target);
+        send(new SqlRequest(1, 5, "xxx\\yyy"), target);
         send(new CloseRequest(1), target);
     }
     
