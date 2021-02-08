@@ -10,6 +10,7 @@ import hu.webarticum.miniconnect.protocol.message.Request;
 
 public class Server implements Runnable {
     
+    // FIXME: connectionFactory? (each session is mapped to a MiniConnection / MiniSession)
     private final MiniConnection connection;
     
     private final BlockSource source;
