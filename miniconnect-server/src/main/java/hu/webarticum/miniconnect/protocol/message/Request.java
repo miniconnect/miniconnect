@@ -6,6 +6,9 @@ public interface Request extends Message {
 
     public enum Type {
         
+        // FIXME: CONNECT vs. INIT_SESSION
+        // session init id?
+        
         CONNECT {
 
             @Override
