@@ -9,6 +9,9 @@ public interface Request extends Message {
         // FIXME: CONNECT vs. INIT_SESSION
         // session init id?
         
+        // FIXME: use dedicated bytes instead of ad hoc ordinals
+        // e. g. ascii letters, such as Q for QUERY (SQL)
+        
         CONNECT {
 
             @Override
