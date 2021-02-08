@@ -6,7 +6,6 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
 import hu.webarticum.miniconnect.api.MiniConnection;
-import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.protocol.block.Block;
 import hu.webarticum.miniconnect.protocol.io.source.BlockSource;
 import hu.webarticum.miniconnect.protocol.io.source.SingleStreamBlockSource;

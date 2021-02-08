@@ -11,8 +11,6 @@ import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniConnection;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniValue;
-import hu.webarticum.miniconnect.protocol.io.source.BlockSource;
-import hu.webarticum.miniconnect.protocol.io.target.BlockTarget;
 import hu.webarticum.miniconnect.protocol.message.SqlRequest;
 import hu.webarticum.miniconnect.util.lab.dummy.DummyResult;
 import hu.webarticum.miniconnect.util.lab.dummy.DummyResultSet;
