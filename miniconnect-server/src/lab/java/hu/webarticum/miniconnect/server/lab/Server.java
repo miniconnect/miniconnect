@@ -1,10 +1,12 @@
-package hu.webarticum.miniconnect.server;
+package hu.webarticum.miniconnect.server.lab;
 
 import java.io.IOException;
 
 import hu.webarticum.miniconnect.api.MiniConnection;
+import hu.webarticum.miniconnect.protocol.block.Block;
 import hu.webarticum.miniconnect.protocol.io.source.BlockSource;
 import hu.webarticum.miniconnect.protocol.io.target.BlockTarget;
+import hu.webarticum.miniconnect.protocol.message.Request;
 
 public class Server implements Runnable {
     
@@ -41,9 +43,13 @@ public class Server implements Runnable {
         return true;
     }
     
-    // XXX
     private void iterateThrowing() throws IOException {
-        target.send(source.fetch());
+        
+        // XXX
+        
+        Block block = source.fetch();
+        Request request = Request.decode(block.content());
+        System.out.println(request.getClass().getName());
     }
     
 }

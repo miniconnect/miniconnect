@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -66,14 +67,14 @@ public class ByteString {
         }
     }
 
+    public void writeTo(OutputStream out) throws IOException {
+        out.write(bytes);
+    }
+
     public ByteBuffer asBuffer() {
         return ByteBuffer.wrap(bytes).asReadOnlyBuffer();
     }
 
-    public void writeTo(OutputStream out) throws IOException {
-        out.write(bytes);
-    }
-    
     @Override
     public int hashCode() {
         return Arrays.hashCode(bytes);
@@ -91,7 +92,7 @@ public class ByteString {
     
     @Override
     public String toString() {
-        return toString(Charset.defaultCharset()); // FIXME: UTF-8?
+        return toString(StandardCharsets.UTF_8);
     }
 
     public String toString(Charset charset) {
@@ -103,7 +104,6 @@ public class ByteString {
     }
     
     
-    // TODO: we could do a more efficient version with using some low-level stuff
     public static class Builder {
         
         private final List<byte[]> parts = new ArrayList<>();

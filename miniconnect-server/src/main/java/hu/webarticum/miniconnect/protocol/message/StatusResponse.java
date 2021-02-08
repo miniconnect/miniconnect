@@ -10,7 +10,7 @@ public class StatusResponse implements SessionResponse {
     
     public enum Status {
         
-        CONNECTED, CLOSED; // TODO
+        CONNECTED, CLOSED;
         
         
         public static Status of(byte flag) {
