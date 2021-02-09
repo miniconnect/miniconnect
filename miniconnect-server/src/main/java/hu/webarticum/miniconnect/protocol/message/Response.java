@@ -1,12 +1,13 @@
 package hu.webarticum.miniconnect.protocol.message;
 
+import hu.webarticum.miniconnect.protocol.common.ByteFlagEnum;
 import hu.webarticum.miniconnect.protocol.common.ByteString;
 
 public interface Response extends Message {
 
-    public enum Type {
+    public enum Type implements ByteFlagEnum {
         
-        STATUS {
+        STATUS((byte) 'S') {
 
             @Override
             StatusResponse decode(ByteString content) {
@@ -15,7 +16,7 @@ public interface Response extends Message {
 
         },
 
-        RESULT {
+        RESULT((byte) 'R') {
 
             @Override
             ResultResponse decode(ByteString content) {
@@ -25,27 +26,27 @@ public interface Response extends Message {
         },
         
         ;
-
+        
+        
+        private final byte flag;
+        
+        
+        private Type(byte flag) {
+            this.flag = flag;
+        }
         
         public static Type of(byte flag) {
-            int typeIndex = Byte.toUnsignedInt(flag);
-            Type[] types = Type.values();
-            if (typeIndex >= types.length) {
-                throw new IllegalArgumentException(String.format(
-                        "Unknown response type index: %d",
-                        typeIndex));
-            }
-            
-            return types[typeIndex];
+            return ByteFlagEnum.find(Type.values(), flag);
         }
 
-        
+
+        @Override
+        public byte flag() {
+            return flag;
+        }
+
         abstract Response decode(ByteString content);
         
-        public byte flag() {
-            return (byte) ordinal();
-        }
-
     }
 
     public static Response decode(ByteString content) {

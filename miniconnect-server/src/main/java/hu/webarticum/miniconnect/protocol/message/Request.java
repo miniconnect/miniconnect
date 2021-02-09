@@ -1,10 +1,11 @@
 package hu.webarticum.miniconnect.protocol.message;
 
+import hu.webarticum.miniconnect.protocol.common.ByteFlagEnum;
 import hu.webarticum.miniconnect.protocol.common.ByteString;
 
 public interface Request extends Message {
 
-    public enum Type {
+    public enum Type implements ByteFlagEnum {
         
         // FIXME: CONNECT vs. INIT_SESSION
         // session init id?
@@ -12,7 +13,7 @@ public interface Request extends Message {
         // FIXME: use dedicated bytes instead of ad hoc ordinals
         // e. g. ascii letters, such as Q for QUERY (SQL)
         
-        CONNECT {
+        CONNECT((byte) 'C') {
 
             @Override
             ConnectRequest decode(ByteString content) {
@@ -21,7 +22,7 @@ public interface Request extends Message {
 
         },
 
-        CLOSE {
+        CLOSE((byte) 'F') {
 
             @Override
             CloseRequest decode(ByteString content) {
@@ -30,7 +31,7 @@ public interface Request extends Message {
 
         },
 
-        PING {
+        PING((byte) 'P') {
 
             @Override
             PingRequest decode(ByteString content) {
@@ -39,7 +40,7 @@ public interface Request extends Message {
 
         },
 
-        SQL {
+        SQL((byte) 'Q') {
 
             @Override
             SqlRequest decode(ByteString content) {
@@ -48,7 +49,7 @@ public interface Request extends Message {
 
         },
 
-        LOB_INIT {
+        LOB_INIT((byte) 'L') {
 
             @Override
             Request decode(ByteString content) {
@@ -58,7 +59,7 @@ public interface Request extends Message {
 
         },
 
-        LOB_PART {
+        LOB_PART((byte) 'P') {
 
             @Override
             Request decode(ByteString content) {
@@ -68,17 +69,7 @@ public interface Request extends Message {
 
         },
 
-        LOB_FREE {
-
-            @Override
-            Request decode(ByteString content) {
-                // TODO
-                throw new UnsupportedOperationException();
-            }
-
-        },
-        
-        FETCH_HINT {
+        FETCH_HINT((byte) 'F') {
 
             @Override
             Request decode(ByteString content) {
@@ -91,25 +82,25 @@ public interface Request extends Message {
         ;
 
         
+        private final byte flag;
+        
+        
+        private Type(byte flag) {
+            this.flag = flag;
+        }
+        
         public static Type of(byte flag) {
-            int typeIndex = Byte.toUnsignedInt(flag);
-            Type[] types = Type.values();
-            if (typeIndex >= types.length) {
-                throw new IllegalArgumentException(String.format(
-                        "Unknown request type index: %d",
-                        typeIndex));
-            }
-            
-            return types[typeIndex];
+            return ByteFlagEnum.find(Type.values(), flag);
         }
 
-        
+
+        @Override
+        public byte flag() {
+            return flag;
+        }
+
         abstract Request decode(ByteString content);
         
-        public byte flag() {
-            return (byte) ordinal();
-        }
-
     }
     
     
