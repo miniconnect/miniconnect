@@ -13,6 +13,8 @@ public interface Request extends Message {
         // FIXME: use dedicated bytes instead of ad hoc ordinals
         // e. g. ascii letters, such as Q for QUERY (SQL)
         
+        // TODO: add tests to check that flags are unique
+        
         CONNECT((byte) 'C') {
 
             @Override
