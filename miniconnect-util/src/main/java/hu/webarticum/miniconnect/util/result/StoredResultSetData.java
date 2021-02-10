@@ -1,30 +1,29 @@
-package hu.webarticum.miniconnect.util.lab.dummy;
+package hu.webarticum.miniconnect.util.result;
 
-import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
-import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
 
-public class DummyResultSet implements MiniResultSet {
+public class StoredResultSetData implements Serializable {
     
-    private final List<MiniColumnHeader> columnHeaders;
-    
-    private final List<List<MiniValue>> rows;
+    private static final long serialVersionUID = 1L;
     
 
-    private volatile boolean closed = false;
+    private final List<MiniColumnHeader> columnHeaders; // NOSONAR serializable
+    
+    private final List<List<MiniValue>> rows; // NOSONAR serializable
     
 
-    public DummyResultSet() {
+    public StoredResultSetData() {
         this(new ArrayList<>(), new ArrayList<>());
     }
     
-    public DummyResultSet(List<MiniColumnHeader> columnHeaders, List<List<MiniValue>> rows) {
+    public StoredResultSetData(List<MiniColumnHeader> columnHeaders, List<List<MiniValue>> rows) {
         this.columnHeaders = new ArrayList<>(columnHeaders);
         this.rows = new ArrayList<>(rows.size());
         for (List<MiniValue> row : rows) {
@@ -33,24 +32,12 @@ public class DummyResultSet implements MiniResultSet {
     }
     
 
-    @Override
     public List<MiniColumnHeader> columnHeaders() {
         return new ArrayList<>(columnHeaders);
     }
 
-    @Override
     public Iterator<List<MiniValue>> iterator() {
         return Collections.unmodifiableCollection(rows).iterator();
-    }
-
-    @Override
-    public void close() throws IOException {
-        closed = true;
-    }
-    
-    @Override
-    public boolean isClosed() {
-        return closed;
     }
 
 }

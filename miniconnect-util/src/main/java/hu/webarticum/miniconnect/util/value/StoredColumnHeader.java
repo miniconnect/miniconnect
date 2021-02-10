@@ -1,13 +1,17 @@
 package hu.webarticum.miniconnect.util.value;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 
-public class StoredColumnHeader implements MiniColumnHeader {
-
+public class StoredColumnHeader implements MiniColumnHeader, Serializable {
+    
+    private static final long serialVersionUID = 1L;
+    
+    
     private final String name;
     
     private final String type;
@@ -29,6 +33,13 @@ public class StoredColumnHeader implements MiniColumnHeader {
         this.name = name;
         this.type = type;
         this.properties = copyProperties ? new HashMap<>(properties) : properties;
+    }
+    
+    public static StoredColumnHeader of(MiniColumnHeader columnHeader) {
+        return new StoredColumnHeader(
+                columnHeader.name(),
+                columnHeader.type(),
+                columnHeader.properties());
     }
     
 

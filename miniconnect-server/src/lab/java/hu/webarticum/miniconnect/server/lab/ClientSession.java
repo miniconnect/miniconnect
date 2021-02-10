@@ -12,8 +12,8 @@ import hu.webarticum.miniconnect.api.MiniConnection;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.protocol.message.SqlRequest;
-import hu.webarticum.miniconnect.util.lab.dummy.DummyResult;
-import hu.webarticum.miniconnect.util.lab.dummy.DummyResultSet;
+import hu.webarticum.miniconnect.util.result.StoredResult;
+import hu.webarticum.miniconnect.util.result.StoredResultSetData;
 import hu.webarticum.miniconnect.util.value.StoredColumnHeader;
 import hu.webarticum.miniconnect.util.value.StoredValue;
 
@@ -60,7 +60,7 @@ public class ClientSession implements MiniConnection {
         rows.add(Arrays.asList(
                 new StoredValue("value2.1".getBytes(StandardCharsets.UTF_8)),
                 new StoredValue("value2.2".getBytes(StandardCharsets.UTF_8))));
-        return new DummyResult(new DummyResultSet(headers, rows));
+        return new StoredResult(new StoredResultSetData(headers, rows));
     }
 
     @Override

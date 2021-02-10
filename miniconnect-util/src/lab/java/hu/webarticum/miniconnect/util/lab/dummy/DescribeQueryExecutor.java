@@ -4,6 +4,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import hu.webarticum.miniconnect.api.MiniResult;
+import hu.webarticum.miniconnect.util.result.StoredResult;
+import hu.webarticum.miniconnect.util.result.StoredResultSetData;
 
 public class DescribeQueryExecutor implements QueryExecutor {
     
@@ -22,13 +24,13 @@ public class DescribeQueryExecutor implements QueryExecutor {
         
         String table = QueryUtil.unescapeIdentifier(matcher.group("table"));
         if (!table.equals("data")) {
-            return new DummyResult(String.format("Unknown table: %s", table));
+            return new StoredResult(String.format("Unknown table: %s", table));
         }
         
-        DummyResultSet resultSet = new DummyResultSet(
+        StoredResultSetData resultSetData = new StoredResultSetData(
                 Structure.getMetaColumnHeaders(), Structure.getColumnData());
         
-        return new DummyResult(resultSet);
+        return new StoredResult(resultSetData);
     }
     
 }

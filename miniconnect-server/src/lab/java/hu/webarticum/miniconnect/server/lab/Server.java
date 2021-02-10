@@ -3,10 +3,14 @@ package hu.webarticum.miniconnect.server.lab;
 import java.io.IOException;
 
 import hu.webarticum.miniconnect.api.MiniConnection;
+import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.protocol.block.Block;
 import hu.webarticum.miniconnect.protocol.io.source.BlockSource;
 import hu.webarticum.miniconnect.protocol.io.target.BlockTarget;
 import hu.webarticum.miniconnect.protocol.message.Request;
+import hu.webarticum.miniconnect.protocol.message.ResultResponse;
+import hu.webarticum.miniconnect.protocol.message.SqlRequest;
+import hu.webarticum.miniconnect.util.result.StoredResult;
 
 public class Server implements Runnable {
     
@@ -51,6 +55,17 @@ public class Server implements Runnable {
         Block block = source.fetch();
         Request request = Request.decode(block.content());
         System.out.println(request.getClass().getName());
+        
+        if (request instanceof SqlRequest) {
+            SqlRequest sqlRequest = (SqlRequest) request;
+            int sessionId = sqlRequest.sessionId();
+            int queryId = sqlRequest.queryId();
+            MiniResult result = connection.execute(sqlRequest.sql());
+            StoredResult storedResult = StoredResult.of(result);
+            ResultResponse resultReponse = new ResultResponse(sessionId, queryId, storedResult);
+            
+            target.send(new Block(resultReponse.encode()));
+        }
     }
     
 }
