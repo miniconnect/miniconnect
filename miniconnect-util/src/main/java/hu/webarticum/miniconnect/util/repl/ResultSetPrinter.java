@@ -1,7 +1,6 @@
 package hu.webarticum.miniconnect.util.repl;
 
 import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
