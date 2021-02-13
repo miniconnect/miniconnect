@@ -29,7 +29,6 @@ public class DummyDriver implements Driver {
 
     @Override
     public MiniConnection openConnection(String url, Map<?, ?> properties) {
-        System.out.println("openConnection!!!!!!!!!!!!");
         return new DummyConnection();
     }
 
