@@ -30,6 +30,10 @@ public class XxxValueEncoder {
     }
     
     public MiniValue encode(Object value) {
+        if (value == null) {
+            return new StoredValue();
+        }
+        
         if (!type.isInstance(value)) {
             throw new IllegalArgumentException(String.format(
                     "Invalid value: expected: '%s', but found: '%s'",
@@ -37,9 +41,7 @@ public class XxxValueEncoder {
                     value.getClass().getName()));
         }
         
-        if (value == null) {
-            return new StoredValue();
-        } else if (value instanceof Boolean) {
+        if (value instanceof Boolean) {
             boolean booleanValue = (boolean) value;
             return new StoredValue(new byte[] { (byte) (booleanValue ? 1 : 0) });
         } else if (value instanceof Byte) {
