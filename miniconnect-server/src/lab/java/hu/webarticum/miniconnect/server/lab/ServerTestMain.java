@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
-import hu.webarticum.miniconnect.api.MiniConnection;
+import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.protocol.block.Block;
 import hu.webarticum.miniconnect.protocol.channel.BlockSource;
 import hu.webarticum.miniconnect.protocol.channel.BlockTarget;
@@ -16,7 +16,7 @@ import hu.webarticum.miniconnect.protocol.message.ConnectRequest;
 import hu.webarticum.miniconnect.protocol.message.PingRequest;
 import hu.webarticum.miniconnect.protocol.message.Request;
 import hu.webarticum.miniconnect.protocol.message.SqlRequest;
-import hu.webarticum.miniconnect.util.lab.dummy.DummyConnection;
+import hu.webarticum.miniconnect.util.lab.dummy.DummySession;
 import hu.webarticum.miniconnect.util.repl.Repl;
 import hu.webarticum.miniconnect.util.repl.ReplRunner;
 import hu.webarticum.miniconnect.util.repl.SqlRepl;
@@ -24,7 +24,7 @@ import hu.webarticum.miniconnect.util.repl.SqlRepl;
 public class ServerTestMain {
 
     public static void main(String[] args) throws IOException {
-        MiniConnection connection = new DummyConnection();
+        MiniSession session = new DummySession();
         
         PipedOutputStream clientOut = new PipedOutputStream();
         InputStream serverIn = new PipedInputStream(clientOut);
@@ -38,11 +38,11 @@ public class ServerTestMain {
 
         BlockSource serverBlockSource = new SingleStreamBlockSource(serverIn);
         BlockTarget serverBlockTarget = new SingleStreamBlockTarget(serverOut);
-        Server server = new Server(connection, serverBlockSource, serverBlockTarget);
+        Server server = new Server(session, serverBlockSource, serverBlockTarget);
         new Thread(server).start();
         
-        ClientSession session = client.openSession();
-        Repl repl = new SqlRepl(session, System.out, System.err);
+        ClientSession clientSession = client.openSession();
+        Repl repl = new SqlRepl(clientSession, System.out, System.err);
         
         ReplRunner replRunner = new ReplRunner(repl, System.in);
         replRunner.run();
@@ -51,10 +51,10 @@ public class ServerTestMain {
     public static void main_XXX(String[] args) throws IOException {
         PipedOutputStream out = new PipedOutputStream();
         InputStream in = new PipedInputStream(out);
-        MiniConnection connection = new DummyConnection();
+        MiniSession session = new DummySession();
         
         Server server = new Server(
-                connection,
+                session,
                 new SingleStreamBlockSource(in),
                 new SingleStreamBlockTarget(new PrintableOutputStream(
                         System.out, 16))); // NOSONAR

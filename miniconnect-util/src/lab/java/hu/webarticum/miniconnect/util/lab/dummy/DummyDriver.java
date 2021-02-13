@@ -2,7 +2,7 @@ package hu.webarticum.miniconnect.util.lab.dummy;
 
 import java.util.Map;
 
-import hu.webarticum.miniconnect.api.MiniConnection;
+import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniDriver;
 import hu.webarticum.miniconnect.util.manager.MiniDriverManager;
 
@@ -28,8 +28,8 @@ public class DummyDriver implements MiniDriver {
     }
 
     @Override
-    public MiniConnection openConnection(String url, Map<?, ?> properties) {
-        return new DummyConnection();
+    public MiniSession openSession(String url, Map<?, ?> properties) {
+        return new DummySession();
     }
 
 }

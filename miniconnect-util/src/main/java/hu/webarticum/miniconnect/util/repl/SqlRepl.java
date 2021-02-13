@@ -3,7 +3,7 @@ package hu.webarticum.miniconnect.util.repl;
 import java.io.PrintStream;
 import java.util.regex.Pattern;
 
-import hu.webarticum.miniconnect.api.MiniConnection;
+import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniResult;
 
 // TODO: better abstraction (context/executor vs output-handling), builder
@@ -21,7 +21,7 @@ public class SqlRepl implements Repl {
             Pattern.MULTILINE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     
 
-    private final MiniConnection connection;
+    private final MiniSession session;
     
     private final PrintStream out;
     
@@ -29,10 +29,10 @@ public class SqlRepl implements Repl {
     
 
     public SqlRepl(
-            MiniConnection connection,
+            MiniSession session,
             PrintStream out,
             PrintStream err) {
-        this.connection = connection;
+        this.session = session;
         this.out = out;
         this.err = err;
     }
@@ -71,7 +71,7 @@ public class SqlRepl implements Repl {
         
         MiniResult result = null;
         try {
-            result = connection.execute(command);
+            result = session.execute(command);
         } catch (Exception e) {
             printException(e);
         }
@@ -105,12 +105,12 @@ public class SqlRepl implements Repl {
     private void help() {
         out.println();
         out.println(String.format("  MiniConnect SQL REPL - %s",
-                connection.getClass().getSimpleName()));
+                session.getClass().getSimpleName()));
         out.println();
         out.println("  Commands:");
         out.println("    \"help\": prints this document");
         out.println("    \"exit\", \"quit\": quits this program");
-        out.println("    <any SQL>: will be executed on the connection");
+        out.println("    <any SQL>: will be executed in the session");
         out.println("      (must be terminated with \";\")");
         out.println();
     }

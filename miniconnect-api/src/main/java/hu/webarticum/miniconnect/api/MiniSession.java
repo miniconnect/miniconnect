@@ -2,8 +2,7 @@ package hu.webarticum.miniconnect.api;
 
 import java.io.Closeable;
 
-// FIXME: rename to MiniSession?
-public interface MiniConnection extends Closeable {
+public interface MiniSession extends Closeable {
 
     // FIXME: IOException?
     public MiniResult execute(String query);

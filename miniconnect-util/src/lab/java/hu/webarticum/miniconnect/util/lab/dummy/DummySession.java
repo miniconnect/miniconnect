@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import hu.webarticum.miniconnect.api.MiniConnection;
+import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniResult;
 
-public class DummyConnection implements MiniConnection {
+public class DummySession implements MiniSession {
 
     private volatile boolean closed = false;
     
@@ -15,7 +15,7 @@ public class DummyConnection implements MiniConnection {
     private final List<QueryExecutor> queryRunners;
     
     
-    public DummyConnection() {
+    public DummySession() {
         queryRunners = new ArrayList<>();
         queryRunners.add(new DescribeQueryExecutor());
         queryRunners.add(new SelectQueryExecutor());

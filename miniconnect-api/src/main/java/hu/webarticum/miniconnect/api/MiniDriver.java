@@ -9,6 +9,6 @@ public interface MiniDriver {
     
     public boolean canAccept(String url);
     
-    public MiniConnection openConnection(String url, Map<?, ?> properties) throws IOException;
+    public MiniSession openSession(String url, Map<?, ?> properties) throws IOException;
     
 }

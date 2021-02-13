@@ -2,7 +2,7 @@ package hu.webarticum.miniconnect.server.lab;
 
 import java.io.IOException;
 
-import hu.webarticum.miniconnect.api.MiniConnection;
+import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.protocol.block.Block;
 import hu.webarticum.miniconnect.protocol.channel.BlockSource;
@@ -14,8 +14,8 @@ import hu.webarticum.miniconnect.util.result.StoredResult;
 
 public class Server implements Runnable {
     
-    // FIXME: connectionFactory? (each session is mapped to a MiniConnection / MiniSession)
-    private final MiniConnection connection;
+    // FIXME: sessionFactory? (each session is mapped to a MiniSession)
+    private final MiniSession session;
     
     private final BlockSource source;
     
@@ -23,11 +23,11 @@ public class Server implements Runnable {
     
 
     public Server(
-            MiniConnection connection,
+            MiniSession session,
             BlockSource source,
             BlockTarget target) {
         
-        this.connection = connection;
+        this.session = session;
         this.source = source;
         this.target = target;
     }
@@ -60,7 +60,7 @@ public class Server implements Runnable {
             SqlRequest sqlRequest = (SqlRequest) request;
             int sessionId = sqlRequest.sessionId();
             int queryId = sqlRequest.queryId();
-            MiniResult result = connection.execute(sqlRequest.sql());
+            MiniResult result = session.execute(sqlRequest.sql());
             StoredResult storedResult = StoredResult.of(result);
             ResultResponse resultReponse = new ResultResponse(sessionId, queryId, storedResult);
             

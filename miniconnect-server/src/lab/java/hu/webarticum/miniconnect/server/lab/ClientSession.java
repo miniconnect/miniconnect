@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
-import hu.webarticum.miniconnect.api.MiniConnection;
+import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.protocol.message.SqlRequest;
@@ -17,7 +17,7 @@ import hu.webarticum.miniconnect.util.result.StoredResultSetData;
 import hu.webarticum.miniconnect.util.value.StoredColumnHeader;
 import hu.webarticum.miniconnect.util.value.StoredValue;
 
-public class ClientSession implements MiniConnection {
+public class ClientSession implements MiniSession {
     
     private final Client client;
     

@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import hu.webarticum.miniconnect.api.MiniConnection;
+import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniDriver;
 
 public class MiniDriverManager {
@@ -27,10 +27,10 @@ public class MiniDriverManager {
         drivers.remove(driver);
     }
     
-    public static MiniConnection openConnection(String url, Map<?, ?> properties) throws IOException {
+    public static MiniSession openSession(String url, Map<?, ?> properties) throws IOException {
         for (MiniDriver driver : drivers) {
             if (driver.canAccept(url)) {
-                return driver.openConnection(url, properties);
+                return driver.openSession(url, properties);
             }
         }
         throw new NoSuchElementException("No suitable driver found");
