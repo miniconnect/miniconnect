@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.protocol.io.target;
+package hu.webarticum.miniconnect.protocol.channel;
 
 import java.io.IOException;
 

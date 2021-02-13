@@ -7,10 +7,10 @@ import java.io.PipedOutputStream;
 
 import hu.webarticum.miniconnect.api.MiniConnection;
 import hu.webarticum.miniconnect.protocol.block.Block;
-import hu.webarticum.miniconnect.protocol.io.source.BlockSource;
-import hu.webarticum.miniconnect.protocol.io.source.SingleStreamBlockSource;
-import hu.webarticum.miniconnect.protocol.io.target.BlockTarget;
-import hu.webarticum.miniconnect.protocol.io.target.SingleStreamBlockTarget;
+import hu.webarticum.miniconnect.protocol.channel.BlockSource;
+import hu.webarticum.miniconnect.protocol.channel.BlockTarget;
+import hu.webarticum.miniconnect.protocol.channel.singlestream.SingleStreamBlockSource;
+import hu.webarticum.miniconnect.protocol.channel.singlestream.SingleStreamBlockTarget;
 import hu.webarticum.miniconnect.protocol.message.CloseRequest;
 import hu.webarticum.miniconnect.protocol.message.ConnectRequest;
 import hu.webarticum.miniconnect.protocol.message.PingRequest;
