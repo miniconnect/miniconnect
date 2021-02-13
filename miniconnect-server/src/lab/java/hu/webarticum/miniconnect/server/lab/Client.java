@@ -2,6 +2,7 @@ package hu.webarticum.miniconnect.server.lab;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 
 import hu.webarticum.miniconnect.protocol.block.Block;
 import hu.webarticum.miniconnect.protocol.channel.BlockSource;
@@ -35,7 +36,15 @@ public class Client implements Closeable {
     }
     
     
-    public ClientSession openSession() throws IOException {
+    public ClientSession openSession() {
+        try {
+            return openSessionThrowing();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private ClientSession openSessionThrowing() throws IOException {
         send(new ConnectRequest());
         
         // TODO: wait for a StatusResponse
@@ -43,9 +52,7 @@ public class Client implements Closeable {
         return new ClientSession(this, 0);
     }
 
-    public void send(Request request)
-            throws IOException {
-        
+    public void send(Request request) throws IOException {
         blockTarget.send(new Block(request.encode()));
     }
     
