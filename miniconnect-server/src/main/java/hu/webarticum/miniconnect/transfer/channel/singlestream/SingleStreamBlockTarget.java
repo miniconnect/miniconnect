@@ -1,11 +1,11 @@
-package hu.webarticum.miniconnect.protocol.channel.singlestream;
+package hu.webarticum.miniconnect.transfer.channel.singlestream;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
-import hu.webarticum.miniconnect.protocol.block.Block;
-import hu.webarticum.miniconnect.protocol.channel.BlockTarget;
-import hu.webarticum.miniconnect.protocol.io.BlockWriter;
+import hu.webarticum.miniconnect.transfer.Block;
+import hu.webarticum.miniconnect.transfer.channel.BlockTarget;
+import hu.webarticum.miniconnect.transfer.io.BlockWriter;
 
 public class SingleStreamBlockTarget implements BlockTarget {
 

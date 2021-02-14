@@ -1,7 +1,7 @@
 package hu.webarticum.miniconnect.protocol.message;
 
 import hu.webarticum.miniconnect.protocol.common.ByteFlagEnum;
-import hu.webarticum.miniconnect.protocol.common.ByteString;
+import hu.webarticum.miniconnect.transfer.util.ByteString;
 
 public interface Response extends Message {
 

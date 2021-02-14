@@ -1,11 +1,11 @@
-package hu.webarticum.miniconnect.protocol.io;
+package hu.webarticum.miniconnect.transfer.io;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-import hu.webarticum.miniconnect.protocol.block.Block;
-import hu.webarticum.miniconnect.protocol.common.ByteString;
+import hu.webarticum.miniconnect.transfer.Block;
+import hu.webarticum.miniconnect.transfer.util.ByteString;
 
 public class BlockReader {
 

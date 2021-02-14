@@ -4,13 +4,13 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
-import hu.webarticum.miniconnect.protocol.block.Block;
-import hu.webarticum.miniconnect.protocol.channel.BlockSource;
-import hu.webarticum.miniconnect.protocol.channel.BlockTarget;
 import hu.webarticum.miniconnect.protocol.message.ConnectRequest;
 import hu.webarticum.miniconnect.protocol.message.Request;
 import hu.webarticum.miniconnect.protocol.message.Response;
 import hu.webarticum.miniconnect.protocol.message.SessionResponse;
+import hu.webarticum.miniconnect.transfer.Block;
+import hu.webarticum.miniconnect.transfer.channel.BlockSource;
+import hu.webarticum.miniconnect.transfer.channel.BlockTarget;
 
 public class Client implements Closeable {
 

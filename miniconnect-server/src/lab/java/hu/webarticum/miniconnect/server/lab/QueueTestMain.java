@@ -5,14 +5,14 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.charset.StandardCharsets;
 
-import hu.webarticum.miniconnect.protocol.block.Block;
-import hu.webarticum.miniconnect.protocol.channel.BlockSource;
-import hu.webarticum.miniconnect.protocol.channel.BlockTarget;
-import hu.webarticum.miniconnect.protocol.channel.queue.QueueBlockSource;
-import hu.webarticum.miniconnect.protocol.channel.queue.QueueBlockTarget;
-import hu.webarticum.miniconnect.protocol.channel.singlestream.SingleStreamBlockSource;
-import hu.webarticum.miniconnect.protocol.channel.singlestream.SingleStreamBlockTarget;
-import hu.webarticum.miniconnect.protocol.common.ByteString;
+import hu.webarticum.miniconnect.transfer.Block;
+import hu.webarticum.miniconnect.transfer.channel.BlockSource;
+import hu.webarticum.miniconnect.transfer.channel.BlockTarget;
+import hu.webarticum.miniconnect.transfer.channel.queue.QueueBlockSource;
+import hu.webarticum.miniconnect.transfer.channel.queue.QueueBlockTarget;
+import hu.webarticum.miniconnect.transfer.channel.singlestream.SingleStreamBlockSource;
+import hu.webarticum.miniconnect.transfer.channel.singlestream.SingleStreamBlockTarget;
+import hu.webarticum.miniconnect.transfer.util.ByteString;
 
 public class QueueTestMain {
 

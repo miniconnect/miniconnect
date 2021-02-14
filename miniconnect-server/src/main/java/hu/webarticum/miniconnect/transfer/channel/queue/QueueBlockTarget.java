@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.protocol.channel.queue;
+package hu.webarticum.miniconnect.transfer.channel.queue;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -6,8 +6,8 @@ import java.io.InterruptedIOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import hu.webarticum.miniconnect.protocol.block.Block;
-import hu.webarticum.miniconnect.protocol.channel.BlockTarget;
+import hu.webarticum.miniconnect.transfer.Block;
+import hu.webarticum.miniconnect.transfer.channel.BlockTarget;
 
 public class QueueBlockTarget implements BlockTarget, Closeable {
     

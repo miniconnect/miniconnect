@@ -1,11 +1,11 @@
-package hu.webarticum.miniconnect.protocol.channel.singlestream;
+package hu.webarticum.miniconnect.transfer.channel.singlestream;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import hu.webarticum.miniconnect.protocol.block.Block;
-import hu.webarticum.miniconnect.protocol.channel.BlockSource;
-import hu.webarticum.miniconnect.protocol.io.BlockReader;
+import hu.webarticum.miniconnect.transfer.Block;
+import hu.webarticum.miniconnect.transfer.channel.BlockSource;
+import hu.webarticum.miniconnect.transfer.io.BlockReader;
 
 public class SingleStreamBlockSource implements BlockSource {
 

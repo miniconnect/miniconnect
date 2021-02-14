@@ -1,8 +1,8 @@
-package hu.webarticum.miniconnect.protocol.channel;
+package hu.webarticum.miniconnect.transfer.channel;
 
 import java.io.IOException;
 
-import hu.webarticum.miniconnect.protocol.block.Block;
+import hu.webarticum.miniconnect.transfer.Block;
 
 public interface BlockSource {
 

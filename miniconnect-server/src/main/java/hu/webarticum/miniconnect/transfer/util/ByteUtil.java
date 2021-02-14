@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.protocol.util;
+package hu.webarticum.miniconnect.transfer.util;
 
 import java.nio.ByteBuffer;
 

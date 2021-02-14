@@ -1,6 +1,6 @@
-package hu.webarticum.miniconnect.protocol.block;
+package hu.webarticum.miniconnect.transfer;
 
-import hu.webarticum.miniconnect.protocol.common.ByteString;
+import hu.webarticum.miniconnect.transfer.util.ByteString;
 
 public class Block {
     

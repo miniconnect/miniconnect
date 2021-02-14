@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.protocol.common;
+package hu.webarticum.miniconnect.transfer.util;
 
 import java.io.IOException;
 import java.io.OutputStream;

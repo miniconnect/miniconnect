@@ -1,15 +1,15 @@
-package hu.webarticum.miniconnect.server.lab;
+package hu.webarticum.miniconnect.transfer.server;
 
 import java.io.IOException;
 
 import hu.webarticum.miniconnect.api.MiniSession;
-import hu.webarticum.miniconnect.api.MiniResult;
-import hu.webarticum.miniconnect.protocol.block.Block;
-import hu.webarticum.miniconnect.protocol.channel.BlockSource;
-import hu.webarticum.miniconnect.protocol.channel.BlockTarget;
 import hu.webarticum.miniconnect.protocol.message.Request;
 import hu.webarticum.miniconnect.protocol.message.ResultResponse;
 import hu.webarticum.miniconnect.protocol.message.SqlRequest;
+import hu.webarticum.miniconnect.transfer.Block;
+import hu.webarticum.miniconnect.transfer.channel.BlockSource;
+import hu.webarticum.miniconnect.transfer.channel.BlockTarget;
+import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.util.result.StoredResult;
 
 // TODO: make it attachable to Server instance
@@ -17,7 +17,7 @@ import hu.webarticum.miniconnect.util.result.StoredResult;
 //     question: how does Server know which session belongs to which connector?
 public class ClientConnector implements Runnable {
     
-    // FIXME: sessionFactory? (each session is mapped to a MiniSession)
+    // FIXME: when to instantiate?
     private final MiniSession session;
     
     private final BlockSource source;
