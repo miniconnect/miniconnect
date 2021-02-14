@@ -7,6 +7,8 @@ public interface Response extends Message {
 
     public enum Type implements ByteFlagEnum {
         
+        // TODO: [CONNECTION_]READY ?
+        
         STATUS((byte) 'S') {
 
             @Override

@@ -20,6 +20,7 @@ public class Client implements Closeable {
     
     private Thread acceptThread;
     
+    
     private Exception acceptException;
     
     
