@@ -12,7 +12,10 @@ import hu.webarticum.miniconnect.protocol.message.ResultResponse;
 import hu.webarticum.miniconnect.protocol.message.SqlRequest;
 import hu.webarticum.miniconnect.util.result.StoredResult;
 
-public class ServerSession implements Runnable {
+// TODO: make it attachable to Server instance
+//   optionally, Server instance can listen to some events, and close attached sessions
+//     question: how does Server know which session belongs to which connector?
+public class ClientConnector implements Runnable {
     
     // FIXME: sessionFactory? (each session is mapped to a MiniSession)
     private final MiniSession session;
@@ -22,7 +25,7 @@ public class ServerSession implements Runnable {
     private final BlockTarget target;
     
 
-    public ServerSession(
+    public ClientConnector(
             MiniSession session,
             BlockSource source,
             BlockTarget target) {

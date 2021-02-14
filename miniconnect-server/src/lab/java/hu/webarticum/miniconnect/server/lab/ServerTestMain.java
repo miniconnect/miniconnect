@@ -38,8 +38,8 @@ public class ServerTestMain {
 
         BlockSource serverBlockSource = new SingleStreamBlockSource(serverIn);
         BlockTarget serverBlockTarget = new SingleStreamBlockTarget(serverOut);
-        ServerSession serverSession = new ServerSession(session, serverBlockSource, serverBlockTarget);
-        new Thread(serverSession).start();
+        ClientConnector clientConnector = new ClientConnector(session, serverBlockSource, serverBlockTarget);
+        new Thread(clientConnector).start();
         
         ClientSession clientSession = client.openSession();
         Repl repl = new SqlRepl(clientSession, System.out, System.err);
@@ -53,12 +53,12 @@ public class ServerTestMain {
         InputStream in = new PipedInputStream(out);
         MiniSession session = new DummySession();
         
-        ServerSession serverSession = new ServerSession(
+        ClientConnector clientConnector = new ClientConnector(
                 session,
                 new SingleStreamBlockSource(in),
                 new SingleStreamBlockTarget(new PrintableOutputStream(
                         System.out, 16))); // NOSONAR
-        new Thread(serverSession).start();
+        new Thread(clientConnector).start();
 
         BlockTarget target = new SingleStreamBlockTarget(out);
         send(new ConnectRequest(), target);
