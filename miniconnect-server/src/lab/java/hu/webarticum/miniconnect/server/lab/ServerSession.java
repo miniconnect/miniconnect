@@ -12,7 +12,7 @@ import hu.webarticum.miniconnect.protocol.message.ResultResponse;
 import hu.webarticum.miniconnect.protocol.message.SqlRequest;
 import hu.webarticum.miniconnect.util.result.StoredResult;
 
-public class Server implements Runnable {
+public class ServerSession implements Runnable {
     
     // FIXME: sessionFactory? (each session is mapped to a MiniSession)
     private final MiniSession session;
@@ -22,7 +22,7 @@ public class Server implements Runnable {
     private final BlockTarget target;
     
 
-    public Server(
+    public ServerSession(
             MiniSession session,
             BlockSource source,
             BlockTarget target) {
@@ -41,14 +41,22 @@ public class Server implements Runnable {
     private boolean iterate() {
         try {
             iterateThrowing();
-        } catch (IOException e) {
+        } catch (InterruptedException e) {
+            
+            // XXX
+            Thread.currentThread().interrupt();
+            return false;
+            
+        } catch (Exception e) {
+            
             // XXX
             return false;
+            
         }
         return true;
     }
     
-    private void iterateThrowing() throws IOException {
+    private void iterateThrowing() throws IOException, InterruptedException {
         
         // XXX
         
