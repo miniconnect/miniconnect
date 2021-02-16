@@ -16,7 +16,6 @@ import hu.webarticum.miniconnect.transfer.channel.BlockSource;
 import hu.webarticum.miniconnect.transfer.channel.BlockTarget;
 import hu.webarticum.miniconnect.transfer.channel.singlestream.SingleStreamBlockSource;
 import hu.webarticum.miniconnect.transfer.channel.singlestream.SingleStreamBlockTarget;
-import hu.webarticum.miniconnect.transfer.server.ClientConnector;
 import hu.webarticum.miniconnect.util.lab.dummy.DummySession;
 import hu.webarticum.miniconnect.util.repl.Repl;
 import hu.webarticum.miniconnect.util.repl.ReplRunner;
@@ -39,7 +38,7 @@ public class ServerTestMain {
 
         BlockSource serverBlockSource = new SingleStreamBlockSource(serverIn);
         BlockTarget serverBlockTarget = new SingleStreamBlockTarget(serverOut);
-        ClientConnector clientConnector = new ClientConnector(session, serverBlockSource, serverBlockTarget);
+        ClientHandler clientConnector = new ClientHandler(session, serverBlockSource, serverBlockTarget);
         new Thread(clientConnector).start();
         
         ClientSession clientSession = client.openSession();
@@ -54,7 +53,7 @@ public class ServerTestMain {
         InputStream in = new PipedInputStream(out);
         MiniSession session = new DummySession();
         
-        ClientConnector clientConnector = new ClientConnector(
+        ClientHandler clientConnector = new ClientHandler(
                 session,
                 new SingleStreamBlockSource(in),
                 new SingleStreamBlockTarget(new PrintableOutputStream(

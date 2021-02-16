@@ -23,10 +23,6 @@ sourceSets {
 }
 
 dependencies {
-    implementation project(':miniconnect-api')
-    implementation project(':miniconnect-util')
-    implementation project(':miniconnect-transfer')
-    
     labImplementation sourceSets.main.output
     labImplementation configurations.lab
 }

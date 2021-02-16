@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.transfer.server;
+package hu.webarticum.miniconnect.server.lab;
 
 import java.io.IOException;
 
@@ -15,7 +15,7 @@ import hu.webarticum.miniconnect.util.result.StoredResult;
 // TODO: make it attachable to Server instance
 //   optionally, Server instance can listen to some events, and close attached sessions
 //     question: how does Server know which session belongs to which connector?
-public class ClientConnector implements Runnable {
+public class ClientHandler implements Runnable {
     
     // FIXME: when to instantiate?
     private final MiniSession session;
@@ -25,7 +25,7 @@ public class ClientConnector implements Runnable {
     private final BlockTarget target;
     
 
-    public ClientConnector(
+    public ClientHandler(
             MiniSession session,
             BlockSource source,
             BlockTarget target) {
@@ -65,7 +65,6 @@ public class ClientConnector implements Runnable {
         
         Block block = source.fetch();
         Request request = Request.decode(block.content());
-        System.out.println(request.getClass().getName());
         
         if (request instanceof SqlRequest) {
             SqlRequest sqlRequest = (SqlRequest) request;
