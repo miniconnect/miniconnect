@@ -10,7 +10,8 @@ import hu.webarticum.miniconnect.transfer.Block;
 import hu.webarticum.miniconnect.transfer.channel.BlockSource;
 import hu.webarticum.miniconnect.transfer.channel.BlockTarget;
 
-public abstract class AbstractTransactionalBlockClient<Q, R> extends AbstractBlockClient {
+public abstract class AbstractTransactionalBlockClient<Q, R>
+        extends AbstractTypedBlockClient<Q, R> {
     
     private final List<ResponseNotifier<R>> responseNotifiers = new ArrayList<>();
     
@@ -22,9 +23,7 @@ public abstract class AbstractTransactionalBlockClient<Q, R> extends AbstractBlo
 
     // TODO: timeout etc.
     @Override
-    protected void acceptBlock(Block block) {
-        R response = parseResponse(block);
-        
+    protected void acceptResponse(R response) {
         ResponseNotifier<R> foundNotifier = null;
         synchronized (responseNotifiers) {
             Iterator<ResponseNotifier<R>> iterator = responseNotifiers.iterator();
@@ -64,20 +63,13 @@ public abstract class AbstractTransactionalBlockClient<Q, R> extends AbstractBlo
                 try {
                     notifier.wait();
                 } catch (InterruptedException e) {
-                    
-                    // XXX
                     Thread.currentThread().interrupt();
-                    
                 }
             }
         }
 
         return notifier.response;
     }
-    
-    protected abstract Block encodeRequest(Q request);
-    
-    protected abstract R parseResponse(Block block);
     
     protected abstract void acceptStandaloneResponse(R response);
     

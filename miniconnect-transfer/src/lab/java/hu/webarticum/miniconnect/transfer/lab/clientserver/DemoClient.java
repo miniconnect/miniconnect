@@ -24,7 +24,7 @@ public class DemoClient extends AbstractTransactionalBlockClient<DemoRequest, De
     }
     
     @Override
-    protected DemoResponse parseResponse(Block block) {
+    protected DemoResponse decodeResponse(Block block) {
         return new DemoResponse(block);
     }
     
