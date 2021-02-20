@@ -1,0 +1,98 @@
+package hu.webarticum.miniconnect.transfer.client;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.function.Predicate;
+
+import hu.webarticum.miniconnect.transfer.Block;
+import hu.webarticum.miniconnect.transfer.channel.BlockSource;
+import hu.webarticum.miniconnect.transfer.channel.BlockTarget;
+
+public abstract class AbstractTransactionalBlockClient<Q, R> extends AbstractBlockClient {
+    
+    private final List<ResponseNotifier<R>> responseNotifiers = new ArrayList<>();
+    
+
+    protected AbstractTransactionalBlockClient(BlockSource source, BlockTarget target) {
+        super(source, target);
+    }
+    
+
+    // TODO: timeout etc.
+    @Override
+    protected void acceptBlock(Block block) {
+        R response = parseResponse(block);
+        
+        ResponseNotifier<R> foundNotifier = null;
+        synchronized (responseNotifiers) {
+            Iterator<ResponseNotifier<R>> iterator = responseNotifiers.iterator();
+            while (iterator.hasNext()) {
+                ResponseNotifier<R> notifier = iterator.next();
+                if (notifier.acceptPredicate.test(response)) {
+                    iterator.remove();
+                    foundNotifier = notifier;
+                    break;
+                }
+            }
+        }
+        
+        if (foundNotifier == null) {
+            acceptStandaloneResponse(response);
+            return;
+        }
+        
+        synchronized (foundNotifier) {
+            foundNotifier.response = response;
+            foundNotifier.notifyAll();
+        }
+    }
+    
+    protected R sendAndWaitForResponse(Q request, Predicate<R> acceptPredicate) throws IOException {
+        ResponseNotifier<R> notifier = new ResponseNotifier<>(acceptPredicate);
+        
+        synchronized (responseNotifiers) {
+            responseNotifiers.add(notifier);
+        }
+       
+        Block requestBlock = encodeRequest(request);
+        sendBlock(requestBlock);
+        
+        synchronized (notifier) {
+            while (notifier.response == null) {
+                try {
+                    notifier.wait();
+                } catch (InterruptedException e) {
+                    
+                    // XXX
+                    Thread.currentThread().interrupt();
+                    
+                }
+            }
+        }
+
+        return notifier.response;
+    }
+    
+    protected abstract Block encodeRequest(Q request);
+    
+    protected abstract R parseResponse(Block block);
+    
+    protected abstract void acceptStandaloneResponse(R response);
+    
+
+    private static class ResponseNotifier<T> {
+
+        volatile T response = null;
+        
+        final Predicate<T> acceptPredicate;
+        
+        
+        ResponseNotifier(Predicate<T> acceptPredicate) {
+            this.acceptPredicate = acceptPredicate;
+        }
+
+    }
+    
+}

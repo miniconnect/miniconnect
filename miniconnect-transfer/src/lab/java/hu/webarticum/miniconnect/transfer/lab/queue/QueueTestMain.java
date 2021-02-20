@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.transfer.lab;
+package hu.webarticum.miniconnect.transfer.lab.queue;
 
 import java.io.InputStream;
 import java.io.PipedInputStream;
