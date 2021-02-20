@@ -63,7 +63,10 @@ public abstract class AbstractTransactionalBlockClient<Q, R>
                 try {
                     notifier.wait();
                 } catch (InterruptedException e) {
+                    
+                    // XXX
                     Thread.currentThread().interrupt();
+                    
                 }
             }
         }
