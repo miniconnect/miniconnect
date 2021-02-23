@@ -19,16 +19,16 @@ public class DemoClient extends AbstractTransactionalBlockClient<DemoRequest, De
 
 
     @Override
-    protected Block encodeRequest(DemoRequest request) {
+    protected Block encodeRequestInternal(DemoRequest request) {
         return request.encode();
     }
     
     @Override
-    protected DemoResponse decodeResponse(Block block) {
+    protected DemoResponse decodeResponseInternal(Block block) {
         return new DemoResponse(block);
     }
     
-    protected void acceptStandaloneResponse(DemoResponse demoResponse) {
+    protected void acceptStandaloneResponseInternal(DemoResponse demoResponse) {
         System.err.println("Unexpected response: " + demoResponse);
     }
     
@@ -36,7 +36,7 @@ public class DemoClient extends AbstractTransactionalBlockClient<DemoRequest, De
         int queryId = queryIdCounter.getAndIncrement();
         DemoRequest request = new DemoRequest(queryId, query);
         
-        DemoResponse response = sendAndWaitForResponse(
+        DemoResponse response = sendAndWaitForResponseInternal(
                 request,
                 r -> r.getQueryId() == queryId);
         

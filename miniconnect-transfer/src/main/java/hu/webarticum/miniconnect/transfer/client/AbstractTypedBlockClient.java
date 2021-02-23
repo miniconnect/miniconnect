@@ -14,18 +14,18 @@ public abstract class AbstractTypedBlockClient<Q, R> extends AbstractBlockClient
 
     
     @Override
-    protected void acceptBlock(Block block) {
-        acceptResponse(decodeResponse(block));
+    protected void acceptBlockInternal(Block block) {
+        acceptResponseInternal(decodeResponseInternal(block));
     }
     
-    protected void sendRequest(Q request) throws IOException {
-        sendBlock(encodeRequest(request));
+    protected void sendRequestInternal(Q request) throws IOException {
+        sendBlockInternal(encodeRequestInternal(request));
     }
     
-    protected abstract void acceptResponse(R response);
+    protected abstract void acceptResponseInternal(R response);
 
-    protected abstract Block encodeRequest(Q request);
+    protected abstract Block encodeRequestInternal(Q request);
     
-    protected abstract R decodeResponse(Block block);
+    protected abstract R decodeResponseInternal(Block block);
     
 }

@@ -26,7 +26,7 @@ public abstract class AbstractBlockClient implements Closeable {
         this.sourceThread.start();
     }
     
-    public void sendBlock(Block block) throws IOException {
+    protected void sendBlockInternal(Block block) throws IOException {
         target.send(block);
     }
 
@@ -45,14 +45,14 @@ public abstract class AbstractBlockClient implements Closeable {
             }
             
             try {
-                acceptBlock(block);
+                acceptBlockInternal(block);
             } catch (Exception e) {
                 // TODO: what to do in this case?
             }
         }
     }
     
-    protected abstract void acceptBlock(Block block);
+    protected abstract void acceptBlockInternal(Block block);
     
     @Override
     public void close() throws IOException {

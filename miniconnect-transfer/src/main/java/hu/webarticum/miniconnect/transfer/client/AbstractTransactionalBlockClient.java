@@ -23,7 +23,7 @@ public abstract class AbstractTransactionalBlockClient<Q, R>
 
     // TODO: timeout etc.
     @Override
-    protected void acceptResponse(R response) {
+    protected void acceptResponseInternal(R response) {
         ResponseNotifier<R> foundNotifier = null;
         synchronized (responseNotifiers) {
             Iterator<ResponseNotifier<R>> iterator = responseNotifiers.iterator();
@@ -38,7 +38,7 @@ public abstract class AbstractTransactionalBlockClient<Q, R>
         }
         
         if (foundNotifier == null) {
-            acceptStandaloneResponse(response);
+            acceptStandaloneResponseInternal(response);
             return;
         }
         
@@ -48,15 +48,15 @@ public abstract class AbstractTransactionalBlockClient<Q, R>
         }
     }
     
-    protected R sendAndWaitForResponse(Q request, Predicate<R> acceptPredicate) throws IOException {
+    protected R sendAndWaitForResponseInternal(Q request, Predicate<R> acceptPredicate) throws IOException {
         ResponseNotifier<R> notifier = new ResponseNotifier<>(acceptPredicate);
         
         synchronized (responseNotifiers) {
             responseNotifiers.add(notifier);
         }
        
-        Block requestBlock = encodeRequest(request);
-        sendBlock(requestBlock);
+        Block requestBlock = encodeRequestInternal(request);
+        sendBlockInternal(requestBlock);
         
         synchronized (notifier) {
             while (notifier.response == null) {
@@ -74,7 +74,7 @@ public abstract class AbstractTransactionalBlockClient<Q, R>
         return notifier.response;
     }
     
-    protected abstract void acceptStandaloneResponse(R response);
+    protected abstract void acceptStandaloneResponseInternal(R response);
     
 
     private static class ResponseNotifier<T> {

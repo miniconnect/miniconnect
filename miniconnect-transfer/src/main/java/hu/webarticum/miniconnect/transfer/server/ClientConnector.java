@@ -1,5 +1,7 @@
 package hu.webarticum.miniconnect.transfer.server;
 
+import java.io.IOException;
+
 import hu.webarticum.miniconnect.transfer.Block;
 import hu.webarticum.miniconnect.transfer.channel.BlockSource;
 import hu.webarticum.miniconnect.transfer.channel.BlockTarget;
@@ -17,8 +19,12 @@ public class ClientConnector extends AbstractBlockClient {
 
     
     @Override
-    protected void acceptBlock(Block block) {
+    protected void acceptBlockInternal(Block block) {
         server.acceptBlock(this, block);
+    }
+    
+    public void sendBlock(Block block) throws IOException {
+        sendBlockInternal(block);
     }
 
 }
