@@ -9,7 +9,7 @@ import hu.webarticum.miniconnect.transfer.channel.BlockSource;
 import hu.webarticum.miniconnect.transfer.channel.BlockTarget;
 import hu.webarticum.miniconnect.transfer.channel.singlestream.SingleStreamBlockSource;
 import hu.webarticum.miniconnect.transfer.channel.singlestream.SingleStreamBlockTarget;
-import hu.webarticum.miniconnect.transfer.server.ClientConnector;
+import hu.webarticum.miniconnect.transfer.xxx.server.ClientConnector;
 
 public class ClientServerMain {
 

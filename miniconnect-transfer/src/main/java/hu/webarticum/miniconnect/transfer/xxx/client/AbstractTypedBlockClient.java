@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.transfer.client;
+package hu.webarticum.miniconnect.transfer.xxx.client;
 
 import java.io.IOException;
 

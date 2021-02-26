@@ -5,10 +5,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.function.UnaryOperator;
 
 import hu.webarticum.miniconnect.transfer.Block;
-import hu.webarticum.miniconnect.transfer.server.AbstractBlockServer;
-import hu.webarticum.miniconnect.transfer.server.ClientConnector;
 import hu.webarticum.miniconnect.transfer.util.ByteString;
 import hu.webarticum.miniconnect.transfer.util.ByteUtil;
+import hu.webarticum.miniconnect.transfer.xxx.server.AbstractBlockServer;
+import hu.webarticum.miniconnect.transfer.xxx.server.ClientConnector;
 
 public class DemoServer extends AbstractBlockServer {
     

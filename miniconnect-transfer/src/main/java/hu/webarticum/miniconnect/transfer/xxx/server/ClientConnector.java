@@ -1,11 +1,11 @@
-package hu.webarticum.miniconnect.transfer.server;
+package hu.webarticum.miniconnect.transfer.xxx.server;
 
 import java.io.IOException;
 
 import hu.webarticum.miniconnect.transfer.Block;
 import hu.webarticum.miniconnect.transfer.channel.BlockSource;
 import hu.webarticum.miniconnect.transfer.channel.BlockTarget;
-import hu.webarticum.miniconnect.transfer.client.AbstractBlockClient;
+import hu.webarticum.miniconnect.transfer.xxx.client.AbstractBlockClient;
 
 public class ClientConnector extends AbstractBlockClient {
     

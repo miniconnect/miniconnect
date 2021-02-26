@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.transfer.server;
+package hu.webarticum.miniconnect.transfer.xxx.server;
 
 import hu.webarticum.miniconnect.transfer.Block;
 

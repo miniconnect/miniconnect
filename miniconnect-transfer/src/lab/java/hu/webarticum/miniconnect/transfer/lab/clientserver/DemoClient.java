@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import hu.webarticum.miniconnect.transfer.Block;
 import hu.webarticum.miniconnect.transfer.channel.BlockSource;
 import hu.webarticum.miniconnect.transfer.channel.BlockTarget;
-import hu.webarticum.miniconnect.transfer.client.AbstractTransactionalBlockClient;
+import hu.webarticum.miniconnect.transfer.xxx.client.AbstractTransactionalBlockClient;
 
 public class DemoClient extends AbstractTransactionalBlockClient<DemoRequest, DemoResponse> {
     
