@@ -17,25 +17,25 @@ import hu.webarticum.miniconnect.transfer.util.ByteString;
 public class QueueTestMain {
 
     public static void main(String[] args) throws Exception {
-        PipedOutputStream innerOut = new PipedOutputStream();
-        InputStream innerIn = new PipedInputStream(innerOut);
+        PipedOutputStream out = new PipedOutputStream();
+        InputStream in = new PipedInputStream(out);
 
-        BlockTarget innerBlockTarget = new SingleStreamBlockTarget(innerOut);
-        BlockSource innerBlockSource = new SingleStreamBlockSource(innerIn);
+        BlockTarget target = new SingleStreamBlockTarget(out);
+        BlockSource source = new SingleStreamBlockSource(in);
         
-        try (QueueBlockTarget queueBlockTarget = QueueBlockTarget.open(innerBlockTarget, 2)) {
-            try (QueueBlockSource queueBlockSource = QueueBlockSource.open(innerBlockSource, 2)) {
-                queueBlockTarget.send(new Block(ByteString.wrap("alma körte".getBytes(StandardCharsets.UTF_8))));
-                queueBlockTarget.send(new Block(ByteString.wrap("xxx yyy".getBytes(StandardCharsets.UTF_8))));
-                queueBlockTarget.send(new Block(ByteString.wrap("lorem ipsum".getBytes(StandardCharsets.UTF_8))));
+        try (QueueBlockTarget queueTarget = QueueBlockTarget.open(target, 2)) {
+            try (QueueBlockSource queueSource = QueueBlockSource.open(source, 2)) {
+                queueTarget.send(new Block(ByteString.wrap("alma körte".getBytes(StandardCharsets.UTF_8))));
+                queueTarget.send(new Block(ByteString.wrap("xxx yyy".getBytes(StandardCharsets.UTF_8))));
+                queueTarget.send(new Block(ByteString.wrap("lorem ipsum".getBytes(StandardCharsets.UTF_8))));
 
                 System.out.println("Sent.");
                 System.out.println("Sleep 1 second before fetch...");
                 Thread.sleep(1000);
                 
-                System.out.println(queueBlockSource.fetch().content().toString(StandardCharsets.UTF_8));
-                System.out.println(queueBlockSource.fetch().content().toString(StandardCharsets.UTF_8));
-                System.out.println(queueBlockSource.fetch().content().toString(StandardCharsets.UTF_8));
+                System.out.println(queueSource.fetch().content().toString(StandardCharsets.UTF_8));
+                System.out.println(queueSource.fetch().content().toString(StandardCharsets.UTF_8));
+                System.out.println(queueSource.fetch().content().toString(StandardCharsets.UTF_8));
             }
         }
     }
