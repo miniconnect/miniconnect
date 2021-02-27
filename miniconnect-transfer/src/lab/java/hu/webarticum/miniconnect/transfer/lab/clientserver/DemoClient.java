@@ -39,7 +39,7 @@ public class DemoClient implements Closeable {
         BlockSourceFetcher fetcher = BlockSourceFetcher.start(
                 source,
                 new DecodingBlockConsumer<>(
-                        DemoResponse::new,
+                        DemoResponse::decode,
                         consumer));
         return new DemoClient(fetcher, consumer, target);
     }

@@ -13,16 +13,18 @@ public class DemoRequest {
     private final String query;
     
     
-    public DemoRequest(Block block) {
-        ByteString.Reader reader = block.content().reader();
-        
-        this.queryId = ByteUtil.bytesToInt(reader.read(4));
-        this.query = new String(reader.readRemaining(), StandardCharsets.UTF_8);
-    }
-    
     public DemoRequest(int queryId, String query) {
         this.queryId = queryId;
         this.query = query;
+    }
+
+    public static DemoRequest decode(Block block) {
+        ByteString.Reader reader = block.content().reader();
+        
+        int queryId = ByteUtil.bytesToInt(reader.read(4));
+        String query = new String(reader.readRemaining(), StandardCharsets.UTF_8);
+        
+        return new DemoRequest(queryId, query);
     }
     
     

@@ -13,18 +13,20 @@ public class DemoResponse {
     private final String result;
     
     
-    public DemoResponse(Block block) {
-        ByteString.Reader reader = block.content().reader();
-        
-        this.queryId = ByteUtil.bytesToInt(reader.read(4));
-        this.result = new String(reader.readRemaining(), StandardCharsets.UTF_8);
-    }
-
     public DemoResponse(int queryId, String result) {
         this.queryId = queryId;
         this.result = result;
     }
-    
+
+    public static DemoResponse decode(Block block) {
+        ByteString.Reader reader = block.content().reader();
+        
+        int queryId = ByteUtil.bytesToInt(reader.read(4));
+        String result = new String(reader.readRemaining(), StandardCharsets.UTF_8);
+        
+        return new DemoResponse(queryId, result);
+    }
+
     
     public int queryId() {
         return queryId;

@@ -25,7 +25,7 @@ public class DemoClientOld extends AbstractTransactionalBlockClient<DemoRequest,
     
     @Override
     protected DemoResponse decodeResponseInternal(Block block) {
-        return new DemoResponse(block);
+        return DemoResponse.decode(block);
     }
     
     protected void acceptStandaloneResponseInternal(DemoResponse demoResponse) {
