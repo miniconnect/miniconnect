@@ -1,16 +1,18 @@
 package hu.webarticum.miniconnect.transfer.fetcher;
 
+import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
 import hu.webarticum.miniconnect.transfer.fetcher.pocket.Pocket;
+import hu.webarticum.miniconnect.transfer.lab.util.ExceptionUtil;
 
 
 public class CollectingConsumer<T> implements Consumer<T> {
     
-    private final List<Notifier> notifiers = new ArrayList<>();
+    private final List<Notifier<?>> notifiers = new ArrayList<>();
     
     private final Consumer<T> fallbackConsumer;
     
@@ -26,11 +28,11 @@ public class CollectingConsumer<T> implements Consumer<T> {
 
     @Override
     public void accept(T item) {
-        Notifier foundNotifier = null;
+        Notifier<?> foundNotifier = null;
         synchronized (notifiers) {
-            Iterator<Notifier> iterator = notifiers.iterator();
+            Iterator<Notifier<?>> iterator = notifiers.iterator();
             while (iterator.hasNext()) {
-                Notifier notifier = iterator.next();
+                Notifier<?> notifier = iterator.next();
                 Pocket.AcceptStatus acceptStatus = notifier.pocket.accept(item);
                 if (acceptStatus == Pocket.AcceptStatus.COMPLETED) {
                     iterator.remove();
@@ -52,8 +54,8 @@ public class CollectingConsumer<T> implements Consumer<T> {
         fallbackConsumer.accept(item);
     }
     
-    public CollectingNotifier<T> listen(Pocket<T> pocket) {
-        Notifier notifier = new Notifier(pocket);
+    public <U> CollectingNotifier<T, U> listen(Pocket<T, U> pocket) {
+        Notifier<U> notifier = new Notifier<>(pocket);
         synchronized (notifiers) {
             notifiers.add(notifier);
         }
@@ -61,19 +63,31 @@ public class CollectingConsumer<T> implements Consumer<T> {
     }
     
 
-    private class Notifier implements CollectingNotifier<T> {
+    private class Notifier<U> implements CollectingNotifier<T, U> {
     
-        private final Pocket<T> pocket;
+        private final Pocket<T, U> pocket;
     
     
-        private Notifier(Pocket<T> pocket) {
+        private Notifier(Pocket<T, U> pocket) {
             this.pocket = pocket;
         }
     
         
         @Override
-        public Pocket<T> pocket() {
+        public Pocket<T, U> pocket() {
             return pocket;
+        }
+
+        @Override
+        public synchronized U await() throws InterruptedIOException {
+            while (!pocket.hasMore()) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    throw ExceptionUtil.convertInterruption(e);
+                }
+            }
+            return pocket.get();
         }
 
         @Override

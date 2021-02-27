@@ -2,7 +2,7 @@ package hu.webarticum.miniconnect.transfer.fetcher.pocket;
 
 import java.util.function.Predicate;
 
-public class SingleItemPocket<T> implements Pocket<T> {
+public class SingleItemPocket<T> implements Pocket<T, T> {
     
     private final Predicate<T> acceptor;
     
@@ -31,12 +31,18 @@ public class SingleItemPocket<T> implements Pocket<T> {
         return AcceptStatus.COMPLETED;
     }
 
-    public synchronized boolean isCompleted() {
-        return (item != null);
+    @Override
+    public boolean hasMore() {
+        return isCompleted();
     }
-
+    
+    @Override
     public synchronized T get() {
         return item;
     }
 
+    public synchronized boolean isCompleted() {
+        return (item != null);
+    }
+    
 }

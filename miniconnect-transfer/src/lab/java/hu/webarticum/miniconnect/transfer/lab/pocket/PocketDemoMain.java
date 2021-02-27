@@ -4,12 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import hu.webarticum.miniconnect.transfer.Block;
 import hu.webarticum.miniconnect.transfer.channel.BlockSource;
 import hu.webarticum.miniconnect.transfer.channel.BlockTarget;
 import hu.webarticum.miniconnect.transfer.channel.singlestream.SingleStreamBlockSource;
@@ -20,7 +18,7 @@ import hu.webarticum.miniconnect.transfer.fetcher.CollectingNotifier;
 import hu.webarticum.miniconnect.transfer.fetcher.DecodingBlockConsumer;
 import hu.webarticum.miniconnect.transfer.fetcher.pocket.Pocket;
 import hu.webarticum.miniconnect.transfer.fetcher.pocket.SingleItemPocket;
-import hu.webarticum.miniconnect.transfer.util.ByteString;
+import hu.webarticum.miniconnect.transfer.lab.util.BlockUtil;
 
 public class PocketDemoMain {
 
@@ -36,28 +34,20 @@ public class PocketDemoMain {
         
         try (BlockSourceFetcher fetcher = createFetcher(source, collectingConsumer)) {
             SingleItemPocket<String> bbbPocket = new SingleItemPocket<>(item -> item.equals("bbb"));
-            CollectingNotifier<String> bbbNotifier = collectingConsumer.listen(bbbPocket);
+            CollectingNotifier<String, String> bbbNotifier = collectingConsumer.listen(bbbPocket);
             
             FirstNFilteredPocket firstTwoNumbersPocket =
                     new FirstNFilteredPocket(2, item -> item.matches("\\d+"));
-            CollectingNotifier<String> firstTwoNumbersNotifier =
+            CollectingNotifier<String, List<String>> firstTwoNumbersNotifier =
                     collectingConsumer.listen(firstTwoNumbersPocket);
             
             Thread thread = sendMessagesOnOtherThread(target);
             
-            synchronized (bbbNotifier) {
-                while (!bbbPocket.isCompleted()) {
-                    bbbNotifier.wait();
-                }
-            }
-            System.out.println(String.format("FOUND BBB: %s", bbbPocket.get()));
+            String bbb = bbbNotifier.await();
+            System.out.println(String.format("FOUND BBB: %s", bbb));
 
-            synchronized (firstTwoNumbersNotifier) {
-                while (!firstTwoNumbersPocket.isCompleted()) {
-                    firstTwoNumbersNotifier.wait();
-                }
-            }
-            System.out.println(String.format("FOUND NUMBERS: %s", firstTwoNumbersPocket.get()));
+            List<String> firstTwoNumbers = firstTwoNumbersNotifier.await();
+            System.out.println(String.format("FOUND NUMBERS: %s", firstTwoNumbers));
             
             thread.join();
         }
@@ -71,13 +61,13 @@ public class PocketDemoMain {
 
     private static void sendMessages(BlockTarget target) {
         try {
-            target.send(blockOf("111"));
-            target.send(blockOf("aaa"));
-            target.send(blockOf("222"));
-            target.send(blockOf("bbb"));
-            target.send(blockOf("333"));
-            target.send(blockOf("ccc"));
-            target.send(blockOf("444"));
+            target.send(BlockUtil.blockOf("111"));
+            target.send(BlockUtil.blockOf("aaa"));
+            target.send(BlockUtil.blockOf("222"));
+            target.send(BlockUtil.blockOf("bbb"));
+            target.send(BlockUtil.blockOf("333"));
+            target.send(BlockUtil.blockOf("ccc"));
+            target.send(BlockUtil.blockOf("444"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -89,21 +79,12 @@ public class PocketDemoMain {
         return BlockSourceFetcher.start(
                 source,
                 new DecodingBlockConsumer<>(
-                        PocketDemoMain::stringOf,
+                        BlockUtil::stringOf,
                         collectingConsumer));
     }
 
-    public static String stringOf(Block block) {
-        return block.content().toString(StandardCharsets.UTF_8);
-    }
-
-    public static Block blockOf(String string) {
-        ByteString content = ByteString.wrap(string.getBytes(StandardCharsets.UTF_8));
-        return new Block(content);
-    }
     
-    
-    private static class FirstNFilteredPocket implements Pocket<String> {
+    private static class FirstNFilteredPocket implements Pocket<String, List<String>> {
         
         private final int n;
         
@@ -138,12 +119,18 @@ public class PocketDemoMain {
                     Pocket.AcceptStatus.ACCEPTED;
         }
 
-        public synchronized boolean isCompleted() {
-            return (items.size() == n);
+        @Override
+        public boolean hasMore() {
+            return isCompleted();
         }
 
+        @Override
         public synchronized List<String> get() {
             return new ArrayList<>(items);
+        }
+        
+        public synchronized boolean isCompleted() {
+            return (items.size() == n);
         }
 
     }

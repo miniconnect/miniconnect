@@ -26,7 +26,7 @@ public class ClientServerMain {
         BlockTarget innerResponseBlockTarget = new SingleStreamBlockTarget(innerResponseOut);
         BlockSource innerResponseBlockSource = new SingleStreamBlockSource(innerResponseIn);
 
-        try (DemoClient client = new DemoClient(innerResponseBlockSource, innerRequestBlockTarget)) {
+        try (DemoClient client = DemoClient.start(innerResponseBlockSource, innerRequestBlockTarget)) {
             DemoServer server = new DemoServer(String::toUpperCase);
             try (ClientConnector connector = new ClientConnector(
                     server, innerRequestBlockSource, innerResponseBlockTarget)) {

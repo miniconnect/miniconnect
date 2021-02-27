@@ -26,11 +26,11 @@ public class DemoResponse {
     }
     
     
-    public int getQueryId() {
+    public int queryId() {
         return queryId;
     }
 
-    public String getResult() {
+    public String result() {
         return result;
     }
     
