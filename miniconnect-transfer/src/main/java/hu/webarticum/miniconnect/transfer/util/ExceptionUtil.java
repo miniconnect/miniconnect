@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.transfer.lab.util;
+package hu.webarticum.miniconnect.transfer.util;
 
 import java.io.InterruptedIOException;
 

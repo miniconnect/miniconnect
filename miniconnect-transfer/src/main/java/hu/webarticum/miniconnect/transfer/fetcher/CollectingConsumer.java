@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import hu.webarticum.miniconnect.transfer.fetcher.pocket.Pocket;
-import hu.webarticum.miniconnect.transfer.lab.util.ExceptionUtil;
+import hu.webarticum.miniconnect.transfer.util.ExceptionUtil;
 
 
 public class CollectingConsumer<T> implements Consumer<T> {
