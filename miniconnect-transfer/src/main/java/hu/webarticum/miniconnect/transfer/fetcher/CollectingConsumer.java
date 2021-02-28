@@ -84,7 +84,8 @@ public class CollectingConsumer<T> implements Consumer<T> {
                 try {
                     wait();
                 } catch (InterruptedException e) {
-                    throw ExceptionUtil.convertInterruption(e);
+                    Thread.currentThread().interrupt();
+                    throw ExceptionUtil.combine(new InterruptedIOException(), e);
                 }
             }
             return pocket.get();

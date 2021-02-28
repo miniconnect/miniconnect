@@ -1,7 +1,5 @@
 package hu.webarticum.miniconnect.transfer.util;
 
-import java.io.InterruptedIOException;
-
 public final class ExceptionUtil {
     
     private ExceptionUtil() {
@@ -9,11 +7,9 @@ public final class ExceptionUtil {
     }
     
 
-    public static InterruptedIOException convertInterruption(InterruptedException e) {
-        Thread.currentThread().interrupt();
-        InterruptedIOException ioE = new InterruptedIOException();
-        ioE.addSuppressed(e);
-        return ioE;
+    public static <E extends Throwable> E combine(E targetException, Throwable originalException) {
+        targetException.addSuppressed(originalException);
+        return targetException;
     }
     
 }

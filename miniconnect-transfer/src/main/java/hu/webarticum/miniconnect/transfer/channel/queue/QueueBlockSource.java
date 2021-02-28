@@ -8,6 +8,7 @@ import java.util.concurrent.BlockingQueue;
 
 import hu.webarticum.miniconnect.transfer.Block;
 import hu.webarticum.miniconnect.transfer.channel.BlockSource;
+import hu.webarticum.miniconnect.transfer.util.ExceptionUtil;
 
 public class QueueBlockSource implements BlockSource, Closeable {
     
@@ -70,11 +71,8 @@ public class QueueBlockSource implements BlockSource, Closeable {
         try {
             return queue.take();
         } catch (InterruptedException e) {
-            
-            // XXX
             Thread.currentThread().interrupt();
-            throw new IOException(e); // InterruptedIOException?
-            
+            throw ExceptionUtil.combine(new InterruptedIOException(), e);
         }
     }
 

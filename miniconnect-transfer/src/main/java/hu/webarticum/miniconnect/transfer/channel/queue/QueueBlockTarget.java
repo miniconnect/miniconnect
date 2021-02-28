@@ -8,6 +8,7 @@ import java.util.concurrent.BlockingQueue;
 
 import hu.webarticum.miniconnect.transfer.Block;
 import hu.webarticum.miniconnect.transfer.channel.BlockTarget;
+import hu.webarticum.miniconnect.transfer.util.ExceptionUtil;
 
 public class QueueBlockTarget implements BlockTarget, Closeable {
     
@@ -42,7 +43,7 @@ public class QueueBlockTarget implements BlockTarget, Closeable {
         while (!closed) {
             iterateSending();
             
-            // XXX
+            // FIXME
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) { }
@@ -75,11 +76,8 @@ public class QueueBlockTarget implements BlockTarget, Closeable {
         try {
             queue.put(block);
         } catch (InterruptedException e) {
-            
-            // XXX
             Thread.currentThread().interrupt();
-            throw new IOException(e); // InterruptedIOException?
-            
+            throw ExceptionUtil.combine(new InterruptedIOException(), e);
         }
     }
 
