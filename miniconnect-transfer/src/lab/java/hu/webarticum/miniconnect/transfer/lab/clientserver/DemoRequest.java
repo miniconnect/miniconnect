@@ -28,11 +28,11 @@ public class DemoRequest {
     }
     
     
-    public int getQueryId() {
+    public int queryId() {
         return queryId;
     }
 
-    public String getQuery() {
+    public String query() {
         return query;
     }
 

@@ -1,46 +1,60 @@
 package hu.webarticum.miniconnect.transfer.lab.clientserver;
 
+import java.io.Closeable;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.UnaryOperator;
 
-import hu.webarticum.miniconnect.transfer.Block;
-import hu.webarticum.miniconnect.transfer.util.ByteString;
-import hu.webarticum.miniconnect.transfer.util.ByteUtil;
-import hu.webarticum.miniconnect.transfer.xxx.server.AbstractBlockServer;
-import hu.webarticum.miniconnect.transfer.xxx.server.ClientConnector;
-
-public class DemoServer extends AbstractBlockServer {
+public class DemoServer implements Closeable {
     
     private final UnaryOperator<String> transformer;
     
+    private final ExecutorService executorService;
+    
+    private final boolean isExecutorServiceOwned;
+    
 
-    public DemoServer(UnaryOperator<String> transformer) {
+    private DemoServer(
+            UnaryOperator<String> transformer,
+            ExecutorService executorService,
+            boolean isExecutorServiceOwned) {
+        
         this.transformer = transformer;
+        this.executorService = executorService;
+        this.isExecutorServiceOwned = isExecutorServiceOwned;
+    }
+
+    public static DemoServer start(UnaryOperator<String> transformer) {
+        return new DemoServer(transformer, Executors.newCachedThreadPool(), true);
     }
     
+    public static DemoServer start(
+            UnaryOperator<String> transformer,
+            ExecutorService executorService) {
+        
+        return new DemoServer(transformer, executorService, false);
+    }
+    
+
+    public void accept(DemoConnector connector, DemoRequest request) {
+        executorService.submit(() -> this.process(connector, request));
+    }
+    
+    public Object process(DemoConnector connector, DemoRequest request) throws IOException {
+        int queryId = request.queryId();
+        String query = request.query();
+        String answer = transformer.apply(query);
+        DemoResponse response = new DemoResponse(queryId, answer);
+        connector.send(response);
+        return null;
+    }
     
     @Override
-    protected void acceptBlock(ClientConnector connector, Block block) {
-        ByteString.Reader reader = block.content().reader();
-        
-        int queryId = ByteUtil.bytesToInt(reader.read(4));
-        String query = new String(reader.readRemaining(), StandardCharsets.UTF_8);
-        
-        String answer = transformer.apply(query);
-        ByteString result = ByteString.builder()
-                .append(ByteUtil.intToBytes(queryId))
-                .append(answer.getBytes(StandardCharsets.UTF_8))
-                .build();
-        
-        try {
-            connector.sendBlock(new Block(result));
-        } catch (IOException e) {
-            
-            // XXX
-            e.printStackTrace();
-            
+    public void close() throws IOException {
+        if (isExecutorServiceOwned) {
+            executorService.shutdown();
         }
     }
-
+    
 }

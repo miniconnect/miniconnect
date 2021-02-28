@@ -9,7 +9,6 @@ import hu.webarticum.miniconnect.transfer.channel.BlockSource;
 import hu.webarticum.miniconnect.transfer.channel.BlockTarget;
 import hu.webarticum.miniconnect.transfer.channel.singlestream.SingleStreamBlockSource;
 import hu.webarticum.miniconnect.transfer.channel.singlestream.SingleStreamBlockTarget;
-import hu.webarticum.miniconnect.transfer.xxx.server.ClientConnector;
 
 public class ClientServerMain {
 
@@ -27,14 +26,15 @@ public class ClientServerMain {
         BlockSource innerResponseBlockSource = new SingleStreamBlockSource(innerResponseIn);
 
         try (DemoClient client = DemoClient.start(innerResponseBlockSource, innerRequestBlockTarget)) {
-            DemoServer server = new DemoServer(String::toUpperCase);
-            try (ClientConnector connector = new ClientConnector(
-                    server, innerRequestBlockSource, innerResponseBlockTarget)) {
-
-                runQuery(client, "Lorem");
-                runQuery(client, "ipsum");
-                runQuery(client, "XXX yyy");
-                runQuery(client, "Aaa Bbb Ccc");
+            try (DemoServer server = DemoServer.start(String::toUpperCase)) {
+                try (DemoConnector connector = DemoConnector.start(
+                        server, innerRequestBlockSource, innerResponseBlockTarget)) {
+    
+                    runQuery(client, "Lorem");
+                    runQuery(client, "ipsum");
+                    runQuery(client, "XXX yyy");
+                    runQuery(client, "Aaa Bbb Ccc");
+                }
             }
         }
     }
