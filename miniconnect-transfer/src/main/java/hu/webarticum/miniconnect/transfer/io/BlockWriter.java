@@ -19,13 +19,10 @@ public class BlockWriter {
         ByteString content = block.content();
         int length = content.length();
         byte[] lengthBytes = ByteBuffer.allocate(Integer.BYTES).putInt(length).array();
-        byte checkByte = (byte) (lengthBytes[0] ^ lengthBytes[1] ^ lengthBytes[2] ^ lengthBytes[3]);
         
         out.write(Block.MAGIC_BYTE);
-        out.write(checkByte);
         out.write(lengthBytes);
         content.writeTo(out);
-        out.write(checkByte);
         out.flush();
     }
 

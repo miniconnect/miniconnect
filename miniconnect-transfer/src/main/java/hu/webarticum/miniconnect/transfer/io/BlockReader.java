@@ -24,18 +24,8 @@ public class BlockReader {
                     firstByte));
         }
 
-        byte checkByte = (byte) in.read();
-        
         int length = readInt();
         byte[] contentBytes = in.readNBytes(length);
-
-        byte finalByte = (byte) in.read();
-
-        if (finalByte != checkByte) {
-            throw new IOException(String.format(
-                    "Wrong final byte: %d, expected: %d",
-                    finalByte, checkByte));
-        }
 
         return new Block(ByteString.wrap(contentBytes));
     }
