@@ -20,7 +20,7 @@ public class LazySingleStreamBlockSource implements BlockSource {
     
     
     @Override
-    public Block fetch() throws IOException {
+    public synchronized Block fetch() throws IOException {
         return new BlockReader(requireInputStream()).read();
     }
     

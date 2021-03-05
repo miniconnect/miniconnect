@@ -16,7 +16,7 @@ public class SingleStreamBlockTarget implements BlockTarget {
     }
     
     @Override
-    public void send(Block block) throws IOException {
+    public synchronized void send(Block block) throws IOException {
         new BlockWriter(out).write(block);
     }
 

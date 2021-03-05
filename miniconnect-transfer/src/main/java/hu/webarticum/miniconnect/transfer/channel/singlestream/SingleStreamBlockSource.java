@@ -16,7 +16,7 @@ public class SingleStreamBlockSource implements BlockSource {
     }
     
     @Override
-    public Block fetch() throws IOException {
+    public synchronized Block fetch() throws IOException {
         return new BlockReader(in).read();
     }
 

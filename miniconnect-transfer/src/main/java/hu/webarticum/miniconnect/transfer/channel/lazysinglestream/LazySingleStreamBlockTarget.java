@@ -20,7 +20,7 @@ public class LazySingleStreamBlockTarget implements BlockTarget {
     
     
     @Override
-    public void send(Block block) throws IOException {
+    public synchronized void send(Block block) throws IOException {
         new BlockWriter(requireOutputStream()).write(block);
     }
 
