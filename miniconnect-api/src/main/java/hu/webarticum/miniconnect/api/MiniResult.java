@@ -4,12 +4,16 @@ import java.util.List;
 
 public interface MiniResult {
 
-    public boolean isSuccess(); // FIXME: status? exception?
-    
-    public String errorMessage(); // FIXME: error code? etc.?
-    
+    public boolean success();
+
+    public String errorCode();
+
+    public String errorMessage();
+
     public List<String> warnings();
 
+    public boolean hasResultSet();
+
     public MiniResultSet resultSet();
-    
+
 }

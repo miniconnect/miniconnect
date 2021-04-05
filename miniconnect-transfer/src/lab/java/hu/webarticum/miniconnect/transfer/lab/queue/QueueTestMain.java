@@ -12,7 +12,7 @@ import hu.webarticum.miniconnect.transfer.channel.queue.QueueBlockSource;
 import hu.webarticum.miniconnect.transfer.channel.queue.QueueBlockTarget;
 import hu.webarticum.miniconnect.transfer.channel.singlestream.SingleStreamBlockSource;
 import hu.webarticum.miniconnect.transfer.channel.singlestream.SingleStreamBlockTarget;
-import hu.webarticum.miniconnect.transfer.util.ByteString;
+import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class QueueTestMain {
 
@@ -25,9 +25,9 @@ public class QueueTestMain {
         
         try (QueueBlockTarget queueTarget = QueueBlockTarget.open(target, 2)) {
             try (QueueBlockSource queueSource = QueueBlockSource.open(source, 2)) {
-                queueTarget.send(new Block(ByteString.wrap("alma körte".getBytes(StandardCharsets.UTF_8))));
-                queueTarget.send(new Block(ByteString.wrap("xxx yyy".getBytes(StandardCharsets.UTF_8))));
-                queueTarget.send(new Block(ByteString.wrap("lorem ipsum".getBytes(StandardCharsets.UTF_8))));
+                queueTarget.send(Block.dataOf(ByteString.wrap("alma körte".getBytes(StandardCharsets.UTF_8))));
+                queueTarget.send(Block.dataOf(ByteString.wrap("xxx yyy".getBytes(StandardCharsets.UTF_8))));
+                queueTarget.send(Block.dataOf(ByteString.wrap("lorem ipsum".getBytes(StandardCharsets.UTF_8))));
 
                 System.out.println("Sent.");
                 System.out.println("Sleep 1 second before fetch...");

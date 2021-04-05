@@ -61,13 +61,13 @@ public class PocketDemoMain {
 
     private static void sendMessages(BlockTarget target) {
         try {
-            target.send(BlockUtil.blockOf("111"));
-            target.send(BlockUtil.blockOf("aaa"));
-            target.send(BlockUtil.blockOf("222"));
-            target.send(BlockUtil.blockOf("bbb"));
-            target.send(BlockUtil.blockOf("333"));
-            target.send(BlockUtil.blockOf("ccc"));
-            target.send(BlockUtil.blockOf("444"));
+            target.send(BlockUtil.dataBlockOf("111"));
+            target.send(BlockUtil.dataBlockOf("aaa"));
+            target.send(BlockUtil.dataBlockOf("222"));
+            target.send(BlockUtil.dataBlockOf("bbb"));
+            target.send(BlockUtil.dataBlockOf("333"));
+            target.send(BlockUtil.dataBlockOf("ccc"));
+            target.send(BlockUtil.dataBlockOf("444"));
         } catch (IOException e) {
             e.printStackTrace();
         }

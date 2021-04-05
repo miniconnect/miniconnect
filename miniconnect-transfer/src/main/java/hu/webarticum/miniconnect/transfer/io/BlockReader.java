@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import hu.webarticum.miniconnect.transfer.Block;
-import hu.webarticum.miniconnect.transfer.util.ByteString;
+import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class BlockReader {
 
@@ -16,18 +16,18 @@ public class BlockReader {
     }
     
     public Block read() throws IOException {
-        byte firstByte = (byte) in.read();
+        byte magicByte = (byte) in.read();
         
-        if (firstByte != Block.MAGIC_BYTE) {
+        if (magicByte != Block.MAGIC_BYTE) {
             throw new IOException(String.format(
-                    "Invalid first byte: %d",
-                    firstByte));
+                    "Invalid magic byte: %d",
+                    magicByte));
         }
 
         int length = readInt();
         byte[] contentBytes = in.readNBytes(length);
 
-        return new Block(ByteString.wrap(contentBytes));
+        return Block.dataOf(ByteString.wrap(contentBytes));
     }
     
     private int readInt() throws IOException {

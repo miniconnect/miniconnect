@@ -1,12 +1,13 @@
 package hu.webarticum.miniconnect.api;
 
 import java.io.Closeable;
-import java.util.List;
 
-public interface MiniResultSet extends Closeable, Iterable<List<MiniValue>> {
+import hu.webarticum.miniconnect.util.data.ImmutableList;
 
-    public List<MiniColumnHeader> columnHeaders();
-    
+public interface MiniResultSet extends Closeable, Iterable<ImmutableList<MiniValue>> {
+
+    public ImmutableList<MiniColumnHeader> columnHeaders();
+
     public boolean isClosed();
-    
+
 }

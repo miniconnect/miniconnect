@@ -26,7 +26,7 @@ public class FetcherDemoMain {
                         "Incoming block: %s",
                         BlockUtil.stringOf(block))))) {
             for (int i = 0; i < 5; i++) {
-                target.send(BlockUtil.blockOf(String.format("ITEM(%d)", i)));
+                target.send(BlockUtil.dataBlockOf(String.format("ITEM(%d)", i)));
                 Thread.sleep(500);
             }
         }

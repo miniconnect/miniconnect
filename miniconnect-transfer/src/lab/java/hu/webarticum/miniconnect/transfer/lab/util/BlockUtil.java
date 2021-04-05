@@ -3,7 +3,7 @@ package hu.webarticum.miniconnect.transfer.lab.util;
 import java.nio.charset.StandardCharsets;
 
 import hu.webarticum.miniconnect.transfer.Block;
-import hu.webarticum.miniconnect.transfer.util.ByteString;
+import hu.webarticum.miniconnect.util.data.ByteString;
 
 public final class BlockUtil {
     
@@ -16,9 +16,9 @@ public final class BlockUtil {
         return block.content().toString(StandardCharsets.UTF_8);
     }
 
-    public static Block blockOf(String string) {
+    public static Block dataBlockOf(String string) {
         ByteString content = ByteString.wrap(string.getBytes(StandardCharsets.UTF_8));
-        return new Block(content);
+        return Block.dataOf(content);
     }
     
 }

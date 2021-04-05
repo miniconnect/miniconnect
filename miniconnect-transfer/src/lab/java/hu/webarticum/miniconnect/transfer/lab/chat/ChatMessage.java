@@ -3,8 +3,8 @@ package hu.webarticum.miniconnect.transfer.lab.chat;
 import java.nio.charset.StandardCharsets;
 
 import hu.webarticum.miniconnect.transfer.Block;
-import hu.webarticum.miniconnect.transfer.util.ByteString;
 import hu.webarticum.miniconnect.transfer.util.ByteUtil;
+import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class ChatMessage {
 
@@ -45,7 +45,7 @@ public class ChatMessage {
                 .append(ByteString.wrap(message.getBytes(StandardCharsets.UTF_8)))
                 .build();
         
-        return new Block(content);
+        return Block.dataOf(content);
     }
     
 }

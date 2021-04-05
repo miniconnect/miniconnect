@@ -10,5 +10,9 @@ include ':miniconnect-util'
 project(':miniconnect-util').projectDir = new File('../miniconnect-util')
 
 // FIXME
+include ':miniconnect-tool'
+project(':miniconnect-tool').projectDir = new File('../miniconnect-tool')
+
+// FIXME
 include ':miniconnect-transfer'
 project(':miniconnect-transfer').projectDir = new File('../miniconnect-transfer')

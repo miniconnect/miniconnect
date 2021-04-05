@@ -1,15 +1,13 @@
 package hu.webarticum.miniconnect.api;
 
-import java.util.Map;
+import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
 public interface MiniColumnHeader {
 
     public String name();
 
     public String type();
-    
-    // TODO: size() ?
 
-    public Map<String, String> properties();
-    
+    public ImmutableMap<String, byte[]> properties();
+
 }

@@ -5,7 +5,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 import hu.webarticum.miniconnect.transfer.Block;
-import hu.webarticum.miniconnect.transfer.util.ByteString;
+import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class BlockWriter {
 
@@ -19,7 +19,7 @@ public class BlockWriter {
         ByteString content = block.content();
         int length = content.length();
         byte[] lengthBytes = ByteBuffer.allocate(Integer.BYTES).putInt(length).array();
-        
+
         out.write(Block.MAGIC_BYTE);
         out.write(lengthBytes);
         content.writeTo(out);
