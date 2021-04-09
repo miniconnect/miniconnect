@@ -3,6 +3,7 @@ package hu.webarticum.miniconnect.tool.result;
 import java.io.Serializable;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
+import hu.webarticum.miniconnect.util.data.ByteString;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
 public class StoredColumnHeader implements MiniColumnHeader, Serializable {
@@ -14,7 +15,7 @@ public class StoredColumnHeader implements MiniColumnHeader, Serializable {
 
     private final String type;
 
-    private final ImmutableMap<String, byte[]> properties;
+    private final ImmutableMap<String, ByteString> properties;
 
 
     public StoredColumnHeader(String name,  String type) {
@@ -24,7 +25,7 @@ public class StoredColumnHeader implements MiniColumnHeader, Serializable {
     public StoredColumnHeader(
             String name,
             String type,
-            ImmutableMap<String, byte[]> properties) {
+            ImmutableMap<String, ByteString> properties) {
 
         this.name = name;
         this.type = type;
@@ -50,7 +51,7 @@ public class StoredColumnHeader implements MiniColumnHeader, Serializable {
     }
 
     @Override
-    public ImmutableMap<String, byte[]> properties() {
+    public ImmutableMap<String, ByteString> properties() {
         return properties;
     }
 

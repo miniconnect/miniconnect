@@ -1,6 +1,6 @@
 package hu.webarticum.miniconnect.tool.repl;
 
-import java.io.PrintStream;
+import java.io.IOException;
 import java.util.regex.Pattern;
 
 import hu.webarticum.miniconnect.api.MiniSession;
@@ -23,18 +23,12 @@ public class SqlRepl implements Repl {
 
     private final MiniSession session;
 
-    private final PrintStream out;
-
-    private final PrintStream err;
+    private final Appendable out;
 
 
-    public SqlRepl(
-            MiniSession session,
-            PrintStream out,
-            PrintStream err) {
+    public SqlRepl(MiniSession session, Appendable out) {
         this.session = session;
         this.out = out;
-        this.err = err;
     }
 
 
@@ -44,22 +38,22 @@ public class SqlRepl implements Repl {
     }
 
     @Override
-    public void welcome() {
-        out.println("\nWelcome in miniConnect SQL REPL!\n");
+    public void welcome() throws IOException {
+        out.append("\nWelcome in miniConnect SQL REPL!\n\n");
     }
 
     @Override
-    public void prompt() {
-        out.print("SQL > ");
+    public void prompt() throws IOException {
+        out.append("SQL > ");
     }
 
     @Override
-    public void prompt2() {
-        out.print("    > ");
+    public void prompt2() throws IOException {
+        out.append("    > ");
     }
 
     @Override
-    public boolean execute(String command) {
+    public boolean execute(String command) throws IOException {
         if (HELP_PATTERN.matcher(command).matches()) {
             help();
             return true;
@@ -83,41 +77,43 @@ public class SqlRepl implements Repl {
         return true;
     }
 
-    private void printException(Exception e) {
+    private void printException(Exception e) throws IOException {
         String message = e.getMessage();
         if (message == null || message.isEmpty()) {
             message = e.getClass().getName();
         }
-        out.println(message);
-
-        e.printStackTrace(err);
+        out.append(message);
+        out.append('\n');
     }
 
-    private void printResult(MiniResult result) {
+    private void printResult(MiniResult result) throws IOException {
         if (!result.success()) {
-            out.println(String.format("ERROR: %s", result.errorMessage()));
+            out.append(String.format(
+                    "ERROR(%s): %s%n",
+                    result.errorCode(),
+                    result.errorMessage()));
             return;
         }
 
         new ResultSetPrinter().print(result.resultSet(), out);
     }
 
-    private void help() {
-        out.println();
-        out.println(String.format("  MiniConnect SQL REPL - %s",
+    private void help() throws IOException {
+        out.append('\n');
+        out.append(String.format("  MiniConnect SQL REPL - %s%n",
                 session.getClass().getSimpleName()));
-        out.println();
-        out.println("  Commands:");
-        out.println("    \"help\": prints this document");
-        out.println("    \"exit\", \"quit\": quits this program");
-        out.println("    <any SQL>: will be executed in the session");
-        out.println("      (must be terminated with \";\")");
-        out.println();
+        out.append('\n');
+        out.append("  Commands:\n");
+        out.append("    \"help\": prints this document\n");
+        out.append("    \"exit\", \"quit\": quits this program\n");
+        out.append("    <any SQL>: will be executed in the session\n");
+        out.append("      (must be terminated with \";\")\n");
+        out.append('\n');
     }
 
     @Override
-    public void bye() {
-        out.println("\nBye-bye!\n");
+    public void bye() throws IOException {
+        out.append("\nBye-bye!\n\n");
     }
 
 }

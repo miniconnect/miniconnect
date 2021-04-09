@@ -2,7 +2,7 @@ package hu.webarticum.miniconnect.server.message.response;
 
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-public class ResultSetValuePartResponse {
+public final class ResultSetValuePartResponse implements Response {
 
     private final int queryId;
 

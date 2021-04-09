@@ -1,6 +1,6 @@
 package hu.webarticum.miniconnect.server.message.request;
 
-public class LobRequest {
+public final class LobRequest implements Request {
 
     private final int id;
 

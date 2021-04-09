@@ -1,9 +1,10 @@
 package hu.webarticum.miniconnect.server.message.response;
 
-import hu.webarticum.miniconnect.tool.result.StoredColumnHeader;
+import hu.webarticum.miniconnect.util.data.ByteString;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
+import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
-public class ResultResponse {
+public final class ResultResponse implements Response {
 
     private final int queryId;
 
@@ -17,7 +18,7 @@ public class ResultResponse {
 
     private final boolean hasResultSet;
 
-    private final ImmutableList<StoredColumnHeader> columnHeaders;
+    private final ImmutableList<ColumnHeaderData> columnHeaders;
 
 
     public ResultResponse(
@@ -27,7 +28,7 @@ public class ResultResponse {
             String errorMessage,
             ImmutableList<String> warnings,
             boolean hasResultSet,
-            ImmutableList<StoredColumnHeader> columnHeaders) {
+            ImmutableList<ColumnHeaderData> columnHeaders) {
 
         this.queryId = queryId;
         this.success = success;
@@ -63,8 +64,43 @@ public class ResultResponse {
         return hasResultSet;
     }
 
-    public ImmutableList<StoredColumnHeader> columnHeaders() {
+    public ImmutableList<ColumnHeaderData> columnHeaders() {
         return columnHeaders;
+    }
+
+
+    public static class ColumnHeaderData {
+
+        private final String name;
+
+        private final String type;
+
+        private final ImmutableMap<String, ByteString> properties;
+
+
+        public ColumnHeaderData(
+                String name,
+                String type,
+                ImmutableMap<String, ByteString> properties) {
+
+            this.name = name;
+            this.type = type;
+            this.properties = properties;
+        }
+
+
+        public String name() {
+            return name;
+        }
+
+        public String type() {
+            return type;
+        }
+
+        public ImmutableMap<String, ByteString> properties() {
+            return properties;
+        }
+
     }
 
 }

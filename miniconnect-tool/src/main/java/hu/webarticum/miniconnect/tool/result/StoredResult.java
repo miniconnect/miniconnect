@@ -1,16 +1,16 @@
 package hu.webarticum.miniconnect.tool.result;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniResultSet;
-import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class StoredResult implements MiniResult, Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -8548902380126828570L;
 
 
     private final boolean success;
@@ -50,21 +50,13 @@ public class StoredResult implements MiniResult, Serializable {
         this.resultSetData = resultSetData;
     }
 
-    // XXX
-    public static StoredResult of(MiniResult result) {
+    public static StoredResult of(MiniResult result) throws IOException {
         return new StoredResult(
                 result.success(),
                 result.errorCode(),
                 result.errorMessage(),
                 result.hasResultSet(),
-                dataOf(result));
-    }
-
-    private static StoredResultSetData dataOf(MiniResult result) {
-        MiniResultSet resultSet = result.resultSet();
-        return new StoredResultSetData(
-                resultSet.columnHeaders(),
-                ImmutableList.fromIterable(resultSet));
+                StoredResultSetData.of(result));
     }
 
 

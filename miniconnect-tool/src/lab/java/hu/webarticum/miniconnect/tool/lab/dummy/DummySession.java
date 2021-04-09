@@ -1,52 +1,53 @@
 package hu.webarticum.miniconnect.tool.lab.dummy;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.tool.result.StoredResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 
 public class DummySession implements MiniSession {
 
     private volatile boolean closed = false;
-    
-    
-    private final List<QueryExecutor> queryRunners;
-    
-    
+
+
+    private final List<QueryExecutor> queryExecutors;
+
+
     public DummySession() {
-        queryRunners = new ArrayList<>();
-        queryRunners.add(new DescribeQueryExecutor());
-        queryRunners.add(new SelectQueryExecutor());
+        queryExecutors = new ArrayList<>();
+        queryExecutors.add(new DescribeQueryExecutor());
+        queryExecutors.add(new SelectQueryExecutor());
     }
-    
-    
+
+
     @Override
     public MiniResult execute(String query) {
         if (closed) {
             throw new IllegalStateException("Already closed");
         }
-        
-        for (QueryExecutor queryRunner : queryRunners) {
-            MiniResult result = queryRunner.execute(query);
+
+        for (QueryExecutor queryExecutor : queryExecutors) {
+            MiniResult result = queryExecutor.execute(query);
             if (result != null) {
                 return result;
             }
         }
-        
-        // FIXME: unsuccessful result?
-        throw new RuntimeException("Unknow command"); // NOSONAR
+
+        return new StoredResult("01", "Unknow command");
+    }
+
+    @Override
+    public String putLargeData(InputStream dataSource) {
+        return "var0";
     }
 
     @Override
     public void close() throws IOException {
         closed = true;
-    }
-    
-    @Override
-    public boolean isClosed() {
-        return closed;
     }
 
 }

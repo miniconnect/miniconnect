@@ -1,6 +1,6 @@
 package hu.webarticum.miniconnect.server.message.request;
 
-public class ResultSetFetchRequest {
+public final class ResultSetFetchRequest implements Request {
 
     private final int queryId;
 

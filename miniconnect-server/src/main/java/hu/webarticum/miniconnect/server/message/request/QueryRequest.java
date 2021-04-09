@@ -1,6 +1,6 @@
 package hu.webarticum.miniconnect.server.message.request;
 
-public class QueryRequest implements Request {
+public final class QueryRequest implements Request {
 
     private final int id;
 

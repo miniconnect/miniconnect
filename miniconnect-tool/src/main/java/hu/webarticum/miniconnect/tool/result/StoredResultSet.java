@@ -2,7 +2,6 @@ package hu.webarticum.miniconnect.tool.result;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Iterator;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResultSet;
@@ -11,13 +10,12 @@ import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class StoredResultSet implements MiniResultSet, Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 5313071004300573832L;
 
 
     private final StoredResultSetData data;
 
-
-    private volatile boolean closed = false;
+    private int position = 0;
 
 
     public StoredResultSet() {
@@ -35,18 +33,25 @@ public class StoredResultSet implements MiniResultSet, Serializable {
     }
 
     @Override
-    public Iterator<ImmutableList<MiniValue>> iterator() {
-        return data.iterator();
+    public ImmutableList<MiniValue> fetch() {
+        ImmutableList<ImmutableList<MiniValue>> rows = rows();
+        if (position >= rows.size()) {
+            return null;
+        }
+
+        ImmutableList<MiniValue> result = rows.get(position);
+        position++;
+
+        return result;
+    }
+
+    public ImmutableList<ImmutableList<MiniValue>> rows() {
+        return data.rows();
     }
 
     @Override
     public void close() throws IOException {
-        closed = true;
-    }
-
-    @Override
-    public boolean isClosed() {
-        return closed;
+        // nothing to do
     }
 
 }

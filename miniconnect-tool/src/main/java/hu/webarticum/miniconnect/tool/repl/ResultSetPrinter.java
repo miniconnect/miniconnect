@@ -1,6 +1,6 @@
 package hu.webarticum.miniconnect.tool.repl;
 
-import java.io.PrintStream;
+import java.io.IOException;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResultSet;
@@ -13,37 +13,40 @@ public class ResultSetPrinter {
     private static final String NULL_PLACEHOLDER = "[NULL]";
 
 
-    public void print(MiniResultSet resultSet, PrintStream out) {
+    public void print(MiniResultSet resultSet, Appendable out) throws IOException {
 
 
         // TODO
 
 
-        out.println();
+        out.append('\n');
 
-        out.println("---------------------");
+        out.append("---------------------\n");
 
         ImmutableList<MiniColumnHeader> columnHeaders = resultSet.columnHeaders();
         for (MiniColumnHeader columnHeader : columnHeaders) {
-            out.print(columnHeader.name() + " | ");
+            out.append(columnHeader.name() + " | ");
         }
-        out.println();
+        out.append('\n');
 
-        out.println("---------------------");
+        out.append("---------------------\n");
 
         int rowLength = columnHeaders.size();
-        for (ImmutableList<MiniValue> row : resultSet) {
+        for (
+                ImmutableList<MiniValue> row = resultSet.fetch();
+                row != null;
+                row = resultSet.fetch()) {
+
             for (int i = 0; i < rowLength; i++) {
                 MiniValue value = row.get(i);
                 MiniColumnHeader columnHeader = columnHeaders.get(i);
-                out.print(stringifyValue(columnHeader, value));
-                out.print(", ");
+                out.append(stringifyValue(columnHeader, value));
+                out.append(", ");
             }
-            out.println();
+            out.append('\n');
         }
 
-        out.println();
-
+        out.append('\n');
     }
 
     public String stringifyValue(MiniColumnHeader columnHeader, MiniValue value) {

@@ -19,11 +19,10 @@ public class DummySqlReplMain {
             try (MiniSession session = connection.openSession()) {
                 Repl repl = new SqlRepl(
                         session,
-                        System.out, // NOSONAR
-                        System.err); // NOSONAR
+                        System.out); // NOSONAR
                 new ReplRunner(repl, System.in).run();
             }
         }
     }
-    
+
 }

@@ -1,40 +1,38 @@
 package hu.webarticum.miniconnect.tool.result;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
-import java.util.Arrays;
 
 import hu.webarticum.miniconnect.api.MiniValue;
+import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class StoredValue implements MiniValue, Serializable {
-    
+
     private static final long serialVersionUID = 1L;
-    
+
 
     private final boolean isNull;
-    
-    private final byte[] content;
-    
+
+    private final ByteString content;
+
 
     public StoredValue() {
-        this(true, false, new byte[0]);
+        this(true, ByteString.empty());
     }
-    
-    public StoredValue(byte[] content) {
-        this(false, true, content);
+
+    public StoredValue(ByteString content) {
+        this(false, content);
     }
-    
-    public StoredValue(boolean isNull, boolean copy, byte[] content) {
+
+    public StoredValue(boolean isNull, ByteString content) {
         this.isNull = isNull;
-        this.content = copy ? Arrays.copyOf(content, content.length) : content;
+        this.content = content;
     }
-    
+
     public static StoredValue of(MiniValue value) {
-        // XXX copy?
-        return new StoredValue(value.isNull(), true, value.content());
+        return new StoredValue(value.isNull(), value.content());
     }
-    
+
 
     @Override
     public boolean isNull() {
@@ -43,17 +41,17 @@ public class StoredValue implements MiniValue, Serializable {
 
     @Override
     public int contentLength() {
-        return content.length;
+        return content.length();
     }
 
     @Override
-    public byte[] content() {
-        return Arrays.copyOf(content, content.length);
+    public ByteString content() {
+        return content;
     }
 
     @Override
     public InputStream inputStream() {
-        return new ByteArrayInputStream(content);
+        return content.asInputStream();
     }
 
 }

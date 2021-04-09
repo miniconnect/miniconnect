@@ -8,33 +8,41 @@ import java.util.regex.Pattern;
 
 // TODO: handle incomplete lines
 public class ReplRunner implements Runnable {
-    
+
     private final Repl repl;
 
     private final InputStream in;
-    
+
 
     public ReplRunner(Repl repl, InputStream in) {
         this.repl = repl;
         this.in = in;
     }
-    
+
     @Override
     public void run() {
+        try {
+            runThrows();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void runThrows() throws IOException {
         repl.welcome();
         repl.prompt();
 
         StringBuilder currentQueryBuilder = new StringBuilder();
-        
+
         Pattern commandPattern = repl.commandPattern();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
         String line;
-        while ((line = readLineSilently(bufferedReader)) != null) { // NOSONAR
+        while ((line = bufferedReader.readLine()) != null) { // NOSONAR
             if (currentQueryBuilder.length() == 0 && line.isBlank()) {
                 repl.prompt();
                 continue;
             }
-            
+
             currentQueryBuilder.append(line);
             String query = currentQueryBuilder.toString();
             if (!commandPattern.matcher(query).matches()) {
@@ -48,17 +56,8 @@ public class ReplRunner implements Runnable {
             }
             repl.prompt();
         }
-        
+
         repl.bye();
     }
-    
-    private String readLineSilently(BufferedReader bufferedReader) {
-        try {
-            return bufferedReader.readLine();
-        } catch (IOException e) {
-            e.printStackTrace(); // FIXME
-            return null;
-        }
-    }
-    
+
 }

@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.server.surface;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
@@ -23,7 +24,7 @@ public class MessengerSession implements MiniSession {
 
 
     @Override
-    public MiniResult execute(String query) {
+    public MiniResult execute(String query) throws IOException {
         int requestId = requestIdCounter.incrementAndGet();
         Request request = new QueryRequest(requestId, query, 1000L);
         Predicate<Response> filter = null; // TODO
@@ -34,9 +35,9 @@ public class MessengerSession implements MiniSession {
     }
 
     @Override
-    public boolean isClosed() {
+    public String putLargeData(InputStream dataSource) throws IOException {
         // TODO Auto-generated method stub
-        return false;
+        return "";
     }
 
     @Override

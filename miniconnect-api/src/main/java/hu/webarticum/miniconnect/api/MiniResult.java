@@ -14,6 +14,7 @@ public interface MiniResult {
 
     public boolean hasResultSet();
 
+    // FIXME: subsequent calls? throws?
     public MiniResultSet resultSet();
 
 }

@@ -2,7 +2,7 @@ package hu.webarticum.miniconnect.server.message.request;
 
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-public class LobPartRequest {
+public final class LobPartRequest implements Request {
 
     private final int lobId;
 
