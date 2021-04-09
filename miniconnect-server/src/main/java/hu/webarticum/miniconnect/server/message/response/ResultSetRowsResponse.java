@@ -10,6 +10,8 @@ public final class ResultSetRowsResponse implements Response {
 
     private final long rowOffset;
 
+    private final ImmutableList<Integer> nullables;
+
     private final ImmutableMap<Integer, Integer> fixedSizes;
 
     private final ImmutableList<ImmutableList<CellData>> rows;
@@ -18,11 +20,13 @@ public final class ResultSetRowsResponse implements Response {
     public ResultSetRowsResponse(
             int queryId,
             long rowOffset,
+            ImmutableList<Integer> nullables,
             ImmutableMap<Integer, Integer> fixedSizes,
             ImmutableList<ImmutableList<CellData>> rows) {
 
         this.queryId = queryId;
         this.rowOffset = rowOffset;
+        this.nullables = nullables;
         this.fixedSizes = fixedSizes;
         this.rows = rows;
     }
@@ -36,6 +40,10 @@ public final class ResultSetRowsResponse implements Response {
         return rowOffset;
     }
 
+    public ImmutableList<Integer> nullables() {
+        return nullables;
+    }
+
     public ImmutableMap<Integer, Integer> fixedSizes() {
         return fixedSizes;
     }
@@ -47,22 +55,29 @@ public final class ResultSetRowsResponse implements Response {
 
     public static final class CellData {
 
+        private final boolean isNull;
+
         private final long fullLength;
 
         private final ByteString content;
 
 
-        public CellData(long fullLength, ByteString content) {
+        public CellData(boolean isNull, long fullLength, ByteString content) {
+            this.isNull = isNull;
             this.fullLength = fullLength;
             this.content = content;
         }
 
 
-        public long getFullLength() {
+        public boolean isNull() {
+            return isNull;
+        }
+
+        public long fullLength() {
             return fullLength;
         }
 
-        public ByteString getContent() {
+        public ByteString content() {
             return content;
         }
 

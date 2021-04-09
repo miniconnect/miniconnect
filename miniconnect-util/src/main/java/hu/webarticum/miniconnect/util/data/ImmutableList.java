@@ -28,6 +28,10 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
         this.data = new ArrayList<>(data);
     }
 
+    public static <T> ImmutableList<T> empty() {
+        return new ImmutableList<>();
+    }
+
     public static <T> ImmutableList<T> fromIterable(
             Iterable<? extends T> iterable) {
 

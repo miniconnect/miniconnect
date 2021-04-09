@@ -8,7 +8,6 @@ public interface MiniSession extends Closeable {
 
     public MiniResult execute(String query) throws IOException;
 
-    // FIXME: MiniLobResult?
-    public String putLargeData(InputStream dataSource) throws IOException;
+    public MiniLobResult putLargeData(InputStream dataSource) throws IOException;
 
 }

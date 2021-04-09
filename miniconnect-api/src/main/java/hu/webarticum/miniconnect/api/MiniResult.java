@@ -1,7 +1,8 @@
 package hu.webarticum.miniconnect.api;
 
-import java.util.List;
+import hu.webarticum.miniconnect.util.data.ImmutableList;
 
+// TODO: affected row count, last inserted id etc.
 public interface MiniResult {
 
     public boolean success();
@@ -10,7 +11,7 @@ public interface MiniResult {
 
     public String errorMessage();
 
-    public List<String> warnings();
+    public ImmutableList<String> warnings();
 
     public boolean hasResultSet();
 

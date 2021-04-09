@@ -2,11 +2,10 @@ package hu.webarticum.miniconnect.tool.result;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniResultSet;
+import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class StoredResult implements MiniResult, Serializable {
 
@@ -19,33 +18,43 @@ public class StoredResult implements MiniResult, Serializable {
 
     private final String errorMessage;
 
+    private final ImmutableList<String> warnings;
+
     private final boolean hasResultSet;
 
     private final StoredResultSetData resultSetData;
 
 
     public StoredResult() {
-        this(true, "", "", false, new StoredResultSetData());
+        this(
+                true, "", "", ImmutableList.empty(),
+                false, new StoredResultSetData());
     }
 
     public StoredResult(String errorCode, String errorMessage) {
-        this(false, errorCode, errorMessage, false, new StoredResultSetData());
+        this(
+                false, errorCode, errorMessage, ImmutableList.empty(),
+                false, new StoredResultSetData());
     }
 
     public StoredResult(StoredResultSetData resultSetData) {
-        this(true, "", "", true, resultSetData);
+        this(
+                true, "", "", ImmutableList.empty(),
+                true, resultSetData);
     }
 
     public StoredResult(
             boolean success,
             String errorCode,
             String errorMessage,
+            ImmutableList<String> warnings,
             boolean hasResultSet,
             StoredResultSetData resultSetData) {
 
         this.success = success;
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
+        this.warnings = warnings;
         this.hasResultSet = hasResultSet;
         this.resultSetData = resultSetData;
     }
@@ -55,6 +64,7 @@ public class StoredResult implements MiniResult, Serializable {
                 result.success(),
                 result.errorCode(),
                 result.errorMessage(),
+                result.warnings(),
                 result.hasResultSet(),
                 StoredResultSetData.of(result));
     }
@@ -76,8 +86,8 @@ public class StoredResult implements MiniResult, Serializable {
     }
 
     @Override
-    public List<String> warnings() {
-        return new ArrayList<>();
+    public ImmutableList<String> warnings() {
+        return warnings;
     }
 
     @Override

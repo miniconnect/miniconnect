@@ -40,13 +40,23 @@ public class StoredValue implements MiniValue, Serializable {
     }
 
     @Override
-    public int contentLength() {
+    public boolean isLarge() {
+        return false;
+    }
+
+    @Override
+    public long length() {
         return content.length();
     }
 
     @Override
     public ByteString content() {
         return content;
+    }
+
+    @Override
+    public ByteString part(long start, int length) {
+        return ByteString.wrap(content.extract((int) start, length));
     }
 
     @Override

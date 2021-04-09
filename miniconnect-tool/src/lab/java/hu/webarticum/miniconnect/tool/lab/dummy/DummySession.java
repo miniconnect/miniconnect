@@ -7,6 +7,7 @@ import java.util.List;
 
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.tool.result.StoredResult;
+import hu.webarticum.miniconnect.api.MiniLobResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 
 public class DummySession implements MiniSession {
@@ -41,8 +42,8 @@ public class DummySession implements MiniSession {
     }
 
     @Override
-    public String putLargeData(InputStream dataSource) {
-        return "var0";
+    public MiniLobResult putLargeData(InputStream dataSource) {
+        throw new UnsupportedOperationException("LOBs are not supported");
     }
 
     @Override

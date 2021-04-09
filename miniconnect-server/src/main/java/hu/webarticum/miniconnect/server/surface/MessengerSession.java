@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
+import hu.webarticum.miniconnect.api.MiniLobResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.server.message.request.Request;
@@ -35,9 +36,9 @@ public class MessengerSession implements MiniSession {
     }
 
     @Override
-    public String putLargeData(InputStream dataSource) throws IOException {
+    public MiniLobResult putLargeData(InputStream dataSource) throws IOException {
         // TODO Auto-generated method stub
-        return "";
+        return null;
     }
 
     @Override

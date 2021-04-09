@@ -4,19 +4,18 @@ import java.io.InputStream;
 
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-// FIXME: rename?
-// FIXME: Closeable? closeStorage?(blob)
+// FIXME: close lob on fetch next
 public interface MiniValue {
 
     public boolean isNull();
 
-    // FIXME: public ByteString retrieve(long start, int length); ?
+    public boolean isLarge();
 
-    // TODO: long
-    public int contentLength();
+    public long length();
 
-    // TODO: immutable access
     public ByteString content();
+
+    public ByteString part(long start, int length);
 
     public InputStream inputStream();
 
