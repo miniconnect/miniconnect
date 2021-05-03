@@ -64,7 +64,7 @@ public class MessengerSession implements MiniSession {
 
     @Override
     public MiniLobResult putLargeData(long length, InputStream dataSource) throws IOException {
-        int lobId = requestIdCounter.incrementAndGet();
+        int lobId = lobIdCounter.incrementAndGet();
         
         CompletableFuture<LobResultResponse> responseFuture = new CompletableFuture<>();
         Offeror.Listening listening = responseOfferor.listen(r -> {
