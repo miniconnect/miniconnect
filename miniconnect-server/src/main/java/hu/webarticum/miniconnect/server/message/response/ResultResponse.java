@@ -1,10 +1,13 @@
 package hu.webarticum.miniconnect.server.message.response;
 
+import hu.webarticum.miniconnect.server.message.SessionMessage;
 import hu.webarticum.miniconnect.util.data.ByteString;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
-public final class ResultResponse implements Response {
+public final class ResultResponse implements Response, SessionMessage {
+
+    private final long sessionId;
 
     private final int queryId;
 
@@ -22,6 +25,7 @@ public final class ResultResponse implements Response {
 
 
     public ResultResponse(
+            long sessionId,
             int queryId,
             boolean success,
             String errorCode,
@@ -30,6 +34,7 @@ public final class ResultResponse implements Response {
             boolean hasResultSet,
             ImmutableList<ColumnHeaderData> columnHeaders) {
 
+        this.sessionId = sessionId;
         this.queryId = queryId;
         this.success = success;
         this.errorCode = errorCode;
@@ -40,7 +45,12 @@ public final class ResultResponse implements Response {
     }
 
 
-    public int getQueryId() {
+    @Override
+    public long sessionId() {
+        return sessionId;
+    }
+
+    public int queryId() {
         return queryId;
     }
 

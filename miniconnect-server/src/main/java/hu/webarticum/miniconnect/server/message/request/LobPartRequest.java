@@ -1,8 +1,11 @@
 package hu.webarticum.miniconnect.server.message.request;
 
+import hu.webarticum.miniconnect.server.message.SessionMessage;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-public final class LobPartRequest implements Request {
+public final class LobPartRequest implements Request, SessionMessage {
+
+    private final long sessionId;
 
     private final int lobId;
 
@@ -11,12 +14,18 @@ public final class LobPartRequest implements Request {
     private final ByteString content;
 
 
-    public LobPartRequest(int lobId, long offset, ByteString content) {
+    public LobPartRequest(long sessionId, int lobId, long offset, ByteString content) {
+        this.sessionId = sessionId;
         this.lobId = lobId;
         this.offset = offset;
         this.content = content;
     }
 
+
+    @Override
+    public long sessionId() {
+        return sessionId;
+    }
 
     public int lobId() {
         return lobId;

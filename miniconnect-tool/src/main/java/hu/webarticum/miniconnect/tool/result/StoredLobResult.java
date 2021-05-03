@@ -1,61 +1,56 @@
-package hu.webarticum.miniconnect.server.message.response;
+package hu.webarticum.miniconnect.tool.result;
 
-import hu.webarticum.miniconnect.server.message.SessionMessage;
+import hu.webarticum.miniconnect.api.MiniLobResult;
 
-public class LobResultResponse implements Response, SessionMessage {
-
-    private final long sessionId;
-
-    private final int lobId;
-
+public class StoredLobResult implements MiniLobResult {
+    
     private final boolean success;
-
+    
     private final String errorCode;
-
+    
     private final String errorMessage;
-
+    
     private final String variableName;
+    
 
-
-    public LobResultResponse(
-            long sessionId,
-            int lobId,
+    public StoredLobResult(
             boolean success,
             String errorCode,
             String errorMessage,
             String variableName) {
 
-        this.sessionId = sessionId;
-        this.lobId = lobId;
         this.success = success;
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
         this.variableName = variableName;
     }
+    
+    public static StoredLobResult success(String variableName) {
+        return new StoredLobResult(true, "", "", variableName);
+    }
 
+    public static StoredLobResult error(String errorCode, String errorMessage) {
+        return new StoredLobResult(false, errorCode, errorMessage, "");
+    }
+    
 
     @Override
-    public long sessionId() {
-        return sessionId;
-    }
-
-    public int lobId() {
-        return lobId;
-    }
-
     public boolean success() {
         return success;
     }
 
+    @Override
     public String errorCode() {
         return errorCode;
     }
 
+    @Override
     public String errorMessage() {
         return errorMessage;
     }
 
-    public String getVariableName() {
+    @Override
+    public String variableName() {
         return variableName;
     }
 

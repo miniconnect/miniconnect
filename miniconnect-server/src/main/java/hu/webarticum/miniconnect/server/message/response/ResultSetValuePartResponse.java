@@ -1,8 +1,11 @@
 package hu.webarticum.miniconnect.server.message.response;
 
+import hu.webarticum.miniconnect.server.message.SessionMessage;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-public final class ResultSetValuePartResponse implements Response {
+public final class ResultSetValuePartResponse implements Response, SessionMessage {
+
+    private final long sessionId;
 
     private final int queryId;
 
@@ -16,8 +19,14 @@ public final class ResultSetValuePartResponse implements Response {
 
 
     public ResultSetValuePartResponse(
-            int queryId, long rowIndex, int columnIndex, long offset, ByteString content) {
+            long sessionId,
+            int queryId,
+            long rowIndex,
+            int columnIndex,
+            long offset,
+            ByteString content) {
 
+        this.sessionId = sessionId;
         this.queryId = queryId;
         this.rowIndex = rowIndex;
         this.columnIndex = columnIndex;
@@ -25,6 +34,11 @@ public final class ResultSetValuePartResponse implements Response {
         this.content = content;
     }
 
+
+    @Override
+    public long sessionId() {
+        return sessionId;
+    }
 
     public int queryId() {
         return queryId;

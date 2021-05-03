@@ -1,10 +1,13 @@
 package hu.webarticum.miniconnect.server.message.response;
 
+import hu.webarticum.miniconnect.server.message.SessionMessage;
 import hu.webarticum.miniconnect.util.data.ByteString;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
-public final class ResultSetRowsResponse implements Response {
+public final class ResultSetRowsResponse implements Response, SessionMessage {
+
+    private final long sessionId;
 
     private final int queryId;
 
@@ -18,12 +21,14 @@ public final class ResultSetRowsResponse implements Response {
 
 
     public ResultSetRowsResponse(
+            long sessionId,
             int queryId,
             long rowOffset,
             ImmutableList<Integer> nullables,
             ImmutableMap<Integer, Integer> fixedSizes,
             ImmutableList<ImmutableList<CellData>> rows) {
 
+        this.sessionId = sessionId;
         this.queryId = queryId;
         this.rowOffset = rowOffset;
         this.nullables = nullables;
@@ -31,6 +36,11 @@ public final class ResultSetRowsResponse implements Response {
         this.rows = rows;
     }
 
+
+    @Override
+    public long sessionId() {
+        return sessionId;
+    }
 
     public int queryId() {
         return queryId;
