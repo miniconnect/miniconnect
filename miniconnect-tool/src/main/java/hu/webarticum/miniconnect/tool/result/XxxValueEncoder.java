@@ -78,20 +78,20 @@ public class XxxValueEncoder {
         if (value.isNull()) {
             return null;
         } else if (type.equals(Boolean.class)) {
-            return (value.content().byteAt(0) != ((byte) 0));
+            return (value.shortContent().byteAt(0) != ((byte) 0));
         } else if (type.equals(Byte.class)) {
-            return value.content().byteAt(0);
+            return value.shortContent().byteAt(0);
         } else if (type.equals(Short.class)) {
-            ByteBuffer byteBuffer = value.content().asBuffer();
+            ByteBuffer byteBuffer = value.shortContent().asBuffer();
             return byteBuffer.getShort();
         } else if (type.equals(Integer.class)) {
-            ByteBuffer byteBuffer = value.content().asBuffer();
+            ByteBuffer byteBuffer = value.shortContent().asBuffer();
             return byteBuffer.getInt();
         } else if (type.equals(Long.class)) {
-            ByteBuffer byteBuffer = value.content().asBuffer();
+            ByteBuffer byteBuffer = value.shortContent().asBuffer();
             return byteBuffer.getLong();
         } else if (type.equals(String.class)) {
-            return value.content().toString(StandardCharsets.UTF_8);
+            return value.shortContent().toString(StandardCharsets.UTF_8);
         } else {
             throw new IllegalStateException(
                     String.format("Unsupported type: %s", type.getSimpleName()));

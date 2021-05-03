@@ -30,7 +30,7 @@ public class StoredValue implements MiniValue, Serializable {
     }
 
     public static StoredValue of(MiniValue value) {
-        return new StoredValue(value.isNull(), value.content());
+        return new StoredValue(value.isNull(), value.shortContent());
     }
 
 
@@ -40,17 +40,12 @@ public class StoredValue implements MiniValue, Serializable {
     }
 
     @Override
-    public boolean isLarge() {
-        return false;
-    }
-
-    @Override
     public long length() {
         return content.length();
     }
 
     @Override
-    public ByteString content() {
+    public ByteString shortContent() {
         return content;
     }
 
