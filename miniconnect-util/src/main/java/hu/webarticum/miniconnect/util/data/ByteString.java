@@ -121,6 +121,8 @@ public class ByteString implements Serializable {
     public static class Builder {
 
         private final List<byte[]> parts = new ArrayList<>();
+        
+        private int length = 0;
 
 
         public Builder append(ByteString part) {
@@ -128,21 +130,20 @@ public class ByteString implements Serializable {
         }
 
         public Builder append(byte part) {
-            parts.add(new byte[] { part });
-            return this;
+            return this.append(new byte[] { part });
         }
 
         public Builder append(byte[] part) {
             parts.add(part);
+            length += part.length;
             return this;
+        }
+        
+        public int length() {
+            return length;
         }
 
         public ByteString build() {
-            int length = 0;
-            for (byte[] part : parts) {
-                length += part.length;
-            }
-
             byte[] bytes = new byte[length];
             int position = 0;
             for (byte[] part : parts) {

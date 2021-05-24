@@ -1,25 +1,41 @@
 package hu.webarticum.miniconnect.tool.repl;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniResult;
 
 // TODO: better abstraction (context/executor vs output-handling), builder
+// TODO: add support for loading LOBs
 public class SqlRepl implements Repl {
 
+    private static final Pattern LOB_PATTERN = Pattern.compile(
+            "\\s*lob\\s*(?:\\(\\s*(?<source>@?(?:([^\\)\\\\]|\\\\.)+))\\s*\\)\\s*)(?:;\\s*)?",
+            Pattern.CASE_INSENSITIVE);
+
     private static final Pattern HELP_PATTERN = Pattern.compile(
-            "\\s*help\\s*(?:\\(\\s*\\)\\s*)?(?:;\\s*)?", Pattern.CASE_INSENSITIVE);
+            "\\s*help\\s*(?:\\(\\s*\\)\\s*)?(?:;\\s*)?",
+            Pattern.CASE_INSENSITIVE);
 
     private static final Pattern QUIT_PATTERN = Pattern.compile(
-            "\\s*(?:quit|exit)\\s*(?:\\(\\s*\\)\\s*)?(?:;\\s*)?", Pattern.CASE_INSENSITIVE);
-
+            "\\s*(?:quit|exit)\\s*(?:\\(\\s*\\)\\s*)?(?:;\\s*)?",
+            Pattern.CASE_INSENSITIVE);
+    
     private static final Pattern COMMAND_PATTERN = Pattern.compile(
-            "^(?:" + HELP_PATTERN + "|" + QUIT_PATTERN +
+            "^(?:" + LOB_PATTERN + "|" + HELP_PATTERN + "|" + QUIT_PATTERN +
                     "|(?:[^'\"`\\\\;]++|\\\\.|(['\"`])(?:(?:\\\\|\\1)\\1|(?!\\1).)++\\1)*;.*+)$",
             Pattern.MULTILINE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
+    private static final Pattern UNESCAPE_PATTERN = Pattern.compile(
+            "\\\\(.)");
+    
 
     private final MiniSession session;
 
@@ -54,6 +70,14 @@ public class SqlRepl implements Repl {
 
     @Override
     public boolean execute(String command) throws IOException {
+        Matcher lobMatcher = LOB_PATTERN.matcher(command);
+        if (lobMatcher.matches()) {
+            String escapedSource = lobMatcher.group("source");
+            String source = UNESCAPE_PATTERN.matcher(escapedSource).replaceAll("$1");
+            lob(source);
+            return true;
+        }
+        
         if (HELP_PATTERN.matcher(command).matches()) {
             help();
             return true;
@@ -96,6 +120,25 @@ public class SqlRepl implements Repl {
         }
 
         new ResultSetPrinter().print(result.resultSet(), out);
+    }
+    
+    private void lob(String source) throws IOException {
+        long length;
+        InputStream in;
+        if (source.length() > 0 && source.charAt(0) == '@') {
+            File file = new File(source.substring(1));
+            length = file.length();
+            if (length > 0) {
+                in = new FileInputStream(file);
+            } else {
+                in = InputStream.nullInputStream();
+            }
+        } else {
+            byte[] bytes = source.getBytes(StandardCharsets.UTF_8);
+            length = bytes.length;
+            in = new ByteArrayInputStream(bytes);
+        }
+        session.putLargeData(length, in);
     }
 
     private void help() throws IOException {

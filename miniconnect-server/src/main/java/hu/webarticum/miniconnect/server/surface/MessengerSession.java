@@ -3,23 +3,22 @@ package hu.webarticum.miniconnect.server.surface;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 import hu.webarticum.miniconnect.api.MiniLobResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
-import hu.webarticum.miniconnect.server.message.request.Request;
 import hu.webarticum.miniconnect.server.message.response.LobResultResponse;
 import hu.webarticum.miniconnect.server.message.response.Response;
-import hu.webarticum.miniconnect.server.util.FutureUtil;
-import hu.webarticum.miniconnect.server.util.Offeror;
 import hu.webarticum.miniconnect.tool.result.StoredLobResult;
+import hu.webarticum.miniconnect.server.Server;
 import hu.webarticum.miniconnect.server.message.request.LobPartRequest;
 import hu.webarticum.miniconnect.server.message.request.LobRequest;
+import hu.webarticum.miniconnect.server.message.request.QueryRequest;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class MessengerSession implements MiniSession {
@@ -33,9 +32,7 @@ public class MessengerSession implements MiniSession {
     
     private final long sessionId;
     
-    private final Consumer<Request> requestConsumer;
-    
-    private final Offeror<Response> responseOfferor;
+    private final Server server;
     
 
     private final AtomicInteger requestIdCounter = new AtomicInteger();
@@ -43,19 +40,20 @@ public class MessengerSession implements MiniSession {
     private final AtomicInteger lobIdCounter = new AtomicInteger();
 
 
-    public MessengerSession(
-            long sessionId,
-            Consumer<Request> requestConsumer,
-            Offeror<Response> responseOfferor) {
-        
+    public MessengerSession(long sessionId, Server server) {
         this.sessionId = sessionId;
-        this.requestConsumer = requestConsumer;
-        this.responseOfferor = responseOfferor;
+        this.server = server;
     }
 
 
     @Override
     public MiniResult execute(String query) throws IOException {
+        int queryId = requestIdCounter.incrementAndGet();
+        int maxRowCount = 0;
+        QueryRequest queryRequest = new QueryRequest(sessionId, queryId, query, maxRowCount);
+        
+        // XXX
+        server.accept(queryRequest, r -> System.out.println(r.getClass()));
         
         // TODO
         
@@ -66,50 +64,43 @@ public class MessengerSession implements MiniSession {
     public MiniLobResult putLargeData(long length, InputStream dataSource) throws IOException {
         int lobId = lobIdCounter.incrementAndGet();
         
-        CompletableFuture<LobResultResponse> responseFuture = new CompletableFuture<>();
-        Offeror.Listening listening = responseOfferor.listen(r -> {
-            if (!(r instanceof LobResultResponse)) {
-                return false;
-            }
-            
-            LobResultResponse lobResultResponse = (LobResultResponse) r;
-            if (lobResultResponse.sessionId() != sessionId || lobResultResponse.lobId() != lobId) {
-                return false;
-            }
-            
-            responseFuture.complete(lobResultResponse);
-            return true;
-        });
+        CompletableFuture<Response> responseFuture = new CompletableFuture<>();
         
         LobRequest lobRequest = new LobRequest(sessionId, lobId, length);
-        requestConsumer.accept(lobRequest);
-        
+        server.accept(lobRequest, responseFuture::complete);
+
         byte[] buffer = new byte[LOB_CHUNK_SIZE];
         int readSize = 0;
         long offset = 0;
         while ((readSize = dataSource.read(buffer)) != -1) {
+            // TODO: check for error
             ByteString content = ByteString.wrap(Arrays.copyOf(buffer, readSize));
             LobPartRequest lobPartRequest = new LobPartRequest(sessionId, lobId, offset, content);
-            requestConsumer.accept(lobPartRequest);
+            server.accept(lobPartRequest);
             offset += readSize;
         }
         
-        Optional<LobResultResponse> optionalResult = FutureUtil.getSilently(
-                responseFuture, LOB_RESULT_TIMEOUT_VALUE, LOB_RESULT_TIMEOUT_UNIT);
-        
-        listening.close();
-        
-        if (optionalResult.isEmpty()) {
-            throw new IOException("No lob result given");
+        Response response = null;
+        try {
+            response = responseFuture.get(LOB_RESULT_TIMEOUT_VALUE, LOB_RESULT_TIMEOUT_UNIT);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (ExecutionException | TimeoutException e) {
+            // nothing to do
         }
-        
-        LobResultResponse lobResultResponse = optionalResult.get();
-        
-        return new StoredLobResult(
-                lobResultResponse.success(),
-                lobResultResponse.errorCode(),
-                lobResultResponse.errorMessage(),
-                lobResultResponse.getVariableName());
+
+        if (response instanceof LobResultResponse) {
+            LobResultResponse lobResultResponse = (LobResultResponse) response;
+            return new StoredLobResult(
+                    lobResultResponse.success(),
+                    lobResultResponse.errorCode(),
+                    lobResultResponse.errorMessage(),
+                    lobResultResponse.getVariableName());
+        } else if (response == null) {
+            return new StoredLobResult(false, "99990", "No response", ""); // XXX
+        } else {
+            return new StoredLobResult(false, "99999", "Bad response", ""); // XXX
+        }
     }
     
     @Override
