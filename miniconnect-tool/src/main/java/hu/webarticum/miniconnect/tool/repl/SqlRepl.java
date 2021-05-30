@@ -113,7 +113,7 @@ public class SqlRepl implements Repl {
     private void printResult(MiniResult result) throws IOException {
         if (!result.success()) {
             out.append(String.format(
-                    "ERROR(%s): %s%n",
+                    "  ERROR(%s): %s%n",
                     result.errorCode(),
                     result.errorMessage()));
             return;

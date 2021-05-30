@@ -75,7 +75,7 @@ public class MessengerSession implements MiniSession {
         
         ResultResponse resultResponse = null;
         List<List<MiniValue>> rows = new ArrayList<>();
-        while (true) {
+        while (true) { // NOSONAR
             Response response;
             try {
                 response = responseQueue.take(RESULT_TIMEOUT_VALUE, RESULT_TIMEOUT_UNIT);
@@ -88,6 +88,9 @@ public class MessengerSession implements MiniSession {
             
             if (response instanceof ResultResponse) {
                 resultResponse = (ResultResponse) response;
+                if (!resultResponse.success()) {
+                    break;
+                }
             } else if (response instanceof ResultSetRowsResponse) {
                 ResultSetRowsResponse rowsResponse = (ResultSetRowsResponse) response;
                 for (ImmutableList<CellData> cellDatas : rowsResponse.rows()) {
