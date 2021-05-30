@@ -27,6 +27,10 @@ public class DefaultValueEncoder implements MiniValueEncoder {
     }
 
 
+    public Class<?> type() {
+        return type;
+    }
+    
     @Override
     public MiniColumnHeader headerFor(String columnName) {
         return new StoredColumnHeader(columnName, type.getName());
