@@ -86,5 +86,29 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
     public List<T> toList() {
         return new ArrayList<>(data);
     }
+    
+    @Override
+    public int hashCode() {
+        return data.hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        }
+        
+        if (!(other instanceof ImmutableList)) {
+            return false;
+        }
+        
+        ImmutableList<?> otherList = (ImmutableList<?>) other;
+        return data.equals(otherList.data);
+    }
+    
+    @Override
+    public String toString() {
+        return data.toString();
+    }
 
 }

@@ -46,5 +46,29 @@ public class ImmutableMap<K, V> implements Serializable {
     public Map<K, V> toMap() {
         return new HashMap<>(data);
     }
+    
+    @Override
+    public int hashCode() {
+        return data.hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) {
+            return true;
+        }
+        
+        if (!(other instanceof ImmutableMap)) {
+            return false;
+        }
+        
+        ImmutableMap<?, ?> otherMap = (ImmutableMap<?, ?>) other;
+        return data.equals(otherMap.data);
+    }
+    
+    @Override
+    public String toString() {
+        return data.toString();
+    }
 
 }
