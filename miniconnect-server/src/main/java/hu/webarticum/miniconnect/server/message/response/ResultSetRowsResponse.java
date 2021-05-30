@@ -1,6 +1,8 @@
 package hu.webarticum.miniconnect.server.message.response;
 
+import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.server.message.SessionMessage;
+import hu.webarticum.miniconnect.tool.result.StoredValue;
 import hu.webarticum.miniconnect.util.data.ByteString;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
@@ -72,6 +74,10 @@ public final class ResultSetRowsResponse implements Response, SessionMessage {
         private final ByteString content;
 
 
+        public CellData(MiniValue value) {
+            this(value.isNull(), value.length(), value.shortContent());
+        }
+        
         public CellData(boolean isNull, long fullLength, ByteString content) {
             this.isNull = isNull;
             this.fullLength = fullLength;
@@ -89,6 +95,10 @@ public final class ResultSetRowsResponse implements Response, SessionMessage {
 
         public ByteString content() {
             return content;
+        }
+        
+        public MiniValue toMiniValue() {
+            return new StoredValue(isNull, content);
         }
 
     }

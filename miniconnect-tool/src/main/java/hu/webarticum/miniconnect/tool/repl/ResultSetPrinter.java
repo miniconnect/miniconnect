@@ -5,7 +5,7 @@ import java.io.IOException;
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
-import hu.webarticum.miniconnect.tool.result.XxxValueEncoder;
+import hu.webarticum.miniconnect.tool.result.DefaultValueEncoder;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class ResultSetPrinter {
@@ -51,7 +51,7 @@ public class ResultSetPrinter {
 
     public String stringifyValue(MiniColumnHeader columnHeader, MiniValue value) {
         if (!value.isNull()) {
-            return new XxxValueEncoder(columnHeader).decode(value).toString();
+            return new DefaultValueEncoder(columnHeader).decode(value).toString();
         } else {
             return NULL_PLACEHOLDER;
         }

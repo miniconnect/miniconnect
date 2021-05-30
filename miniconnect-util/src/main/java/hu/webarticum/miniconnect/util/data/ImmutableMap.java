@@ -21,6 +21,7 @@ public class ImmutableMap<K, V> implements Serializable {
         this.data = new HashMap<>(data);
     }
 
+    
     public static <K, V> ImmutableMap<K, V> empty() {
         return new ImmutableMap<>();
     }

@@ -1,6 +1,8 @@
 package hu.webarticum.miniconnect.server.message.response;
 
+import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.server.message.SessionMessage;
+import hu.webarticum.miniconnect.tool.result.StoredColumnHeader;
 import hu.webarticum.miniconnect.util.data.ByteString;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
@@ -88,6 +90,10 @@ public final class ResultResponse implements Response, SessionMessage {
         private final ImmutableMap<String, ByteString> properties;
 
 
+        public ColumnHeaderData(MiniColumnHeader header) {
+            this(header.name(), header.type(), header.properties());
+        }
+        
         public ColumnHeaderData(
                 String name,
                 String type,
@@ -109,6 +115,10 @@ public final class ResultResponse implements Response, SessionMessage {
 
         public ImmutableMap<String, ByteString> properties() {
             return properties;
+        }
+        
+        public MiniColumnHeader toMiniColumnHeader() {
+            return new StoredColumnHeader(name, type, properties);
         }
 
     }

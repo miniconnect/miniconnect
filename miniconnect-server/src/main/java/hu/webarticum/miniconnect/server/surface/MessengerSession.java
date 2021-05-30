@@ -2,32 +2,47 @@ package hu.webarticum.miniconnect.server.surface;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniLobResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.server.message.response.LobResultResponse;
 import hu.webarticum.miniconnect.server.message.response.Response;
+import hu.webarticum.miniconnect.server.message.response.ResultResponse;
+import hu.webarticum.miniconnect.server.message.response.ResultResponse.ColumnHeaderData;
+import hu.webarticum.miniconnect.server.message.response.ResultSetEofResponse;
+import hu.webarticum.miniconnect.server.message.response.ResultSetRowsResponse;
+import hu.webarticum.miniconnect.server.message.response.ResultSetRowsResponse.CellData;
+import hu.webarticum.miniconnect.server.message.response.ResultSetValuePartResponse;
+import hu.webarticum.miniconnect.server.util.StrictlySortedQueue;
 import hu.webarticum.miniconnect.tool.result.StoredLobResult;
+import hu.webarticum.miniconnect.tool.result.StoredResult;
+import hu.webarticum.miniconnect.tool.result.StoredResultSetData;
 import hu.webarticum.miniconnect.server.Server;
 import hu.webarticum.miniconnect.server.message.request.LobPartRequest;
 import hu.webarticum.miniconnect.server.message.request.LobRequest;
 import hu.webarticum.miniconnect.server.message.request.QueryRequest;
 import hu.webarticum.miniconnect.util.data.ByteString;
+import hu.webarticum.miniconnect.util.data.ImmutableList;
 
+// TODO: use asynchronously fillable result set
 public class MessengerSession implements MiniSession {
     
     private static final int LOB_CHUNK_SIZE = 4096; // TODO: make it configurable
     
-    private static final int LOB_RESULT_TIMEOUT_VALUE = 60; // TODO: make it configurable
+    private static final int RESULT_TIMEOUT_VALUE = 60; // TODO: make it configurable
     
-    private static final TimeUnit LOB_RESULT_TIMEOUT_UNIT = TimeUnit.SECONDS; // TODO: make it configurable
+    private static final TimeUnit RESULT_TIMEOUT_UNIT = TimeUnit.SECONDS; // TODO: make it configurable
     
     
     private final long sessionId;
@@ -46,18 +61,99 @@ public class MessengerSession implements MiniSession {
     }
 
 
+    // TODO: handle lob value parts
     @Override
     public MiniResult execute(String query) throws IOException {
         int queryId = requestIdCounter.incrementAndGet();
         int maxRowCount = 0;
+        
+        StrictlySortedQueue<Response> responseQueue = new StrictlySortedQueue<>(
+                MessengerSession::checkNextResultResponse);
+        
         QueryRequest queryRequest = new QueryRequest(sessionId, queryId, query, maxRowCount);
+        server.accept(queryRequest, responseQueue::add);
         
-        // XXX
-        server.accept(queryRequest, r -> System.out.println(r.getClass()));
+        ResultResponse resultResponse = null;
+        List<List<MiniValue>> rows = new ArrayList<>();
+        while (true) {
+            Response response;
+            try {
+                response = responseQueue.take(RESULT_TIMEOUT_VALUE, RESULT_TIMEOUT_UNIT);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return new StoredResult("INTERRUPT", "Interrupt occured while waiting for results");
+            } catch (TimeoutException e) {
+                return new StoredResult("TIMEOUT", "Timeout reached while waiting for results");
+            }
+            
+            if (response instanceof ResultResponse) {
+                resultResponse = (ResultResponse) response;
+            } else if (response instanceof ResultSetRowsResponse) {
+                ResultSetRowsResponse rowsResponse = (ResultSetRowsResponse) response;
+                for (ImmutableList<CellData> cellDatas : rowsResponse.rows()) {
+                    List<MiniValue> row = new ArrayList<>();
+                    for (CellData cellData : cellDatas) {
+                        row.add(cellData.toMiniValue());
+                    }
+                    rows.add(row);
+                }
+            } else if (response instanceof ResultSetValuePartResponse) {
+                
+                // TODO
+                ResultSetValuePartResponse valuePartResponse = (ResultSetValuePartResponse) response;
+                System.out.println("  Content part: " + valuePartResponse.content().length());
+                
+            } else if (response instanceof ResultSetEofResponse) {
+                break;
+            }
+        }
         
-        // TODO
+        if (resultResponse == null) {
+            throw new IllegalStateException("resultResponse could not be null");
+        }
         
-        return null;
+        if (!resultResponse.success()) {
+            return new StoredResult(resultResponse.errorCode(), resultResponse.errorMessage());
+        }
+        
+        List<MiniColumnHeader> columnHeaders = new ArrayList<>();
+        for (ColumnHeaderData columnHeaderData : resultResponse.columnHeaders()) {
+            columnHeaders.add(columnHeaderData.toMiniColumnHeader());
+        }
+        StoredResultSetData resultSetData = new StoredResultSetData(columnHeaders, rows);
+        return new StoredResult(resultSetData);
+    }
+    
+    private static boolean checkNextResultResponse(Response previousResponse, Response response) {
+        if (response instanceof ResultResponse) {
+            return previousResponse == null;
+        } else if (response instanceof ResultSetRowsResponse) {
+            ResultSetRowsResponse resultSetRowsResponse = (ResultSetRowsResponse) response;
+            long rowOffset = resultSetRowsResponse.rowOffset();
+            return checkNextOffset(previousResponse, rowOffset);
+        } else if (response instanceof ResultSetEofResponse) {
+            ResultSetEofResponse resultSetEofResponse = (ResultSetEofResponse) response;
+            long endOffset = resultSetEofResponse.endOffset();
+            return checkNextOffset(previousResponse, endOffset);
+        } else {
+            return false;
+        }
+    }
+    
+    private static boolean checkNextOffset(Response previousResponse, long nextOffset) {
+        if (nextOffset == 0L) {
+            return true;
+        }
+        if (!(previousResponse instanceof ResultSetRowsResponse)) {
+            return false;
+        }
+        
+        ResultSetRowsResponse previousResultSetRowsResponse = (ResultSetRowsResponse) previousResponse;
+        long previousRowOffset = previousResultSetRowsResponse.rowOffset();
+        int previousRowCount = previousResultSetRowsResponse.rows().size();
+        long previousEndOffset = previousRowOffset + previousRowCount;
+        
+        return nextOffset == previousEndOffset;
     }
 
     @Override
@@ -82,7 +178,7 @@ public class MessengerSession implements MiniSession {
         
         Response response = null;
         try {
-            response = responseFuture.get(LOB_RESULT_TIMEOUT_VALUE, LOB_RESULT_TIMEOUT_UNIT);
+            response = responseFuture.get(RESULT_TIMEOUT_VALUE, RESULT_TIMEOUT_UNIT);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (ExecutionException | TimeoutException e) {

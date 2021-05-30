@@ -26,8 +26,6 @@ public class StrictlySortedQueue<T> {
     
     private final BlockingQueue<T> queue = new LinkedBlockingDeque<>();
     
-    private T first = null;
-    
     private T previous = null;
     
 
@@ -37,14 +35,11 @@ public class StrictlySortedQueue<T> {
     
     
     public synchronized void add(T item) {
-        if (!nextChecker.isNext(first, previous, item)) {
+        if (!nextChecker.isNext(previous, item)) {
             unorderedItems.add(item);
             return;
         }
         
-        if (first == null) {
-            first = null;
-        }
         previous = item;
         queue.add(item);
         
@@ -54,7 +49,7 @@ public class StrictlySortedQueue<T> {
             Iterator<T> unorderedIterator = unorderedItems.iterator();
             while (unorderedIterator.hasNext()) {
                 T unorderedItem = unorderedIterator.next();
-                if (nextChecker.isNext(first, previous, unorderedItem)) {
+                if (nextChecker.isNext(previous, unorderedItem)) {
                     unorderedIterator.remove();
                     previous = unorderedItem;
                     queue.add(unorderedItem);
@@ -87,7 +82,7 @@ public class StrictlySortedQueue<T> {
     @FunctionalInterface
     public interface NextChecker<T> {
         
-        public boolean isNext(T first, T previous, T itemToCheck);
+        public boolean isNext(T previous, T itemToCheck);
         
     }
     

@@ -4,7 +4,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -13,24 +12,30 @@ import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
+import hu.webarticum.miniconnect.api.MiniColumnHeader;
+import hu.webarticum.miniconnect.api.MiniValue;
+import hu.webarticum.miniconnect.api.MiniValueEncoder;
 import hu.webarticum.miniconnect.server.Server;
 import hu.webarticum.miniconnect.server.message.request.LobPartRequest;
 import hu.webarticum.miniconnect.server.message.request.LobRequest;
 import hu.webarticum.miniconnect.server.message.request.QueryRequest;
 import hu.webarticum.miniconnect.server.message.request.Request;
+import hu.webarticum.miniconnect.server.message.request.ResultSetFetchRequest;
 import hu.webarticum.miniconnect.server.message.response.LobResultResponse;
 import hu.webarticum.miniconnect.server.message.response.Response;
 import hu.webarticum.miniconnect.server.message.response.ResultResponse;
 import hu.webarticum.miniconnect.server.message.response.ResultSetRowsResponse;
+import hu.webarticum.miniconnect.server.message.response.ResultResponse.ColumnHeaderData;
+import hu.webarticum.miniconnect.server.message.response.ResultSetEofResponse;
 import hu.webarticum.miniconnect.server.message.response.ResultSetRowsResponse.CellData;
+import hu.webarticum.miniconnect.tool.result.DefaultValueEncoder;
 import hu.webarticum.miniconnect.util.data.ByteString;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
 public class DummyServer implements Server {
-    
-    private static final String LIST_QUERY = "LIST";
     
     private static final String UNEXPECTED_ERROR = "00000";
     
@@ -42,10 +47,23 @@ public class DummyServer implements Server {
     
     private static final int MAX_LENGTH = 1000_000;
     
+    public static final Pattern SELECT_ALL_QUERY_PATTERN = Pattern.compile(
+            "(?i)\\s*SELECT\\s+\\*\\s+FROM\\s+([\"`]?)(?-i)data(?i)\\1\\s*;?\\s*");
+    
+    
+    private static final ImmutableList<String> columnNames = ImmutableList.of(
+            "id", "created_at", "length", "content");
+
+    private static final ImmutableList<MiniValueEncoder> encoders = ImmutableList.of(
+            new DefaultValueEncoder(Long.class),
+            new DefaultValueEncoder(String.class),
+            new DefaultValueEncoder(Integer.class),
+            new DefaultValueEncoder(String.class));
+    
 
     private final AtomicLong rowCounter = new AtomicLong(0);
     
-    private final List<List<Object>> data = Collections.synchronizedList(new ArrayList<>());
+    private final List<List<Object>> data = new ArrayList<>();
     
     private final Map<Long, CompletableSmallLobContent> incompleteContents = new HashMap<>();
     
@@ -56,10 +74,18 @@ public class DummyServer implements Server {
     public void accept(Request request, Consumer<Response> responseConsumer) {
         if (request instanceof QueryRequest) {
             acceptQueryRequest((QueryRequest) request, responseConsumer);
+        } else if (request instanceof ResultSetFetchRequest) {
+            
+            // FIXME
+            
         } else if (request instanceof LobRequest) {
             acceptLobRequest((LobRequest) request, responseConsumer);
         } else if (request instanceof LobPartRequest) {
             acceptLobPartRequest((LobPartRequest) request);
+        } else {
+            throw new UnsupportedOperationException(String.format(
+                    "Unsupported request type: %s",
+                    request.getClass().getSimpleName()));
         }
     }
 
@@ -70,34 +96,79 @@ public class DummyServer implements Server {
         int queryId = request.id();
         String query = request.query();
         
-        if (!query.equals(LIST_QUERY)) {
-            ResultResponse resultResponse = new ResultResponse(
-                    sessionId,
-                    queryId,
-                    false,
-                    BAD_QUERY_ERROR,
-                    "Only LIST query is supported",
-                    ImmutableList.empty(),
-                    true,
-                    ImmutableList.empty());
-            responseConsumer.accept(resultResponse);
+        if (!SELECT_ALL_QUERY_PATTERN.matcher(query).matches()) {
+            sendBadQueryErrorResultResponse(request, responseConsumer);
+            return;
         }
         
+        List<List<Object>> dataRows;
+        synchronized (data) {
+            dataRows = new ArrayList<>(data);
+        }
+        int dataRowCount = dataRows.size();
         
-        // XXX
+        List<ColumnHeaderData> headerDatasBuilder = new ArrayList<>();
+        int columnCount = encoders.size();
+        for (int i = 0; i < columnCount; i++) {
+            MiniValueEncoder encoder = encoders.get(i);
+            String columnName = columnNames.get(i);
+            MiniColumnHeader header = encoder.headerFor(columnName);
+            headerDatasBuilder.add(new ColumnHeaderData(header));
+        }
+        ImmutableList<ColumnHeaderData> headerDatas = new ImmutableList<>(headerDatasBuilder);
         
         ResultResponse resultResponse = new ResultResponse(
-                sessionId, queryId, true, "", "", ImmutableList.empty(), true, ImmutableList.empty());
+                sessionId, queryId, true, "", "", ImmutableList.empty(), true, headerDatas);
         responseConsumer.accept(resultResponse);
         
-        ImmutableList<ImmutableList<CellData>> rows = new ImmutableList<>();
+        for (int fetchFrom = 0; fetchFrom < dataRowCount; fetchFrom += 3) {
+            int fetchUntil = Math.min(dataRowCount, fetchFrom + 3);
+            List<List<Object>> dataRowsChunk = dataRows.subList(fetchFrom, fetchUntil);
+            sendRows(dataRowsChunk, sessionId, queryId, fetchFrom, responseConsumer);
+        }
+        
+        ResultSetEofResponse resultSetEofResponse = new ResultSetEofResponse(
+                sessionId, queryId, dataRows.size());
+        responseConsumer.accept(resultSetEofResponse);
+    }
+    
+    private void sendRows(
+            List<List<Object>> dataRows,
+            long sessionId,
+            int queryId,
+            long offset,
+            Consumer<Response> responseConsumer) {
+
+        int columnCount = encoders.size();
+        List<ImmutableList<CellData>> rowsBuilder = new ArrayList<>();
+        for (List<Object> dataRow : dataRows) {
+            List<CellData> rowBuilder = new ArrayList<>();
+            for (int c = 0; c < columnCount; c++) {
+                MiniValueEncoder encoder = encoders.get(c);
+                Object content = dataRow.get(c);
+                MiniValue value = encoder.encode(content);
+                rowBuilder.add(new CellData(value));
+            }
+            rowsBuilder.add(new ImmutableList<>(rowBuilder));
+        }
+        ImmutableList<ImmutableList<CellData>> rows = new ImmutableList<>(rowsBuilder);
         
         ResultSetRowsResponse resultSetRowsResponse = new ResultSetRowsResponse(
-                sessionId, queryId, 0, ImmutableList.empty(), ImmutableMap.empty(), rows);
+                sessionId, queryId, offset, ImmutableList.empty(), ImmutableMap.empty(), rows);
         responseConsumer.accept(resultSetRowsResponse);
-        
-        // TODO
-        
+    }
+    
+    private void sendBadQueryErrorResultResponse(QueryRequest request, Consumer<Response> responseConsumer) {
+        ResultResponse resultResponse = new ResultResponse(
+                request.sessionId(),
+                request.id(),
+                false,
+                BAD_QUERY_ERROR,
+                "Bad query, only select all is supported",
+                ImmutableList.empty(),
+                true,
+                ImmutableList.empty());
+        responseConsumer.accept(resultResponse);
     }
 
     private void acceptLobRequest(LobRequest request, Consumer<Response> responseConsumer) {
@@ -110,8 +181,6 @@ public class DummyServer implements Server {
         if (length > MAX_LENGTH) {
             responseConsumer.accept(new LobResultResponse(
                     sessionId, lobId, false, TOO_LARGE_LOB_ERROR, "Too large LOB", ""));
-            return;
-        } else if (length == 0L) {
             return;
         }
         
@@ -128,6 +197,10 @@ public class DummyServer implements Server {
             incompleteContents.remove(contentId);
             responseConsumer.accept(new LobResultResponse(
                     sessionId, lobId, false, UNEXPECTED_ERROR, "Unexpected error " + e.getMessage(), ""));
+        }
+        
+        if (length == 0) {
+            acceptLobPartRequest(new LobPartRequest(sessionId, lobId, 0, ByteString.wrap(new byte[0])));
         }
     }
 
@@ -150,12 +223,24 @@ public class DummyServer implements Server {
         } catch (IllegalStateException e) {
             removeCompletable(
                     contentId,
-                    new LobResultResponse(sessionId, lobId, false, ILLEGAL_LOB_STATE_ERROR, "Illegal LOB state", ""));
+                    new LobResultResponse(
+                            sessionId,
+                            lobId,
+                            false,
+                            ILLEGAL_LOB_STATE_ERROR,
+                            "Illegal LOB state",
+                            ""));
             return;
         } catch (Exception e) {
             removeCompletable(
                     contentId,
-                    new LobResultResponse(sessionId, lobId, false, UNEXPECTED_ERROR, "Unexpected error " + e.getMessage(), ""));
+                    new LobResultResponse(
+                            sessionId,
+                            lobId,
+                            false,
+                            UNEXPECTED_ERROR,
+                            "Unexpected error " + e.getMessage(),
+                            ""));
             return;
         }
         
@@ -220,9 +305,6 @@ public class DummyServer implements Server {
         
         synchronized (data) {
             data.add(row);
-            
-            // XXX
-            System.out.println(data);
         }
     }
     

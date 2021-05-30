@@ -10,14 +10,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.api.MiniLobResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 
 // TODO: better abstraction (context/executor vs output-handling), builder
-// TODO: add support for loading LOBs
 public class SqlRepl implements Repl {
 
     private static final Pattern LOB_PATTERN = Pattern.compile(
-            "\\s*lob\\s*(?:\\(\\s*(?<source>@?(?:([^\\)\\\\]|\\\\.)+))\\s*\\)\\s*)(?:;\\s*)?",
+            "\\s*lob:\\s*(?:\\s*(?<source>@?(?:([^\\)\\\\]|\\\\.)+))\\s*)(?:;\\s*)?",
             Pattern.CASE_INSENSITIVE);
 
     private static final Pattern HELP_PATTERN = Pattern.compile(
@@ -138,7 +138,29 @@ public class SqlRepl implements Repl {
             length = bytes.length;
             in = new ByteArrayInputStream(bytes);
         }
-        session.putLargeData(length, in);
+
+        MiniLobResult lobResult = session.putLargeData(length, in);
+        printLobResult(lobResult, length);
+    }
+    
+    private void printLobResult(MiniLobResult lobResult, long length) throws IOException {
+        if (lobResult.success()) {
+            printSuccessLobResult(lobResult, length);
+        } else {
+            printErrorLobResult(lobResult);
+        }
+    }
+
+    private void printSuccessLobResult(MiniLobResult lobResult, long length) throws IOException {
+        out.append("  Successfully stored\n");
+        out.append("  Size: " + length + " bytes\n");
+        out.append("  Variable name: '" + lobResult.variableName() + "'\n");
+    }
+
+    private void printErrorLobResult(MiniLobResult lobResult) throws IOException {
+        out.append("  Failed to store data\n");
+        out.append("  Error code: " + lobResult.errorCode() + "\n");
+        out.append("  Error message: " + lobResult.errorMessage() + "\n");
     }
 
     private void help() throws IOException {
@@ -148,6 +170,8 @@ public class SqlRepl implements Repl {
         out.append('\n');
         out.append("  Commands:\n");
         out.append("    \"help\": prints this document\n");
+        out.append("    \"lob:\"<data>: sends lob data\n");
+        out.append("    \"lob:@\"<file>: sends lob data from file\n");
         out.append("    \"exit\", \"quit\": quits this program\n");
         out.append("    <any SQL>: will be executed in the session\n");
         out.append("      (must be terminated with \";\")\n");

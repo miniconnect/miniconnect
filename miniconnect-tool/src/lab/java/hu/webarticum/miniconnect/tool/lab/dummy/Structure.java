@@ -6,7 +6,7 @@ import java.util.List;
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.tool.result.StoredColumnHeader;
-import hu.webarticum.miniconnect.tool.result.XxxValueEncoder;
+import hu.webarticum.miniconnect.tool.result.DefaultValueEncoder;
 
 
 public final class Structure {
@@ -51,7 +51,7 @@ public final class Structure {
             String defaultValue,
             String extra) {
 
-        XxxValueEncoder stringEncoder = new XxxValueEncoder(String.class);
+        DefaultValueEncoder stringEncoder = new DefaultValueEncoder(String.class);
 
         List<MiniValue> row = new ArrayList<>(6);
         row.add(stringEncoder.encode(field));
@@ -73,8 +73,8 @@ public final class Structure {
     }
 
     private static List<MiniValue> createRow(int id, String label, String desription) {
-        XxxValueEncoder intEncoder = new XxxValueEncoder(Integer.class);
-        XxxValueEncoder stringEncoder = new XxxValueEncoder(String.class);
+        DefaultValueEncoder intEncoder = new DefaultValueEncoder(Integer.class);
+        DefaultValueEncoder stringEncoder = new DefaultValueEncoder(String.class);
 
         List<MiniValue> row = new ArrayList<>(3);
         row.add(intEncoder.encode(id));

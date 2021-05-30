@@ -5,15 +5,16 @@ import java.nio.charset.StandardCharsets;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniValue;
+import hu.webarticum.miniconnect.api.MiniValueEncoder;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
 // FIXME: this is a very dummy implementation
-public class XxxValueEncoder {
+public class DefaultValueEncoder implements MiniValueEncoder {
 
     private final Class<?> type;
 
 
-    public XxxValueEncoder(MiniColumnHeader columnHeader) {
+    public DefaultValueEncoder(MiniColumnHeader columnHeader) {
         try {
             this.type = Class.forName(columnHeader.type());
         } catch (ClassNotFoundException e) {
@@ -21,15 +22,17 @@ public class XxxValueEncoder {
         }
     }
 
-    public XxxValueEncoder(Class<?> type) {
+    public DefaultValueEncoder(Class<?> type) {
         this.type = type;
     }
 
 
-    public MiniColumnHeader columnHeader(String columnName) {
+    @Override
+    public MiniColumnHeader headerFor(String columnName) {
         return new StoredColumnHeader(columnName, type.getName());
     }
 
+    @Override
     public MiniValue encode(Object value) {
         if (value == null) {
             return new StoredValue();
@@ -74,6 +77,7 @@ public class XxxValueEncoder {
         }
     }
 
+    @Override
     public Object decode(MiniValue value) {
         if (value.isNull()) {
             return null;

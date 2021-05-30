@@ -2,6 +2,7 @@ package hu.webarticum.miniconnect.util.data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -28,8 +29,14 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
         this.data = new ArrayList<>(data);
     }
 
+    
     public static <T> ImmutableList<T> empty() {
         return new ImmutableList<>();
+    }
+
+    @SafeVarargs
+    public static <T> ImmutableList<T> of(T... items) {
+        return new ImmutableList<>(Arrays.asList(items));
     }
 
     public static <T> ImmutableList<T> fromIterable(

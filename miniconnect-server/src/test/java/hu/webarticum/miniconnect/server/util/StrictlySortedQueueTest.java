@@ -16,7 +16,7 @@ class StrictlySortedQueueTest {
     @BeforeEach
     void init() {
         queue = new StrictlySortedQueue<Integer>(
-                (f, p, i) -> i == Objects.requireNonNullElse(p, 0) + 1);
+                (p, i) -> i == Objects.requireNonNullElse(p, 0) + 1);
     }
 
     @Test
