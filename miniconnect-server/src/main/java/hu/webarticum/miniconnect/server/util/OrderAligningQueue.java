@@ -18,7 +18,7 @@ import java.util.concurrent.TimeoutException;
  * 
  * @param <T> any type
  */
-public class StrictlySortedQueue<T> {
+public class OrderAligningQueue<T> {
     
     private final NextChecker<T> nextChecker;
     
@@ -29,7 +29,7 @@ public class StrictlySortedQueue<T> {
     private T previous = null;
     
 
-    public StrictlySortedQueue(NextChecker<T> nextChecker) {
+    public OrderAligningQueue(NextChecker<T> nextChecker) {
         this.nextChecker = nextChecker;
     }
     

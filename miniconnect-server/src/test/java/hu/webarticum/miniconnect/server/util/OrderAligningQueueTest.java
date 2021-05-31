@@ -8,14 +8,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
-class StrictlySortedQueueTest {
+class OrderAligningQueueTest {
 
-    private StrictlySortedQueue<Integer> queue;
+    private OrderAligningQueue<Integer> queue;
 
 
     @BeforeEach
     void init() {
-        queue = new StrictlySortedQueue<Integer>(
+        queue = new OrderAligningQueue<Integer>(
                 (p, i) -> i == Objects.requireNonNullElse(p, 0) + 1);
     }
 

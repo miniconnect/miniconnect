@@ -24,7 +24,7 @@ import hu.webarticum.miniconnect.server.message.response.ResultSetEofResponse;
 import hu.webarticum.miniconnect.server.message.response.ResultSetRowsResponse;
 import hu.webarticum.miniconnect.server.message.response.ResultSetRowsResponse.CellData;
 import hu.webarticum.miniconnect.server.message.response.ResultSetValuePartResponse;
-import hu.webarticum.miniconnect.server.util.StrictlySortedQueue;
+import hu.webarticum.miniconnect.server.util.OrderAligningQueue;
 import hu.webarticum.miniconnect.tool.result.StoredLobResult;
 import hu.webarticum.miniconnect.tool.result.StoredResult;
 import hu.webarticum.miniconnect.tool.result.StoredResultSetData;
@@ -67,7 +67,7 @@ public class MessengerSession implements MiniSession {
         int queryId = requestIdCounter.incrementAndGet();
         int maxRowCount = 0;
         
-        StrictlySortedQueue<Response> responseQueue = new StrictlySortedQueue<>(
+        OrderAligningQueue<Response> responseQueue = new OrderAligningQueue<>(
                 MessengerSession::checkNextResultResponse);
         
         QueryRequest queryRequest = new QueryRequest(sessionId, queryId, query, maxRowCount);
