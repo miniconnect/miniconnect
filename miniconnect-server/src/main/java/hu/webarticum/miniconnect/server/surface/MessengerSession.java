@@ -5,8 +5,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -49,6 +53,8 @@ public class MessengerSession implements MiniSession {
     
     private final Server server;
     
+    private final ExecutorService resultExecutorService = Executors.newCachedThreadPool();
+    
 
     private final AtomicInteger requestIdCounter = new AtomicInteger();
 
@@ -60,17 +66,68 @@ public class MessengerSession implements MiniSession {
         this.server = server;
     }
 
-
-    // TODO: handle lob value parts
     @Override
     public MiniResult execute(String query) throws IOException {
         int queryId = requestIdCounter.incrementAndGet();
-        int maxRowCount = 0;
+        
+        OrderAligningQueue<Response> responseQueue = new OrderAligningQueue<>(
+                MessengerSession::checkNextResultResponse);
+
+        BlockingQueue<ResultSetValuePartResponse> valueQueue = new LinkedBlockingDeque<>();
+        
+        QueryRequest queryRequest = new QueryRequest(sessionId, queryId, query);
+        server.accept(queryRequest, response -> {
+            if (response instanceof ResultSetValuePartResponse) {
+                try {
+                    valueQueue.put((ResultSetValuePartResponse) response);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            } else {
+                responseQueue.add(response);
+            }
+        });
+
+        Response firstResponse;
+        try {
+            firstResponse = responseQueue.take(RESULT_TIMEOUT_VALUE, RESULT_TIMEOUT_UNIT);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return new StoredResult("INTERRUPT", "Interrupt occured while waiting for results");
+        } catch (TimeoutException e) {
+            return new StoredResult("TIMEOUT", "Timeout reached while waiting for results");
+        }
+        
+        if (!(firstResponse instanceof ResultResponse)) {
+            return new StoredResult("BADRESPONSE", "Bad response");
+        }
+
+        ResultResponse resultResponse = (ResultResponse) firstResponse;
+        if (!resultResponse.success()) {
+            return new StoredResult(resultResponse.errorCode(), resultResponse.errorMessage());
+        }
+        
+        MessengerResultSet resultSet = new MessengerResultSet(resultResponse);
+        resultExecutorService.submit(() -> {
+            
+            // TODO
+            // FIXME: how to fetch rows and value parts parallelly?
+            
+            // XXX
+            resultSet.eof();
+            
+        });
+        
+        return new MessengerResult(resultResponse, resultSet);
+    }
+    
+    public MiniResult executeOld(String query) throws IOException {
+        int queryId = requestIdCounter.incrementAndGet();
         
         OrderAligningQueue<Response> responseQueue = new OrderAligningQueue<>(
                 MessengerSession::checkNextResultResponse);
         
-        QueryRequest queryRequest = new QueryRequest(sessionId, queryId, query, maxRowCount);
+        QueryRequest queryRequest = new QueryRequest(sessionId, queryId, query);
         server.accept(queryRequest, responseQueue::add);
         
         ResultResponse resultResponse = null;

@@ -10,14 +10,11 @@ public final class QueryRequest implements Request, SessionMessage {
 
     private final String query;
 
-    private final long maxRowCount;
 
-
-    public QueryRequest(long sessionId, int id, String query, long maxRowCount) {
+    public QueryRequest(long sessionId, int id, String query) {
         this.sessionId = sessionId;
         this.id = id;
         this.query = query;
-        this.maxRowCount = maxRowCount;
     }
 
 
@@ -32,10 +29,6 @@ public final class QueryRequest implements Request, SessionMessage {
 
     public String query() {
         return query;
-    }
-
-    public long maxRowCount() {
-        return maxRowCount;
     }
 
 }

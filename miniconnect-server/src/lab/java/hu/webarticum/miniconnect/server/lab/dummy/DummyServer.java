@@ -22,7 +22,6 @@ import hu.webarticum.miniconnect.server.message.request.LobPartRequest;
 import hu.webarticum.miniconnect.server.message.request.LobRequest;
 import hu.webarticum.miniconnect.server.message.request.QueryRequest;
 import hu.webarticum.miniconnect.server.message.request.Request;
-import hu.webarticum.miniconnect.server.message.request.ResultSetFetchRequest;
 import hu.webarticum.miniconnect.server.message.response.LobResultResponse;
 import hu.webarticum.miniconnect.server.message.response.Response;
 import hu.webarticum.miniconnect.server.message.response.ResultResponse;
@@ -74,10 +73,6 @@ public class DummyServer implements Server {
     public void accept(Request request, Consumer<Response> responseConsumer) {
         if (request instanceof QueryRequest) {
             acceptQueryRequest((QueryRequest) request, responseConsumer);
-        } else if (request instanceof ResultSetFetchRequest) {
-            
-            // FIXME
-            
         } else if (request instanceof LobRequest) {
             acceptLobRequest((LobRequest) request, responseConsumer);
         } else if (request instanceof LobPartRequest) {

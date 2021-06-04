@@ -93,7 +93,7 @@ public class SqlRepl implements Repl {
         } catch (Exception e) {
             printException(e);
         }
-
+        
         if (result != null) {
             printResult(result);
         }

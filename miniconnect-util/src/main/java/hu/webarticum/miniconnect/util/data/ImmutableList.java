@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public final class ImmutableList<T> implements Iterable<T>, Serializable {
@@ -27,6 +29,10 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
 
     public ImmutableList(Collection<? extends T> data) {
         this.data = new ArrayList<>(data);
+    }
+
+    private ImmutableList(List<T> data, Void ignored) { // NOSONAR
+        this.data = data;
     }
 
     
@@ -68,6 +74,24 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
 
     public boolean contains(T item) {
         return data.contains(item);
+    }
+    
+    public <U> ImmutableList<U> map(Function<T, U> mapper) {
+        List<U> mappedData = new ArrayList<>(data.size());
+        for (T item : data) {
+            mappedData.add(mapper.apply(item));
+        }
+        return new ImmutableList<>(mappedData, null);
+    }
+
+    public ImmutableList<T> filter(Predicate<T> filter) {
+        List<T> filteredData = new ArrayList<>();
+        for (T item : data) {
+            if (filter.test(item)) {
+                filteredData.add(item);
+            }
+        }
+        return new ImmutableList<>(filteredData, null);
     }
 
     @Override
