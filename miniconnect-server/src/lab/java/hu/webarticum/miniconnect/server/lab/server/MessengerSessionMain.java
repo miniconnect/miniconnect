@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.server.lab;
+package hu.webarticum.miniconnect.server.lab.server;
 
 import java.io.IOException;
 
