@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.server.surface;
+package hu.webarticum.miniconnect.server.lob;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,10 +10,9 @@ import java.util.NavigableSet;
 import java.util.TreeSet;
 
 import hu.webarticum.miniconnect.api.MiniLobAccess;
-import hu.webarticum.miniconnect.server.message.response.ResultSetValuePartResponse;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-public class MessengerLobAccess implements MiniLobAccess {
+public class AsynchronousLobAccess implements MiniLobAccess {
     
     private static final String FILE_ACCESS_MODE = "rw";
     
@@ -38,7 +37,7 @@ public class MessengerLobAccess implements MiniLobAccess {
     
     
     
-    public MessengerLobAccess(long length, File file) throws IOException {
+    public AsynchronousLobAccess(long length, File file) throws IOException {
         this.fullLength = length;
         this.file = file;
         this.randomAccessFile = new RandomAccessFile(file, FILE_ACCESS_MODE);
@@ -72,11 +71,9 @@ public class MessengerLobAccess implements MiniLobAccess {
 
     // FIXME: what if close occured during this write?
     // FIXME: what if other error occured (close with storing the exception? 'closeReason' or something)
-    public void accept(ResultSetValuePartResponse partResponse) throws IOException {
+    public void accept(long start, ByteString part) throws IOException {
         checkClosed();
         
-        long start = partResponse.offset();
-        ByteString part = partResponse.content();
         int length = part.length();
         long end = start + length;
         

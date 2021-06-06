@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
-import hu.webarticum.miniconnect.server.message.response.ResultSetValuePartResponse;
-import hu.webarticum.miniconnect.server.surface.MessengerLobAccess;
+import hu.webarticum.miniconnect.server.lob.AsynchronousLobAccess;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class MessengerLobAccessMain {
@@ -21,8 +20,8 @@ public class MessengerLobAccessMain {
     
     public static void main(String[] args) throws IOException, InterruptedException {
         long fullLength = ((long) SUPPLIER_CHUNK_SIZE) * SUPPLIER_ORDER.length;
-        try (MessengerLobAccess lob =
-            new MessengerLobAccess(fullLength, Files.createTempFile("LOB_", ".bin").toFile())) {
+        try (AsynchronousLobAccess lob =
+            new AsynchronousLobAccess(fullLength, Files.createTempFile("LOB_", ".bin").toFile())) {
             
             Thread supplierThread = new Thread(() -> {
                 for (int n : SUPPLIER_ORDER) {
@@ -42,10 +41,8 @@ public class MessengerLobAccessMain {
                     String contentString = contentBuilder.toString();
                     System.out.println("Write: " + contentString);
                     ByteString content = ByteString.of(contentString);
-                    ResultSetValuePartResponse partResponse =
-                            new ResultSetValuePartResponse(0L, 0, 0L, 0, offset, content);
                     try {
-                        lob.accept(partResponse);
+                        lob.accept(offset, content);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
