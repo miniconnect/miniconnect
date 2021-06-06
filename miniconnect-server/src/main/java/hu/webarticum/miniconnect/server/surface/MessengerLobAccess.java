@@ -1,10 +1,11 @@
 package hu.webarticum.miniconnect.server.surface;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.RandomAccessFile;
-import java.nio.channels.Channels;
+import java.nio.file.Files;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
@@ -12,10 +13,14 @@ import hu.webarticum.miniconnect.api.MiniLobAccess;
 import hu.webarticum.miniconnect.server.message.response.ResultSetValuePartResponse;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-// TODO: test
 public class MessengerLobAccess implements MiniLobAccess {
     
+    private static final String FILE_ACCESS_MODE = "rw";
+    
+    
     private final long fullLength;
+    
+    private final File file;
     
     private final RandomAccessFile randomAccessFile;
     
@@ -33,9 +38,10 @@ public class MessengerLobAccess implements MiniLobAccess {
     
     
     
-    public MessengerLobAccess(long length, RandomAccessFile randomAccessFile) {
+    public MessengerLobAccess(long length, File file) throws IOException {
         this.fullLength = length;
-        this.randomAccessFile = randomAccessFile;
+        this.file = file;
+        this.randomAccessFile = new RandomAccessFile(file, FILE_ACCESS_MODE);
     }
 
 
@@ -58,16 +64,14 @@ public class MessengerLobAccess implements MiniLobAccess {
         return ByteString.wrap(bytes);
     }
     
-    // TODO: use a concurrent InputStream implementation instead
-    //       that can start reading even if content is not completed yet
     @Override
     public InputStream inputStream() throws IOException {
         checkClosed();
-        waitAvailable(0L, fullLength);
-        
-        return Channels.newInputStream(randomAccessFile.getChannel());
+        return new LobInputStream();
     }
-    
+
+    // FIXME: what if close occured during this write?
+    // FIXME: what if other error occured (close with storing the exception? 'closeReason' or something)
     public void accept(ResultSetValuePartResponse partResponse) throws IOException {
         checkClosed();
         
@@ -97,10 +101,12 @@ public class MessengerLobAccess implements MiniLobAccess {
             
             index.add(entry);
         }
+        
         synchronized (fileAccessLock) {
             randomAccessFile.seek(start);
             randomAccessFile.write(part.extract());
         }
+        
         synchronized (indexLock) {
             entry.pending = false;
             
@@ -122,9 +128,6 @@ public class MessengerLobAccess implements MiniLobAccess {
                 entry.end = nextEntry.end;
             }
         }
-        
-        // FIXME: what if close occured during this write?
-        
     }
     
     private void checkBounds(long start, int length) {
@@ -179,6 +182,7 @@ public class MessengerLobAccess implements MiniLobAccess {
         }
         
         randomAccessFile.close();
+        Files.delete(file.toPath());
     }
     
     
@@ -217,5 +221,79 @@ public class MessengerLobAccess implements MiniLobAccess {
         }
         
     }
+    
+    
+    private class LobInputStream extends InputStream {
+        
+        private long position = 0L;
+        
+        private long mark = -1L;
+        
 
+        @Override
+        public int read() throws IOException {
+            ByteString part = readPart(1);
+            if (part.isEmpty()) {
+                return -1;
+            }
+            
+            return (int) part.byteAt(0);
+        }
+
+        @Override
+        public int read(byte[] buffer) throws IOException {
+            return read(buffer, 0, buffer.length);
+        }
+        
+        @Override
+        public int read(byte[] buffer, int offset, int length) throws IOException {
+            if (length == 0) {
+                return 0;
+            }
+            
+            ByteString part = readPart(length);
+            int partLength = part.length();
+            part.extractTo(buffer, offset, 0, partLength);
+            
+            return partLength;
+        }
+
+        private synchronized ByteString readPart(int length) throws IOException {
+            int safeLength = position + length > fullLength ? (int) (fullLength - position) : length;
+            ByteString part = part(position, safeLength);
+            position += safeLength;
+            return part;
+        }
+        
+        @Override
+        public boolean markSupported() {
+            return true;
+        }
+        
+        @Override
+        public synchronized void mark(int readlimit) {
+            mark = position;
+        }
+        
+        @Override
+        public synchronized void reset() throws IOException {
+            position = mark;
+        }
+
+        @Override
+        public int available() throws IOException {
+            IndexEntry firstEntry;
+            synchronized (indexLock) {
+                if (index.isEmpty()) {
+                    return 0;
+                }
+                firstEntry = index.first();
+            }
+            long longAvailable = firstEntry.end - position;
+            
+            return longAvailable > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) longAvailable;
+        }
+        
+    }
+    
 }

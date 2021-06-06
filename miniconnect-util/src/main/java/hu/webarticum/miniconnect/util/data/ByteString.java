@@ -88,6 +88,10 @@ public class ByteString implements Serializable {
         return extractedBytes;
     }
 
+    public void extractTo(byte[] target, int targetOffset, int selfOffset, int length) {
+        System.arraycopy(bytes, selfOffset, target, targetOffset, length);
+    }
+
     private void checkBounds(int beginIndex, int length) {
         if (beginIndex < 0 || length <= 0 || (beginIndex + length) > bytes.length) {
             throw new IllegalArgumentException(String.format(
