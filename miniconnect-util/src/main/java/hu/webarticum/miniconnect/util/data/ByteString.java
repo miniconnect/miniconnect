@@ -2,7 +2,6 @@ package hu.webarticum.miniconnect.util.data;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
@@ -33,6 +32,10 @@ public class ByteString implements Serializable {
         return new ByteString(new byte[0]);
     }
 
+    public static ByteString of(byte[] bytes) {
+        return new ByteString(Arrays.copyOf(bytes, bytes.length));
+    }
+
     public static ByteString wrap(byte[] bytes) {
         return new ByteString(bytes);
     }
@@ -53,27 +56,43 @@ public class ByteString implements Serializable {
     public byte byteAt(int position) {
         return bytes[position];
     }
+    
+    public ByteString substring(int beginIndex) {
+        return substring(beginIndex, bytes.length);
+    }
+
+    public ByteString substring(int beginIndex, int endIndex) {
+        return substringLength(beginIndex, endIndex - beginIndex);
+    }
+
+    public ByteString substringLength(int beginIndex, int length) {
+        return ByteString.wrap(extractLength(beginIndex, length));
+    }
 
     public byte[] extract() {
         return Arrays.copyOf(bytes, bytes.length);
     }
 
-    public byte[] extract(int position) {
-        return extract(position, bytes.length - position);
+    public byte[] extract(int beginIndex) {
+        return extract(beginIndex, bytes.length);
+    }
+    
+    public byte[] extract(int beginIndex, int endIndex) {
+        return extractLength(beginIndex, endIndex - beginIndex);
     }
 
-    public byte[] extract(int position, int length) {
-        checkExtraction(position, length);
+    public byte[] extractLength(int beginIndex, int length) {
+        checkBounds(beginIndex, length);
         byte[] extractedBytes = new byte[length];
-        System.arraycopy(bytes, position, extractedBytes, 0, length);
+        System.arraycopy(bytes, beginIndex, extractedBytes, 0, length);
         return extractedBytes;
     }
 
-    private void checkExtraction(int position, int length) {
-        if (position < 0 || length <= 0 || (position + length) > bytes.length) {
+    private void checkBounds(int beginIndex, int length) {
+        if (beginIndex < 0 || length <= 0 || (beginIndex + length) > bytes.length) {
             throw new IllegalArgumentException(String.format(
-                    "Invalid extraction, position: %d, length: %d, array length: %d",
-                    position, length, bytes.length));
+                    "Invalid substring, beginIndex: %d, length: %d, content length: %d",
+                    beginIndex, length, bytes.length));
         }
     }
 
@@ -85,7 +104,7 @@ public class ByteString implements Serializable {
         return ByteBuffer.wrap(bytes).asReadOnlyBuffer();
     }
 
-    public InputStream asInputStream() {
+    public ByteArrayInputStream asInputStream() {
         return new ByteArrayInputStream(bytes);
     }
 
@@ -173,7 +192,7 @@ public class ByteString implements Serializable {
         }
 
         public byte[] read(int length) {
-            byte[] result = extract(position, length);
+            byte[] result = extractLength(position, length);
             position += length;
             return result;
         }

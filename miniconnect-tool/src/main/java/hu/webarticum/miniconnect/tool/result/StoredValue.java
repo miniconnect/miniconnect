@@ -1,8 +1,9 @@
 package hu.webarticum.miniconnect.tool.result;
 
-import java.io.InputStream;
+import java.io.IOException;
 import java.io.Serializable;
 
+import hu.webarticum.miniconnect.api.MiniLobAccess;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
@@ -30,7 +31,10 @@ public class StoredValue implements MiniValue, Serializable {
     }
 
     public static StoredValue of(MiniValue value) {
-        return new StoredValue(value.isNull(), value.shortContent());
+        if (value.isLob()) {
+            throw new IllegalArgumentException("LOB value can not be stored");
+        }
+        return new StoredValue(value.isNull(), value.content());
     }
 
 
@@ -40,23 +44,23 @@ public class StoredValue implements MiniValue, Serializable {
     }
 
     @Override
+    public boolean isLob() {
+        return false;
+    }
+
+    @Override
     public long length() {
         return content.length();
     }
 
     @Override
-    public ByteString shortContent() {
+    public ByteString content() {
         return content;
     }
 
     @Override
-    public ByteString part(long start, int length) {
-        return ByteString.wrap(content.extract((int) start, length));
-    }
-
-    @Override
-    public InputStream inputStream() {
-        return content.asInputStream();
+    public MiniLobAccess lobAccess() throws IOException {
+        return new StoredLobAccess(content);
     }
 
 }

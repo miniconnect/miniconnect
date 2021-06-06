@@ -46,7 +46,7 @@ public class MessengerResultSet implements MiniResultSet {
     }
 
     public void accept(ResultSetValuePartResponse valuePartResponse) {
-
+        
         // TODO
         
     }

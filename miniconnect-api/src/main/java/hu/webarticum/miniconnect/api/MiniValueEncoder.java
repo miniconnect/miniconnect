@@ -1,5 +1,6 @@
 package hu.webarticum.miniconnect.api;
 
+// FIXME: rename to MiniValueInterpreter?
 public interface MiniValueEncoder {
 
     public MiniColumnHeader headerFor(String columnName);

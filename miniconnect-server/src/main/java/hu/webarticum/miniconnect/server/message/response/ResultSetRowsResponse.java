@@ -75,7 +75,7 @@ public final class ResultSetRowsResponse implements Response, SessionMessage {
 
 
         public CellData(MiniValue value) {
-            this(value.isNull(), value.length(), value.shortContent());
+            this(value.isNull(), value.length(), value.content());
         }
         
         public CellData(boolean isNull, long fullLength, ByteString content) {
