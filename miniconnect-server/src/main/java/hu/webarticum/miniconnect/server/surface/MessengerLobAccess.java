@@ -127,6 +127,8 @@ public class MessengerLobAccess implements MiniLobAccess {
                 index.remove(nextEntry);
                 entry.end = nextEntry.end;
             }
+
+            indexLock.notifyAll();
         }
     }
     
@@ -252,6 +254,10 @@ public class MessengerLobAccess implements MiniLobAccess {
             }
             
             ByteString part = readPart(length);
+            if (part == null) {
+                return -1;
+            }
+            
             int partLength = part.length();
             part.extractTo(buffer, offset, 0, partLength);
             
@@ -260,6 +266,9 @@ public class MessengerLobAccess implements MiniLobAccess {
 
         private synchronized ByteString readPart(int length) throws IOException {
             int safeLength = position + length > fullLength ? (int) (fullLength - position) : length;
+            if (safeLength == 0) {
+                return null;
+            }
             ByteString part = part(position, safeLength);
             position += safeLength;
             return part;

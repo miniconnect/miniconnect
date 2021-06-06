@@ -36,6 +36,14 @@ public class ByteString implements Serializable {
         return new ByteString(Arrays.copyOf(bytes, bytes.length));
     }
 
+    public static ByteString of(String string) {
+        return of(string, StandardCharsets.UTF_8);
+    }
+
+    public static ByteString of(String string, Charset charset) {
+        return ByteString.wrap(string.getBytes(charset));
+    }
+
     public static ByteString wrap(byte[] bytes) {
         return new ByteString(bytes);
     }
@@ -134,6 +142,10 @@ public class ByteString implements Serializable {
 
     public String toString(Charset charset) {
         return new String(bytes, charset);
+    }
+
+    public String toArrayString() {
+        return Arrays.toString(bytes);
     }
 
     public Reader reader() {
