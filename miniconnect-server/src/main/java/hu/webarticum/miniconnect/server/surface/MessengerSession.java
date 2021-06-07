@@ -63,7 +63,8 @@ public class MessengerSession implements MiniSession {
         QueryRequest queryRequest = new QueryRequest(sessionId, queryId, query);
         server.accept(queryRequest, response -> {
             if (response instanceof ResultSetValuePartResponse) {
-                handlePartResponse((ResultSetValuePartResponse) response, resultSetFuture);
+                ResultSetValuePartResponse partResponse = (ResultSetValuePartResponse) response;
+                resultSetFuture.thenAcceptAsync(resultSet -> resultSet.accept(partResponse));
             } else {
                 responseQueue.add(response);
             }
@@ -128,27 +129,6 @@ public class MessengerSession implements MiniSession {
         return true;
     }
     
-    private void handlePartResponse(
-            ResultSetValuePartResponse partResponse,
-            CompletableFuture<MessengerResultSet> resultSetFuture) {
-        
-        if (resultSetFuture.isCancelled()) {
-            return;
-        }
-        
-        MessengerResultSet resultSet;
-        try {
-            resultSet = resultSetFuture.get();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return;
-        } catch (Exception e) {
-            return;
-        }
-        
-        resultSet.accept(partResponse);
-    }
-
     private static boolean checkNextResultResponse(Response previousResponse, Response response) {
         if (response instanceof ResultResponse) {
             return previousResponse == null;

@@ -1,5 +1,7 @@
 package hu.webarticum.miniconnect.server.lab.dummy;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -26,10 +28,12 @@ import hu.webarticum.miniconnect.server.message.response.LobResultResponse;
 import hu.webarticum.miniconnect.server.message.response.Response;
 import hu.webarticum.miniconnect.server.message.response.ResultResponse;
 import hu.webarticum.miniconnect.server.message.response.ResultSetRowsResponse;
+import hu.webarticum.miniconnect.server.message.response.ResultSetValuePartResponse;
 import hu.webarticum.miniconnect.server.message.response.ResultResponse.ColumnHeaderData;
 import hu.webarticum.miniconnect.server.message.response.ResultSetEofResponse;
 import hu.webarticum.miniconnect.server.message.response.ResultSetRowsResponse.CellData;
 import hu.webarticum.miniconnect.tool.result.DefaultValueEncoder;
+import hu.webarticum.miniconnect.tool.result.StoredValue;
 import hu.webarticum.miniconnect.util.data.ByteString;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
@@ -45,6 +49,10 @@ public class DummyServer implements Server {
     private static final String ILLEGAL_LOB_STATE_ERROR = "00003";
     
     private static final int MAX_LENGTH = 1000_000;
+    
+    private static final int LOB_INITIAL_LENGTH = 25;
+    
+    private static final int LOB_CHUNK_LENGTH = 10;
     
     public static final Pattern SELECT_ALL_QUERY_PATTERN = Pattern.compile(
             "(?i)\\s*SELECT\\s+\\*\\s+FROM\\s+([\"`]?)(?-i)data(?i)\\1\\s*;?\\s*");
@@ -137,6 +145,8 @@ public class DummyServer implements Server {
         int rowCount = dataRows.size();
         int columnCount = encoders.size();
         
+        List<ResultSetValuePartResponse> partResponses = new ArrayList<>();
+        
         List<ImmutableList<CellData>> rowsBuilder = new ArrayList<>();
         for (int r = 0; r < rowCount; r++) {
             List<Object> dataRow = dataRows.get(r);
@@ -145,10 +155,19 @@ public class DummyServer implements Server {
                 MiniValueEncoder encoder = encoders.get(c);
                 Object content = dataRow.get(c);
                 MiniValue value = encoder.encode(content);
-                if ((value.isLob() && value.length() > 0) || value.length() > 10) {
-                    // TODO: send content in chuncks
+                if ((value.isLob() && value.length() > 0) || value.length() > LOB_INITIAL_LENGTH) {
+                    try (InputStream valueIn = value.lobAccess().inputStream()) {
+                        value = new StoredValue(readInputStream(valueIn, LOB_INITIAL_LENGTH));
+                        ByteString chunk;
+                        while (!(chunk = readInputStream(valueIn, LOB_CHUNK_LENGTH)).isEmpty()) {
+                            partResponses.add(new ResultSetValuePartResponse(
+                                    sessionId, queryId, offset + r, c, offset, chunk));
+                        }
+                    } catch (IOException e) {
+                        // FIXME: what to do?
+                    }
                 }
-                rowBuilder.add(new CellData(value));
+                rowBuilder.add(new CellData(value)); // FIXME
             }
             rowsBuilder.add(new ImmutableList<>(rowBuilder));
         }
@@ -157,6 +176,24 @@ public class DummyServer implements Server {
         ResultSetRowsResponse resultSetRowsResponse = new ResultSetRowsResponse(
                 sessionId, queryId, offset, ImmutableList.empty(), ImmutableMap.empty(), rows);
         responseConsumer.accept(resultSetRowsResponse);
+        
+        for (ResultSetValuePartResponse partResponse : partResponses) {
+            responseConsumer.accept(partResponse);
+        }
+    }
+
+    private ByteString readInputStream(InputStream in, int length) throws IOException {
+        byte[] buffer = new byte[length];
+        int readLength = in.read(buffer);
+        if (readLength == -1) {
+            return ByteString.empty();
+        }
+        if (readLength == length) {
+            return ByteString.wrap(buffer);
+        }
+        byte[] result = new byte[readLength];
+        System.arraycopy(buffer, 0, result, 0, readLength);
+        return ByteString.wrap(result);
     }
     
     private void sendBadQueryErrorResultResponse(QueryRequest request, Consumer<Response> responseConsumer) {
