@@ -2,44 +2,31 @@ package hu.webarticum.miniconnect.server.surface;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniLobResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
-import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.server.message.response.LobResultResponse;
 import hu.webarticum.miniconnect.server.message.response.Response;
 import hu.webarticum.miniconnect.server.message.response.ResultResponse;
-import hu.webarticum.miniconnect.server.message.response.ResultResponse.ColumnHeaderData;
 import hu.webarticum.miniconnect.server.message.response.ResultSetEofResponse;
 import hu.webarticum.miniconnect.server.message.response.ResultSetRowsResponse;
-import hu.webarticum.miniconnect.server.message.response.ResultSetRowsResponse.CellData;
 import hu.webarticum.miniconnect.server.message.response.ResultSetValuePartResponse;
 import hu.webarticum.miniconnect.server.util.OrderAligningQueue;
 import hu.webarticum.miniconnect.tool.result.StoredLobResult;
 import hu.webarticum.miniconnect.tool.result.StoredResult;
-import hu.webarticum.miniconnect.tool.result.StoredResultSetData;
 import hu.webarticum.miniconnect.server.Server;
 import hu.webarticum.miniconnect.server.message.request.LobPartRequest;
 import hu.webarticum.miniconnect.server.message.request.LobRequest;
 import hu.webarticum.miniconnect.server.message.request.QueryRequest;
 import hu.webarticum.miniconnect.util.data.ByteString;
-import hu.webarticum.miniconnect.util.data.ImmutableList;
 
-// TODO: use asynchronously fillable result set
 public class MessengerSession implements MiniSession {
     
     private static final int LOB_CHUNK_SIZE = 4096; // TODO: make it configurable
@@ -52,8 +39,6 @@ public class MessengerSession implements MiniSession {
     private final long sessionId;
     
     private final Server server;
-    
-    private final ExecutorService resultExecutorService = Executors.newCachedThreadPool();
     
 
     private final AtomicInteger requestIdCounter = new AtomicInteger();
@@ -73,16 +58,12 @@ public class MessengerSession implements MiniSession {
         OrderAligningQueue<Response> responseQueue = new OrderAligningQueue<>(
                 MessengerSession::checkNextResultResponse);
 
-        BlockingQueue<ResultSetValuePartResponse> valueQueue = new LinkedBlockingDeque<>();
+        CompletableFuture<MessengerResultSet> resultSetFuture = new CompletableFuture<>();
         
         QueryRequest queryRequest = new QueryRequest(sessionId, queryId, query);
         server.accept(queryRequest, response -> {
             if (response instanceof ResultSetValuePartResponse) {
-                try {
-                    valueQueue.put((ResultSetValuePartResponse) response);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
+                handlePartResponse((ResultSetValuePartResponse) response, resultSetFuture);
             } else {
                 responseQueue.add(response);
             }
@@ -93,97 +74,81 @@ public class MessengerSession implements MiniSession {
             firstResponse = responseQueue.take(RESULT_TIMEOUT_VALUE, RESULT_TIMEOUT_UNIT);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            resultSetFuture.cancel(true);
             return new StoredResult("INTERRUPT", "Interrupt occured while waiting for results");
         } catch (TimeoutException e) {
+            resultSetFuture.cancel(true);
             return new StoredResult("TIMEOUT", "Timeout reached while waiting for results");
         }
         
         if (!(firstResponse instanceof ResultResponse)) {
+            resultSetFuture.cancel(true);
             return new StoredResult("BADRESPONSE", "Bad response");
         }
 
         ResultResponse resultResponse = (ResultResponse) firstResponse;
         if (!resultResponse.success()) {
+            resultSetFuture.cancel(true);
             return new StoredResult(resultResponse.errorCode(), resultResponse.errorMessage());
         }
         
         MessengerResultSet resultSet = new MessengerResultSet(resultResponse);
-        resultExecutorService.submit(() -> {
-            
-            // TODO
-            // FIXME: how to fetch rows and value parts parallelly?
-            
-            // XXX
-            resultSet.eof();
-            
-        });
+        resultSetFuture.complete(resultSet);
+        new Thread(() -> pollResponseQueue(responseQueue, resultSet)).start();
         
         return new MessengerResult(resultResponse, resultSet);
     }
     
-    public MiniResult executeOld(String query) throws IOException {
-        int queryId = requestIdCounter.incrementAndGet();
+    // TODO: error handling
+    private void pollResponseQueue(
+            OrderAligningQueue<Response> responseQueue, MessengerResultSet resultSet) {
         
-        OrderAligningQueue<Response> responseQueue = new OrderAligningQueue<>(
-                MessengerSession::checkNextResultResponse);
-        
-        QueryRequest queryRequest = new QueryRequest(sessionId, queryId, query);
-        server.accept(queryRequest, responseQueue::add);
-        
-        ResultResponse resultResponse = null;
-        List<List<MiniValue>> rows = new ArrayList<>();
-        while (true) { // NOSONAR
-            Response response;
-            try {
-                response = responseQueue.take(RESULT_TIMEOUT_VALUE, RESULT_TIMEOUT_UNIT);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return new StoredResult("INTERRUPT", "Interrupt occured while waiting for results");
-            } catch (TimeoutException e) {
-                return new StoredResult("TIMEOUT", "Timeout reached while waiting for results");
-            }
-            
-            if (response instanceof ResultResponse) {
-                resultResponse = (ResultResponse) response;
-                if (!resultResponse.success()) {
-                    break;
-                }
-            } else if (response instanceof ResultSetRowsResponse) {
-                ResultSetRowsResponse rowsResponse = (ResultSetRowsResponse) response;
-                for (ImmutableList<CellData> cellDatas : rowsResponse.rows()) {
-                    List<MiniValue> row = new ArrayList<>();
-                    for (CellData cellData : cellDatas) {
-                        row.add(cellData.toMiniValue());
-                    }
-                    rows.add(row);
-                }
-            } else if (response instanceof ResultSetValuePartResponse) {
-                
-                // TODO
-                ResultSetValuePartResponse valuePartResponse = (ResultSetValuePartResponse) response;
-                System.out.println("  Content part: " + valuePartResponse.content().length());
-                
-            } else if (response instanceof ResultSetEofResponse) {
-                break;
-            }
+        while (fetchResponseQueue(responseQueue, resultSet)) {
+            // nothing to do
         }
+    }
         
-        if (resultResponse == null) {
-            throw new IllegalStateException("resultResponse could not be null");
+    private boolean fetchResponseQueue(
+            OrderAligningQueue<Response> responseQueue, MessengerResultSet resultSet) {
+        Response response;
+        try {
+            response = responseQueue.take();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
         }
-        
-        if (!resultResponse.success()) {
-            return new StoredResult(resultResponse.errorCode(), resultResponse.errorMessage());
+
+        if (response instanceof ResultSetRowsResponse) {
+            resultSet.accept((ResultSetRowsResponse) response);
+        } else if (response instanceof ResultSetEofResponse) {
+            resultSet.eof();
+            return false;
         }
-        
-        List<MiniColumnHeader> columnHeaders = new ArrayList<>();
-        for (ColumnHeaderData columnHeaderData : resultResponse.columnHeaders()) {
-            columnHeaders.add(columnHeaderData.toMiniColumnHeader());
-        }
-        StoredResultSetData resultSetData = new StoredResultSetData(columnHeaders, rows);
-        return new StoredResult(resultSetData);
+
+        return true;
     }
     
+    private void handlePartResponse(
+            ResultSetValuePartResponse partResponse,
+            CompletableFuture<MessengerResultSet> resultSetFuture) {
+        
+        if (resultSetFuture.isCancelled()) {
+            return;
+        }
+        
+        MessengerResultSet resultSet;
+        try {
+            resultSet = resultSetFuture.get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return;
+        } catch (Exception e) {
+            return;
+        }
+        
+        resultSet.accept(partResponse);
+    }
+
     private static boolean checkNextResultResponse(Response previousResponse, Response response) {
         if (response instanceof ResultResponse) {
             return previousResponse == null;

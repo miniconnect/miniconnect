@@ -134,14 +134,20 @@ public class DummyServer implements Server {
             long offset,
             Consumer<Response> responseConsumer) {
 
+        int rowCount = dataRows.size();
         int columnCount = encoders.size();
+        
         List<ImmutableList<CellData>> rowsBuilder = new ArrayList<>();
-        for (List<Object> dataRow : dataRows) {
+        for (int r = 0; r < rowCount; r++) {
+            List<Object> dataRow = dataRows.get(r);
             List<CellData> rowBuilder = new ArrayList<>();
             for (int c = 0; c < columnCount; c++) {
                 MiniValueEncoder encoder = encoders.get(c);
                 Object content = dataRow.get(c);
                 MiniValue value = encoder.encode(content);
+                if ((value.isLob() && value.length() > 0) || value.length() > 10) {
+                    // TODO: send content in chuncks
+                }
                 rowBuilder.add(new CellData(value));
             }
             rowsBuilder.add(new ImmutableList<>(rowBuilder));
@@ -244,7 +250,7 @@ public class DummyServer implements Server {
             addRow(fullContent);
             Consumer<Response> responseConsumer = removeCompletable(contentId, null);
             if (responseConsumer != null) {
-                String variableName = "blob_" + contentId; // XXX
+                String variableName = "blob_" + contentId;
                 responseConsumer.accept(new LobResultResponse(sessionId, lobId, true, "", "", variableName));
             }
         }
@@ -253,7 +259,7 @@ public class DummyServer implements Server {
     private CompletableSmallLobContent requireCompletable(long contentId, Consumer<Response> responseConsumer) {
         CompletableSmallLobContent completable;
         synchronized (incompleteContents) {
-            completable = incompleteContents.get(contentId);
+            completable = incompleteContents.get(contentId); // NOSONAR
             if (completable == null) {
                 completable = new CompletableSmallLobContent();
                 incompleteContents.put(contentId, completable);
