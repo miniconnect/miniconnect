@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -80,6 +81,16 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
         List<U> mappedData = new ArrayList<>(data.size());
         for (T item : data) {
             mappedData.add(mapper.apply(item));
+        }
+        return new ImmutableList<>(mappedData, null);
+    }
+
+    public <U> ImmutableList<U> mapIndex(BiFunction<Integer, T, U> mapper) {
+        List<U> mappedData = new ArrayList<>(data.size());
+        int length = data.size();
+        for (int i = 0; i < length; i++) {
+            T item = data.get(i);
+            mappedData.add(mapper.apply(i, item));
         }
         return new ImmutableList<>(mappedData, null);
     }

@@ -3,39 +3,47 @@ package hu.webarticum.miniconnect.tool.result;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniValue;
-import hu.webarticum.miniconnect.api.MiniValueEncoder;
+import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
 // FIXME: this is a very dummy implementation
-public class DefaultValueEncoder implements MiniValueEncoder {
+public class DefaultValueInterpreter implements ValueInterpreter {
+
+    public static final StoredValueDefinition DEFAULT_DEFINITION =
+            new StoredValueDefinition(ByteString.class.getName());
+    
 
     private final Class<?> type;
+    
+    // FIXME: use?
+    private final MiniValueDefinition definition;
 
 
-    public DefaultValueEncoder(MiniColumnHeader columnHeader) {
+    public DefaultValueInterpreter(MiniValueDefinition definition) {
         try {
-            this.type = Class.forName(columnHeader.type());
+            this.type = Class.forName(definition.type());
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException(e);
         }
+        
+        this.definition = definition;
     }
-
-    public DefaultValueEncoder(Class<?> type) {
+    
+    public DefaultValueInterpreter(Class<?> type) {
         this.type = type;
+        this.definition = new StoredValueDefinition(type.getName());
     }
 
 
     public Class<?> type() {
         return type;
     }
-    
-    @Override
-    public MiniColumnHeader headerFor(String columnName) {
-        return new StoredColumnHeader(columnName, type.getName());
-    }
 
+    public MiniValueDefinition definition() {
+        return definition;
+    }
+    
     @Override
     public MiniValue encode(Object value) {
         if (value == null) {
@@ -75,6 +83,9 @@ public class DefaultValueEncoder implements MiniValueEncoder {
             String stringValue = (String) value;
             return new StoredValue(ByteString.wrap(
                     stringValue.getBytes(StandardCharsets.UTF_8)));
+        } else if (value instanceof ByteString) {
+            ByteString byteStringValue = (ByteString) value;
+            return new StoredValue(byteStringValue);
         } else {
             throw new IllegalArgumentException(
                     String.format("Unsupported type: %s", value.getClass().getSimpleName()));

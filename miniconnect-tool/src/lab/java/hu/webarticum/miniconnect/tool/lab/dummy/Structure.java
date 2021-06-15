@@ -6,10 +6,18 @@ import java.util.List;
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.tool.result.StoredColumnHeader;
-import hu.webarticum.miniconnect.tool.result.DefaultValueEncoder;
+import hu.webarticum.miniconnect.tool.result.StoredValueDefinition;
+import hu.webarticum.miniconnect.tool.result.DefaultValueInterpreter;
 
 
 public final class Structure {
+    
+    private static final StoredValueDefinition STRING_DEFINITION =
+            new StoredValueDefinition(String.class.getName());
+
+    private static final StoredValueDefinition INTEGER_DEFINITION =
+            new StoredValueDefinition(Integer.class.getName());
+    
 
     private Structure() {
         // static class
@@ -18,20 +26,20 @@ public final class Structure {
 
     public static List<MiniColumnHeader> getMetaColumnHeaders() {
         List<MiniColumnHeader> result = new ArrayList<>();
-        result.add(new StoredColumnHeader("Field", String.class.getName()));
-        result.add(new StoredColumnHeader("Type", String.class.getName()));
-        result.add(new StoredColumnHeader("Null", String.class.getName()));
-        result.add(new StoredColumnHeader("Key", String.class.getName()));
-        result.add(new StoredColumnHeader("Default", String.class.getName()));
-        result.add(new StoredColumnHeader("Extra", String.class.getName()));
+        result.add(new StoredColumnHeader("Field", STRING_DEFINITION));
+        result.add(new StoredColumnHeader("Type", STRING_DEFINITION));
+        result.add(new StoredColumnHeader("Null", STRING_DEFINITION));
+        result.add(new StoredColumnHeader("Key", STRING_DEFINITION));
+        result.add(new StoredColumnHeader("Default", STRING_DEFINITION));
+        result.add(new StoredColumnHeader("Extra", STRING_DEFINITION));
         return result;
     }
 
     public static List<MiniColumnHeader> getColumnHeaders() {
         List<MiniColumnHeader> result = new ArrayList<>();
-        result.add(new StoredColumnHeader("id", Integer.class.getName()));
-        result.add(new StoredColumnHeader("label", String.class.getName()));
-        result.add(new StoredColumnHeader("description", String.class.getName()));
+        result.add(new StoredColumnHeader("id", INTEGER_DEFINITION));
+        result.add(new StoredColumnHeader("label", STRING_DEFINITION));
+        result.add(new StoredColumnHeader("description", STRING_DEFINITION));
         return result;
     }
 
@@ -51,7 +59,7 @@ public final class Structure {
             String defaultValue,
             String extra) {
 
-        DefaultValueEncoder stringEncoder = new DefaultValueEncoder(String.class);
+        DefaultValueInterpreter stringEncoder = new DefaultValueInterpreter(String.class);
 
         List<MiniValue> row = new ArrayList<>(6);
         row.add(stringEncoder.encode(field));
@@ -73,8 +81,8 @@ public final class Structure {
     }
 
     private static List<MiniValue> createRow(int id, String label, String desription) {
-        DefaultValueEncoder intEncoder = new DefaultValueEncoder(Integer.class);
-        DefaultValueEncoder stringEncoder = new DefaultValueEncoder(String.class);
+        DefaultValueInterpreter intEncoder = new DefaultValueInterpreter(Integer.class);
+        DefaultValueInterpreter stringEncoder = new DefaultValueInterpreter(String.class);
 
         List<MiniValue> row = new ArrayList<>(3);
         row.add(intEncoder.encode(id));

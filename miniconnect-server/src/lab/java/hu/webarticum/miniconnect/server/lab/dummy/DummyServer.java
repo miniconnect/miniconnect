@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniValue;
-import hu.webarticum.miniconnect.api.MiniValueEncoder;
 import hu.webarticum.miniconnect.server.Server;
 import hu.webarticum.miniconnect.server.message.request.LobPartRequest;
 import hu.webarticum.miniconnect.server.message.request.LobRequest;
@@ -32,8 +31,11 @@ import hu.webarticum.miniconnect.server.message.response.ResultSetValuePartRespo
 import hu.webarticum.miniconnect.server.message.response.ResultResponse.ColumnHeaderData;
 import hu.webarticum.miniconnect.server.message.response.ResultSetEofResponse;
 import hu.webarticum.miniconnect.server.message.response.ResultSetRowsResponse.CellData;
-import hu.webarticum.miniconnect.tool.result.DefaultValueEncoder;
+import hu.webarticum.miniconnect.tool.result.DefaultValueInterpreter;
+import hu.webarticum.miniconnect.tool.result.StoredColumnHeader;
 import hu.webarticum.miniconnect.tool.result.StoredValue;
+import hu.webarticum.miniconnect.tool.result.StoredValueDefinition;
+import hu.webarticum.miniconnect.tool.result.ValueInterpreter;
 import hu.webarticum.miniconnect.util.data.ByteString;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
@@ -54,19 +56,15 @@ public class DummyServer implements Server {
     
     private static final int LOB_CHUNK_LENGTH = 10;
     
-    public static final Pattern SELECT_ALL_QUERY_PATTERN = Pattern.compile(
+    private static final Pattern SELECT_ALL_QUERY_PATTERN = Pattern.compile(
             "(?i)\\s*SELECT\\s+\\*\\s+FROM\\s+([\"`]?)(?-i)data(?i)\\1\\s*;?\\s*");
     
-    
-    private static final ImmutableList<String> columnNames = ImmutableList.of(
-            "id", "created_at", "length", "content");
+    private static final ImmutableList<MiniColumnHeader> columnHeaders = ImmutableList.of(
+            new StoredColumnHeader("id", new StoredValueDefinition(Long.class.getName())),
+            new StoredColumnHeader("created_at", new StoredValueDefinition(String.class.getName())),
+            new StoredColumnHeader("length", new StoredValueDefinition(Integer.class.getName())),
+            new StoredColumnHeader("content", new StoredValueDefinition(String.class.getName())));
 
-    private static final ImmutableList<MiniValueEncoder> encoders = ImmutableList.of(
-            new DefaultValueEncoder(Long.class),
-            new DefaultValueEncoder(String.class),
-            new DefaultValueEncoder(Integer.class),
-            new DefaultValueEncoder(String.class));
-    
 
     private final AtomicLong rowCounter = new AtomicLong(0);
     
@@ -75,6 +73,9 @@ public class DummyServer implements Server {
     private final Map<Long, CompletableSmallLobContent> incompleteContents = new HashMap<>();
     
     private final Map<Long, Consumer<Response>> lobResponseConsumers = new HashMap<>();
+    
+    private final ImmutableList<ValueInterpreter> interpreters = columnHeaders.map(
+            h -> new DefaultValueInterpreter(h.valueDefinition()));
     
     
     @Override
@@ -110,14 +111,11 @@ public class DummyServer implements Server {
         }
         int dataRowCount = dataRows.size();
         
-        List<ColumnHeaderData> headerDatasBuilder = new ArrayList<>();
-        int columnCount = encoders.size();
-        for (int i = 0; i < columnCount; i++) {
-            MiniValueEncoder encoder = encoders.get(i);
-            String columnName = columnNames.get(i);
-            MiniColumnHeader header = encoder.headerFor(columnName);
+        List<ColumnHeaderData> headerDatasBuilder = new ArrayList<>(columnHeaders.size());
+        for (MiniColumnHeader header : columnHeaders) {
             headerDatasBuilder.add(new ColumnHeaderData(header));
         }
+        
         ImmutableList<ColumnHeaderData> headerDatas = new ImmutableList<>(headerDatasBuilder);
         
         ResultResponse resultResponse = new ResultResponse(
@@ -143,7 +141,7 @@ public class DummyServer implements Server {
             Consumer<Response> responseConsumer) {
 
         int rowCount = dataRows.size();
-        int columnCount = encoders.size();
+        int columnCount = columnHeaders.size();
         
         List<ResultSetValuePartResponse> partResponses = new ArrayList<>();
         
@@ -152,9 +150,9 @@ public class DummyServer implements Server {
             List<Object> dataRow = dataRows.get(r);
             List<CellData> rowBuilder = new ArrayList<>();
             for (int c = 0; c < columnCount; c++) {
-                MiniValueEncoder encoder = encoders.get(c);
+                ValueInterpreter interpreter = interpreters.get(c);
                 Object content = dataRow.get(c);
-                MiniValue value = encoder.encode(content);
+                MiniValue value = interpreter.encode(content);
                 if ((value.isLob() && value.length() > 0) || value.length() > LOB_INITIAL_LENGTH) {
                     try (InputStream valueIn = value.lobAccess().inputStream()) {
                         value = new StoredValue(readInputStream(valueIn, LOB_INITIAL_LENGTH));

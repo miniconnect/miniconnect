@@ -5,10 +5,13 @@ import java.io.IOException;
 
 import hu.webarticum.miniconnect.api.MiniLobAccess;
 import hu.webarticum.miniconnect.api.MiniValue;
+import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.server.lob.AsynchronousLobAccess;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class MessengerLobValue implements MiniValue, Closeable {
+    
+    private final MiniValueDefinition definition;
     
     private final AsynchronousLobAccess lobAccess;
     
@@ -22,11 +25,21 @@ public class MessengerLobValue implements MiniValue, Closeable {
     private boolean closed;
     
 
-    public MessengerLobValue(AsynchronousLobAccess lobAccess, ByteString initialContent) {
+    public MessengerLobValue(
+            MiniValueDefinition definition,
+            AsynchronousLobAccess lobAccess,
+            ByteString initialContent) {
+        
+        this.definition = definition;
         this.lobAccess = lobAccess;
         this.initialContent = initialContent;
     }
     
+    
+    @Override
+    public MiniValueDefinition definition() {
+        return definition;
+    }
     
     @Override
     public boolean isNull() {

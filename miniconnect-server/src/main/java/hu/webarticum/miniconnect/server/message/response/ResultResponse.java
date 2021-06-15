@@ -3,6 +3,7 @@ package hu.webarticum.miniconnect.server.message.response;
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.server.message.SessionMessage;
 import hu.webarticum.miniconnect.tool.result.StoredColumnHeader;
+import hu.webarticum.miniconnect.tool.result.StoredValueDefinition;
 import hu.webarticum.miniconnect.util.data.ByteString;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
@@ -91,7 +92,10 @@ public final class ResultResponse implements Response, SessionMessage {
 
 
         public ColumnHeaderData(MiniColumnHeader header) {
-            this(header.name(), header.type(), header.properties());
+            this(
+                    header.name(),
+                    header.valueDefinition().type(),
+                    header.valueDefinition().properties());
         }
         
         public ColumnHeaderData(
@@ -118,7 +122,7 @@ public final class ResultResponse implements Response, SessionMessage {
         }
         
         public MiniColumnHeader toMiniColumnHeader() {
-            return new StoredColumnHeader(name, type, properties);
+            return new StoredColumnHeader(name, new StoredValueDefinition(type, properties));
         }
 
     }

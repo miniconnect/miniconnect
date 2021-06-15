@@ -8,8 +8,8 @@ import java.util.List;
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
-import hu.webarticum.miniconnect.api.MiniValueEncoder;
-import hu.webarticum.miniconnect.tool.result.DefaultValueEncoder;
+import hu.webarticum.miniconnect.tool.result.DefaultValueInterpreter;
+import hu.webarticum.miniconnect.tool.result.ValueInterpreter;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class ResultSetPrinter {
@@ -53,10 +53,11 @@ public class ResultSetPrinter {
         int columnCount = columnHeaders.size();
         int[] widths = new int[columnCount];
         boolean[] aligns = new boolean[columnCount];
-        List<MiniValueEncoder> encoders = new ArrayList<>();
+        List<ValueInterpreter> encoders = new ArrayList<>();
         for (int i = 0; i < columnCount; i++) {
             MiniColumnHeader columnHeader = columnHeaders.get(i);
-            DefaultValueEncoder encoder = new DefaultValueEncoder(columnHeader);
+            DefaultValueInterpreter encoder = new DefaultValueInterpreter(
+                    columnHeader.valueDefinition());
             widths[i] = columnHeader.name().length();
             aligns[i] = Number.class.isAssignableFrom(encoder.type());
             encoders.add(encoder);
@@ -126,7 +127,7 @@ public class ResultSetPrinter {
         out.append('\n');
     }
 
-    public String stringifyValue(MiniValue value, MiniValueEncoder encoder) {
+    public String stringifyValue(MiniValue value, ValueInterpreter encoder) {
         if (!value.isNull()) {
             Object decoded = encoder.decode(value);
             if (decoded instanceof Float || decoded instanceof Double || decoded instanceof BigDecimal) {

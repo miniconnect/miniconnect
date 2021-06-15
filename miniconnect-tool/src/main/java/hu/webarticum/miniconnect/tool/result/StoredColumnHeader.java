@@ -3,42 +3,31 @@ package hu.webarticum.miniconnect.tool.result;
 import java.io.Serializable;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
-import hu.webarticum.miniconnect.util.data.ByteString;
-import hu.webarticum.miniconnect.util.data.ImmutableMap;
+import hu.webarticum.miniconnect.api.MiniValueDefinition;
 
 public class StoredColumnHeader implements MiniColumnHeader, Serializable {
 
     private static final long serialVersionUID = 1L;
-
+    
 
     private final String name;
-
-    private final String type;
-
-    private final ImmutableMap<String, ByteString> properties;
-
-
-    public StoredColumnHeader(String name,  String type) {
-        this(name, type, new ImmutableMap<>());
-    }
-
-    public StoredColumnHeader(
-            String name,
-            String type,
-            ImmutableMap<String, ByteString> properties) {
-
+    
+    private final StoredValueDefinition valueDefinition;
+    
+    
+    public StoredColumnHeader(String name, MiniValueDefinition valueDefinition) {
         this.name = name;
-        this.type = type;
-        this.properties = properties;
+        this.valueDefinition = StoredValueDefinition.of(valueDefinition);
     }
 
     public static StoredColumnHeader of(MiniColumnHeader columnHeader) {
-        return new StoredColumnHeader(
-                columnHeader.name(),
-                columnHeader.type(),
-                columnHeader.properties());
+        if (columnHeader instanceof StoredColumnHeader) {
+            return (StoredColumnHeader) columnHeader;
+        }
+        
+        return new StoredColumnHeader(columnHeader.name(), columnHeader.valueDefinition());
     }
-
+    
 
     @Override
     public String name() {
@@ -46,13 +35,8 @@ public class StoredColumnHeader implements MiniColumnHeader, Serializable {
     }
 
     @Override
-    public String type() {
-        return type;
-    }
-
-    @Override
-    public ImmutableMap<String, ByteString> properties() {
-        return properties;
+    public MiniValueDefinition valueDefinition() {
+        return valueDefinition;
     }
 
 }

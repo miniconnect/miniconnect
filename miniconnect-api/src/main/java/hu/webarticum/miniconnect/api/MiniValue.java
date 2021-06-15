@@ -5,7 +5,9 @@ import java.io.IOException;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
 public interface MiniValue {
-    
+
+    public MiniValueDefinition definition();
+
     public boolean isNull();
     
     public boolean isLob();

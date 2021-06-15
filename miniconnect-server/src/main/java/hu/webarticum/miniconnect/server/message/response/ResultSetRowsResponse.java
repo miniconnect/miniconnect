@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.server.message.response;
 
 import hu.webarticum.miniconnect.api.MiniValue;
+import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.server.message.SessionMessage;
 import hu.webarticum.miniconnect.tool.result.StoredValue;
 import hu.webarticum.miniconnect.util.data.ByteString;
@@ -97,8 +98,8 @@ public final class ResultSetRowsResponse implements Response, SessionMessage {
             return content;
         }
         
-        public MiniValue toMiniValue() {
-            return new StoredValue(isNull, content);
+        public MiniValue toMiniValue(MiniValueDefinition valueDefinition) {
+            return new StoredValue(valueDefinition, isNull, content);
         }
 
     }

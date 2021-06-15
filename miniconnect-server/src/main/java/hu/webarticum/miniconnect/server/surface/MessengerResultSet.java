@@ -37,7 +37,8 @@ public class MessengerResultSet implements MiniResultSet {
     }
     
     private void addRowData(ImmutableList<CellData> rowData) {
-        ImmutableList<MiniValue> row = rowData.map(CellData::toMiniValue);
+        ImmutableList<MiniValue> row = rowData.mapIndex(
+                (i, cellData) -> cellData.toMiniValue(columnHeaders.get(i).valueDefinition()));
         try {
             rowQueue.put(row);
         } catch (InterruptedException e) {

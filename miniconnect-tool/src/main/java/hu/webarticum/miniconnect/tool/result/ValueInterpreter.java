@@ -1,4 +1,6 @@
-package hu.webarticum.miniconnect.api;
+package hu.webarticum.miniconnect.tool.result;
+
+import hu.webarticum.miniconnect.api.MiniValue;
 
 // FIXME: rename to MiniValueInterpreter?
 // TODO: encode to bytes instead of MiniValue
@@ -6,10 +8,8 @@ package hu.webarticum.miniconnect.api;
 //       - void encodeTo(Object value, OutputStream out)
 //       - Object decode(ByteString value)
 //       - Object decodeFrom(InputStream in)
-public interface MiniValueEncoder {
+public interface ValueInterpreter {
 
-    public MiniColumnHeader headerFor(String columnName);
-    
     public MiniValue encode(Object value);
     
     public Object decode(MiniValue value);
