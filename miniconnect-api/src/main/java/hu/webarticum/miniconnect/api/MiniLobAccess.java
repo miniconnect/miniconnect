@@ -7,11 +7,16 @@ import java.io.InputStream;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
 public interface MiniLobAccess extends Closeable {
-
+    
     public long length();
+    
+    // TODO: public boolean isLarge();
+    
+    // TODO: public boolean isInMemory();
 
-    // FIXME: better name?
-    public ByteString part(long start, int length) throws IOException;
+    public ByteString get() throws IOException;
+
+    public ByteString get(long start, int length) throws IOException;
 
     public InputStream inputStream() throws IOException;
 

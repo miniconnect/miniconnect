@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
-import hu.webarticum.miniconnect.server.lob.AsynchronousLobAccess;
+import hu.webarticum.miniconnect.server.lob.FileAsynchronousLobAccess;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class MessengerLobAccessMain {
@@ -20,8 +20,8 @@ public class MessengerLobAccessMain {
     
     public static void main(String[] args) throws IOException, InterruptedException {
         long fullLength = ((long) SUPPLIER_CHUNK_SIZE) * SUPPLIER_ORDER.length;
-        try (AsynchronousLobAccess lob =
-            new AsynchronousLobAccess(fullLength, Files.createTempFile("LOB_", ".bin").toFile())) {
+        try (FileAsynchronousLobAccess lob =
+            new FileAsynchronousLobAccess(fullLength, Files.createTempFile("LOB_", ".bin").toFile())) {
             
             Thread supplierThread = new Thread(() -> {
                 for (int n : SUPPLIER_ORDER) {

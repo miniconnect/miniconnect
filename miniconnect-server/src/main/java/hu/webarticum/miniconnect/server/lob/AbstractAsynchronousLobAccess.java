@@ -1,46 +1,27 @@
 package hu.webarticum.miniconnect.server.lob;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
-import java.io.RandomAccessFile;
-import java.nio.file.Files;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
 import hu.webarticum.miniconnect.api.MiniLobAccess;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-public class AsynchronousLobAccess implements MiniLobAccess {
-    
-    private static final String FILE_ACCESS_MODE = "rw";
-    
-    
+public abstract class AbstractAsynchronousLobAccess implements MiniLobAccess {
+
     private final long fullLength;
     
-    private final File file;
-    
-    private final RandomAccessFile randomAccessFile;
-    
     private final Object indexLock = new Object();
-    
-    private final Object fileAccessLock = new Object();
-    
-    private final Object closeLock = new Object();
     
     
     private NavigableSet<IndexEntry> index = new TreeSet<>();
     
     
-    private volatile boolean closed = false;
     
-    
-    
-    public AsynchronousLobAccess(long length, File file) throws IOException {
+    protected AbstractAsynchronousLobAccess(long length) {
         this.fullLength = length;
-        this.file = file;
-        this.randomAccessFile = new RandomAccessFile(file, FILE_ACCESS_MODE);
     }
 
 
@@ -50,18 +31,15 @@ public class AsynchronousLobAccess implements MiniLobAccess {
     }
 
     @Override
-    public ByteString part(long start, int length) throws IOException {
+    public ByteString get(long start, int length) throws IOException {
         checkClosed();
         checkBounds(start, length);
         waitAvailable(start, (long) length);
         
-        byte[] bytes = new byte[length];
-        synchronized (fileAccessLock) {
-            randomAccessFile.seek(start);
-            randomAccessFile.readFully(bytes);
-        }
-        return ByteString.wrap(bytes);
+        return loadPart(start, length);
     }
+    
+    protected abstract ByteString loadPart(long start, int length) throws IOException;
     
     @Override
     public InputStream inputStream() throws IOException {
@@ -99,10 +77,7 @@ public class AsynchronousLobAccess implements MiniLobAccess {
             index.add(entry);
         }
         
-        synchronized (fileAccessLock) {
-            randomAccessFile.seek(start);
-            randomAccessFile.write(part.extract());
-        }
+        savePart(start, part);
         
         synchronized (indexLock) {
             entry.pending = false;
@@ -128,6 +103,8 @@ public class AsynchronousLobAccess implements MiniLobAccess {
             indexLock.notifyAll();
         }
     }
+    
+    protected abstract void savePart(long start, ByteString part) throws IOException;
     
     private void checkBounds(long start, int length) {
         if (start < 0L || length <= 0 || (start + length) > fullLength) {
@@ -161,27 +138,13 @@ public class AsynchronousLobAccess implements MiniLobAccess {
         }
     }
 
-    private void checkClosed() {
-        if (closed) {
-            throw new IllegalArgumentException("This LOB access was already closed");
-        }
-    }
+    protected abstract void checkClosed();
     
     @Override
     public void close() throws IOException {
-        synchronized (closeLock) {
-            if (closed) {
-                return;
-            }
-            closed = true;
-        }
-        
         synchronized (indexLock) {
             indexLock.notifyAll();
         }
-        
-        randomAccessFile.close();
-        Files.delete(file.toPath());
     }
     
     
@@ -266,7 +229,7 @@ public class AsynchronousLobAccess implements MiniLobAccess {
             if (safeLength == 0) {
                 return null;
             }
-            ByteString part = part(position, safeLength);
+            ByteString part = get(position, safeLength);
             position += safeLength;
             return part;
         }

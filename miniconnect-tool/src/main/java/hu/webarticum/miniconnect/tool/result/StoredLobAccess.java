@@ -20,9 +20,14 @@ public class StoredLobAccess implements MiniLobAccess {
     public long length() {
         return content.length();
     }
+
+    @Override
+    public ByteString get() throws IOException {
+        return content;
+    }
     
     @Override
-    public ByteString part(long start, int length) throws IOException {
+    public ByteString get(long start, int length) throws IOException {
         long contentLength = content.length();
         long end = start + length;
         if (start < 0L || end > contentLength) {

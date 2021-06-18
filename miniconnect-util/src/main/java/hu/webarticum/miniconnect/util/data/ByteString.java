@@ -33,7 +33,13 @@ public class ByteString implements Serializable {
     }
 
     public static ByteString of(byte[] bytes) {
-        return new ByteString(Arrays.copyOf(bytes, bytes.length));
+        return of(bytes, 0, bytes.length);
+    }
+
+    public static ByteString of(byte[] bytes, int offset, int length) {
+        byte[] partBytes = new byte[length];
+        System.arraycopy(bytes, offset, partBytes, 0, length);
+        return new ByteString(partBytes);
     }
 
     public static ByteString of(String string) {

@@ -6,14 +6,14 @@ import java.io.IOException;
 import hu.webarticum.miniconnect.api.MiniLobAccess;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
-import hu.webarticum.miniconnect.server.lob.AsynchronousLobAccess;
+import hu.webarticum.miniconnect.server.lob.FileAsynchronousLobAccess;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class MessengerLobValue implements MiniValue, Closeable {
     
     private final MiniValueDefinition definition;
     
-    private final AsynchronousLobAccess lobAccess;
+    private final FileAsynchronousLobAccess lobAccess;
     
     private final ByteString initialContent;
     
@@ -27,7 +27,7 @@ public class MessengerLobValue implements MiniValue, Closeable {
 
     public MessengerLobValue(
             MiniValueDefinition definition,
-            AsynchronousLobAccess lobAccess,
+            FileAsynchronousLobAccess lobAccess,
             ByteString initialContent) {
         
         this.definition = definition;
