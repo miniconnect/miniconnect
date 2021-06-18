@@ -13,7 +13,7 @@ public interface MiniLobAccess extends Closeable {
     
     // TODO: public boolean isLarge();
     
-    // TODO: public boolean isInMemory();
+    // TODO: public boolean isTemporary();
 
     public ByteString get() throws IOException;
 
