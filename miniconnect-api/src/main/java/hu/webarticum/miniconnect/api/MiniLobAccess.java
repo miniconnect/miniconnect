@@ -6,6 +6,7 @@ import java.io.InputStream;
 
 import hu.webarticum.miniconnect.util.data.ByteString;
 
+// TODO: rename to MiniContentAccess
 public interface MiniLobAccess extends Closeable {
     
     public long length();

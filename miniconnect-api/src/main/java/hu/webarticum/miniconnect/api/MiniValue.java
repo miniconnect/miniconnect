@@ -10,12 +10,17 @@ public interface MiniValue {
 
     public boolean isNull();
     
+    // TODO: remove
     public boolean isLob();
 
+    // TODO: remove
     public long length();
 
+    // TODO: remove
     public ByteString content();
-    
+
+    // TODO: public MiniContentAccess contentAccess() throws IOException;
+    // FIXME: IOException -> UncheckedIOException ?
     public MiniLobAccess lobAccess() throws IOException;
 
 }
