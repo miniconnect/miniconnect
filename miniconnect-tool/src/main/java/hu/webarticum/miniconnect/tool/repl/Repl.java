@@ -3,6 +3,7 @@ package hu.webarticum.miniconnect.tool.repl;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
+// FIXME: more clean method names?
 public interface Repl {
 
     public Pattern commandPattern();

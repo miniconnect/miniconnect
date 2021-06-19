@@ -2,18 +2,18 @@ package hu.webarticum.miniconnect.server.message.request;
 
 import hu.webarticum.miniconnect.server.message.SessionMessage;
 
-public final class LobRequest implements Request, SessionMessage {
+public final class LargeDataHeadRequest implements Request, SessionMessage {
 
     private final long sessionId;
 
-    private final int id;
+    private final int exchangeId;
 
     private final long length;
 
 
-    public LobRequest(long sessionId, int id, long length) {
+    public LargeDataHeadRequest(long sessionId, int exchangeId, long length) {
         this.sessionId = sessionId;
-        this.id = id;
+        this.exchangeId = exchangeId;
         this.length = length;
     }
 
@@ -23,8 +23,8 @@ public final class LobRequest implements Request, SessionMessage {
         return sessionId;
     }
 
-    public int id() {
-        return id;
+    public int exchangeId() {
+        return exchangeId;
     }
 
     public long length() {

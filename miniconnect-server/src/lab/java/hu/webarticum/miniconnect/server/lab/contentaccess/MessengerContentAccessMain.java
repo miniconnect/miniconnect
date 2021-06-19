@@ -1,17 +1,17 @@
-package hu.webarticum.miniconnect.server.lab.lob;
+package hu.webarticum.miniconnect.server.lab.contentaccess;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
-import hu.webarticum.miniconnect.server.lob.FileAsynchronousLobAccess;
+import hu.webarticum.miniconnect.server.contentaccess.FileAsynchronousContentAccess;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-public class MessengerLobAccessMain {
+public class MessengerContentAccessMain {
 
     private static final int SUPPLIER_SLEEP_MILLIS = 1000;
     
-    private static final int[] SUPPLIER_ORDER = new int[] {3, 2, 0, 6, 1, 5, 4, 8, 7};
+    private static final int[] SUPPLIER_ORDER = new int[] { 3, 2, 0, 6, 1, 5, 4, 8, 7 };
     
     private static final int SUPPLIER_CHUNK_SIZE = 7;
     
@@ -20,8 +20,8 @@ public class MessengerLobAccessMain {
     
     public static void main(String[] args) throws IOException, InterruptedException {
         long fullLength = ((long) SUPPLIER_CHUNK_SIZE) * SUPPLIER_ORDER.length;
-        try (FileAsynchronousLobAccess lob =
-            new FileAsynchronousLobAccess(fullLength, Files.createTempFile("LOB_", ".bin").toFile())) {
+        try (FileAsynchronousContentAccess contentAccess =
+            new FileAsynchronousContentAccess(fullLength, Files.createTempFile("LOB_", ".bin").toFile())) {
             
             Thread supplierThread = new Thread(() -> {
                 for (int n : SUPPLIER_ORDER) {
@@ -42,7 +42,7 @@ public class MessengerLobAccessMain {
                     System.out.println("Write: " + contentString);
                     ByteString content = ByteString.of(contentString);
                     try {
-                        lob.accept(offset, content);
+                        contentAccess.accept(offset, content);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -51,7 +51,7 @@ public class MessengerLobAccessMain {
             
             supplierThread.start();
 
-            try (InputStream in = lob.inputStream()) {
+            try (InputStream in = contentAccess.inputStream()) {
                 byte[] buffer = new byte[CONSUMER_CHUNK_SIZE];
                 while (true) {
                     int r = in.read(buffer);

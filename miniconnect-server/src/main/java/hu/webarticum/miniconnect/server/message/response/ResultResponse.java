@@ -12,7 +12,7 @@ public final class ResultResponse implements Response, SessionMessage {
 
     private final long sessionId;
 
-    private final int queryId;
+    private final int exchangeId;
 
     private final boolean success;
 
@@ -27,9 +27,10 @@ public final class ResultResponse implements Response, SessionMessage {
     private final ImmutableList<ColumnHeaderData> columnHeaders;
 
 
+    // TODO: builder
     public ResultResponse(
             long sessionId,
-            int queryId,
+            int exchangeId,
             boolean success,
             String errorCode,
             String errorMessage,
@@ -38,7 +39,7 @@ public final class ResultResponse implements Response, SessionMessage {
             ImmutableList<ColumnHeaderData> columnHeaders) {
 
         this.sessionId = sessionId;
-        this.queryId = queryId;
+        this.exchangeId = exchangeId;
         this.success = success;
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
@@ -53,8 +54,8 @@ public final class ResultResponse implements Response, SessionMessage {
         return sessionId;
     }
 
-    public int queryId() {
-        return queryId;
+    public int exchangeId() {
+        return exchangeId;
     }
 
     public boolean success() {

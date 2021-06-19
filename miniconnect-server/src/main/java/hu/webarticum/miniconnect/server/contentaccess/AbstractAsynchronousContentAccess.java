@@ -1,15 +1,16 @@
-package hu.webarticum.miniconnect.server.lob;
+package hu.webarticum.miniconnect.server.contentaccess;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
+import java.io.UncheckedIOException;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
-import hu.webarticum.miniconnect.api.MiniLobAccess;
+import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-public abstract class AbstractAsynchronousLobAccess implements MiniLobAccess {
+public abstract class AbstractAsynchronousContentAccess implements MiniContentAccess {
 
     private final long fullLength;
     
@@ -20,7 +21,7 @@ public abstract class AbstractAsynchronousLobAccess implements MiniLobAccess {
     
     
     
-    protected AbstractAsynchronousLobAccess(long length) {
+    protected AbstractAsynchronousContentAccess(long length) {
         this.fullLength = length;
     }
 
@@ -31,7 +32,7 @@ public abstract class AbstractAsynchronousLobAccess implements MiniLobAccess {
     }
 
     @Override
-    public ByteString get(long start, int length) throws IOException {
+    public ByteString get(long start, int length) {
         checkClosed();
         checkBounds(start, length);
         waitAvailable(start, (long) length);
@@ -39,10 +40,10 @@ public abstract class AbstractAsynchronousLobAccess implements MiniLobAccess {
         return loadPart(start, length);
     }
     
-    protected abstract ByteString loadPart(long start, int length) throws IOException;
+    protected abstract ByteString loadPart(long start, int length);
     
     @Override
-    public InputStream inputStream() throws IOException {
+    public InputStream inputStream() {
         checkClosed();
         return new LobInputStream();
     }
@@ -104,7 +105,7 @@ public abstract class AbstractAsynchronousLobAccess implements MiniLobAccess {
         }
     }
     
-    protected abstract void savePart(long start, ByteString part) throws IOException;
+    protected abstract void savePart(long start, ByteString part);
     
     private void checkBounds(long start, int length) {
         if (start < 0L || length <= 0 || (start + length) > fullLength) {
@@ -114,7 +115,7 @@ public abstract class AbstractAsynchronousLobAccess implements MiniLobAccess {
         }
     }
 
-    private void waitAvailable(long start, long length) throws IOException {
+    private void waitAvailable(long start, long length) {
         synchronized (indexLock) {
             while (!checkAvailable(start, length)) {
                 try {
@@ -122,12 +123,18 @@ public abstract class AbstractAsynchronousLobAccess implements MiniLobAccess {
                     indexLock.wait();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    throw new InterruptedIOException(
-                            "Interrupt occured before the requested content whould became available");
+                    throw asUncheckedIOException(e);
                 }
                 checkClosed();
             }
         }
+    }
+    
+    private RuntimeException asUncheckedIOException(Exception exception) {
+        Thread.currentThread().interrupt();
+        IOException ioException = new InterruptedIOException();
+        ioException.addSuppressed(exception);
+        return new UncheckedIOException(ioException);
     }
     
     private boolean checkAvailable(long start, long length) {

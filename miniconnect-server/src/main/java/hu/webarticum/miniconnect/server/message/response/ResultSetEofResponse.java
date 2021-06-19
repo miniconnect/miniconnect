@@ -6,14 +6,14 @@ public class ResultSetEofResponse implements Response, SessionMessage {
 
     private final long sessionId;
 
-    private final int queryId;
+    private final int exchangeId;
 
     private final long endOffset;
 
     
-    public ResultSetEofResponse(long sessionId, int queryId, long endOffset) {
+    public ResultSetEofResponse(long sessionId, int exchangeId, long endOffset) {
         this.sessionId = sessionId;
-        this.queryId = queryId;
+        this.exchangeId = exchangeId;
         this.endOffset = endOffset;
     }
 
@@ -23,8 +23,8 @@ public class ResultSetEofResponse implements Response, SessionMessage {
         return sessionId;
     }
 
-    public int queryId() {
-        return queryId;
+    public int exchangeId() {
+        return exchangeId;
     }
 
     public long endOffset() {

@@ -8,28 +8,28 @@ import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class DemoResponse {
     
-    private final int queryId;
+    private final int exchangeId;
     
     private final String result;
     
     
-    public DemoResponse(int queryId, String result) {
-        this.queryId = queryId;
+    public DemoResponse(int exchangeId, String result) {
+        this.exchangeId = exchangeId;
         this.result = result;
     }
 
     public static DemoResponse decode(Block block) {
         ByteString.Reader reader = block.content().reader();
         
-        int queryId = ByteUtil.bytesToInt(reader.read(4));
+        int exchangeId = ByteUtil.bytesToInt(reader.read(4));
         String result = new String(reader.readRemaining(), StandardCharsets.UTF_8);
         
-        return new DemoResponse(queryId, result);
+        return new DemoResponse(exchangeId, result);
     }
 
     
-    public int queryId() {
-        return queryId;
+    public int exchangeId() {
+        return exchangeId;
     }
 
     public String result() {
@@ -38,7 +38,7 @@ public class DemoResponse {
     
     public Block encode() {
         ByteString content = ByteString.builder()
-                .append(ByteUtil.intToBytes(queryId))
+                .append(ByteUtil.intToBytes(exchangeId))
                 .append(ByteString.wrap(result.getBytes(StandardCharsets.UTF_8)))
                 .build();
         
@@ -47,7 +47,7 @@ public class DemoResponse {
     
     @Override
     public String toString() {
-        return String.format("%d:%s", queryId, result);
+        return String.format("%d:%s", exchangeId, result);
     }
     
 }

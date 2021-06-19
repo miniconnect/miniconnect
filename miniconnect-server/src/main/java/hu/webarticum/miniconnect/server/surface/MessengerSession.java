@@ -9,31 +9,31 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import hu.webarticum.miniconnect.api.MiniLobResult;
+import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
-import hu.webarticum.miniconnect.server.message.response.LobResultResponse;
+import hu.webarticum.miniconnect.server.message.response.LargeDataSaveResponse;
 import hu.webarticum.miniconnect.server.message.response.Response;
 import hu.webarticum.miniconnect.server.message.response.ResultResponse;
 import hu.webarticum.miniconnect.server.message.response.ResultSetEofResponse;
 import hu.webarticum.miniconnect.server.message.response.ResultSetRowsResponse;
 import hu.webarticum.miniconnect.server.message.response.ResultSetValuePartResponse;
 import hu.webarticum.miniconnect.server.util.OrderAligningQueue;
-import hu.webarticum.miniconnect.tool.result.StoredLobResult;
+import hu.webarticum.miniconnect.tool.result.StoredLargeDataSaveResult;
 import hu.webarticum.miniconnect.tool.result.StoredResult;
 import hu.webarticum.miniconnect.server.Server;
-import hu.webarticum.miniconnect.server.message.request.LobPartRequest;
-import hu.webarticum.miniconnect.server.message.request.LobRequest;
+import hu.webarticum.miniconnect.server.message.request.LargeDataPartRequest;
+import hu.webarticum.miniconnect.server.message.request.LargeDataHeadRequest;
 import hu.webarticum.miniconnect.server.message.request.QueryRequest;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class MessengerSession implements MiniSession {
     
-    private static final int LOB_CHUNK_SIZE = 4096; // TODO: make it configurable
+    private static final int DATA_SEND_CHUNK_SIZE = 4096; // TODO: make it configurable
     
     private static final int RESULT_TIMEOUT_VALUE = 60; // TODO: make it configurable
     
-    private static final TimeUnit RESULT_TIMEOUT_UNIT = TimeUnit.SECONDS; // TODO: make it configurable
+    private static final TimeUnit RESULT_TIMEOUT_UNIT = TimeUnit.SECONDS; // TODO: make it conf.
     
     
     private final long sessionId;
@@ -41,9 +41,7 @@ public class MessengerSession implements MiniSession {
     private final Server server;
     
 
-    private final AtomicInteger requestIdCounter = new AtomicInteger();
-
-    private final AtomicInteger lobIdCounter = new AtomicInteger();
+    private final AtomicInteger exchangeIdCounter = new AtomicInteger();
 
 
     public MessengerSession(long sessionId, Server server) {
@@ -53,14 +51,14 @@ public class MessengerSession implements MiniSession {
 
     @Override
     public MiniResult execute(String query) throws IOException {
-        int queryId = requestIdCounter.incrementAndGet();
+        int exchangeId = exchangeIdCounter.incrementAndGet();
         
         OrderAligningQueue<Response> responseQueue = new OrderAligningQueue<>(
                 MessengerSession::checkNextResultResponse);
 
         CompletableFuture<MessengerResultSet> resultSetFuture = new CompletableFuture<>();
         
-        QueryRequest queryRequest = new QueryRequest(sessionId, queryId, query);
+        QueryRequest queryRequest = new QueryRequest(sessionId, exchangeId, query);
         server.accept(queryRequest, response -> {
             if (response instanceof ResultSetValuePartResponse) {
                 ResultSetValuePartResponse partResponse = (ResultSetValuePartResponse) response;
@@ -111,6 +109,7 @@ public class MessengerSession implements MiniSession {
         
     private boolean fetchResponseQueue(
             OrderAligningQueue<Response> responseQueue, MessengerResultSet resultSet) {
+        
         Response response;
         try {
             response = responseQueue.take();
@@ -153,7 +152,8 @@ public class MessengerSession implements MiniSession {
             return false;
         }
         
-        ResultSetRowsResponse previousResultSetRowsResponse = (ResultSetRowsResponse) previousResponse;
+        ResultSetRowsResponse previousResultSetRowsResponse =
+                (ResultSetRowsResponse) previousResponse;
         long previousRowOffset = previousResultSetRowsResponse.rowOffset();
         int previousRowCount = previousResultSetRowsResponse.rows().size();
         long previousEndOffset = previousRowOffset + previousRowCount;
@@ -162,22 +162,26 @@ public class MessengerSession implements MiniSession {
     }
 
     @Override
-    public MiniLobResult putLargeData(long length, InputStream dataSource) throws IOException {
-        int lobId = lobIdCounter.incrementAndGet();
+    public MiniLargeDataSaveResult putLargeData(
+            long length, InputStream dataSource) throws IOException {
+        
+        int exchangeId = exchangeIdCounter.incrementAndGet();
         
         CompletableFuture<Response> responseFuture = new CompletableFuture<>();
         
-        LobRequest lobRequest = new LobRequest(sessionId, lobId, length);
-        server.accept(lobRequest, responseFuture::complete);
+        LargeDataHeadRequest largeDataHeadRequest =
+                new LargeDataHeadRequest(sessionId, exchangeId, length);
+        server.accept(largeDataHeadRequest, responseFuture::complete);
 
-        byte[] buffer = new byte[LOB_CHUNK_SIZE];
+        byte[] buffer = new byte[DATA_SEND_CHUNK_SIZE];
         int readSize = 0;
         long offset = 0;
         while ((readSize = dataSource.read(buffer)) != -1) {
             // TODO: check for error
             ByteString content = ByteString.wrap(Arrays.copyOf(buffer, readSize));
-            LobPartRequest lobPartRequest = new LobPartRequest(sessionId, lobId, offset, content);
-            server.accept(lobPartRequest);
+            LargeDataPartRequest largeDataPartRequest =
+                    new LargeDataPartRequest(sessionId, exchangeId, offset, content);
+            server.accept(largeDataPartRequest);
             offset += readSize;
         }
         
@@ -190,17 +194,17 @@ public class MessengerSession implements MiniSession {
             // nothing to do
         }
 
-        if (response instanceof LobResultResponse) {
-            LobResultResponse lobResultResponse = (LobResultResponse) response;
-            return new StoredLobResult(
-                    lobResultResponse.success(),
-                    lobResultResponse.errorCode(),
-                    lobResultResponse.errorMessage(),
-                    lobResultResponse.getVariableName());
+        if (response instanceof LargeDataSaveResponse) {
+            LargeDataSaveResponse largeDataSaveResponse = (LargeDataSaveResponse) response;
+            return new StoredLargeDataSaveResult(
+                    largeDataSaveResponse.success(),
+                    largeDataSaveResponse.errorCode(),
+                    largeDataSaveResponse.errorMessage(),
+                    largeDataSaveResponse.getVariableName());
         } else if (response == null) {
-            return new StoredLobResult(false, "99990", "No response", ""); // XXX
+            return new StoredLargeDataSaveResult(false, "99990", "No response", ""); // XXX
         } else {
-            return new StoredLobResult(false, "99999", "Bad response", ""); // XXX
+            return new StoredLargeDataSaveResult(false, "99999", "Bad response", ""); // XXX
         }
     }
     

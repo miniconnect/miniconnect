@@ -10,14 +10,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import hu.webarticum.miniconnect.api.MiniSession;
-import hu.webarticum.miniconnect.api.MiniLobResult;
+import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 
 // TODO: better abstraction (context/executor vs output-handling), builder
+// TODO: use regex-bee
 public class SqlRepl implements Repl {
 
-    private static final Pattern LOB_PATTERN = Pattern.compile(
-            "\\s*lob:\\s*(?:\\s*(?<source>@?(?:([^\\)\\\\]|\\\\.)+))\\s*)(?:;\\s*)?",
+    private static final Pattern DATA_PATTERN = Pattern.compile(
+            "\\s*data:\\s*(?:\\s*(?<source>@?(?:([^\\)\\\\]|\\\\.)+))\\s*)(?:;\\s*)?",
             Pattern.CASE_INSENSITIVE);
 
     private static final Pattern HELP_PATTERN = Pattern.compile(
@@ -29,7 +30,7 @@ public class SqlRepl implements Repl {
             Pattern.CASE_INSENSITIVE);
     
     private static final Pattern COMMAND_PATTERN = Pattern.compile(
-            "^(?:" + LOB_PATTERN + "|" + HELP_PATTERN + "|" + QUIT_PATTERN +
+            "^(?:" + DATA_PATTERN + "|" + HELP_PATTERN + "|" + QUIT_PATTERN +
                     "|(?:[^'\"`\\\\;]++|\\\\.|(['\"`])(?:(?:\\\\|\\1)\\1|(?!\\1).)++\\1)*;.*+)$",
             Pattern.MULTILINE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
@@ -70,16 +71,16 @@ public class SqlRepl implements Repl {
 
     @Override
     public boolean execute(String command) throws IOException {
-        Matcher lobMatcher = LOB_PATTERN.matcher(command);
-        if (lobMatcher.matches()) {
-            String escapedSource = lobMatcher.group("source");
+        Matcher dataMatcher = DATA_PATTERN.matcher(command);
+        if (dataMatcher.matches()) {
+            String escapedSource = dataMatcher.group("source");
             String source = UNESCAPE_PATTERN.matcher(escapedSource).replaceAll("$1");
-            lob(source);
+            putLargeData(source);
             return true;
         }
         
         if (HELP_PATTERN.matcher(command).matches()) {
-            help();
+            printHelp();
             return true;
         }
 
@@ -122,7 +123,7 @@ public class SqlRepl implements Repl {
         new ResultSetPrinter().print(result.resultSet(), out);
     }
     
-    private void lob(String source) throws IOException {
+    private void putLargeData(String source) throws IOException {
         long length;
         InputStream in;
         if (source.length() > 0 && source.charAt(0) == '@') {
@@ -139,39 +140,43 @@ public class SqlRepl implements Repl {
             in = new ByteArrayInputStream(bytes);
         }
 
-        MiniLobResult lobResult = session.putLargeData(length, in);
-        printLobResult(lobResult, length);
+        MiniLargeDataSaveResult result = session.putLargeData(length, in);
+        printLargeDataSaveResult(result, length);
     }
     
-    private void printLobResult(MiniLobResult lobResult, long length) throws IOException {
-        if (lobResult.success()) {
-            printSuccessLobResult(lobResult, length);
+    private void printLargeDataSaveResult(
+            MiniLargeDataSaveResult result, long length) throws IOException {
+        
+        if (result.success()) {
+            printSuccessLargeDataSaveResult(result, length);
         } else {
-            printErrorLobResult(lobResult);
+            printErrorLargeDataSaveResult(result);
         }
     }
 
-    private void printSuccessLobResult(MiniLobResult lobResult, long length) throws IOException {
+    private void printSuccessLargeDataSaveResult(
+            MiniLargeDataSaveResult result, long length) throws IOException {
+        
         out.append("  Successfully stored\n");
         out.append("  Size: " + length + " bytes\n");
-        out.append("  Variable name: '" + lobResult.variableName() + "'\n");
+        out.append("  Variable name: '" + result.variableName() + "'\n");
     }
 
-    private void printErrorLobResult(MiniLobResult lobResult) throws IOException {
+    private void printErrorLargeDataSaveResult(MiniLargeDataSaveResult result) throws IOException {
         out.append("  Failed to store data\n");
-        out.append("  Error code: " + lobResult.errorCode() + "\n");
-        out.append("  Error message: " + lobResult.errorMessage() + "\n");
+        out.append("  Error code: " + result.errorCode() + "\n");
+        out.append("  Error message: " + result.errorMessage() + "\n");
     }
 
-    private void help() throws IOException {
+    private void printHelp() throws IOException {
         out.append('\n');
         out.append(String.format("  MiniConnect SQL REPL - %s%n",
                 session.getClass().getSimpleName()));
         out.append('\n');
         out.append("  Commands:\n");
         out.append("    \"help\": prints this document\n");
-        out.append("    \"lob:\"<data>: sends lob data\n");
-        out.append("    \"lob:@\"<file>: sends lob data from file\n");
+        out.append("    \"data:\"<data>: sends large data\n");
+        out.append("    \"data:@\"<file>: sends large data from file\n");
         out.append("    \"exit\", \"quit\": quits this program\n");
         out.append("    <any SQL>: will be executed in the session\n");
         out.append("      (must be terminated with \";\")\n");

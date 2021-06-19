@@ -20,7 +20,7 @@ public class DemoClient implements Closeable {
     
     private final BlockTarget target; // XXX: something typed?
     
-    private final AtomicInteger queryIdCounter = new AtomicInteger(1);
+    private final AtomicInteger exchangeIdCounter = new AtomicInteger(1);
     
 
     private DemoClient(
@@ -46,13 +46,13 @@ public class DemoClient implements Closeable {
 
 
     public String query(String query) throws IOException {
-        int queryId = queryIdCounter.getAndIncrement();
+        int exchangeId = exchangeIdCounter.getAndIncrement();
         
         SingleItemPocket<DemoResponse> pocket = new SingleItemPocket<>(
-                response -> response.queryId() == queryId);
+                response -> response.exchangeId() == exchangeId);
         CollectingNotifier<DemoResponse, DemoResponse> notifier = consumer.listen(pocket);
 
-        DemoRequest request = new DemoRequest(queryId, query);
+        DemoRequest request = new DemoRequest(exchangeId, query);
         target.send(request.encode());
         DemoResponse response = notifier.await();
         

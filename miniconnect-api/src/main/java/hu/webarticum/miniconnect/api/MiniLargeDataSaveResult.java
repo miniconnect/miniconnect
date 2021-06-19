@@ -1,6 +1,6 @@
 package hu.webarticum.miniconnect.api;
 
-public interface MiniLobResult {
+public interface MiniLargeDataSaveResult {
 
     public boolean success();
 

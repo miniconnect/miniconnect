@@ -96,21 +96,24 @@ public class DefaultValueInterpreter implements ValueInterpreter {
     public Object decode(MiniValue value) {
         if (value.isNull()) {
             return null;
-        } else if (type.equals(Boolean.class)) {
-            return (value.content().byteAt(0) != ((byte) 0));
+        }
+        
+        ByteString content = value.contentAccess().get();
+        if (type.equals(Boolean.class)) {
+            return (content.byteAt(0) != ((byte) 0));
         } else if (type.equals(Byte.class)) {
-            return value.content().byteAt(0);
+            return content.byteAt(0);
         } else if (type.equals(Short.class)) {
-            ByteBuffer byteBuffer = value.content().asBuffer();
+            ByteBuffer byteBuffer = content.asBuffer();
             return byteBuffer.getShort();
         } else if (type.equals(Integer.class)) {
-            ByteBuffer byteBuffer = value.content().asBuffer();
+            ByteBuffer byteBuffer = content.asBuffer();
             return byteBuffer.getInt();
         } else if (type.equals(Long.class)) {
-            ByteBuffer byteBuffer = value.content().asBuffer();
+            ByteBuffer byteBuffer = content.asBuffer();
             return byteBuffer.getLong();
         } else if (type.equals(String.class)) {
-            return value.content().toString(StandardCharsets.UTF_8);
+            return content.toString(StandardCharsets.UTF_8);
         } else {
             throw new IllegalStateException(
                     String.format("Unsupported type: %s", type.getSimpleName()));

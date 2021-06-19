@@ -42,10 +42,10 @@ public class DemoServer implements Closeable {
     }
     
     public Object process(DemoConnector connector, DemoRequest request) throws IOException {
-        int queryId = request.queryId();
+        int exchangeId = request.exchangeId();
         String query = request.query();
         String answer = transformer.apply(query);
-        DemoResponse response = new DemoResponse(queryId, answer);
+        DemoResponse response = new DemoResponse(exchangeId, answer);
         connector.send(response);
         return null;
     }

@@ -1,56 +1,61 @@
-package hu.webarticum.miniconnect.tool.result;
+package hu.webarticum.miniconnect.server.message.response;
 
-import hu.webarticum.miniconnect.api.MiniLobResult;
+import hu.webarticum.miniconnect.server.message.SessionMessage;
 
-public class StoredLobResult implements MiniLobResult {
-    
+public class LargeDataSaveResponse implements Response, SessionMessage {
+
+    private final long sessionId;
+
+    private final int exchangeId;
+
     private final boolean success;
-    
-    private final String errorCode;
-    
-    private final String errorMessage;
-    
-    private final String variableName;
-    
 
-    public StoredLobResult(
+    private final String errorCode;
+
+    private final String errorMessage;
+
+    private final String variableName;
+
+
+    public LargeDataSaveResponse(
+            long sessionId,
+            int exchangeId,
             boolean success,
             String errorCode,
             String errorMessage,
             String variableName) {
 
+        this.sessionId = sessionId;
+        this.exchangeId = exchangeId;
         this.success = success;
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
         this.variableName = variableName;
     }
-    
-    public static StoredLobResult success(String variableName) {
-        return new StoredLobResult(true, "", "", variableName);
-    }
 
-    public static StoredLobResult error(String errorCode, String errorMessage) {
-        return new StoredLobResult(false, errorCode, errorMessage, "");
-    }
-    
 
     @Override
+    public long sessionId() {
+        return sessionId;
+    }
+
+    public int exchangeId() {
+        return exchangeId;
+    }
+
     public boolean success() {
         return success;
     }
 
-    @Override
     public String errorCode() {
         return errorCode;
     }
 
-    @Override
     public String errorMessage() {
         return errorMessage;
     }
 
-    @Override
-    public String variableName() {
+    public String getVariableName() {
         return variableName;
     }
 

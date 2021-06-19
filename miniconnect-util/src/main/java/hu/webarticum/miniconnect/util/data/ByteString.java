@@ -17,9 +17,9 @@ import java.util.Objects;
  */
 public class ByteString implements Serializable {
 
-    private static final long serialVersionUID = 3831893275159407967L;
-
-
+    private static final long serialVersionUID = 2392643209772967829L;
+    
+    
     private final byte[] bytes;
 
 

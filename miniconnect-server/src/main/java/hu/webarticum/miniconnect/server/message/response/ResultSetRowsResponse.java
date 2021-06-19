@@ -1,5 +1,6 @@
 package hu.webarticum.miniconnect.server.message.response;
 
+import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.server.message.SessionMessage;
@@ -12,7 +13,7 @@ public final class ResultSetRowsResponse implements Response, SessionMessage {
 
     private final long sessionId;
 
-    private final int queryId;
+    private final int exchangeId;
 
     private final long rowOffset;
 
@@ -25,14 +26,14 @@ public final class ResultSetRowsResponse implements Response, SessionMessage {
 
     public ResultSetRowsResponse(
             long sessionId,
-            int queryId,
+            int exchangeId,
             long rowOffset,
             ImmutableList<Integer> nullables,
             ImmutableMap<Integer, Integer> fixedSizes,
             ImmutableList<ImmutableList<CellData>> rows) {
 
         this.sessionId = sessionId;
-        this.queryId = queryId;
+        this.exchangeId = exchangeId;
         this.rowOffset = rowOffset;
         this.nullables = nullables;
         this.fixedSizes = fixedSizes;
@@ -45,8 +46,8 @@ public final class ResultSetRowsResponse implements Response, SessionMessage {
         return sessionId;
     }
 
-    public int queryId() {
-        return queryId;
+    public int exchangeId() {
+        return exchangeId;
     }
 
     public long rowOffset() {
@@ -75,14 +76,18 @@ public final class ResultSetRowsResponse implements Response, SessionMessage {
         private final ByteString content;
 
 
-        public CellData(MiniValue value) {
-            this(value.isNull(), value.length(), value.content());
-        }
-        
         public CellData(boolean isNull, long fullLength, ByteString content) {
             this.isNull = isNull;
             this.fullLength = fullLength;
             this.content = content;
+        }
+        
+        public static CellData of(MiniValue value) {
+            return of(value.isNull(), value.contentAccess());
+        }
+
+        public static CellData of(boolean isNull, MiniContentAccess contentAccess) {
+            return new CellData(isNull, contentAccess.length(), contentAccess.get());
         }
 
 

@@ -1,13 +1,14 @@
-package hu.webarticum.miniconnect.server.lob;
+package hu.webarticum.miniconnect.server.contentaccess;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-public class FileAsynchronousLobAccess extends AbstractAsynchronousLobAccess {
+public class FileAsynchronousContentAccess extends AbstractAsynchronousContentAccess {
     
     private static final long MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
@@ -26,7 +27,7 @@ public class FileAsynchronousLobAccess extends AbstractAsynchronousLobAccess {
     private volatile boolean closed = false;
     
     
-    public FileAsynchronousLobAccess(long length, File file) throws IOException {
+    public FileAsynchronousContentAccess(long length, File file) throws IOException {
         super(length);
         this.file = file;
         this.randomAccessFile = new RandomAccessFile(file, FILE_ACCESS_MODE);
@@ -34,30 +35,57 @@ public class FileAsynchronousLobAccess extends AbstractAsynchronousLobAccess {
     
 
     @Override
-    public ByteString get() throws IOException {
-        long length = length();
-        if (length > MAX_ARRAY_SIZE) {
-            throw new IllegalStateException("Content is too large to get in its entirety");
-        }
-        return get(0, (int) length);
+    public boolean isLarge() {
+        return (length() > MAX_ARRAY_SIZE);
     }
 
     @Override
-    protected ByteString loadPart(long start, int length) throws IOException {
-        byte[] bytes = new byte[length];
+    public boolean isTemporary() {
+        return true;
+    }
+
+    @Override
+    public ByteString get() {
+        if (isLarge()) {
+            throw new IllegalStateException("Content is too large to get in its entirety");
+        }
+        return get(0, (int) length());
+    }
+
+    @Override
+    protected ByteString loadPart(long start, int length) {
+        byte[] bytes;
         synchronized (fileAccessLock) {
-            randomAccessFile.seek(start);
-            randomAccessFile.readFully(bytes);
+            try {
+                bytes = loadPartUnsafe(start, length);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
         return ByteString.wrap(bytes);
     }
 
+    private byte[] loadPartUnsafe(long start, int length) throws IOException {
+        byte[] bytes = new byte[length];
+        randomAccessFile.seek(start);
+        randomAccessFile.readFully(bytes);
+        return bytes;
+    }
+    
     @Override
-    protected void savePart(long start, ByteString part) throws IOException {
+    protected void savePart(long start, ByteString part) {
         synchronized (fileAccessLock) {
-            randomAccessFile.seek(start);
-            randomAccessFile.write(part.extract());
+            try {
+                savePartUnsafe(start, part);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
+    }
+    
+    private void savePartUnsafe(long start, ByteString part) throws IOException {
+        randomAccessFile.seek(start);
+        randomAccessFile.write(part.extract());
     }
 
     @Override

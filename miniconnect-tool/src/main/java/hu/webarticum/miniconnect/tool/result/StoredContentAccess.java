@@ -1,20 +1,33 @@
 package hu.webarticum.miniconnect.tool.result;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 
-import hu.webarticum.miniconnect.api.MiniLobAccess;
+import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-public class StoredLobAccess implements MiniLobAccess {
+public class StoredContentAccess implements MiniContentAccess, Serializable {
 
+    private static final long serialVersionUID = 1L;
+    
+    
     private final ByteString content;
     
     
-    public StoredLobAccess(ByteString content) {
+    public StoredContentAccess(ByteString content) {
         this.content = content;
     }
 
+
+    @Override
+    public boolean isLarge() {
+        return false;
+    }
+
+    @Override
+    public boolean isTemporary() {
+        return false;
+    }
 
     @Override
     public long length() {
@@ -22,12 +35,12 @@ public class StoredLobAccess implements MiniLobAccess {
     }
 
     @Override
-    public ByteString get() throws IOException {
+    public ByteString get() {
         return content;
     }
     
     @Override
-    public ByteString get(long start, int length) throws IOException {
+    public ByteString get(long start, int length) {
         long contentLength = content.length();
         long end = start + length;
         if (start < 0L || end > contentLength) {
@@ -39,7 +52,7 @@ public class StoredLobAccess implements MiniLobAccess {
     }
 
     @Override
-    public InputStream inputStream() throws IOException {
+    public InputStream inputStream() {
         return content.asInputStream();
     }
     

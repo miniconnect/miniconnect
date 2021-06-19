@@ -5,7 +5,7 @@ import java.util.TreeMap;
 
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-public class CompletableSmallLobContent {
+public class CompletableSmallContent {
 
     private final ByteString.Builder builder = ByteString.builder();
     

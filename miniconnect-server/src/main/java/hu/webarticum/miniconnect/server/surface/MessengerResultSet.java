@@ -27,7 +27,8 @@ public class MessengerResultSet implements MiniResultSet {
     
     
     public MessengerResultSet(ResultResponse resultResponse) {
-        this.columnHeaders = resultResponse.columnHeaders().map(ColumnHeaderData::toMiniColumnHeader);
+        this.columnHeaders =
+                resultResponse.columnHeaders().map(ColumnHeaderData::toMiniColumnHeader);
     }
 
     public void accept(ResultSetRowsResponse rowsResponse) {
@@ -67,7 +68,7 @@ public class MessengerResultSet implements MiniResultSet {
     }
 
     @Override
-    public synchronized ImmutableList<MiniValue> fetch() throws IOException {
+    public synchronized ImmutableList<MiniValue> fetch() {
         if (finished) {
             // XXX
             return null;

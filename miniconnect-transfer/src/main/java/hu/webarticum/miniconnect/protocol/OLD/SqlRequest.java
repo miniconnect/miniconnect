@@ -15,14 +15,14 @@ public class SqlRequest implements SessionRequest {
 
     private final int sessionId;
 
-    private final int queryId;
+    private final int exchangeId;
     
     private final String sql;
 
     
-    public SqlRequest(int sessionId, int queryId, String sql) {
+    public SqlRequest(int sessionId, int exchangeId, String sql) {
         this.sessionId = sessionId;
-        this.queryId = queryId;
+        this.exchangeId = exchangeId;
         this.sql = sql;
     }
     
@@ -30,10 +30,10 @@ public class SqlRequest implements SessionRequest {
         ByteString.Reader reader = content.reader().skip(1);
         
         int sessionId = ByteUtil.bytesToInt(reader.read(4));
-        int queryId = ByteUtil.bytesToInt(reader.read(4));
+        int exchangeId = ByteUtil.bytesToInt(reader.read(4));
         String sql = new String(reader.readRemaining(), CHARSET);
         
-        return new SqlRequest(sessionId, queryId, sql);
+        return new SqlRequest(sessionId, exchangeId, sql);
     }
     
     
@@ -47,8 +47,8 @@ public class SqlRequest implements SessionRequest {
         return sessionId;
     }
 
-    public int queryId() {
-        return queryId;
+    public int exchangeId() {
+        return exchangeId;
     }
 
     @Override
@@ -56,7 +56,7 @@ public class SqlRequest implements SessionRequest {
         return ByteString.builder()
                 .append(TYPE.flag())
                 .append(ByteUtil.intToBytes(sessionId))
-                .append(ByteUtil.intToBytes(queryId))
+                .append(ByteUtil.intToBytes(exchangeId))
                 .append(sql.getBytes(CHARSET))
                 .build();
     }

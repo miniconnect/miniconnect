@@ -12,14 +12,14 @@ public class ResultResponse implements SessionResponse {
 
     private final int sessionId;
 
-    private final int queryId;
+    private final int exchangeId;
 
     private final StoredResult storedResult; // XXX
 
 
-    public ResultResponse(int sessionId, int queryId, StoredResult storedResult) {
+    public ResultResponse(int sessionId, int exchangeId, StoredResult storedResult) {
         this.sessionId = sessionId;
-        this.queryId = queryId;
+        this.exchangeId = exchangeId;
         this.storedResult = storedResult;
     }
 
@@ -27,10 +27,10 @@ public class ResultResponse implements SessionResponse {
         ByteString.Reader reader = content.reader().skip(1);
 
         int sessionId = ByteUtil.bytesToInt(reader.read(4));
-        int queryId = ByteUtil.bytesToInt(reader.read(4));
+        int exchangeId = ByteUtil.bytesToInt(reader.read(4));
         StoredResult storedResult = Serialization.deserialize(reader.readRemaining());
 
-        return new ResultResponse(sessionId, queryId, storedResult);
+        return new ResultResponse(sessionId, exchangeId, storedResult);
     }
 
 
@@ -44,8 +44,8 @@ public class ResultResponse implements SessionResponse {
         return sessionId;
     }
 
-    public int queryId() {
-        return queryId;
+    public int exchangeId() {
+        return exchangeId;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class ResultResponse implements SessionResponse {
         return ByteString.builder()
                 .append(TYPE.flag())
                 .append(ByteUtil.intToBytes(sessionId))
-                .append(ByteUtil.intToBytes(queryId))
+                .append(ByteUtil.intToBytes(exchangeId))
                 .append(Serialization.serialize(storedResult))
                 .build();
     }

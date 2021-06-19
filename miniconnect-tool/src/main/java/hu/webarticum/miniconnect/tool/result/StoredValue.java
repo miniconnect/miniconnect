@@ -1,9 +1,8 @@
 package hu.webarticum.miniconnect.tool.result;
 
-import java.io.IOException;
 import java.io.Serializable;
 
-import hu.webarticum.miniconnect.api.MiniLobAccess;
+import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.util.data.ByteString;
@@ -17,7 +16,7 @@ public class StoredValue implements MiniValue, Serializable {
     
     private final boolean isNull;
 
-    private final ByteString content;
+    private final StoredContentAccess contentAccess;
 
 
     public StoredValue() {
@@ -35,14 +34,16 @@ public class StoredValue implements MiniValue, Serializable {
     public StoredValue(MiniValueDefinition definition, boolean isNull, ByteString content) {
         this.definition = StoredValueDefinition.of(definition);
         this.isNull = isNull;
-        this.content = content;
+        this.contentAccess = new StoredContentAccess(content);
     }
 
     public static StoredValue of(MiniValue value) {
-        if (value.isLob()) {
-            throw new IllegalArgumentException("LOB value can not be stored");
+        MiniContentAccess contentAccess = value.contentAccess();
+        if (contentAccess.isLarge()) {
+            throw new IllegalArgumentException(
+                    "Content is too large to store in memory");
         }
-        return new StoredValue(value.isNull(), value.content());
+        return new StoredValue(value.isNull(), contentAccess.get());
     }
 
 
@@ -57,23 +58,8 @@ public class StoredValue implements MiniValue, Serializable {
     }
 
     @Override
-    public boolean isLob() {
-        return false;
-    }
-
-    @Override
-    public long length() {
-        return content.length();
-    }
-
-    @Override
-    public ByteString content() {
-        return content;
-    }
-
-    @Override
-    public MiniLobAccess lobAccess() throws IOException {
-        return new StoredLobAccess(content);
+    public MiniContentAccess contentAccess() {
+        return contentAccess;
     }
 
 }

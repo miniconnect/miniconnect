@@ -17,13 +17,14 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
+import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.server.Server;
-import hu.webarticum.miniconnect.server.message.request.LobPartRequest;
-import hu.webarticum.miniconnect.server.message.request.LobRequest;
+import hu.webarticum.miniconnect.server.message.request.LargeDataPartRequest;
+import hu.webarticum.miniconnect.server.message.request.LargeDataHeadRequest;
 import hu.webarticum.miniconnect.server.message.request.QueryRequest;
 import hu.webarticum.miniconnect.server.message.request.Request;
-import hu.webarticum.miniconnect.server.message.response.LobResultResponse;
+import hu.webarticum.miniconnect.server.message.response.LargeDataSaveResponse;
 import hu.webarticum.miniconnect.server.message.response.Response;
 import hu.webarticum.miniconnect.server.message.response.ResultResponse;
 import hu.webarticum.miniconnect.server.message.response.ResultSetRowsResponse;
@@ -33,7 +34,6 @@ import hu.webarticum.miniconnect.server.message.response.ResultSetEofResponse;
 import hu.webarticum.miniconnect.server.message.response.ResultSetRowsResponse.CellData;
 import hu.webarticum.miniconnect.tool.result.DefaultValueInterpreter;
 import hu.webarticum.miniconnect.tool.result.StoredColumnHeader;
-import hu.webarticum.miniconnect.tool.result.StoredValue;
 import hu.webarticum.miniconnect.tool.result.StoredValueDefinition;
 import hu.webarticum.miniconnect.tool.result.ValueInterpreter;
 import hu.webarticum.miniconnect.util.data.ByteString;
@@ -52,9 +52,8 @@ public class DummyServer implements Server {
     
     private static final int MAX_LENGTH = 1000_000;
     
-    private static final int LOB_INITIAL_LENGTH = 25;
-    
-    private static final int LOB_CHUNK_LENGTH = 10;
+    // FIXME/TODO: larger value
+    private static final int DATA_CHUNK_LENGTH = 10;
     
     private static final Pattern SELECT_ALL_QUERY_PATTERN = Pattern.compile(
             "(?i)\\s*SELECT\\s+\\*\\s+FROM\\s+([\"`]?)(?-i)data(?i)\\1\\s*;?\\s*");
@@ -70,9 +69,9 @@ public class DummyServer implements Server {
     
     private final List<List<Object>> data = new ArrayList<>();
     
-    private final Map<Long, CompletableSmallLobContent> incompleteContents = new HashMap<>();
+    private final Map<Long, CompletableSmallContent> incompleteContents = new HashMap<>();
     
-    private final Map<Long, Consumer<Response>> lobResponseConsumers = new HashMap<>();
+    private final Map<Long, Consumer<Response>> dataSaveConsumers = new HashMap<>();
     
     private final ImmutableList<ValueInterpreter> interpreters = columnHeaders.map(
             h -> new DefaultValueInterpreter(h.valueDefinition()));
@@ -82,10 +81,10 @@ public class DummyServer implements Server {
     public void accept(Request request, Consumer<Response> responseConsumer) {
         if (request instanceof QueryRequest) {
             acceptQueryRequest((QueryRequest) request, responseConsumer);
-        } else if (request instanceof LobRequest) {
-            acceptLobRequest((LobRequest) request, responseConsumer);
-        } else if (request instanceof LobPartRequest) {
-            acceptLobPartRequest((LobPartRequest) request);
+        } else if (request instanceof LargeDataHeadRequest) {
+            acceptLargeDataHeadRequest((LargeDataHeadRequest) request, responseConsumer);
+        } else if (request instanceof LargeDataPartRequest) {
+            acceptLargeDataPartRequest((LargeDataPartRequest) request);
         } else {
             throw new UnsupportedOperationException(String.format(
                     "Unsupported request type: %s",
@@ -97,7 +96,7 @@ public class DummyServer implements Server {
         Objects.requireNonNull(responseConsumer);
         
         long sessionId = request.sessionId();
-        int queryId = request.id();
+        int exchangeId = request.exchangeId();
         String query = request.query();
         
         if (!SELECT_ALL_QUERY_PATTERN.matcher(query).matches()) {
@@ -119,24 +118,24 @@ public class DummyServer implements Server {
         ImmutableList<ColumnHeaderData> headerDatas = new ImmutableList<>(headerDatasBuilder);
         
         ResultResponse resultResponse = new ResultResponse(
-                sessionId, queryId, true, "", "", ImmutableList.empty(), true, headerDatas);
+                sessionId, exchangeId, true, "", "", ImmutableList.empty(), true, headerDatas);
         responseConsumer.accept(resultResponse);
         
         for (int fetchFrom = 0; fetchFrom < dataRowCount; fetchFrom += 3) {
             int fetchUntil = Math.min(dataRowCount, fetchFrom + 3);
             List<List<Object>> dataRowsChunk = dataRows.subList(fetchFrom, fetchUntil);
-            sendRows(dataRowsChunk, sessionId, queryId, fetchFrom, responseConsumer);
+            sendRows(dataRowsChunk, sessionId, exchangeId, fetchFrom, responseConsumer);
         }
         
         ResultSetEofResponse resultSetEofResponse = new ResultSetEofResponse(
-                sessionId, queryId, dataRows.size());
+                sessionId, exchangeId, dataRows.size());
         responseConsumer.accept(resultSetEofResponse);
     }
     
     private void sendRows(
             List<List<Object>> dataRows,
             long sessionId,
-            int queryId,
+            int exchangeId,
             long offset,
             Consumer<Response> responseConsumer) {
 
@@ -153,26 +152,32 @@ public class DummyServer implements Server {
                 ValueInterpreter interpreter = interpreters.get(c);
                 Object content = dataRow.get(c);
                 MiniValue value = interpreter.encode(content);
-                if ((value.isLob() && value.length() > 0) || value.length() > LOB_INITIAL_LENGTH) {
-                    try (InputStream valueIn = value.lobAccess().inputStream()) {
-                        value = new StoredValue(readInputStream(valueIn, LOB_INITIAL_LENGTH));
+                MiniContentAccess contentAccess = value.contentAccess();
+                long fullLength = contentAccess.length();
+                
+                if (fullLength > DATA_CHUNK_LENGTH) {
+                    try (InputStream valueIn = value.contentAccess().inputStream()) {
+                        ByteString firstChunk = readInputStream(valueIn, DATA_CHUNK_LENGTH);
+                        rowBuilder.add(new CellData(false, fullLength, firstChunk));
+                        
                         ByteString chunk;
-                        while (!(chunk = readInputStream(valueIn, LOB_CHUNK_LENGTH)).isEmpty()) {
+                        while (!(chunk = readInputStream(valueIn, DATA_CHUNK_LENGTH)).isEmpty()) {
                             partResponses.add(new ResultSetValuePartResponse(
-                                    sessionId, queryId, offset + r, c, offset, chunk));
+                                    sessionId, exchangeId, offset + r, c, offset, chunk));
                         }
                     } catch (IOException e) {
                         // FIXME: what to do?
                     }
+                } else {
+                    rowBuilder.add(CellData.of(value));
                 }
-                rowBuilder.add(new CellData(value)); // FIXME
             }
             rowsBuilder.add(new ImmutableList<>(rowBuilder));
         }
         ImmutableList<ImmutableList<CellData>> rows = new ImmutableList<>(rowsBuilder);
         
         ResultSetRowsResponse resultSetRowsResponse = new ResultSetRowsResponse(
-                sessionId, queryId, offset, ImmutableList.empty(), ImmutableMap.empty(), rows);
+                sessionId, exchangeId, offset, ImmutableList.empty(), ImmutableMap.empty(), rows);
         responseConsumer.accept(resultSetRowsResponse);
         
         for (ResultSetValuePartResponse partResponse : partResponses) {
@@ -180,13 +185,13 @@ public class DummyServer implements Server {
         }
     }
 
-    private ByteString readInputStream(InputStream in, int length) throws IOException {
-        byte[] buffer = new byte[length];
+    private ByteString readInputStream(InputStream in, int maxLength) throws IOException {
+        byte[] buffer = new byte[maxLength];
         int readLength = in.read(buffer);
         if (readLength == -1) {
             return ByteString.empty();
         }
-        if (readLength == length) {
+        if (readLength == maxLength) {
             return ByteString.wrap(buffer);
         }
         byte[] result = new byte[readLength];
@@ -197,7 +202,7 @@ public class DummyServer implements Server {
     private void sendBadQueryErrorResultResponse(QueryRequest request, Consumer<Response> responseConsumer) {
         ResultResponse resultResponse = new ResultResponse(
                 request.sessionId(),
-                request.id(),
+                request.exchangeId(),
                 false,
                 BAD_QUERY_ERROR,
                 "Bad query, only select all is supported",
@@ -207,42 +212,44 @@ public class DummyServer implements Server {
         responseConsumer.accept(resultResponse);
     }
 
-    private void acceptLobRequest(LobRequest request, Consumer<Response> responseConsumer) {
-        Objects.requireNonNull(responseConsumer);
+    private void acceptLargeDataHeadRequest(
+            LargeDataHeadRequest request, Consumer<Response> consumer) {
+        
+        Objects.requireNonNull(consumer);
         
         long sessionId = request.sessionId();
-        int lobId = request.id();
+        int exchangeId = request.exchangeId();
         long length = request.length();
         
         if (length > MAX_LENGTH) {
-            responseConsumer.accept(new LobResultResponse(
-                    sessionId, lobId, false, TOO_LARGE_LOB_ERROR, "Too large LOB", ""));
+            consumer.accept(new LargeDataSaveResponse(
+                    sessionId, exchangeId, false, TOO_LARGE_LOB_ERROR, "Too large LOB", ""));
             return;
         }
         
-        Long contentId = (sessionId * 1000) + lobId;
-        CompletableSmallLobContent completable = requireCompletable(contentId, responseConsumer);
+        Long contentId = (sessionId * 1000) + exchangeId;
+        CompletableSmallContent completable = requireCompletable(contentId, consumer);
         
         try {
             completable.setLength((int) length);
         } catch (IllegalStateException e) {
             incompleteContents.remove(contentId);
-            responseConsumer.accept(new LobResultResponse(
-                    sessionId, lobId, false, ILLEGAL_LOB_STATE_ERROR, "Illegal LOB state", ""));
+            consumer.accept(new LargeDataSaveResponse(
+                    sessionId, exchangeId, false, ILLEGAL_LOB_STATE_ERROR, "Illegal LOB state", ""));
         } catch (Exception e) {
             incompleteContents.remove(contentId);
-            responseConsumer.accept(new LobResultResponse(
-                    sessionId, lobId, false, UNEXPECTED_ERROR, "Unexpected error " + e.getMessage(), ""));
+            consumer.accept(new LargeDataSaveResponse(
+                    sessionId, exchangeId, false, UNEXPECTED_ERROR, "Unexpected error " + e.getMessage(), ""));
         }
         
         if (length == 0) {
-            acceptLobPartRequest(new LobPartRequest(sessionId, lobId, 0, ByteString.wrap(new byte[0])));
+            acceptLargeDataPartRequest(new LargeDataPartRequest(sessionId, exchangeId, 0, ByteString.wrap(new byte[0])));
         }
     }
 
-    private void acceptLobPartRequest(LobPartRequest request) {
+    private void acceptLargeDataPartRequest(LargeDataPartRequest request) {
         long sessionId = request.sessionId();
-        int lobId = request.lobId();
+        int exchangeId = request.exchangeId();
         long offset = request.offset();
         ByteString content = request.content();
 
@@ -251,17 +258,17 @@ public class DummyServer implements Server {
             return;
         }
         
-        Long contentId = (sessionId * 1000) + lobId;
-        CompletableSmallLobContent completable = requireCompletable(contentId, null);
+        Long contentId = (sessionId * 1000) + exchangeId;
+        CompletableSmallContent completable = requireCompletable(contentId, null);
         
         try {
             completable.put((int) offset, content);
         } catch (IllegalStateException e) {
             removeCompletable(
                     contentId,
-                    new LobResultResponse(
+                    new LargeDataSaveResponse(
                             sessionId,
-                            lobId,
+                            exchangeId,
                             false,
                             ILLEGAL_LOB_STATE_ERROR,
                             "Illegal LOB state",
@@ -270,9 +277,9 @@ public class DummyServer implements Server {
         } catch (Exception e) {
             removeCompletable(
                     contentId,
-                    new LobResultResponse(
+                    new LargeDataSaveResponse(
                             sessionId,
-                            lobId,
+                            exchangeId,
                             false,
                             UNEXPECTED_ERROR,
                             "Unexpected error " + e.getMessage(),
@@ -286,23 +293,25 @@ public class DummyServer implements Server {
             Consumer<Response> responseConsumer = removeCompletable(contentId, null);
             if (responseConsumer != null) {
                 String variableName = "blob_" + contentId;
-                responseConsumer.accept(new LobResultResponse(sessionId, lobId, true, "", "", variableName));
+                responseConsumer.accept(new LargeDataSaveResponse(sessionId, exchangeId, true, "", "", variableName));
             }
         }
     }
     
-    private CompletableSmallLobContent requireCompletable(long contentId, Consumer<Response> responseConsumer) {
-        CompletableSmallLobContent completable;
+    private CompletableSmallContent requireCompletable(
+            long contentId, Consumer<Response> consumer) {
+        
+        CompletableSmallContent completable;
         synchronized (incompleteContents) {
             completable = incompleteContents.get(contentId); // NOSONAR
             if (completable == null) {
-                completable = new CompletableSmallLobContent();
+                completable = new CompletableSmallContent();
                 incompleteContents.put(contentId, completable);
             }
         }
-        if (responseConsumer != null) {
-            synchronized (lobResponseConsumers) {
-                lobResponseConsumers.put(contentId, responseConsumer);
+        if (consumer != null) {
+            synchronized (dataSaveConsumers) {
+                dataSaveConsumers.put(contentId, consumer);
             }
         }
         return completable;
@@ -313,8 +322,8 @@ public class DummyServer implements Server {
             incompleteContents.remove(contentId);
         }
         Consumer<Response> responseConsumer;
-        synchronized (lobResponseConsumers) {
-            responseConsumer = lobResponseConsumers.remove(contentId);
+        synchronized (dataSaveConsumers) {
+            responseConsumer = dataSaveConsumers.remove(contentId);
         }
         if (errorResponse != null) {
             if (responseConsumer != null) {

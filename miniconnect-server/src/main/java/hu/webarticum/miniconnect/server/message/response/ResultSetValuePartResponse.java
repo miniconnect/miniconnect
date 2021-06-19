@@ -7,7 +7,7 @@ public final class ResultSetValuePartResponse implements Response, SessionMessag
 
     private final long sessionId;
 
-    private final int queryId;
+    private final int exchangeId;
 
     private final long rowIndex;
 
@@ -20,14 +20,14 @@ public final class ResultSetValuePartResponse implements Response, SessionMessag
 
     public ResultSetValuePartResponse(
             long sessionId,
-            int queryId,
+            int exchangeId,
             long rowIndex,
             int columnIndex,
             long offset,
             ByteString content) {
 
         this.sessionId = sessionId;
-        this.queryId = queryId;
+        this.exchangeId = exchangeId;
         this.rowIndex = rowIndex;
         this.columnIndex = columnIndex;
         this.offset = offset;
@@ -40,8 +40,8 @@ public final class ResultSetValuePartResponse implements Response, SessionMessag
         return sessionId;
     }
 
-    public int queryId() {
-        return queryId;
+    public int exchangeId() {
+        return exchangeId;
     }
 
     public long rowIndex() {

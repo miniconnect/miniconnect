@@ -6,14 +6,14 @@ public final class QueryRequest implements Request, SessionMessage {
 
     private final long sessionId;
 
-    private final int id;
+    private final int exchangeId;
 
     private final String query;
 
 
-    public QueryRequest(long sessionId, int id, String query) {
+    public QueryRequest(long sessionId, int exchangeId, String query) {
         this.sessionId = sessionId;
-        this.id = id;
+        this.exchangeId = exchangeId;
         this.query = query;
     }
 
@@ -23,8 +23,8 @@ public final class QueryRequest implements Request, SessionMessage {
         return sessionId;
     }
 
-    public int id() {
-        return id;
+    public int exchangeId() {
+        return exchangeId;
     }
 
     public String query() {
