@@ -6,14 +6,14 @@ import java.io.IOException;
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
-import hu.webarticum.miniconnect.server.contentaccess.FileAsynchronousContentAccess;
+import hu.webarticum.miniconnect.server.contentaccess.FileChargeableContentAccess;
 
 public class MessengerValue implements MiniValue, Closeable {
     
     private final MiniValueDefinition definition;
     
     // FIXME
-    private final FileAsynchronousContentAccess contentAccess;
+    private final FileChargeableContentAccess contentAccess;
     
     private final Object closeLock = new Object();
     
@@ -24,7 +24,7 @@ public class MessengerValue implements MiniValue, Closeable {
     
 
     public MessengerValue(
-            MiniValueDefinition definition, FileAsynchronousContentAccess contentAccess) {
+            MiniValueDefinition definition, FileChargeableContentAccess contentAccess) {
         
         this.definition = definition;
         this.contentAccess = contentAccess;

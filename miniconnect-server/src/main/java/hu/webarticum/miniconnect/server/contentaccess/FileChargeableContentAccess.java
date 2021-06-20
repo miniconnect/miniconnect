@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.server.contentaccess;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UncheckedIOException;
@@ -8,7 +9,7 @@ import java.nio.file.Files;
 
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-public class FileAsynchronousContentAccess extends AbstractAsynchronousContentAccess {
+public class FileChargeableContentAccess extends AbstractChargeableContentAccess {
     
     private static final long MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
@@ -26,11 +27,35 @@ public class FileAsynchronousContentAccess extends AbstractAsynchronousContentAc
     
     private volatile boolean closed = false;
     
+
+    public FileChargeableContentAccess(long length) {
+        this(length, createTemporaryFile());
+    }
     
-    public FileAsynchronousContentAccess(long length, File file) throws IOException {
+    public FileChargeableContentAccess(long length, File file) {
         super(length);
         this.file = file;
-        this.randomAccessFile = new RandomAccessFile(file, FILE_ACCESS_MODE);
+        this.randomAccessFile = createRandomAccessfile(file);
+    }
+    
+    // TODO: improve this
+    // - check SystemUtils.IS_OS_UNIX
+    // - use a better directory if possible, e. g. $XDG_CACHE_HOME
+    // - check existing solutions in jdbc implementations
+    private static File createTemporaryFile() {
+        try {
+            return Files.createTempFile("miniconnect-", ".blob").toFile();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+    
+    private static RandomAccessFile createRandomAccessfile(File file) {
+        try {
+            return new RandomAccessFile(file, FILE_ACCESS_MODE);
+        } catch (FileNotFoundException e) {
+            throw new UncheckedIOException(e);
+        }
     }
     
 

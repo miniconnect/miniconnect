@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
-import hu.webarticum.miniconnect.server.contentaccess.FileAsynchronousContentAccess;
+import hu.webarticum.miniconnect.server.contentaccess.FileChargeableContentAccess;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class MessengerContentAccessMain {
@@ -20,8 +20,8 @@ public class MessengerContentAccessMain {
     
     public static void main(String[] args) throws IOException, InterruptedException {
         long fullLength = ((long) SUPPLIER_CHUNK_SIZE) * SUPPLIER_ORDER.length;
-        try (FileAsynchronousContentAccess contentAccess =
-            new FileAsynchronousContentAccess(fullLength, Files.createTempFile("LOB_", ".bin").toFile())) {
+        try (FileChargeableContentAccess contentAccess =
+            new FileChargeableContentAccess(fullLength, Files.createTempFile("LOB_", ".bin").toFile())) {
             
             Thread supplierThread = new Thread(() -> {
                 for (int n : SUPPLIER_ORDER) {
@@ -43,7 +43,7 @@ public class MessengerContentAccessMain {
                     ByteString content = ByteString.of(contentString);
                     try {
                         contentAccess.accept(offset, content);
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }

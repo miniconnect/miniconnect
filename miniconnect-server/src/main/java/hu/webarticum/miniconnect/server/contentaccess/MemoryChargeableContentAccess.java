@@ -2,12 +2,12 @@ package hu.webarticum.miniconnect.server.contentaccess;
 
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-public class MemoryAsynchronousContentAccess extends AbstractAsynchronousContentAccess {
+public class MemoryChargeableContentAccess extends AbstractChargeableContentAccess {
     
     private final byte[] content;
     
 
-    public MemoryAsynchronousContentAccess(int length) {
+    public MemoryChargeableContentAccess(int length) {
         super((long) length);
         this.content = new byte[length];
     }

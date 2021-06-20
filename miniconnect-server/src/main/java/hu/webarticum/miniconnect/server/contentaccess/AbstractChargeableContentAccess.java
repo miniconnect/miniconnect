@@ -2,15 +2,14 @@ package hu.webarticum.miniconnect.server.contentaccess;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InterruptedIOException;
 import java.io.UncheckedIOException;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
-import hu.webarticum.miniconnect.api.MiniContentAccess;
+import hu.webarticum.miniconnect.server.util.ExceptionUtil;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-public abstract class AbstractAsynchronousContentAccess implements MiniContentAccess {
+public abstract class AbstractChargeableContentAccess implements ChargeableContentAccess {
 
     private final long fullLength;
     
@@ -21,7 +20,7 @@ public abstract class AbstractAsynchronousContentAccess implements MiniContentAc
     
     
     
-    protected AbstractAsynchronousContentAccess(long length) {
+    protected AbstractChargeableContentAccess(long length) {
         this.fullLength = length;
     }
 
@@ -48,9 +47,18 @@ public abstract class AbstractAsynchronousContentAccess implements MiniContentAc
         return new LobInputStream();
     }
 
+    @Override
+    public void accept(long start, ByteString part) {
+        try {
+            acceptThrowing(start, part);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     // FIXME: what if close occured during this write?
     // FIXME: what if other error occured (close with storing the exception? 'closeReason' or something)
-    public void accept(long start, ByteString part) throws IOException {
+    private void acceptThrowing(long start, ByteString part) throws IOException {
         checkClosed();
         
         int length = part.length();
@@ -123,18 +131,11 @@ public abstract class AbstractAsynchronousContentAccess implements MiniContentAc
                     indexLock.wait();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    throw asUncheckedIOException(e);
+                    throw ExceptionUtil.asUncheckedIOException(e);
                 }
                 checkClosed();
             }
         }
-    }
-    
-    private RuntimeException asUncheckedIOException(Exception exception) {
-        Thread.currentThread().interrupt();
-        IOException ioException = new InterruptedIOException();
-        ioException.addSuppressed(exception);
-        return new UncheckedIOException(ioException);
     }
     
     private boolean checkAvailable(long start, long length) {

@@ -17,16 +17,16 @@ public class MessengerResult implements MiniResult {
 
     private final boolean hasResultSet;
 
-    private final MessengerResultSet resultSet;
+    private final MessengerResultSetCharger charger;
 
 
-    public MessengerResult(ResultResponse resultResponse, MessengerResultSet resultSet) {
+    public MessengerResult(ResultResponse resultResponse, MessengerResultSetCharger charger) {
         this.success = resultResponse.success();
         this.errorCode = resultResponse.errorCode();
         this.errorMessage = resultResponse.errorMessage();
         this.warnings = resultResponse.warnings();
         this.hasResultSet = resultResponse.hasResultSet();
-        this.resultSet = resultSet;
+        this.charger = charger;
     }
 
 
@@ -57,7 +57,7 @@ public class MessengerResult implements MiniResult {
 
     @Override
     public MiniResultSet resultSet() {
-        return resultSet;
+        return charger.resultSet();
     }
 
 }

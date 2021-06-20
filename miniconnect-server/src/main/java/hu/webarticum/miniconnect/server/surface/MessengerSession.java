@@ -56,7 +56,7 @@ public class MessengerSession implements MiniSession {
         OrderAligningQueue<Response> responseQueue = new OrderAligningQueue<>(
                 MessengerSession::checkNextResultResponse);
 
-        CompletableFuture<MessengerResultSet> resultSetFuture = new CompletableFuture<>();
+        CompletableFuture<MessengerResultSetCharger> resultSetFuture = new CompletableFuture<>();
         
         QueryRequest queryRequest = new QueryRequest(sessionId, exchangeId, query);
         server.accept(queryRequest, response -> {
@@ -91,7 +91,7 @@ public class MessengerSession implements MiniSession {
             return new StoredResult(resultResponse.errorCode(), resultResponse.errorMessage());
         }
         
-        MessengerResultSet resultSet = new MessengerResultSet(resultResponse);
+        MessengerResultSetCharger resultSet = new MessengerResultSetCharger(resultResponse);
         resultSetFuture.complete(resultSet);
         new Thread(() -> pollResponseQueue(responseQueue, resultSet)).start();
         
@@ -100,7 +100,7 @@ public class MessengerSession implements MiniSession {
     
     // TODO: error handling
     private void pollResponseQueue(
-            OrderAligningQueue<Response> responseQueue, MessengerResultSet resultSet) {
+            OrderAligningQueue<Response> responseQueue, MessengerResultSetCharger resultSet) {
         
         while (fetchResponseQueue(responseQueue, resultSet)) {
             // nothing to do
@@ -108,7 +108,7 @@ public class MessengerSession implements MiniSession {
     }
         
     private boolean fetchResponseQueue(
-            OrderAligningQueue<Response> responseQueue, MessengerResultSet resultSet) {
+            OrderAligningQueue<Response> responseQueue, MessengerResultSetCharger resultSet) {
         
         Response response;
         try {
@@ -121,7 +121,7 @@ public class MessengerSession implements MiniSession {
         if (response instanceof ResultSetRowsResponse) {
             resultSet.accept((ResultSetRowsResponse) response);
         } else if (response instanceof ResultSetEofResponse) {
-            resultSet.eof();
+            resultSet.acceptEof();
             return false;
         }
 
