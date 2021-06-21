@@ -18,23 +18,28 @@ public class ResultSetPrinter {
 
     private static final int ROWS_BUFFER_SIZE = 20;
 
-
-    // TODO: first, read strings!
+    
     public void print(MiniResultSet resultSet, Appendable out) throws IOException {
         out.append('\n');
-        List<ImmutableList<MiniValue>> rowsBuffer = new ArrayList<>();
+        ImmutableList<MiniColumnHeader> columnHeaders = resultSet.columnHeaders();
+        ImmutableList<String> columnNames = columnHeaders.map(MiniColumnHeader::name);
+        ImmutableList<DefaultValueInterpreter> valueInterpreters = columnHeaders.map(
+                h -> new DefaultValueInterpreter(h.valueDefinition()));
+        List<ImmutableList<String>> stringRowsBuffer = new ArrayList<>();
         ImmutableList<MiniValue> row;
         boolean foundAny = false;
         while ((row = resultSet.fetch()) != null) {
             foundAny = true;
-            rowsBuffer.add(row);
-            if (rowsBuffer.size() == ROWS_BUFFER_SIZE) {
-                printRows(rowsBuffer, resultSet.columnHeaders(), out);
-                rowsBuffer.clear();
+            ImmutableList<String> stringRow = row.mapIndex(
+                    (i, value) -> stringifyValue(value, valueInterpreters.get(i)));
+            stringRowsBuffer.add(stringRow);
+            if (stringRowsBuffer.size() == ROWS_BUFFER_SIZE) {
+                printStringRows(stringRowsBuffer, columnNames, valueInterpreters, out);
+                stringRowsBuffer.clear();
             }
         }
-        if (!rowsBuffer.isEmpty()) {
-            printRows(rowsBuffer, resultSet.columnHeaders(), out);
+        if (!stringRowsBuffer.isEmpty()) {
+            printStringRows(stringRowsBuffer, columnNames, valueInterpreters, out);
         }
         if (!foundAny) {
             printNoRows(out);
@@ -45,48 +50,39 @@ public class ResultSetPrinter {
         out.append("  Result contains no rows!\n\n");
     }
     
-    private void printRows(
-            List<ImmutableList<MiniValue>> rows,
-            ImmutableList<MiniColumnHeader> columnHeaders,
+    private void printStringRows(
+            List<ImmutableList<String>> stringRows,
+            ImmutableList<String> columnNames,
+            ImmutableList<DefaultValueInterpreter> valueInterpreters,
             Appendable out
             ) throws IOException {
         
-        int columnCount = columnHeaders.size();
+        int columnCount = columnNames.size();
         int[] widths = new int[columnCount];
         boolean[] aligns = new boolean[columnCount];
-        List<ValueInterpreter> encoders = new ArrayList<>();
+        List<DefaultValueInterpreter> encoders = new ArrayList<>();
         for (int i = 0; i < columnCount; i++) {
-            MiniColumnHeader columnHeader = columnHeaders.get(i);
-            DefaultValueInterpreter encoder = new DefaultValueInterpreter(
-                    columnHeader.valueDefinition());
-            widths[i] = columnHeader.name().length();
-            aligns[i] = Number.class.isAssignableFrom(encoder.type());
-            encoders.add(encoder);
+            String columnName = columnNames.get(i);
+            DefaultValueInterpreter valueInterpreter = valueInterpreters.get(i);
+            widths[i] = columnName.length();
+            aligns[i] = Number.class.isAssignableFrom(valueInterpreter.type());
+            encoders.add(valueInterpreter);
         }
         
-        List<List<String>> stringRows = new ArrayList<>();
-        for (ImmutableList<MiniValue> row : rows) {
-            List<String> stringRow = new ArrayList<>();
+        for (ImmutableList<String> stringRow : stringRows) {
             for (int i = 0; i < columnCount; i++) {
-                MiniValue value = row.get(i);
-                String stringValue = stringifyValue(value, encoders.get(i));
-                stringRow.add(stringValue);
+                String stringValue = stringRow.get(i);
                 widths[i] = Math.max(widths[i], stringValue.length());
             }
-            stringRows.add(stringRow);
         }
 
         printLine(widths, out);
         
-        List<String> headerNames = new ArrayList<>();
-        for (MiniColumnHeader columnHeader : columnHeaders) {
-            headerNames.add(columnHeader.name());
-        }
-        printStringRow(headerNames, widths, new boolean[columnCount], out);
+        printStringRow(columnNames, widths, new boolean[columnCount], out);
         
         printLine(widths, out);
         
-        for (List<String> stringRow : stringRows) {
+        for (ImmutableList<String> stringRow : stringRows) {
             printStringRow(stringRow, widths, aligns, out);
         }
         
@@ -110,7 +106,7 @@ public class ResultSetPrinter {
     }
 
     private void printStringRow(
-            List<String> stringRow,
+            ImmutableList<String> stringRow,
             int[] widths,
             boolean[] aligns,
             Appendable out
@@ -127,8 +123,8 @@ public class ResultSetPrinter {
         out.append('|');
         out.append('\n');
     }
-
-    public String stringifyValue(MiniValue value, ValueInterpreter encoder) {
+    
+    private String stringifyValue(MiniValue value, ValueInterpreter encoder) {
         if (!value.isNull()) {
             Object decoded = encoder.decode(value);
             if (decoded instanceof Float || decoded instanceof Double || decoded instanceof BigDecimal) {
