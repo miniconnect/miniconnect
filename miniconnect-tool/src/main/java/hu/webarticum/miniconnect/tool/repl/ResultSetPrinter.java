@@ -19,6 +19,7 @@ public class ResultSetPrinter {
     private static final int ROWS_BUFFER_SIZE = 20;
 
 
+    // TODO: first, read strings!
     public void print(MiniResultSet resultSet, Appendable out) throws IOException {
         out.append('\n');
         List<ImmutableList<MiniValue>> rowsBuffer = new ArrayList<>();

@@ -11,7 +11,7 @@ import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class FileChargeableContentAccess extends AbstractChargeableContentAccess {
     
-    private static final long MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+    private static final long MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8L;
 
     private static final String FILE_ACCESS_MODE = "rw";
     
@@ -121,7 +121,7 @@ public class FileChargeableContentAccess extends AbstractChargeableContentAccess
     }
     
     @Override
-    public void close() throws IOException {
+    public void close() {
         synchronized (closeLock) {
             if (closed) {
                 return;
@@ -131,8 +131,12 @@ public class FileChargeableContentAccess extends AbstractChargeableContentAccess
         
         super.close();
         
-        randomAccessFile.close();
-        Files.delete(file.toPath());
+        try {
+            randomAccessFile.close();
+            Files.delete(file.toPath());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
     
 }

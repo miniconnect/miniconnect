@@ -53,7 +53,7 @@ public class DummyServer implements Server {
     private static final int MAX_LENGTH = 1000_000;
     
     // FIXME/TODO: larger value
-    private static final int DATA_CHUNK_LENGTH = 10;
+    private static final int DATA_CHUNK_LENGTH = 20;
     
     private static final Pattern SELECT_ALL_QUERY_PATTERN = Pattern.compile(
             "(?i)\\s*SELECT\\s+\\*\\s+FROM\\s+([\"`]?)(?-i)data(?i)\\1\\s*;?\\s*");
@@ -160,10 +160,12 @@ public class DummyServer implements Server {
                         ByteString firstChunk = readInputStream(valueIn, DATA_CHUNK_LENGTH);
                         rowBuilder.add(new CellData(false, fullLength, firstChunk));
                         
+                        long contentOffset = firstChunk.length();
                         ByteString chunk;
                         while (!(chunk = readInputStream(valueIn, DATA_CHUNK_LENGTH)).isEmpty()) {
                             partResponses.add(new ResultSetValuePartResponse(
-                                    sessionId, exchangeId, offset + r, c, offset, chunk));
+                                    sessionId, exchangeId, offset + r, c, contentOffset, chunk));
+                            contentOffset += chunk.length();
                         }
                     } catch (IOException e) {
                         // FIXME: what to do?

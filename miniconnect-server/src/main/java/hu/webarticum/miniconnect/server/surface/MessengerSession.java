@@ -62,7 +62,7 @@ public class MessengerSession implements MiniSession {
         server.accept(queryRequest, response -> {
             if (response instanceof ResultSetValuePartResponse) {
                 ResultSetValuePartResponse partResponse = (ResultSetValuePartResponse) response;
-                resultSetFuture.thenAcceptAsync(resultSet -> resultSet.accept(partResponse));
+                resultSetFuture.thenAcceptAsync(resultSet -> resultSet.acceptPart(partResponse));
             } else {
                 responseQueue.add(response);
             }

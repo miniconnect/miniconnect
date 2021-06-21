@@ -57,16 +57,10 @@ public class CompletableSmallContent {
 
     public ByteString content() {
         if (!completed()) {
-            throw new IllegalStateException("Incomplete LOB");
+            throw new IllegalStateException("Incomplete content");
         }
         
         return builder.build();
-    }
-    
-    
-    // XXX
-    public void dump() {
-        System.out.println(String.format("%d :: %s :: %s", length, builder.build(), subsequentParts));
     }
     
 }

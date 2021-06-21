@@ -97,7 +97,7 @@ public class DefaultValueInterpreter implements ValueInterpreter {
         if (value.isNull()) {
             return null;
         }
-        
+
         ByteString content = value.contentAccess().get();
         if (type.equals(Boolean.class)) {
             return (content.byteAt(0) != ((byte) 0));

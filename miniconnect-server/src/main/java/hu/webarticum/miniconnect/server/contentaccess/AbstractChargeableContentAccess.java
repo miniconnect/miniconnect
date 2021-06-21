@@ -1,8 +1,6 @@
 package hu.webarticum.miniconnect.server.contentaccess;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
@@ -15,8 +13,9 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
     
     private final Object indexLock = new Object();
     
+    private final NavigableSet<IndexEntry> index = new TreeSet<>();
     
-    private NavigableSet<IndexEntry> index = new TreeSet<>();
+    private volatile boolean completed = false;
     
     
     
@@ -46,19 +45,11 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
         checkClosed();
         return new LobInputStream();
     }
-
-    @Override
-    public void accept(long start, ByteString part) {
-        try {
-            acceptThrowing(start, part);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
+    
     // FIXME: what if close occured during this write?
     // FIXME: what if other error occured (close with storing the exception? 'closeReason' or something)
-    private void acceptThrowing(long start, ByteString part) throws IOException {
+    @Override
+    public void accept(long start, ByteString part) {
         checkClosed();
         
         int length = part.length();
@@ -71,16 +62,16 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
         synchronized (indexLock) {
             IndexEntry previousEntry = index.lower(entry);
             if (previousEntry != null && previousEntry.end > start) {
-                throw new IllegalArgumentException(
-                        "Location is already allocated (start: " + start + "), " +
-                        "previous entry ends at: " + previousEntry.end);
+                throw new IllegalArgumentException(String.format(
+                        "Interval %d..%d is already allocated by existing entry: %d..%d",
+                        start, end, previousEntry.start, previousEntry.end));
             }
             
             IndexEntry nextEntry = index.ceiling(entry);
             if (nextEntry != null && nextEntry.start < end) {
-                    throw new IllegalArgumentException(
-                            "Location is already allocated (end: " + end + "), "+
-                            "next entry starts at: " + nextEntry.start);
+                throw new IllegalArgumentException(String.format(
+                        "Interval %d..%d is already allocated by existing entry: %d..%d",
+                        start, end, nextEntry.start, nextEntry.end));
             }
             
             index.add(entry);
@@ -109,6 +100,8 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
                 entry.end = nextEntry.end;
             }
 
+            completed = isAvailable(0L, fullLength);
+            
             indexLock.notifyAll();
         }
     }
@@ -125,7 +118,7 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
 
     private void waitAvailable(long start, long length) {
         synchronized (indexLock) {
-            while (!checkAvailable(start, length)) {
+            while (!isAvailable(start, length)) {
                 try {
                     // TODO: timeout?
                     indexLock.wait();
@@ -138,18 +131,21 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
         }
     }
     
-    private boolean checkAvailable(long start, long length) {
+    private boolean isAvailable(long start, long length) {
         long end = start + length;
-        synchronized (indexLock) {
-            IndexEntry containerEntry = index.floor(new IndexEntry(start, end));
-            return (containerEntry != null && !containerEntry.pending && containerEntry.end >= end);
-        }
+        IndexEntry containerEntry = index.floor(new IndexEntry(start, end));
+        return (containerEntry != null && !containerEntry.pending && containerEntry.end >= end);
     }
 
     protected abstract void checkClosed();
     
     @Override
-    public void close() throws IOException {
+    public boolean isCompleted() {
+        return completed;
+    }
+    
+    @Override
+    public void close() {
         synchronized (indexLock) {
             indexLock.notifyAll();
         }
@@ -190,6 +186,11 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
             return start == ((IndexEntry) other).start;
         }
         
+        @Override
+        public String toString() {
+            return start + ".." + end;
+        }
+        
     }
     
     
@@ -201,7 +202,7 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
         
 
         @Override
-        public int read() throws IOException {
+        public int read() {
             ByteString part = readPart(1);
             if (part.isEmpty()) {
                 return -1;
@@ -211,12 +212,12 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
         }
 
         @Override
-        public int read(byte[] buffer) throws IOException {
+        public int read(byte[] buffer) {
             return read(buffer, 0, buffer.length);
         }
         
         @Override
-        public int read(byte[] buffer, int offset, int length) throws IOException {
+        public int read(byte[] buffer, int offset, int length) {
             if (length == 0) {
                 return 0;
             }
@@ -232,7 +233,7 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
             return partLength;
         }
 
-        private synchronized ByteString readPart(int length) throws IOException {
+        private synchronized ByteString readPart(int length) {
             int safeLength = position + length > fullLength ? (int) (fullLength - position) : length;
             if (safeLength == 0) {
                 return null;
@@ -253,12 +254,12 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
         }
         
         @Override
-        public synchronized void reset() throws IOException {
+        public synchronized void reset() {
             position = mark;
         }
 
         @Override
-        public int available() throws IOException {
+        public int available() {
             IndexEntry firstEntry;
             synchronized (indexLock) {
                 if (index.isEmpty()) {
