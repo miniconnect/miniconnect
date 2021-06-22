@@ -1,0 +1,18 @@
+
+rootProject.name = 'miniconnect-messenger'
+
+// FIXME
+include ':miniconnect-api'
+project(':miniconnect-api').projectDir = new File('../miniconnect-api')
+
+// FIXME
+include ':miniconnect-util'
+project(':miniconnect-util').projectDir = new File('../miniconnect-util')
+
+// FIXME
+include ':miniconnect-tool'
+project(':miniconnect-tool').projectDir = new File('../miniconnect-tool')
+
+// FIXME
+include ':miniconnect-transfer'
+project(':miniconnect-transfer').projectDir = new File('../miniconnect-transfer')
