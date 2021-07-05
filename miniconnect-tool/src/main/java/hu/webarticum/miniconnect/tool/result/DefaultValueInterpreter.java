@@ -1,5 +1,7 @@
 package hu.webarticum.miniconnect.tool.result;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -86,6 +88,19 @@ public class DefaultValueInterpreter implements ValueInterpreter {
         } else if (value instanceof ByteString) {
             ByteString byteStringValue = (ByteString) value;
             return new StoredValue(byteStringValue);
+        } else if (value instanceof BigInteger) {
+            BigInteger bigIntegerValue = (BigInteger) value;
+            return new StoredValue(ByteString.wrap(bigIntegerValue.toByteArray()));
+        } else if (value instanceof BigDecimal) {
+            ByteString.Builder builder = ByteString.builder();
+            BigDecimal bigDecimalValue = (BigDecimal) value;
+            int scale = bigDecimalValue.scale();
+            ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.BYTES);
+            byteBuffer.putInt(scale);
+            builder.append(byteBuffer.array());
+            BigInteger bigIntegerValue = bigDecimalValue.unscaledValue();
+            builder.append(bigIntegerValue.toByteArray());
+            return new StoredValue(builder.build());
         } else {
             throw new IllegalArgumentException(
                     String.format("Unsupported type: %s", value.getClass().getSimpleName()));
@@ -114,6 +129,15 @@ public class DefaultValueInterpreter implements ValueInterpreter {
             return byteBuffer.getLong();
         } else if (type.equals(String.class)) {
             return content.toString(StandardCharsets.UTF_8);
+        } else if (type.equals(ByteString.class)) {
+            return content;
+        } else if (type.equals(BigInteger.class)) {
+            return new BigInteger(content.extract());
+        } else if (type.equals(BigDecimal.class)) {
+            ByteString.Reader reader = content.reader();
+            int scale = ByteBuffer.wrap(reader.read(Integer.BYTES)).getInt();
+            BigInteger bigIntegerValue = new BigInteger(reader.readRemaining());
+            return new BigDecimal(bigIntegerValue, scale);
         } else {
             throw new IllegalStateException(
                     String.format("Unsupported type: %s", type.getSimpleName()));

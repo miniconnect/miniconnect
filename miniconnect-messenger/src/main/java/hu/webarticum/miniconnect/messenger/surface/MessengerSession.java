@@ -2,6 +2,7 @@ package hu.webarticum.miniconnect.messenger.surface;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -50,7 +51,7 @@ public class MessengerSession implements MiniSession {
     }
 
     @Override
-    public MiniResult execute(String query) throws IOException {
+    public MiniResult execute(String query) {
         int exchangeId = exchangeIdCounter.incrementAndGet();
         
         OrderAligningQueue<Response> responseQueue = new OrderAligningQueue<>(
@@ -162,9 +163,7 @@ public class MessengerSession implements MiniSession {
     }
 
     @Override
-    public MiniLargeDataSaveResult putLargeData(
-            long length, InputStream dataSource) throws IOException {
-        
+    public MiniLargeDataSaveResult putLargeData(long length, InputStream dataSource) {
         int exchangeId = exchangeIdCounter.incrementAndGet();
         
         CompletableFuture<Response> responseFuture = new CompletableFuture<>();
@@ -176,7 +175,7 @@ public class MessengerSession implements MiniSession {
         byte[] buffer = new byte[DATA_SEND_CHUNK_SIZE];
         int readSize = 0;
         long offset = 0;
-        while ((readSize = dataSource.read(buffer)) != -1) {
+        while ((readSize = readStream(dataSource, buffer)) != -1) {
             // TODO: check for error
             ByteString content = ByteString.wrap(Arrays.copyOf(buffer, readSize));
             LargeDataPartRequest largeDataPartRequest =
@@ -205,6 +204,14 @@ public class MessengerSession implements MiniSession {
             return new StoredLargeDataSaveResult(false, "99990", "No response", ""); // XXX
         } else {
             return new StoredLargeDataSaveResult(false, "99999", "Bad response", ""); // XXX
+        }
+    }
+    
+    private int readStream(InputStream in, byte[] buffer) {
+        try {
+            return in.read(buffer);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
     
