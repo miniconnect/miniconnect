@@ -177,8 +177,8 @@ public class SqlRepl implements Repl {
         out.append('\n');
         out.append("  Commands:\n");
         out.append("    \"help\": prints this document\n");
-        out.append("    \"data:\"<data>: sends large data\n");
-        out.append("    \"data:@\"<file>: sends large data from file\n");
+        out.append("    \"data:\"<name>\":\"<data>: sends large data\n");
+        out.append("    \"data:\"<name>\":@\"<file>: sends large data from file\n");
         out.append("    \"exit\", \"quit\": quits this program\n");
         out.append("    <any SQL>: will be executed in the session\n");
         out.append("      (must be terminated with \";\")\n");
