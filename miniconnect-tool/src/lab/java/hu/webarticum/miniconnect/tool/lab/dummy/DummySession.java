@@ -38,7 +38,7 @@ public class DummySession implements MiniSession {
             }
         }
 
-        return new StoredResult("01", "Unknow command");
+        return new StoredResult("00001", "01", "Unknow command");
     }
 
     @Override

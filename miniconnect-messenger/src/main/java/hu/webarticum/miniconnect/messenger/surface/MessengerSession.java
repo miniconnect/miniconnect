@@ -75,21 +75,26 @@ public class MessengerSession implements MiniSession {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             resultSetFuture.cancel(true);
-            return new StoredResult("INTERRUPT", "Interrupt occured while waiting for results");
+            return new StoredResult(
+                    "M0001", "INTERRUPT", "Interrupt occured while waiting for results");
         } catch (TimeoutException e) {
             resultSetFuture.cancel(true);
-            return new StoredResult("TIMEOUT", "Timeout reached while waiting for results");
+            return new StoredResult(
+                    "M0002", "TIMEOUT", "Timeout reached while waiting for results");
         }
         
         if (!(firstResponse instanceof ResultResponse)) {
             resultSetFuture.cancel(true);
-            return new StoredResult("BADRESPONSE", "Bad response");
+            return new StoredResult("M0003", "BADRESPONSE", "Bad response");
         }
 
         ResultResponse resultResponse = (ResultResponse) firstResponse;
         if (!resultResponse.success()) {
             resultSetFuture.cancel(true);
-            return new StoredResult(resultResponse.errorCode(), resultResponse.errorMessage());
+            return new StoredResult(
+                    resultResponse.sqlState(),
+                    resultResponse.errorCode(),
+                    resultResponse.errorMessage());
         }
         
         MessengerResultSetCharger resultSet = new MessengerResultSetCharger(resultResponse);
@@ -199,12 +204,15 @@ public class MessengerSession implements MiniSession {
             LargeDataSaveResponse largeDataSaveResponse = (LargeDataSaveResponse) response;
             return new StoredLargeDataSaveResult(
                     largeDataSaveResponse.success(),
+                    largeDataSaveResponse.sqlState(),
                     largeDataSaveResponse.errorCode(),
                     largeDataSaveResponse.errorMessage());
         } else if (response == null) {
-            return new StoredLargeDataSaveResult(false, "99990", "No response"); // XXX
+            // XXX
+            return new StoredLargeDataSaveResult(false, "M0004", "NORESPONSE", "No response");
         } else {
-            return new StoredLargeDataSaveResult(false, "99999", "Bad response"); // XXX
+            // XXX
+            return new StoredLargeDataSaveResult(false, "M0005", "BADRESPONSE", "Bad response");
         }
     }
     

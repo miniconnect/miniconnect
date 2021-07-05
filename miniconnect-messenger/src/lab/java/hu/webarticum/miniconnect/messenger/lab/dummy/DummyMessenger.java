@@ -42,14 +42,6 @@ import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
 public class DummyMessenger implements Messenger {
     
-    private static final String UNEXPECTED_ERROR = "00000";
-    
-    private static final String BAD_QUERY_ERROR = "00001";
-    
-    private static final String TOO_LARGE_LOB_ERROR = "00002";
-    
-    private static final String ILLEGAL_LOB_STATE_ERROR = "00003";
-    
     private static final int MAX_LENGTH = 1000_000;
     
     // FIXME/TODO: larger value
@@ -121,7 +113,8 @@ public class DummyMessenger implements Messenger {
         ImmutableList<ColumnHeaderData> headerDatas = new ImmutableList<>(headerDatasBuilder);
         
         ResultResponse resultResponse = new ResultResponse(
-                sessionId, exchangeId, true, "", "", ImmutableList.empty(), true, headerDatas);
+                sessionId, exchangeId, true,
+                "00000", "", "", ImmutableList.empty(), true, headerDatas);
         responseConsumer.accept(resultResponse);
         
         for (int fetchFrom = 0; fetchFrom < dataRowCount; fetchFrom += 3) {
@@ -209,7 +202,8 @@ public class DummyMessenger implements Messenger {
                 request.sessionId(),
                 request.exchangeId(),
                 false,
-                BAD_QUERY_ERROR,
+                "D0001",
+                "BADQUERY",
                 "Bad query, only select all is supported",
                 ImmutableList.empty(),
                 true,
@@ -229,7 +223,7 @@ public class DummyMessenger implements Messenger {
         
         if (length > MAX_LENGTH) {
             consumer.accept(new LargeDataSaveResponse(
-                    sessionId, exchangeId, false, TOO_LARGE_LOB_ERROR, "Too large LOB"));
+                    sessionId, exchangeId, false, "D0002", "LARGELOB", "Too large LOB"));
             return;
         }
         
@@ -245,12 +239,12 @@ public class DummyMessenger implements Messenger {
         } catch (IllegalStateException e) {
             incompleteContents.remove(contentId);
             consumer.accept(new LargeDataSaveResponse(
-                    sessionId, exchangeId, false, ILLEGAL_LOB_STATE_ERROR, "Illegal LOB state"));
+                    sessionId, exchangeId, false, "D0003", "ILLEGALLOBSTATE", "Illegal LOB state"));
         } catch (Exception e) {
             incompleteContents.remove(contentId);
             consumer.accept(new LargeDataSaveResponse(
-                    sessionId, exchangeId, false, UNEXPECTED_ERROR,
-                    "Unexpected error " + e.getMessage()));
+                    sessionId, exchangeId, false,
+                    "D9999", "UNEXPECTED", "Unexpected error " + e.getMessage()));
         }
         
         if (length == 0) {
@@ -279,21 +273,15 @@ public class DummyMessenger implements Messenger {
             removeCompletable(
                     contentId,
                     new LargeDataSaveResponse(
-                            sessionId,
-                            exchangeId,
-                            false,
-                            ILLEGAL_LOB_STATE_ERROR,
-                            "Illegal LOB state"));
+                            sessionId, exchangeId, false,
+                            "D0003", "ILLEGALLOBSTATE", "Illegal LOB state"));
             return;
         } catch (Exception e) {
             removeCompletable(
                     contentId,
                     new LargeDataSaveResponse(
-                            sessionId,
-                            exchangeId,
-                            false,
-                            UNEXPECTED_ERROR,
-                            "Unexpected error " + e.getMessage()));
+                            sessionId, exchangeId, false,
+                            "D9999", "UNEXPECTED", "Unexpected error " + e.getMessage()));
             return;
         }
         
@@ -307,7 +295,7 @@ public class DummyMessenger implements Messenger {
             Consumer<Response> responseConsumer = removeCompletable(contentId, null);
             if (responseConsumer != null) {
                 responseConsumer.accept(new LargeDataSaveResponse(
-                        sessionId, exchangeId, true, "", ""));
+                        sessionId, exchangeId, true, "00000", "", ""));
             }
         }
     }

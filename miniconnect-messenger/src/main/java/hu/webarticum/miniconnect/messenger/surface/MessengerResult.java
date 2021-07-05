@@ -9,6 +9,8 @@ public class MessengerResult implements MiniResult {
 
     private final boolean success;
 
+    private final String sqlState;
+
     private final String errorCode;
 
     private final String errorMessage;
@@ -22,6 +24,7 @@ public class MessengerResult implements MiniResult {
 
     public MessengerResult(ResultResponse resultResponse, MessengerResultSetCharger charger) {
         this.success = resultResponse.success();
+        this.sqlState = resultResponse.sqlState();
         this.errorCode = resultResponse.errorCode();
         this.errorMessage = resultResponse.errorMessage();
         this.warnings = resultResponse.warnings();
@@ -33,6 +36,11 @@ public class MessengerResult implements MiniResult {
     @Override
     public boolean success() {
         return success;
+    }
+
+    @Override
+    public String sqlState() {
+        return sqlState;
     }
 
     @Override

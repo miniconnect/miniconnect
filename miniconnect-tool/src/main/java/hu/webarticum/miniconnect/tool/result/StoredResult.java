@@ -10,9 +10,14 @@ import hu.webarticum.miniconnect.util.data.ImmutableList;
 public class StoredResult implements MiniResult, Serializable {
 
     private static final long serialVersionUID = -8548902380126828570L;
+    
+    
+    private static final String DEFAULT_SQL_STATE = "00000";
 
 
     private final boolean success;
+
+    private final String sqlState;
 
     private final String errorCode;
 
@@ -27,24 +32,25 @@ public class StoredResult implements MiniResult, Serializable {
 
     public StoredResult() {
         this(
-                true, "", "", ImmutableList.empty(),
+                true, DEFAULT_SQL_STATE, "", "", ImmutableList.empty(),
                 false, new StoredResultSetData());
     }
 
-    public StoredResult(String errorCode, String errorMessage) {
+    public StoredResult(String sqlState, String errorCode, String errorMessage) {
         this(
-                false, errorCode, errorMessage, ImmutableList.empty(),
+                false, sqlState, errorCode, errorMessage, ImmutableList.empty(),
                 false, new StoredResultSetData());
     }
 
     public StoredResult(StoredResultSetData resultSetData) {
         this(
-                true, "", "", ImmutableList.empty(),
+                true, DEFAULT_SQL_STATE, "", "", ImmutableList.empty(),
                 true, resultSetData);
     }
 
     public StoredResult(
             boolean success,
+            String sqlState,
             String errorCode,
             String errorMessage,
             ImmutableList<String> warnings,
@@ -52,6 +58,7 @@ public class StoredResult implements MiniResult, Serializable {
             StoredResultSetData resultSetData) {
 
         this.success = success;
+        this.sqlState = sqlState;
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
         this.warnings = warnings;
@@ -62,6 +69,7 @@ public class StoredResult implements MiniResult, Serializable {
     public static StoredResult of(MiniResult result) throws IOException {
         return new StoredResult(
                 result.success(),
+                result.sqlState(),
                 result.errorCode(),
                 result.errorMessage(),
                 result.warnings(),
@@ -73,6 +81,11 @@ public class StoredResult implements MiniResult, Serializable {
     @Override
     public boolean success() {
         return success;
+    }
+
+    @Override
+    public String sqlState() {
+        return sqlState;
     }
 
     @Override

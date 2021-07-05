@@ -23,7 +23,7 @@ public class SelectQueryExecutor implements QueryExecutor {
 
         String table = QueryUtil.unescapeIdentifier(matcher.group("table"));
         if (!table.equals("data")) {
-            return new StoredResult("02", String.format("Unknown table: %s", table));
+            return new StoredResult("00002", "02", String.format("Unknown table: %s", table));
         }
 
         StoredResultSetData resultSetData = new StoredResultSetData(

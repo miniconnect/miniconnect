@@ -8,6 +8,8 @@ public interface MiniResult {
 
     public String errorCode();
 
+    public String sqlState();
+
     public String errorMessage();
 
     public ImmutableList<String> warnings();

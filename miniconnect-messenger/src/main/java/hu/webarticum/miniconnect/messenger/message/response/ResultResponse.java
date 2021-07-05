@@ -16,6 +16,8 @@ public final class ResultResponse implements Response, SessionMessage {
 
     private final boolean success;
 
+    private final String sqlState;
+
     private final String errorCode;
 
     private final String errorMessage;
@@ -32,6 +34,7 @@ public final class ResultResponse implements Response, SessionMessage {
             long sessionId,
             int exchangeId,
             boolean success,
+            String sqlState,
             String errorCode,
             String errorMessage,
             ImmutableList<String> warnings,
@@ -41,6 +44,7 @@ public final class ResultResponse implements Response, SessionMessage {
         this.sessionId = sessionId;
         this.exchangeId = exchangeId;
         this.success = success;
+        this.sqlState = sqlState;
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
         this.warnings = warnings;
@@ -60,6 +64,10 @@ public final class ResultResponse implements Response, SessionMessage {
 
     public boolean success() {
         return success;
+    }
+
+    public String sqlState() {
+        return sqlState;
     }
 
     public String errorCode() {
