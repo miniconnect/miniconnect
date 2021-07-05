@@ -163,13 +163,15 @@ public class MessengerSession implements MiniSession {
     }
 
     @Override
-    public MiniLargeDataSaveResult putLargeData(long length, InputStream dataSource) {
+    public MiniLargeDataSaveResult putLargeData(
+            String variableName, long length, InputStream dataSource) {
+        
         int exchangeId = exchangeIdCounter.incrementAndGet();
         
         CompletableFuture<Response> responseFuture = new CompletableFuture<>();
         
         LargeDataHeadRequest largeDataHeadRequest =
-                new LargeDataHeadRequest(sessionId, exchangeId, length);
+                new LargeDataHeadRequest(sessionId, exchangeId, variableName, length);
         messenger.accept(largeDataHeadRequest, responseFuture::complete);
 
         byte[] buffer = new byte[DATA_SEND_CHUNK_SIZE];
@@ -198,12 +200,11 @@ public class MessengerSession implements MiniSession {
             return new StoredLargeDataSaveResult(
                     largeDataSaveResponse.success(),
                     largeDataSaveResponse.errorCode(),
-                    largeDataSaveResponse.errorMessage(),
-                    largeDataSaveResponse.getVariableName());
+                    largeDataSaveResponse.errorMessage());
         } else if (response == null) {
-            return new StoredLargeDataSaveResult(false, "99990", "No response", ""); // XXX
+            return new StoredLargeDataSaveResult(false, "99990", "No response"); // XXX
         } else {
-            return new StoredLargeDataSaveResult(false, "99999", "Bad response", ""); // XXX
+            return new StoredLargeDataSaveResult(false, "99999", "Bad response"); // XXX
         }
     }
     

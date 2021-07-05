@@ -8,12 +8,15 @@ public final class LargeDataHeadRequest implements Request, SessionMessage {
 
     private final int exchangeId;
 
+    private final String variableName;
+
     private final long length;
 
 
-    public LargeDataHeadRequest(long sessionId, int exchangeId, long length) {
+    public LargeDataHeadRequest(long sessionId, int exchangeId, String variableName, long length) {
         this.sessionId = sessionId;
         this.exchangeId = exchangeId;
+        this.variableName = variableName;
         this.length = length;
     }
 
@@ -25,6 +28,10 @@ public final class LargeDataHeadRequest implements Request, SessionMessage {
 
     public int exchangeId() {
         return exchangeId;
+    }
+
+    public String variableName() {
+        return variableName;
     }
 
     public long length() {

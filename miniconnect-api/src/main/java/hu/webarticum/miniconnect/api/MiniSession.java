@@ -7,6 +7,7 @@ public interface MiniSession extends Closeable {
 
     public MiniResult execute(String query);
 
-    public MiniLargeDataSaveResult putLargeData(long length, InputStream dataSource);
+    public MiniLargeDataSaveResult putLargeData(
+            String variableName, long length, InputStream dataSource);
 
 }

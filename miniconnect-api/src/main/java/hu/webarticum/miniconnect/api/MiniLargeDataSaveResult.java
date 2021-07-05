@@ -8,6 +8,4 @@ public interface MiniLargeDataSaveResult {
 
     public String errorMessage();
 
-    public String variableName();
-
 }

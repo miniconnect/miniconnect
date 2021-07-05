@@ -42,7 +42,9 @@ public class DummySession implements MiniSession {
     }
 
     @Override
-    public MiniLargeDataSaveResult putLargeData(long length, InputStream dataSource) {
+    public MiniLargeDataSaveResult putLargeData(
+            String variableName, long length, InputStream dataSource) {
+        
         throw new UnsupportedOperationException("LOBs are not supported");
     }
 

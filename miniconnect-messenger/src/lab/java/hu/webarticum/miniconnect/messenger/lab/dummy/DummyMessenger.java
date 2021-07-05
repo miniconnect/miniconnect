@@ -61,6 +61,7 @@ public class DummyMessenger implements Messenger {
     private static final ImmutableList<MiniColumnHeader> columnHeaders = ImmutableList.of(
             new StoredColumnHeader("id", new StoredValueDefinition(Long.class.getName())),
             new StoredColumnHeader("created_at", new StoredValueDefinition(String.class.getName())),
+            new StoredColumnHeader("name", new StoredValueDefinition(String.class.getName())),
             new StoredColumnHeader("length", new StoredValueDefinition(Integer.class.getName())),
             new StoredColumnHeader("content", new StoredValueDefinition(String.class.getName())));
 
@@ -70,6 +71,8 @@ public class DummyMessenger implements Messenger {
     private final List<List<Object>> data = new ArrayList<>();
     
     private final Map<Long, CompletableSmallContent> incompleteContents = new HashMap<>();
+    
+    private final Map<Long, String> variableNames = new HashMap<>();
     
     private final Map<Long, Consumer<Response>> dataSaveConsumers = new HashMap<>();
     
@@ -221,31 +224,38 @@ public class DummyMessenger implements Messenger {
         
         long sessionId = request.sessionId();
         int exchangeId = request.exchangeId();
+        String variableName = request.variableName();
         long length = request.length();
         
         if (length > MAX_LENGTH) {
             consumer.accept(new LargeDataSaveResponse(
-                    sessionId, exchangeId, false, TOO_LARGE_LOB_ERROR, "Too large LOB", ""));
+                    sessionId, exchangeId, false, TOO_LARGE_LOB_ERROR, "Too large LOB"));
             return;
         }
         
         Long contentId = (sessionId * 1000) + exchangeId;
         CompletableSmallContent completable = requireCompletable(contentId, consumer);
         
+        synchronized (variableNames) {
+            variableNames.put(contentId, variableName);
+        }
+        
         try {
             completable.setLength((int) length);
         } catch (IllegalStateException e) {
             incompleteContents.remove(contentId);
             consumer.accept(new LargeDataSaveResponse(
-                    sessionId, exchangeId, false, ILLEGAL_LOB_STATE_ERROR, "Illegal LOB state", ""));
+                    sessionId, exchangeId, false, ILLEGAL_LOB_STATE_ERROR, "Illegal LOB state"));
         } catch (Exception e) {
             incompleteContents.remove(contentId);
             consumer.accept(new LargeDataSaveResponse(
-                    sessionId, exchangeId, false, UNEXPECTED_ERROR, "Unexpected error " + e.getMessage(), ""));
+                    sessionId, exchangeId, false, UNEXPECTED_ERROR,
+                    "Unexpected error " + e.getMessage()));
         }
         
         if (length == 0) {
-            acceptLargeDataPartRequest(new LargeDataPartRequest(sessionId, exchangeId, 0, ByteString.wrap(new byte[0])));
+            acceptLargeDataPartRequest(new LargeDataPartRequest(
+                    sessionId, exchangeId, 0, ByteString.wrap(new byte[0])));
         }
     }
 
@@ -273,8 +283,7 @@ public class DummyMessenger implements Messenger {
                             exchangeId,
                             false,
                             ILLEGAL_LOB_STATE_ERROR,
-                            "Illegal LOB state",
-                            ""));
+                            "Illegal LOB state"));
             return;
         } catch (Exception e) {
             removeCompletable(
@@ -284,18 +293,21 @@ public class DummyMessenger implements Messenger {
                             exchangeId,
                             false,
                             UNEXPECTED_ERROR,
-                            "Unexpected error " + e.getMessage(),
-                            ""));
+                            "Unexpected error " + e.getMessage()));
             return;
         }
         
         if (completable.completed()) {
+            String variableName = variableNames.get(contentId);
+            if (variableName == null) {
+                throw new IllegalStateException("No variable name given");
+            }
             ByteString fullContent = completable.content();
-            addRow(fullContent);
+            addRow(variableName, fullContent);
             Consumer<Response> responseConsumer = removeCompletable(contentId, null);
             if (responseConsumer != null) {
-                String variableName = "blob_" + contentId;
-                responseConsumer.accept(new LargeDataSaveResponse(sessionId, exchangeId, true, "", "", variableName));
+                responseConsumer.accept(new LargeDataSaveResponse(
+                        sessionId, exchangeId, true, "", ""));
             }
         }
     }
@@ -323,6 +335,9 @@ public class DummyMessenger implements Messenger {
         synchronized (incompleteContents) {
             incompleteContents.remove(contentId);
         }
+        synchronized (variableNames) {
+            variableNames.remove(contentId);
+        }
         Consumer<Response> responseConsumer;
         synchronized (dataSaveConsumers) {
             responseConsumer = dataSaveConsumers.remove(contentId);
@@ -339,7 +354,7 @@ public class DummyMessenger implements Messenger {
         return responseConsumer;
     }
     
-    private void addRow(ByteString content) {
+    private void addRow(String variableName, ByteString content) {
         Long rowId = rowCounter.incrementAndGet();
         String insertTimestamp = currentTimestamp();
         String stringContent = content.toString(StandardCharsets.UTF_8);
@@ -347,6 +362,7 @@ public class DummyMessenger implements Messenger {
         List<Object> row = new ArrayList<>();
         row.add(rowId);
         row.add(insertTimestamp);
+        row.add(variableName);
         row.add(stringContent.length());
         row.add(stringContent);
         

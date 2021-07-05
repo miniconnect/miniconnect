@@ -10,27 +10,15 @@ public class StoredLargeDataSaveResult implements MiniLargeDataSaveResult {
     
     private final String errorMessage;
     
-    private final String variableName;
-    
 
     public StoredLargeDataSaveResult(
             boolean success,
             String errorCode,
-            String errorMessage,
-            String variableName) {
+            String errorMessage) {
 
         this.success = success;
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
-        this.variableName = variableName;
-    }
-    
-    public static StoredLargeDataSaveResult success(String variableName) {
-        return new StoredLargeDataSaveResult(true, "", "", variableName);
-    }
-
-    public static StoredLargeDataSaveResult error(String errorCode, String errorMessage) {
-        return new StoredLargeDataSaveResult(false, errorCode, errorMessage, "");
     }
     
 
@@ -47,11 +35,6 @@ public class StoredLargeDataSaveResult implements MiniLargeDataSaveResult {
     @Override
     public String errorMessage() {
         return errorMessage;
-    }
-
-    @Override
-    public String variableName() {
-        return variableName;
     }
 
 }

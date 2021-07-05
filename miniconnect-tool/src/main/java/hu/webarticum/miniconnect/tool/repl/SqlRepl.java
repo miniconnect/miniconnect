@@ -18,7 +18,7 @@ import hu.webarticum.miniconnect.api.MiniResult;
 public class SqlRepl implements Repl {
 
     private static final Pattern DATA_PATTERN = Pattern.compile(
-            "\\s*data:\\s*(?:\\s*(?<source>@?(?:([^\\)\\\\]|\\\\.)+))\\s*)(?:;\\s*)?",
+            "\\s*data:(?<name>([^:\\\\]|\\\\.)+):\\s*(?:\\s*(?<source>@?(?:([^\\)\\\\]|\\\\.)+))\\s*)(?:;\\s*)?",
             Pattern.CASE_INSENSITIVE);
 
     private static final Pattern HELP_PATTERN = Pattern.compile(
@@ -73,9 +73,11 @@ public class SqlRepl implements Repl {
     public boolean execute(String command) throws IOException {
         Matcher dataMatcher = DATA_PATTERN.matcher(command);
         if (dataMatcher.matches()) {
+            String escapedName = dataMatcher.group("name");
+            String name = UNESCAPE_PATTERN.matcher(escapedName).replaceAll("$1");
             String escapedSource = dataMatcher.group("source");
             String source = UNESCAPE_PATTERN.matcher(escapedSource).replaceAll("$1");
-            putLargeData(source);
+            putLargeData(name, source);
             return true;
         }
         
@@ -123,7 +125,7 @@ public class SqlRepl implements Repl {
         new ResultSetPrinter().print(result.resultSet(), out);
     }
     
-    private void putLargeData(String source) throws IOException {
+    private void putLargeData(String name, String source) throws IOException {
         long length;
         InputStream in;
         if (source.length() > 0 && source.charAt(0) == '@') {
@@ -140,26 +142,26 @@ public class SqlRepl implements Repl {
             in = new ByteArrayInputStream(bytes);
         }
 
-        MiniLargeDataSaveResult result = session.putLargeData(length, in);
-        printLargeDataSaveResult(result, length);
+        MiniLargeDataSaveResult result = session.putLargeData(name, length, in);
+        printLargeDataSaveResult(result, name, length);
     }
     
     private void printLargeDataSaveResult(
-            MiniLargeDataSaveResult result, long length) throws IOException {
+            MiniLargeDataSaveResult result, String name, long length) throws IOException {
         
         if (result.success()) {
-            printSuccessLargeDataSaveResult(result, length);
+            printSuccessLargeDataSaveResult(result, name, length);
         } else {
             printErrorLargeDataSaveResult(result);
         }
     }
 
     private void printSuccessLargeDataSaveResult(
-            MiniLargeDataSaveResult result, long length) throws IOException {
+            MiniLargeDataSaveResult result, String name, long length) throws IOException {
         
         out.append("  Successfully stored\n");
         out.append("  Size: " + length + " bytes\n");
-        out.append("  Variable name: '" + result.variableName() + "'\n");
+        out.append("  Variable name: '" + name + "'\n");
     }
 
     private void printErrorLargeDataSaveResult(MiniLargeDataSaveResult result) throws IOException {

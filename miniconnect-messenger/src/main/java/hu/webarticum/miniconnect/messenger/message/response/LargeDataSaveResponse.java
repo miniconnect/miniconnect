@@ -14,23 +14,19 @@ public class LargeDataSaveResponse implements Response, SessionMessage {
 
     private final String errorMessage;
 
-    private final String variableName;
-
 
     public LargeDataSaveResponse(
             long sessionId,
             int exchangeId,
             boolean success,
             String errorCode,
-            String errorMessage,
-            String variableName) {
+            String errorMessage) {
 
         this.sessionId = sessionId;
         this.exchangeId = exchangeId;
         this.success = success;
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
-        this.variableName = variableName;
     }
 
 
@@ -53,10 +49,6 @@ public class LargeDataSaveResponse implements Response, SessionMessage {
 
     public String errorMessage() {
         return errorMessage;
-    }
-
-    public String getVariableName() {
-        return variableName;
     }
 
 }
