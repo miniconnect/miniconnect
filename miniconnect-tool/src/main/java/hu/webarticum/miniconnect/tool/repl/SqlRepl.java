@@ -29,9 +29,16 @@ public class SqlRepl implements Repl {
             "\\s*(?:quit|exit)\\s*(?:\\(\\s*\\)\\s*)?(?:;\\s*)?",
             Pattern.CASE_INSENSITIVE);
     
+    private static final Pattern QUERY_PATTERN = Pattern.compile(
+            "(?:[^'\"`\\\\;]++|\\\\.|" +
+            "(?<s>['\"`])(?:(?:\\\\|\\k<s>)\\k<s>|(?!\\k<s>).)++\\k<s>)*;.*+");
+    
     private static final Pattern COMMAND_PATTERN = Pattern.compile(
-            "^(?:" + DATA_PATTERN + "|" + HELP_PATTERN + "|" + QUIT_PATTERN +
-                    "|(?:[^'\"`\\\\;]++|\\\\.|(['\"`])(?:(?:\\\\|\\1)\\1|(?!\\1).)++\\1)*;.*+)$",
+            "^(?:" +
+                    DATA_PATTERN + "|" +
+                    HELP_PATTERN + "|" +
+                    QUIT_PATTERN + "|" +
+                    QUERY_PATTERN + ")$",
             Pattern.MULTILINE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     private static final Pattern UNESCAPE_PATTERN = Pattern.compile(

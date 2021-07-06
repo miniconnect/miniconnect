@@ -1,0 +1,38 @@
+plugins {
+    id 'java-library'
+}
+
+group 'hu.webarticum.miniconnect'
+version '1.0-SNAPSHOT'
+sourceCompatibility = 1.8
+
+repositories {
+    jcenter()
+}
+
+configurations {
+    lab
+}
+
+sourceSets {
+    lab {
+        java {
+            srcDirs = ['src/lab/java']
+        }
+    }
+}
+
+dependencies {
+    implementation project(':miniconnect-api')
+    implementation project(':miniconnect-util')
+    implementation project(':miniconnect-tool')
+    
+	implementation group: 'com.h2database', name: 'h2', version: '1.4.200'
+}
+
+eclipse {
+    classpath {
+        plusConfigurations.add configurations.lab
+    }
+}
+
