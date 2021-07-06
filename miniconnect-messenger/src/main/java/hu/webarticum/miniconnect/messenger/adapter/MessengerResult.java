@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.messenger.surface;
+package hu.webarticum.miniconnect.messenger.adapter;
 
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniResultSet;

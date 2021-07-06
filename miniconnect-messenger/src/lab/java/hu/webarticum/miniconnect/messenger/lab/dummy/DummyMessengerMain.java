@@ -3,7 +3,7 @@ package hu.webarticum.miniconnect.messenger.lab.dummy;
 import java.io.IOException;
 
 import hu.webarticum.miniconnect.api.MiniSession;
-import hu.webarticum.miniconnect.messenger.surface.MessengerSession;
+import hu.webarticum.miniconnect.messenger.adapter.MessengerSession;
 import hu.webarticum.miniconnect.tool.repl.ReplRunner;
 import hu.webarticum.miniconnect.tool.repl.SqlRepl;
 

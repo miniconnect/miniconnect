@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.messenger.surface;
+package hu.webarticum.miniconnect.messenger.adapter;
 
 import java.io.IOException;
 import java.io.InputStream;
