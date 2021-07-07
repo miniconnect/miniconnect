@@ -6,7 +6,7 @@ import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.messenger.message.request.QueryRequest;
 import hu.webarticum.miniconnect.messenger.message.response.Response;
 
-public class QueryPartial {
+class QueryPartial {
 
     private final long sessionId;
     

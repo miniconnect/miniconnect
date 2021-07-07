@@ -22,7 +22,7 @@ import hu.webarticum.miniconnect.messenger.message.response.Response;
 import hu.webarticum.miniconnect.messenger.util.OrderAligningQueue;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-public class LargeDataPartial {
+class LargeDataPartial {
     
     private final long sessionId;
     
