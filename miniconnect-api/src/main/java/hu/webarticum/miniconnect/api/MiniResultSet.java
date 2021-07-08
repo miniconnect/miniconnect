@@ -9,5 +9,8 @@ public interface MiniResultSet extends Closeable {
     public ImmutableList<MiniColumnHeader> columnHeaders();
 
     public ImmutableList<MiniValue> fetch();
+    
+    @Override
+    public void close();
 
 }

@@ -1,6 +1,5 @@
 package hu.webarticum.miniconnect.tool.result;
 
-import java.io.IOException;
 import java.io.Serializable;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
@@ -50,7 +49,7 @@ public class StoredResultSet implements MiniResultSet, Serializable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         // nothing to do
     }
 

@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.messenger.message.response;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
+import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.messenger.message.SessionMessage;
 import hu.webarticum.miniconnect.tool.result.StoredColumnHeader;
 import hu.webarticum.miniconnect.tool.result.StoredValueDefinition;
@@ -51,6 +52,19 @@ public final class ResultResponse implements Response, SessionMessage {
         this.hasResultSet = hasResultSet;
         this.columnHeaders = columnHeaders;
     }
+    
+    public static ResultResponse of(MiniResult result, long sessionId, int exchangeId) {
+        return new ResultResponse(
+                sessionId,
+                exchangeId,
+                result.success(),
+                result.sqlState(),
+                result.errorCode(),
+                result.errorMessage(),
+                result.warnings(),
+                result.hasResultSet(),
+                result.resultSet().columnHeaders().map(ResultResponse.ColumnHeaderData::of));
+    }
 
 
     @Override
@@ -100,13 +114,6 @@ public final class ResultResponse implements Response, SessionMessage {
         private final ImmutableMap<String, ByteString> properties;
 
 
-        public ColumnHeaderData(MiniColumnHeader header) {
-            this(
-                    header.name(),
-                    header.valueDefinition().type(),
-                    header.valueDefinition().properties());
-        }
-        
         public ColumnHeaderData(
                 String name,
                 String type,
@@ -115,6 +122,13 @@ public final class ResultResponse implements Response, SessionMessage {
             this.name = name;
             this.type = type;
             this.properties = properties;
+        }
+        
+        public static ColumnHeaderData of(MiniColumnHeader header) {
+            return new ColumnHeaderData(
+                    header.name(),
+                    header.valueDefinition().type(),
+                    header.valueDefinition().properties());
         }
 
 

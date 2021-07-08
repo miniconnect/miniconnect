@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.jdbcadapter;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -175,12 +176,12 @@ public class JdbcAdapterResultSet implements MiniResultSet {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         try {
             jdbcResultSet.close();
             jdbcStatement.close();
         } catch (SQLException e) {
-            throw new IOException("Unexpected SQLException", e);
+            throw new UncheckedIOException(new IOException("Unexpected SQLException", e));
         }
     }
 

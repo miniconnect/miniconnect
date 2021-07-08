@@ -1,6 +1,5 @@
 package hu.webarticum.miniconnect.messenger.adapter;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -288,7 +287,7 @@ public class MessengerResultSetCharger {
         }
 
         @Override
-        public void close() throws IOException {
+        public void close() {
             
             // TODO
             

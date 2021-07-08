@@ -107,7 +107,7 @@ public class DummyMessenger implements Messenger {
         
         List<ColumnHeaderData> headerDatasBuilder = new ArrayList<>(columnHeaders.size());
         for (MiniColumnHeader header : columnHeaders) {
-            headerDatasBuilder.add(new ColumnHeaderData(header));
+            headerDatasBuilder.add(ColumnHeaderData.of(header));
         }
         
         ImmutableList<ColumnHeaderData> headerDatas = new ImmutableList<>(headerDatasBuilder);
