@@ -14,9 +14,5 @@ include ':miniconnect-tool'
 project(':miniconnect-tool').projectDir = new File('../miniconnect-tool')
 
 // FIXME
-include ':miniconnect-transfer'
-project(':miniconnect-transfer').projectDir = new File('../miniconnect-transfer')
-
-// FIXME
 include ':miniconnect-jdbc-adapter'
 project(':miniconnect-jdbc-adapter').projectDir = new File('../miniconnect-jdbc-adapter')

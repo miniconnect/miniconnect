@@ -27,7 +27,6 @@ dependencies {
     implementation project(':miniconnect-api')
     implementation project(':miniconnect-util')
     implementation project(':miniconnect-tool')
-    implementation project(':miniconnect-transfer')
 
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
