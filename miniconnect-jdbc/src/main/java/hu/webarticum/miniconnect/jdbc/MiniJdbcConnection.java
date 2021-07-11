@@ -17,6 +17,7 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
 import hu.webarticum.miniconnect.api.MiniSession;
@@ -24,6 +25,12 @@ import hu.webarticum.miniconnect.api.MiniSession;
 public class MiniJdbcConnection implements Connection {
 
     private final MiniSession session;
+    
+    private volatile boolean closed = false;
+    
+    private final Object closeLock = new Object();
+    
+    private final CopyOnWriteArrayList<Statement> activeStatements = new CopyOnWriteArrayList<>();
     
     
     public MiniJdbcConnection(MiniSession session) {
@@ -368,14 +375,20 @@ public class MiniJdbcConnection implements Connection {
 
     @Override
     public void close() throws SQLException {
-        // TODO Auto-generated method stub
-        
+        synchronized (closeLock) {
+            if (closed) {
+                return;
+            }
+            
+            for (Statement activeStatement : activeStatements) {
+                activeStatement.close();
+            }
+        }
     }
 
     @Override
     public boolean isClosed() throws SQLException {
-        // TODO Auto-generated method stub
-        return false;
+        return closed;
     }
 
     @Override
