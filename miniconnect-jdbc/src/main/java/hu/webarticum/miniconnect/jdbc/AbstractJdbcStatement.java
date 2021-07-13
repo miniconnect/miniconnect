@@ -1,6 +1,5 @@
 package hu.webarticum.miniconnect.jdbc;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -21,6 +20,7 @@ public abstract class AbstractJdbcStatement implements Statement {
     
     AbstractJdbcStatement(MiniJdbcConnection connection) {
         this.connection = connection;
+        connection.registerActiveStatement(this);
     }
     
 
@@ -41,7 +41,7 @@ public abstract class AbstractJdbcStatement implements Statement {
     }
 
     @Override
-    public Connection getConnection() throws SQLException {
+    public MiniJdbcConnection getConnection() throws SQLException {
         return connection;
     }
 
@@ -97,7 +97,7 @@ public abstract class AbstractJdbcStatement implements Statement {
 
     @Override
     public ResultSet getResultSet() throws SQLException {
-        return currentResult.jdbcResultSet;
+        return (currentResult != null ? currentResult.jdbcResultSet : null);
     }
 
     @Override
@@ -167,9 +167,13 @@ public abstract class AbstractJdbcStatement implements Statement {
 
     @Override
     public void close() throws SQLException {
+        
+        // FIXME
+        
         synchronized (closeLock) {
-            // TODO ...
             closed = true;
+            connection.unregisterActiveStatement(this);
+            // TODO ...
         }
     }
     

@@ -5,7 +5,6 @@ import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,7 +24,9 @@ import hu.webarticum.miniconnect.api.MiniSession;
 
 public class MiniJdbcConnection implements Connection {
 
-    private final MiniSession session;
+    private final MiniSession miniSession;
+    
+    private final MiniJdbcDatabaseMetaData metaData;
     
     private volatile boolean closed = false;
     
@@ -35,12 +36,26 @@ public class MiniJdbcConnection implements Connection {
     
     
     public MiniJdbcConnection(MiniSession session) {
-        this.session = session;
+        this.miniSession = session;
+        this.metaData = new MiniJdbcDatabaseMetaData(this);
     }
 
 
     // --- METADATA ---
     // [start]
+    
+    
+    public MiniSession getMiniSession() {
+        return miniSession;
+    }
+    
+    public void registerActiveStatement(Statement statement) {
+        activeStatements.add(statement);
+    }
+
+    public void unregisterActiveStatement(Statement statement) {
+        activeStatements.remove(statement);
+    }
     
     @Override
     public <T> T unwrap(Class<T> type) throws SQLException {
@@ -59,9 +74,8 @@ public class MiniJdbcConnection implements Connection {
     }
 
     @Override
-    public DatabaseMetaData getMetaData() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+    public MiniJdbcDatabaseMetaData getMetaData() throws SQLException {
+        return metaData;
     }
 
     @Override
@@ -163,7 +177,9 @@ public class MiniJdbcConnection implements Connection {
     @Override
     public Statement createStatement() throws SQLException {
         return createStatement(
-                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, getHoldability());
+                ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_READ_ONLY,
+                ResultSet.HOLD_CURSORS_OVER_COMMIT);
     }
 
     @Override
@@ -177,9 +193,18 @@ public class MiniJdbcConnection implements Connection {
     public Statement createStatement(
             int resultSetType, int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
+
+        if (resultSetType != ResultSet.TYPE_FORWARD_ONLY) {
+            throw new SQLException("Only TYPE_FORWARD_ONLY result sets are supported");
+        }
+        if (resultSetConcurrency != ResultSet.CONCUR_READ_ONLY) {
+            throw new SQLException("Only READ_ONLY result sets are supported");
+        }
+        if (resultSetHoldability != ResultSet.HOLD_CURSORS_OVER_COMMIT) {
+            throw new SQLException("Only HOLD_CURSORS_OVER_COMMIT result sets are supported");
+        }
         
-        throw new RuntimeException("TODO!"); // TODO
-        
+        return new MiniJdbcStatement(this);
     }
 
     
