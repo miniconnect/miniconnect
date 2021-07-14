@@ -13,6 +13,7 @@ import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.RowId;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLWarning;
 import java.sql.SQLXML;
 import java.sql.Time;
@@ -20,8 +21,11 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Map;
 
+import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
+import hu.webarticum.miniconnect.jdbc.converter.GeneralConverter;
+import hu.webarticum.miniconnect.tool.result.DefaultValueInterpreter;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class MiniJdbcResultSet implements ResultSet {
@@ -31,6 +35,8 @@ public class MiniJdbcResultSet implements ResultSet {
     private final MiniResultSet miniResultSet;
     
     private final MiniJdbcResultSetMetaData metaData;
+    
+    private final GeneralConverter generalConverter = new GeneralConverter();
     
     
     private volatile ImmutableList<MiniValue> currentRow = null; // NOSONAR
@@ -97,7 +103,16 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public int findColumn(String columnLabel) throws SQLException {
-        return -1; // TODO
+        ImmutableList<MiniColumnHeader> columnHeaders = miniResultSet.columnHeaders();
+        int columnCount = columnHeaders.size();
+        for (int i = 0; i < columnCount; i++) {
+            String columnName = columnHeaders.get(i).name();
+            if (columnName.equals(columnLabel)) {
+                return i + 1;
+            }
+        }
+        
+        throw new SQLException(String.format("No column with label '%s'", columnLabel));
     }
 
     @Override
@@ -308,12 +323,12 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public BigDecimal getBigDecimal(int columnIndex) throws SQLException {
-        return null; // TODO
+        return getObject(columnIndex, BigDecimal.class);
     }
 
     @Override
     public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
-        return null; // TODO
+        return getObject(columnIndex, BigDecimal.class, scale);
     }
 
     @Override
@@ -323,7 +338,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public byte[] getBytes(int columnIndex) throws SQLException {
-        return null; // TODO
+        return getObject(columnIndex, byte[].class);
     }
 
     @Override
@@ -343,7 +358,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public String getNString(int columnIndex) throws SQLException {
-        return null; // TODO
+        return getObject(columnIndex, String.class);
     }
 
     @Override
@@ -358,12 +373,12 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public Date getDate(int columnIndex) throws SQLException {
-        return null; // TODO
+        return getObject(columnIndex, Date.class);
     }
 
     @Override
     public Date getDate(int columnIndex, Calendar cal) throws SQLException {
-        return null; // TODO
+        return getObject(columnIndex, Date.class, cal);
     }
 
     @Override
@@ -378,12 +393,12 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public Time getTime(int columnIndex) throws SQLException {
-        return null; // TODO
+        return getObject(columnIndex, Time.class);
     }
 
     @Override
     public Time getTime(int columnIndex, Calendar cal) throws SQLException {
-        return null; // TODO
+        return getObject(columnIndex, Time.class, cal);
     }
 
     @Override
@@ -398,12 +413,12 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public Timestamp getTimestamp(int columnIndex) throws SQLException {
-        return null; // TODO
+        return getObject(columnIndex, Timestamp.class);
     }
 
     @Override
     public Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
-        return null; // TODO
+        return getObject(columnIndex, Timestamp.class, cal);
     }
 
     @Override
@@ -413,7 +428,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public URL getURL(int columnIndex) throws SQLException {
-        return null; // TODO
+        return getObject(columnIndex, URL.class);
     }
 
     @Override
@@ -423,7 +438,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public SQLXML getSQLXML(int columnIndex) throws SQLException {
-        return null; // TODO
+        return getObject(columnIndex, SQLXML.class);
     }
 
     @Override
@@ -473,7 +488,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public InputStream getUnicodeStream(int columnIndex) throws SQLException {
-        return null; // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
@@ -543,29 +558,24 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public Object getObject(int columnIndex, Map<String, Class<?>> map) throws SQLException {
-        return false; // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
-        // TODO: error checks
-        Object value = getObject(columnIndex);
-        if (type.isAssignableFrom(value.getClass())) {
-            return (T) value;
-        } else if (type == String.class) {
-            return (T) value.toString();
-        } else {
-            // TODO: numeric conversions
-            // TODO: parsing number, date, json[?] etc.
-            // TODO: etc.
-            throw new SQLException("Unsupported conversion");
-        }
+        return getObject(columnIndex, type, null);
+    }
+
+    public <T> T getObject(int columnIndex, Class<T> type, Object modifier) throws SQLException {
+        return generalConverter.convert(getObject(columnIndex), type, modifier);
     }
 
     @Override
     public Object getObject(int columnIndex) throws SQLException {
-        return metaData.getValueInterpreter(columnIndex).decode(currentRow.get(columnIndex - 1));
+        DefaultValueInterpreter interpreter = metaData.getValueInterpreter(columnIndex);
+        Object result = interpreter.decode(currentRow.get(columnIndex - 1));
+        wasNull = (result == null);
+        return result;
     }
 
     @Override
@@ -997,52 +1007,52 @@ public class MiniJdbcResultSet implements ResultSet {
     
     @Override
     public void insertRow() throws SQLException {
-        // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateRow() throws SQLException {
-        // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void deleteRow() throws SQLException {
-        // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void refreshRow() throws SQLException {
-        // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void cancelRowUpdates() throws SQLException {
-        // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void moveToInsertRow() throws SQLException {
-        // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void moveToCurrentRow() throws SQLException {
-        // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public boolean rowUpdated() throws SQLException {
-        return false; // TODO
+        return false;
     }
 
     @Override
     public boolean rowInserted() throws SQLException {
-        return false; // TODO
+        return false;
     }
 
     @Override
     public boolean rowDeleted() throws SQLException {
-        return false; // TODO
+        return false;
     }
 
     // [end]
@@ -1053,22 +1063,22 @@ public class MiniJdbcResultSet implements ResultSet {
     
     @Override
     public RowId getRowId(int columnIndex) throws SQLException {
-        return null; // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public RowId getRowId(String columnLabel) throws SQLException {
-        return null; // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateRowId(int columnIndex, RowId x) throws SQLException {
-        // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void updateRowId(String columnLabel, RowId x) throws SQLException {
-        // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     // [end]

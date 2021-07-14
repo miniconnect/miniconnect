@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -8,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -21,7 +23,7 @@ import hu.webarticum.miniconnect.messenger.lab.dummy.DummyMessenger;
 class MiniJdbcConnectionTest {
 
     @Test
-    void testSelect() throws Exception {
+    void testThingsInGeneral() throws Exception {
         Map<String, String> contents = new LinkedHashMap<>();
         contents.put("first", "Lorem ipsum");
         contents.put("second", "Hello World");
@@ -42,6 +44,11 @@ class MiniJdbcConnectionTest {
                 assertThat(executeResult).isTrue();
                 
                 try (ResultSet resultSet = selectStatement.getResultSet()) {
+                    assertThat(resultSet.findColumn("id")).isEqualTo(1);
+                    assertThat(resultSet.findColumn("name")).isEqualTo(3);
+                    assertThatThrownBy(() -> resultSet.findColumn("xxxxx"))
+                            .isInstanceOf(SQLException.class);
+                    
                     ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
                     assertThat(resultSetMetaData.getColumnCount()).isEqualTo(5);
                     assertThat(resultSetMetaData.getColumnLabel(1)).isEqualTo("id");
