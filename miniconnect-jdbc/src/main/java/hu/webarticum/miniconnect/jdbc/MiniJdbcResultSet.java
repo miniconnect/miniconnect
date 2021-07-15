@@ -1,9 +1,11 @@
 package hu.webarticum.miniconnect.jdbc;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -43,7 +45,7 @@ public class MiniJdbcResultSet implements ResultSet {
     
     private volatile boolean wasNull = false;
     
-    private volatile int fetchSize = 0; // ignored
+    private volatile int fetchSize = 0; // XXX ignored
     
 
     public MiniJdbcResultSet(MiniJdbcStatement statement, MiniResultSet miniResultSet) {
@@ -155,7 +157,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public int getFetchSize() throws SQLException {
-        return fetchSize; // TODO
+        return fetchSize;
     }
 
     // [end]
@@ -448,17 +450,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public InputStream getAsciiStream(int columnIndex) throws SQLException {
-        return null; // TODO
-    }
-
-    @Override
-    public InputStream getBinaryStream(String columnLabel) throws SQLException {
-        return getBinaryStream(findColumn(columnLabel));
-    }
-
-    @Override
-    public InputStream getBinaryStream(int columnIndex) throws SQLException {
-        return null; // TODO
+        return getBinaryStream(columnIndex); // XXX conversion?
     }
 
     @Override
@@ -468,7 +460,8 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public Reader getCharacterStream(int columnIndex) throws SQLException {
-        return null; // TODO
+        // FIXME: character set...
+        return new InputStreamReader(getBinaryStream(columnIndex), StandardCharsets.UTF_8);
     }
 
     @Override
@@ -478,7 +471,8 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public Reader getNCharacterStream(int columnIndex) throws SQLException {
-        return null; // TODO
+        // FIXME: character set... always UTF_8? (see mysql)
+        return new InputStreamReader(getBinaryStream(columnIndex), StandardCharsets.UTF_8);
     }
 
     @Override
@@ -489,6 +483,16 @@ public class MiniJdbcResultSet implements ResultSet {
     @Override
     public InputStream getUnicodeStream(int columnIndex) throws SQLException {
         throw new SQLFeatureNotSupportedException();
+    }
+
+    @Override
+    public InputStream getBinaryStream(String columnLabel) throws SQLException {
+        return getBinaryStream(findColumn(columnLabel));
+    }
+
+    @Override
+    public InputStream getBinaryStream(int columnIndex) throws SQLException {
+        return getMiniValue(columnIndex).contentAccess().inputStream();
     }
 
     @Override
@@ -528,7 +532,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public Ref getRef(int columnIndex) throws SQLException {
-        return null; // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
@@ -573,9 +577,18 @@ public class MiniJdbcResultSet implements ResultSet {
     @Override
     public Object getObject(int columnIndex) throws SQLException {
         DefaultValueInterpreter interpreter = metaData.getValueInterpreter(columnIndex);
-        Object result = interpreter.decode(currentRow.get(columnIndex - 1));
+        MiniValue miniValue = getMiniValue(columnIndex);
+        Object result = interpreter.decode(miniValue);
         wasNull = (result == null);
         return result;
+    }
+    
+    public MiniValue getMiniValue(int columnIndex) throws SQLException {
+        if (columnIndex < 1 || columnIndex > currentRow.size()) {
+            throw new SQLException(String.format("Invalid column index: %d", columnIndex));
+        }
+        
+        return currentRow.get(columnIndex - 1);
     }
 
     @Override
@@ -782,39 +795,6 @@ public class MiniJdbcResultSet implements ResultSet {
     }
 
     @Override
-    public void updateBinaryStream(String columnLabel, InputStream x) throws SQLException {
-        throw createReadOnlyException();
-    }
-
-    @Override
-    public void updateBinaryStream(
-            String columnLabel, InputStream x, int length) throws SQLException {
-        throw createReadOnlyException();
-    }
-
-    @Override
-    public void updateBinaryStream(
-            String columnLabel, InputStream x, long length) throws SQLException {
-        throw createReadOnlyException();
-    }
-
-    @Override
-    public void updateBinaryStream(int columnIndex, InputStream x) throws SQLException {
-        throw createReadOnlyException();
-    }
-
-    @Override
-    public void updateBinaryStream(int columnIndex, InputStream x, int length) throws SQLException {
-        throw createReadOnlyException();
-    }
-
-    @Override
-    public void updateBinaryStream(
-            int columnIndex, InputStream x, long length) throws SQLException {
-        throw createReadOnlyException();
-    }
-
-    @Override
     public void updateCharacterStream(String columnLabel, Reader reader) throws SQLException {
         throw createReadOnlyException();
     }
@@ -864,6 +844,39 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public void updateNCharacterStream(int columnIndex, Reader x, long length) throws SQLException {
+        throw createReadOnlyException();
+    }
+
+    @Override
+    public void updateBinaryStream(String columnLabel, InputStream x) throws SQLException {
+        throw createReadOnlyException();
+    }
+
+    @Override
+    public void updateBinaryStream(
+            String columnLabel, InputStream x, int length) throws SQLException {
+        throw createReadOnlyException();
+    }
+
+    @Override
+    public void updateBinaryStream(
+            String columnLabel, InputStream x, long length) throws SQLException {
+        throw createReadOnlyException();
+    }
+
+    @Override
+    public void updateBinaryStream(int columnIndex, InputStream x) throws SQLException {
+        throw createReadOnlyException();
+    }
+
+    @Override
+    public void updateBinaryStream(int columnIndex, InputStream x, int length) throws SQLException {
+        throw createReadOnlyException();
+    }
+
+    @Override
+    public void updateBinaryStream(
+            int columnIndex, InputStream x, long length) throws SQLException {
         throw createReadOnlyException();
     }
 

@@ -24,11 +24,14 @@ import hu.webarticum.miniconnect.messenger.message.response.ResultSetEofResponse
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetValuePartResponse;
 import hu.webarticum.miniconnect.messenger.util.OrderAligningQueue;
+import hu.webarticum.miniconnect.tool.result.StoredError;
 import hu.webarticum.miniconnect.tool.result.StoredLargeDataSaveResult;
 import hu.webarticum.miniconnect.tool.result.StoredResult;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class MessengerSession implements MiniSession {
+
+    private static final String SQLSTATE_CONNECTIONERROR = "08006";
     
     private static final int DATA_SEND_CHUNK_SIZE = 4096; // TODO: make it configurable
     
@@ -75,26 +78,27 @@ public class MessengerSession implements MiniSession {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             resultSetFuture.cancel(true);
-            return new StoredResult(
-                    "M0001", "INTERRUPT", "Interrupt occured while waiting for results");
+            return new StoredResult(new StoredError(
+                    1, SQLSTATE_CONNECTIONERROR, "Interrupt occured while waiting for results"));
         } catch (TimeoutException e) {
             resultSetFuture.cancel(true);
-            return new StoredResult(
-                    "M0002", "TIMEOUT", "Timeout reached while waiting for results");
+            return new StoredResult(new StoredError(
+                    2, SQLSTATE_CONNECTIONERROR, "Timeout reached while waiting for results"));
         }
         
         if (!(firstResponse instanceof ResultResponse)) {
             resultSetFuture.cancel(true);
-            return new StoredResult("M0003", "BADRESPONSE", "Bad response");
+            return new StoredResult(new StoredError(3, SQLSTATE_CONNECTIONERROR, "Bad response"));
         }
 
         ResultResponse resultResponse = (ResultResponse) firstResponse;
         if (!resultResponse.success()) {
             resultSetFuture.cancel(true);
-            return new StoredResult(
-                    resultResponse.sqlState(),
-                    resultResponse.errorCode(),
-                    resultResponse.errorMessage());
+            ResultResponse.ErrorData errorData = resultResponse.error();
+            return new StoredResult(new StoredError(
+                    errorData.code(),
+                    errorData.sqlState(),
+                    errorData.message()));
         }
         
         MessengerResultSetCharger resultSet = new MessengerResultSetCharger(resultResponse);
@@ -204,15 +208,20 @@ public class MessengerSession implements MiniSession {
             LargeDataSaveResponse largeDataSaveResponse = (LargeDataSaveResponse) response;
             return new StoredLargeDataSaveResult(
                     largeDataSaveResponse.success(),
-                    largeDataSaveResponse.sqlState(),
-                    largeDataSaveResponse.errorCode(),
-                    largeDataSaveResponse.errorMessage());
+                    new StoredError(
+                        largeDataSaveResponse.errorCode(),
+                        largeDataSaveResponse.sqlState(),
+                        largeDataSaveResponse.errorMessage()));
         } else if (response == null) {
             // XXX
-            return new StoredLargeDataSaveResult(false, "M0004", "NORESPONSE", "No response");
+            return new StoredLargeDataSaveResult(
+                    false,
+                    new StoredError(4, SQLSTATE_CONNECTIONERROR, "No response"));
         } else {
             // XXX
-            return new StoredLargeDataSaveResult(false, "M0005", "BADRESPONSE", "Bad response");
+            return new StoredLargeDataSaveResult(
+                    false,
+                    new StoredError(5, SQLSTATE_CONNECTIONERROR, "Bad response"));
         }
     }
     

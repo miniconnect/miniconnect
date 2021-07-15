@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.messenger.message.response;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
+import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.messenger.message.SessionMessage;
 import hu.webarticum.miniconnect.tool.result.StoredColumnHeader;
@@ -17,51 +18,41 @@ public final class ResultResponse implements Response, SessionMessage {
 
     private final boolean success;
 
-    private final String sqlState;
+    private final ErrorData error;
 
-    private final String errorCode;
-
-    private final String errorMessage;
-
-    private final ImmutableList<String> warnings;
+    private final ImmutableList<ErrorData> warnings;
 
     private final boolean hasResultSet;
 
     private final ImmutableList<ColumnHeaderData> columnHeaders;
 
 
-    // TODO: builder
     public ResultResponse(
             long sessionId,
             int exchangeId,
             boolean success,
-            String sqlState,
-            String errorCode,
-            String errorMessage,
-            ImmutableList<String> warnings,
+            ErrorData error,
+            ImmutableList<ErrorData> warnings,
             boolean hasResultSet,
             ImmutableList<ColumnHeaderData> columnHeaders) {
 
         this.sessionId = sessionId;
         this.exchangeId = exchangeId;
         this.success = success;
-        this.sqlState = sqlState;
-        this.errorCode = errorCode;
-        this.errorMessage = errorMessage;
+        this.error = error;
         this.warnings = warnings;
         this.hasResultSet = hasResultSet;
         this.columnHeaders = columnHeaders;
     }
     
     public static ResultResponse of(MiniResult result, long sessionId, int exchangeId) {
+        MiniError error = result.error();
         return new ResultResponse(
                 sessionId,
                 exchangeId,
                 result.success(),
-                result.sqlState(),
-                result.errorCode(),
-                result.errorMessage(),
-                result.warnings(),
+                ErrorData.of(error),
+                result.warnings().map(ErrorData::of),
                 result.hasResultSet(),
                 result.resultSet().columnHeaders().map(ResultResponse.ColumnHeaderData::of));
     }
@@ -80,19 +71,11 @@ public final class ResultResponse implements Response, SessionMessage {
         return success;
     }
 
-    public String sqlState() {
-        return sqlState;
+    public ErrorData error() {
+        return error;
     }
 
-    public String errorCode() {
-        return errorCode;
-    }
-
-    public String errorMessage() {
-        return errorMessage;
-    }
-
-    public ImmutableList<String> warnings() {
+    public ImmutableList<ErrorData> warnings() {
         return warnings;
     }
 
@@ -146,6 +129,41 @@ public final class ResultResponse implements Response, SessionMessage {
         
         public MiniColumnHeader toMiniColumnHeader() {
             return new StoredColumnHeader(name, new StoredValueDefinition(type, properties));
+        }
+
+    }
+    
+
+    public static class ErrorData {
+
+        private final int code;
+
+        private final String sqlState;
+
+        private final String message;
+
+        
+        public ErrorData(int code, String sqlState, String message) {
+            this.code = code;
+            this.sqlState = sqlState;
+            this.message = message;
+        }
+        
+        public static ErrorData of(MiniError error) {
+            return new ErrorData(error.code(), error.sqlState(), error.message());
+        }
+        
+        
+        public int code() {
+            return code;
+        }
+
+        public String sqlState() {
+            return sqlState;
+        }
+
+        public String message() {
+            return message;
         }
 
     }

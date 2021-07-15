@@ -1,6 +1,5 @@
 package hu.webarticum.miniconnect.jdbc.converter;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 

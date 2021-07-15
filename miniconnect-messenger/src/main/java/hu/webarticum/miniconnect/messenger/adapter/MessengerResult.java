@@ -1,21 +1,19 @@
 package hu.webarticum.miniconnect.messenger.adapter;
 
+import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.messenger.message.response.ResultResponse;
+import hu.webarticum.miniconnect.tool.result.StoredError;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class MessengerResult implements MiniResult {
 
     private final boolean success;
 
-    private final String sqlState;
+    private final MiniError error;
 
-    private final String errorCode;
-
-    private final String errorMessage;
-
-    private final ImmutableList<String> warnings;
+    private final ImmutableList<MiniError> warnings;
 
     private final boolean hasResultSet;
 
@@ -23,11 +21,11 @@ public class MessengerResult implements MiniResult {
 
 
     public MessengerResult(ResultResponse resultResponse, MessengerResultSetCharger charger) {
+        ResultResponse.ErrorData errorData = resultResponse.error();
         this.success = resultResponse.success();
-        this.sqlState = resultResponse.sqlState();
-        this.errorCode = resultResponse.errorCode();
-        this.errorMessage = resultResponse.errorMessage();
-        this.warnings = resultResponse.warnings();
+        this.error = new StoredError(errorData.code(), errorData.sqlState(), errorData.message());
+        this.warnings = resultResponse.warnings().map(
+                e -> new StoredError(e.code(), e.sqlState(), e.message()));
         this.hasResultSet = resultResponse.hasResultSet();
         this.charger = charger;
     }
@@ -39,22 +37,12 @@ public class MessengerResult implements MiniResult {
     }
 
     @Override
-    public String sqlState() {
-        return sqlState;
+    public MiniError error() {
+        return error;
     }
 
     @Override
-    public String errorCode() {
-        return errorCode;
-    }
-
-    @Override
-    public String errorMessage() {
-        return errorMessage;
-    }
-
-    @Override
-    public ImmutableList<String> warnings() {
+    public ImmutableList<MiniError> warnings() {
         return warnings;
     }
 

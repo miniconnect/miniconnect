@@ -38,11 +38,16 @@ public class StoredValue implements MiniValue, Serializable {
     }
 
     public static StoredValue of(MiniValue value) {
+        if (value instanceof StoredValue) {
+            return (StoredValue) value;
+        }
+        
         MiniContentAccess contentAccess = value.contentAccess();
         if (contentAccess.isLarge()) {
             throw new IllegalArgumentException(
                     "Content is too large to store in memory");
         }
+        
         return new StoredValue(value.isNull(), contentAccess.get());
     }
 

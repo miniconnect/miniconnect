@@ -41,6 +41,8 @@ import hu.webarticum.miniconnect.util.data.ImmutableList;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
 public class DummyMessenger implements Messenger {
+
+    private static final String SQLSTATE_SYNTAXERROR = "42000";
     
     private static final int MAX_LENGTH = 1000_000;
     
@@ -113,8 +115,13 @@ public class DummyMessenger implements Messenger {
         ImmutableList<ColumnHeaderData> headerDatas = new ImmutableList<>(headerDatasBuilder);
         
         ResultResponse resultResponse = new ResultResponse(
-                sessionId, exchangeId, true,
-                "00000", "", "", ImmutableList.empty(), true, headerDatas);
+                sessionId,
+                exchangeId,
+                true,
+                new ResultResponse.ErrorData(0, "00000", ""),
+                ImmutableList.empty(),
+                true,
+                headerDatas);
         responseConsumer.accept(resultResponse);
         
         for (int fetchFrom = 0; fetchFrom < dataRowCount; fetchFrom += 3) {
@@ -202,9 +209,10 @@ public class DummyMessenger implements Messenger {
                 request.sessionId(),
                 request.exchangeId(),
                 false,
-                "D0001",
-                "BADQUERY",
-                "Bad query, only select all is supported",
+                new ResultResponse.ErrorData(
+                        1,
+                        SQLSTATE_SYNTAXERROR,
+                        "Bad query, only select all is supported"),
                 ImmutableList.empty(),
                 true,
                 ImmutableList.empty());
@@ -223,7 +231,7 @@ public class DummyMessenger implements Messenger {
         
         if (length > MAX_LENGTH) {
             consumer.accept(new LargeDataSaveResponse(
-                    sessionId, exchangeId, false, "D0002", "LARGELOB", "Too large LOB"));
+                    sessionId, exchangeId, false, 2, "XXXXX", "Too large LOB"));
             return;
         }
         
@@ -239,12 +247,21 @@ public class DummyMessenger implements Messenger {
         } catch (IllegalStateException e) {
             incompleteContents.remove(contentId);
             consumer.accept(new LargeDataSaveResponse(
-                    sessionId, exchangeId, false, "D0003", "ILLEGALLOBSTATE", "Illegal LOB state"));
+                    sessionId,
+                    exchangeId,
+                    false,
+                    3,
+                    "XXXXX",
+                    "Illegal LOB state"));
         } catch (Exception e) {
             incompleteContents.remove(contentId);
             consumer.accept(new LargeDataSaveResponse(
-                    sessionId, exchangeId, false,
-                    "D9999", "UNEXPECTED", "Unexpected error " + e.getMessage()));
+                    sessionId,
+                    exchangeId,
+                    false,
+                    4,
+                    "XXXXX",
+                    "Unexpected error: " + e.getMessage()));
         }
         
         if (length == 0) {
@@ -273,15 +290,23 @@ public class DummyMessenger implements Messenger {
             removeCompletable(
                     contentId,
                     new LargeDataSaveResponse(
-                            sessionId, exchangeId, false,
-                            "D0003", "ILLEGALLOBSTATE", "Illegal LOB state"));
+                            sessionId,
+                            exchangeId,
+                            false,
+                            3,
+                            "D0003",
+                            "Illegal LOB state"));
             return;
         } catch (Exception e) {
             removeCompletable(
                     contentId,
                     new LargeDataSaveResponse(
-                            sessionId, exchangeId, false,
-                            "D9999", "UNEXPECTED", "Unexpected error " + e.getMessage()));
+                            sessionId,
+                            exchangeId,
+                            false,
+                            99,
+                            "XXXXX",
+                            "Unexpected error " + e.getMessage()));
             return;
         }
         
@@ -295,7 +320,12 @@ public class DummyMessenger implements Messenger {
             Consumer<Response> responseConsumer = removeCompletable(contentId, null);
             if (responseConsumer != null) {
                 responseConsumer.accept(new LargeDataSaveResponse(
-                        sessionId, exchangeId, true, "00000", "", ""));
+                        sessionId,
+                        exchangeId,
+                        true,
+                        0,
+                        "00000",
+                        ""));
             }
         }
     }

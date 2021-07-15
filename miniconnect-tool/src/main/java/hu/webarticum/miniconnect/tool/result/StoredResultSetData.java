@@ -1,6 +1,5 @@
 package hu.webarticum.miniconnect.tool.result;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -55,7 +54,7 @@ public class StoredResultSetData implements Serializable {
                 .collect(Collectors.toList()));
     }
 
-    public static StoredResultSetData of(MiniResult result) throws IOException {
+    public static StoredResultSetData of(MiniResult result) {
         MiniResultSet resultSet = result.resultSet();
         List<MiniColumnHeader> headers = resultSet.columnHeaders().toList();
         List<List<MiniValue>> rows = new ArrayList<>();

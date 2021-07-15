@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
+import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataHeadRequest;
@@ -23,6 +24,9 @@ import hu.webarticum.miniconnect.messenger.util.OrderAligningQueue;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
 class LargeDataPartial {
+
+    private static final String SQLSTATE_CONNECTIONERROR = "08006";
+    
     
     private final long sessionId;
     
@@ -90,8 +94,8 @@ class LargeDataPartial {
                     sessionId,
                     exchangeId,
                     false,
-                    "99999", // FIXME
-                    "ERROR", // FIXME
+                    999, // XXX
+                    SQLSTATE_CONNECTIONERROR,
                     e.getMessage());
             responseConsumer.accept(response);
         }
@@ -130,13 +134,14 @@ class LargeDataPartial {
             result = resultFuture.get(300, TimeUnit.SECONDS);
         }
         
+        MiniError error = result.error();
         LargeDataSaveResponse response = new LargeDataSaveResponse(
                 sessionId,
                 exchangeId,
                 result.success(),
-                result.sqlState(),
-                result.errorCode(),
-                result.errorMessage());
+                error.code(),
+                error.sqlState(),
+                error.message());
         responseConsumer.accept(response);
     }
 

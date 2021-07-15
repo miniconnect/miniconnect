@@ -3,6 +3,7 @@ package hu.webarticum.miniconnect.jdbc;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniResult;
 
 public class MiniJdbcStatement extends AbstractJdbcStatement {
@@ -59,10 +60,11 @@ public class MiniJdbcStatement extends AbstractJdbcStatement {
         
         MiniResult result = getConnection().getMiniSession().execute(sql);
         if (!result.success()) {
+            MiniError error = result.error();
             throw new SQLException(
-                    result.errorMessage(),
-                    result.sqlState(),
-                    0); // FIXME result.errorCode());
+                    error.message(),
+                    error.sqlState(),
+                    error.code());
         }
         
         boolean hasResultSet = result.hasResultSet();

@@ -4,10 +4,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import hu.webarticum.miniconnect.api.MiniResult;
+import hu.webarticum.miniconnect.tool.result.StoredError;
 import hu.webarticum.miniconnect.tool.result.StoredResult;
 import hu.webarticum.miniconnect.tool.result.StoredResultSetData;
 
 public class DescribeQueryExecutor implements QueryExecutor {
+
+    private static final String SQLCODE_UNKNOWN_TABLE = "42S02";
 
     private static final Pattern DESCRIBE_PATTERN = Pattern.compile(
             "^\\s*(?:DESCRIBE|EXPLAIN|SHOW\\s+COLUMNS\\s+(?:FROM|IN))\\s+" + // NOSONAR
@@ -24,7 +27,8 @@ public class DescribeQueryExecutor implements QueryExecutor {
 
         String table = QueryUtil.unescapeIdentifier(matcher.group("table"));
         if (!table.equals("data")) {
-            return new StoredResult("00002", "02", String.format("Unknown table: %s", table));
+            return new StoredResult(new StoredError(
+                    2, SQLCODE_UNKNOWN_TABLE, String.format("Unknown table: %s", table)));
         }
 
         StoredResultSetData resultSetData = new StoredResultSetData(

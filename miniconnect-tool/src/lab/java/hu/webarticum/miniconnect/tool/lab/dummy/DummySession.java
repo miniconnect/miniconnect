@@ -6,11 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.tool.result.StoredError;
 import hu.webarticum.miniconnect.tool.result.StoredResult;
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 
 public class DummySession implements MiniSession {
+    
+    private static final String SQLSTATE_SYNTAXERROR = "42000";
+    
 
     private volatile boolean closed = false;
 
@@ -38,7 +42,7 @@ public class DummySession implements MiniSession {
             }
         }
 
-        return new StoredResult("00001", "01", "Unknow command");
+        return new StoredResult(new StoredError(1, SQLSTATE_SYNTAXERROR, "Unknow command"));
     }
 
     @Override

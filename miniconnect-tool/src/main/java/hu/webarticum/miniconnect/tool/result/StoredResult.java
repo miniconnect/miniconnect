@@ -3,27 +3,21 @@ package hu.webarticum.miniconnect.tool.result;
 import java.io.IOException;
 import java.io.Serializable;
 
+import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class StoredResult implements MiniResult, Serializable {
 
-    private static final long serialVersionUID = -8548902380126828570L;
-    
-    
-    private static final String DEFAULT_SQL_STATE = "00000";
+    private static final long serialVersionUID = 1L;
 
 
     private final boolean success;
 
-    private final String sqlState;
+    private final StoredError error;
 
-    private final String errorCode;
-
-    private final String errorMessage;
-
-    private final ImmutableList<String> warnings;
+    private final ImmutableList<MiniError> warnings;
 
     private final boolean hasResultSet;
 
@@ -32,47 +26,45 @@ public class StoredResult implements MiniResult, Serializable {
 
     public StoredResult() {
         this(
-                true, DEFAULT_SQL_STATE, "", "", ImmutableList.empty(),
+                true, StoredError.PLACEHOLDER, ImmutableList.empty(),
                 false, new StoredResultSetData());
     }
 
-    public StoredResult(String sqlState, String errorCode, String errorMessage) {
+    public StoredResult(MiniError error) {
         this(
-                false, sqlState, errorCode, errorMessage, ImmutableList.empty(),
+                false, StoredError.of(error), ImmutableList.empty(),
                 false, new StoredResultSetData());
     }
 
     public StoredResult(StoredResultSetData resultSetData) {
         this(
-                true, DEFAULT_SQL_STATE, "", "", ImmutableList.empty(),
+                true, StoredError.PLACEHOLDER, ImmutableList.empty(),
                 true, resultSetData);
     }
 
     public StoredResult(
             boolean success,
-            String sqlState,
-            String errorCode,
-            String errorMessage,
-            ImmutableList<String> warnings,
+            StoredError error,
+            ImmutableList<StoredError> warnings,
             boolean hasResultSet,
             StoredResultSetData resultSetData) {
 
         this.success = success;
-        this.sqlState = sqlState;
-        this.errorCode = errorCode;
-        this.errorMessage = errorMessage;
-        this.warnings = warnings;
+        this.error = error;
+        this.warnings = warnings.map(e -> e);
         this.hasResultSet = hasResultSet;
         this.resultSetData = resultSetData;
     }
 
     public static StoredResult of(MiniResult result) throws IOException {
+        if (result instanceof StoredResult) {
+            return (StoredResult) result;
+        }
+        
         return new StoredResult(
                 result.success(),
-                result.sqlState(),
-                result.errorCode(),
-                result.errorMessage(),
-                result.warnings(),
+                StoredError.of(result.error()),
+                result.warnings().map(StoredError::of),
                 result.hasResultSet(),
                 StoredResultSetData.of(result));
     }
@@ -84,22 +76,12 @@ public class StoredResult implements MiniResult, Serializable {
     }
 
     @Override
-    public String sqlState() {
-        return sqlState;
+    public MiniError error() {
+        return error;
     }
 
     @Override
-    public String errorCode() {
-        return errorCode;
-    }
-
-    @Override
-    public String errorMessage() {
-        return errorMessage;
-    }
-
-    @Override
-    public ImmutableList<String> warnings() {
+    public ImmutableList<MiniError> warnings() {
         return warnings;
     }
 

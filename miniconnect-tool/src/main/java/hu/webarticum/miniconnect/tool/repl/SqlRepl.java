@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 
@@ -122,10 +123,7 @@ public class SqlRepl implements Repl {
 
     private void printResult(MiniResult result) throws IOException {
         if (!result.success()) {
-            out.append(String.format(
-                    "  ERROR(%s): %s%n",
-                    result.errorCode(),
-                    result.errorMessage()));
+            printError(result.error());
             return;
         }
 
@@ -159,7 +157,7 @@ public class SqlRepl implements Repl {
         if (result.success()) {
             printSuccessLargeDataSaveResult(result, name, length);
         } else {
-            printErrorLargeDataSaveResult(result);
+            printError(result.error());
         }
     }
 
@@ -171,12 +169,13 @@ public class SqlRepl implements Repl {
         out.append("  Variable name: '" + name + "'\n");
     }
 
-    private void printErrorLargeDataSaveResult(MiniLargeDataSaveResult result) throws IOException {
-        out.append("  Failed to store data\n");
-        out.append("  Error code: " + result.errorCode() + "\n");
-        out.append("  Error message: " + result.errorMessage() + "\n");
+    private void printError(MiniError error) throws IOException {
+        out.append("  ERROR!\n");
+        out.append("  Code: " + error.code() + "\n");
+        out.append("  SQL state: '" + error.sqlState() + "'\n");
+        out.append("  Message: '" + error.message() + "'\n");
     }
-
+    
     private void printHelp() throws IOException {
         out.append('\n');
         out.append(String.format("  MiniConnect SQL REPL - %s%n",

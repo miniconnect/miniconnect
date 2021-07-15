@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
+import hu.webarticum.miniconnect.tool.result.StoredError;
 import hu.webarticum.miniconnect.tool.result.StoredLargeDataSaveResult;
 
 public class SimpleJdbcLargeDataPutter implements JdbcLargeDataPutter {
@@ -32,12 +33,16 @@ public class SimpleJdbcLargeDataPutter implements JdbcLargeDataPutter {
             preparedStatement.setBinaryStream(1, dataSource, length);
             preparedStatement.execute();
         } catch (SQLException e) {
+            int errorCode = e.getErrorCode();
             String sqlState = e.getSQLState();
-            String errorCode = "" + e.getErrorCode();
             String errorMessage = e.getMessage();
-            return new StoredLargeDataSaveResult(false, sqlState, errorCode, errorMessage);
+            return new StoredLargeDataSaveResult(
+                    false,
+                    new StoredError(errorCode, sqlState, errorMessage));
         }
-        return new StoredLargeDataSaveResult(true, DEFAULT_SQL_STATE, "", "");
+        return new StoredLargeDataSaveResult(
+                true,
+                new StoredError(0, DEFAULT_SQL_STATE, ""));
     }
 
 }

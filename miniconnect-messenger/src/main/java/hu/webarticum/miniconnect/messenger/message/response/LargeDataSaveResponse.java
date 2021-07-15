@@ -9,10 +9,10 @@ public class LargeDataSaveResponse implements Response, SessionMessage {
     private final int exchangeId;
 
     private final boolean success;
-    
-    private final String sqlState;
 
-    private final String errorCode;
+    private final int errorCode;
+
+    private final String sqlState;
 
     private final String errorMessage;
 
@@ -21,15 +21,15 @@ public class LargeDataSaveResponse implements Response, SessionMessage {
             long sessionId,
             int exchangeId,
             boolean success,
+            int errorCode,
             String sqlState,
-            String errorCode,
             String errorMessage) {
 
         this.sessionId = sessionId;
         this.exchangeId = exchangeId;
         this.success = success;
-        this.sqlState = sqlState;
         this.errorCode = errorCode;
+        this.sqlState = sqlState;
         this.errorMessage = errorMessage;
     }
 
@@ -47,14 +47,14 @@ public class LargeDataSaveResponse implements Response, SessionMessage {
         return success;
     }
 
+    public int errorCode() {
+        return errorCode;
+    }
+
     public String sqlState() {
         return sqlState;
     }
     
-    public String errorCode() {
-        return errorCode;
-    }
-
     public String errorMessage() {
         return errorMessage;
     }
