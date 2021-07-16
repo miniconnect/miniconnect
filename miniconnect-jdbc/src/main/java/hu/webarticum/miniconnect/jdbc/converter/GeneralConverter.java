@@ -10,7 +10,16 @@ public class GeneralConverter {
     
     public GeneralConverter() {
         specificConverters.put(Boolean.class, new BooleanConverter());
+        specificConverters.put(Byte.class, new ByteConverter());
+        specificConverters.put(Character.class, new CharacterConverter());
+        specificConverters.put(Short.class, new ShortConverter());
+        specificConverters.put(Integer.class, new IntegerConverter());
+        specificConverters.put(Long.class, new LongConverter());
+        specificConverters.put(Float.class, new FloatConverter());
+        specificConverters.put(Double.class, new DoubleConverter());
+        
         // TODO
+        
     }
     
     

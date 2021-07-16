@@ -22,6 +22,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Map;
+import java.util.Objects;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResultSet;
@@ -250,7 +251,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public boolean getBoolean(int columnIndex) throws SQLException {
-        return getObject(columnIndex, Boolean.class);
+        return Objects.requireNonNullElse(getObject(columnIndex, Boolean.class), false);
     }
 
     @Override
@@ -260,7 +261,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public byte getByte(int columnIndex) throws SQLException {
-        return getObject(columnIndex, Byte.class);
+        return Objects.requireNonNullElse(getObject(columnIndex, Byte.class), (byte) 0);
     }
 
     @Override
@@ -270,7 +271,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public short getShort(int columnIndex) throws SQLException {
-        return getObject(columnIndex, Short.class);
+        return Objects.requireNonNullElse(getObject(columnIndex, Short.class), (short) 0);
     }
 
     @Override
@@ -280,7 +281,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public int getInt(int columnIndex) throws SQLException {
-        return getObject(columnIndex, Integer.class);
+        return Objects.requireNonNullElse(getObject(columnIndex, Integer.class), 0);
     }
 
     @Override
@@ -290,7 +291,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public long getLong(int columnIndex) throws SQLException {
-        return getObject(columnIndex, Long.class);
+        return Objects.requireNonNullElse(getObject(columnIndex, Long.class), 0L);
     }
 
     @Override
@@ -300,7 +301,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public float getFloat(int columnIndex) throws SQLException {
-        return getObject(columnIndex, Float.class);
+        return Objects.requireNonNullElse(getObject(columnIndex, Float.class), 0f);
     }
 
     @Override
@@ -310,7 +311,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public double getDouble(int columnIndex) throws SQLException {
-        return getObject(columnIndex, Double.class);
+        return Objects.requireNonNullElse(getObject(columnIndex, Double.class), 0.0);
     }
 
     @Override
@@ -461,6 +462,7 @@ public class MiniJdbcResultSet implements ResultSet {
     @Override
     public Reader getCharacterStream(int columnIndex) throws SQLException {
         // FIXME: character set...
+        // TODO: handle null
         return new InputStreamReader(getBinaryStream(columnIndex), StandardCharsets.UTF_8);
     }
 
@@ -472,12 +474,13 @@ public class MiniJdbcResultSet implements ResultSet {
     @Override
     public Reader getNCharacterStream(int columnIndex) throws SQLException {
         // FIXME: character set... always UTF_8? (see mysql)
+        // TODO: handle null
         return new InputStreamReader(getBinaryStream(columnIndex), StandardCharsets.UTF_8);
     }
 
     @Override
     public InputStream getUnicodeStream(String columnLabel) throws SQLException {
-        return getUnicodeStream(findColumn(columnLabel));
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
@@ -492,6 +495,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public InputStream getBinaryStream(int columnIndex) throws SQLException {
+        // TODO: handle null
         return getMiniValue(columnIndex).contentAccess().inputStream();
     }
 
