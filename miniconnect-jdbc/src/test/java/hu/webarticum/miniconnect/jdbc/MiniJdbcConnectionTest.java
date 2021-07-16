@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -17,13 +18,15 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.jdbcadapter.JdbcAdapterSession;
 import hu.webarticum.miniconnect.messenger.adapter.MessengerSession;
 import hu.webarticum.miniconnect.messenger.lab.dummy.DummyMessenger;
 
 class MiniJdbcConnectionTest {
-
+    
+    // TODO: eliminate the use of DummyMessenger
     @Test
-    void testThingsInGeneral() throws Exception {
+    void testResultSetWithDummyMessenger() throws Exception {
         Map<String, String> contents = new LinkedHashMap<>();
         contents.put("first", "Lorem ipsum");
         contents.put("second", "Hello World");
@@ -80,6 +83,49 @@ class MiniJdbcConnectionTest {
                 }
             }
         }
+    }
+
+    @Test
+    void testStatementBatch() throws Exception {
+        try (
+                Connection baseConnection = createInMemoryConnection();
+                MiniSession miniSession = new JdbcAdapterSession(baseConnection);
+                Connection connection = new MiniJdbcConnection(miniSession);
+                ) {
+            
+            // TODO
+            
+        }
+    }
+
+    @Test
+    void testPreparedStatement() throws Exception {
+        try (
+                Connection baseConnection = createInMemoryConnection();
+                MiniSession miniSession = new JdbcAdapterSession(baseConnection);
+                Connection connection = new MiniJdbcConnection(miniSession);
+                ) {
+            
+            // TODO
+            
+        }
+    }
+
+    @Test
+    void testPreparedStatementBatch() throws Exception {
+        try (
+                Connection baseConnection = createInMemoryConnection();
+                MiniSession miniSession = new JdbcAdapterSession(baseConnection);
+                Connection connection = new MiniJdbcConnection(miniSession);
+                ) {
+            
+            // TODO
+            
+        }
+    }
+    
+    private Connection createInMemoryConnection() throws SQLException {
+        return DriverManager.getConnection("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
     }
     
 }
