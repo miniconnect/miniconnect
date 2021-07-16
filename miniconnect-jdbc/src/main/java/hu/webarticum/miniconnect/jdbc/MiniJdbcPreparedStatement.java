@@ -25,6 +25,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     MiniJdbcPreparedStatement(MiniJdbcConnection connection) {
         super(connection);
+        
     }
     
 
@@ -32,8 +33,13 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     // [start]
     
     @Override
-    public void setEscapeProcessing(boolean enable) throws SQLException {
-        // TODO
+    public ResultSetMetaData getMetaData() throws SQLException {
+        return null; // TODO
+    }
+
+    @Override
+    public ParameterMetaData getParameterMetaData() throws SQLException {
+        return null; // TODO
     }
 
     @Override
@@ -44,16 +50,6 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     @Override
     public boolean isPoolable() throws SQLException {
         return false; // TODO
-    }
-
-    @Override
-    public ResultSetMetaData getMetaData() throws SQLException {
-        return null; // TODO
-    }
-
-    @Override
-    public ParameterMetaData getParameterMetaData() throws SQLException {
-        return null; // TODO
     }
 
     // [end]
@@ -234,12 +230,14 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     }
 
     @Override
-    public void setCharacterStream(int parameterIndex, Reader reader, int length) throws SQLException {
+    public void setCharacterStream(
+            int parameterIndex, Reader reader, int length) throws SQLException {
         // TODO
     }
 
     @Override
-    public void setCharacterStream(int parameterIndex, Reader reader, long length) throws SQLException {
+    public void setCharacterStream(
+            int parameterIndex, Reader reader, long length) throws SQLException {
         // TODO
     }
 
@@ -249,12 +247,14 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     }
 
     @Override
-    public void setNCharacterStream(int parameterIndex, Reader value, long length) throws SQLException {
+    public void setNCharacterStream(
+            int parameterIndex, Reader value, long length) throws SQLException {
         // TODO
     }
 
     @Override
-    public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
+    public void setUnicodeStream(
+            int parameterIndex, InputStream x, int length) throws SQLException {
         // TODO
     }
 
@@ -269,7 +269,8 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     }
 
     @Override
-    public void setBinaryStream(int parameterIndex, InputStream x, long length) throws SQLException {
+    public void setBinaryStream(
+            int parameterIndex, InputStream x, long length) throws SQLException {
         // TODO
     }
 
@@ -294,7 +295,8 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     }
 
     @Override
-    public void setBlob(int parameterIndex, InputStream inputStream, long length) throws SQLException {
+    public void setBlob(
+            int parameterIndex, InputStream inputStream, long length) throws SQLException {
         // TODO
     }
 
@@ -339,7 +341,8 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     }
 
     @Override
-    public void setObject(int parameterIndex, Object x, int targetSqlType, int scaleOrLength) throws SQLException {
+    public void setObject(
+            int parameterIndex, Object x, int targetSqlType, int scaleOrLength) throws SQLException {
         // TODO
     }
 
