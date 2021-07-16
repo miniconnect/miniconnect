@@ -14,11 +14,6 @@ public class MiniJdbcStatement extends AbstractJdbcStatement {
 
 
     @Override
-    public void setEscapeProcessing(boolean enable) throws SQLException {
-        // TODO
-    }
-
-    @Override
     public void setPoolable(boolean poolable) throws SQLException {
         // TODO
     }

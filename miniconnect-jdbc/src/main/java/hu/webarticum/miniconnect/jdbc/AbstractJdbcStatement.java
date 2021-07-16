@@ -11,6 +11,8 @@ public abstract class AbstractJdbcStatement implements Statement {
     
     private final MiniJdbcConnection connection;
     
+    private volatile boolean escapeProcessing = false;
+    
     private volatile ResultHolder currentResult = null; // NOSONAR
 
     private final Object closeLock = new Object();
@@ -43,6 +45,15 @@ public abstract class AbstractJdbcStatement implements Statement {
     @Override
     public MiniJdbcConnection getConnection() throws SQLException {
         return connection;
+    }
+
+    @Override
+    public void setEscapeProcessing(boolean enable) throws SQLException {
+        this.escapeProcessing = enable;
+    }
+
+    public boolean getEscapeProcessing() {
+        return escapeProcessing;
     }
 
     @Override
