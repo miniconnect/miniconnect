@@ -10,12 +10,12 @@ include ':miniconnect-util'
 project(':miniconnect-util').projectDir = new File('../miniconnect-util')
 
 // FIXME
-include ':miniconnect-messenger'
-project(':miniconnect-messenger').projectDir = new File('../miniconnect-messenger')
-
-// FIXME
 include ':miniconnect-tool'
 project(':miniconnect-tool').projectDir = new File('../miniconnect-tool')
+
+// FIXME
+include ':miniconnect-messenger'
+project(':miniconnect-messenger').projectDir = new File('../miniconnect-messenger')
 
 // FIXME
 include ':miniconnect-jdbc-adapter'
