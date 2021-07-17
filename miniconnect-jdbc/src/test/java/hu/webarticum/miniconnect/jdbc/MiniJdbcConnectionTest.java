@@ -18,6 +18,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.jdbc.provider.h2.H2DatabaseProvider;
 import hu.webarticum.miniconnect.jdbcadapter.JdbcAdapterSession;
 import hu.webarticum.miniconnect.messenger.adapter.MessengerSession;
 import hu.webarticum.miniconnect.messenger.lab.dummy.DummyMessenger;
@@ -41,7 +42,8 @@ class MiniJdbcConnectionTest {
             }
             
             // FIXME: close?
-            Connection connection = new MiniJdbcConnection(session);
+            // FIXME: DatabaseProvider?
+            Connection connection = new MiniJdbcConnection(session, null);
             try (Statement selectStatement = connection.createStatement()) {
                 boolean executeResult = selectStatement.execute("SELECT * FROM data");
                 assertThat(executeResult).isTrue();
@@ -90,7 +92,8 @@ class MiniJdbcConnectionTest {
         try (
                 Connection baseConnection = createInMemoryConnection();
                 MiniSession miniSession = new JdbcAdapterSession(baseConnection);
-                Connection connection = new MiniJdbcConnection(miniSession);
+                Connection connection = new MiniJdbcConnection(
+                        miniSession, new H2DatabaseProvider());
                 ) {
             
             // TODO
@@ -103,7 +106,8 @@ class MiniJdbcConnectionTest {
         try (
                 Connection baseConnection = createInMemoryConnection();
                 MiniSession miniSession = new JdbcAdapterSession(baseConnection);
-                Connection connection = new MiniJdbcConnection(miniSession);
+                Connection connection = new MiniJdbcConnection(
+                        miniSession, new H2DatabaseProvider());
                 ) {
             
             // TODO
@@ -116,7 +120,8 @@ class MiniJdbcConnectionTest {
         try (
                 Connection baseConnection = createInMemoryConnection();
                 MiniSession miniSession = new JdbcAdapterSession(baseConnection);
-                Connection connection = new MiniJdbcConnection(miniSession);
+                Connection connection = new MiniJdbcConnection(
+                        miniSession, new H2DatabaseProvider());
                 ) {
             
             // TODO

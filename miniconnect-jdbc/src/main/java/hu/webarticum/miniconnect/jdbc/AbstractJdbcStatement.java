@@ -15,10 +15,6 @@ public abstract class AbstractJdbcStatement implements Statement {
     
     private volatile ResultHolder currentResult = null; // NOSONAR
 
-    private final Object closeLock = new Object();
-    
-    private volatile boolean closed = false;
-    
     
     AbstractJdbcStatement(MiniJdbcConnection connection) {
         this.connection = connection;
@@ -176,23 +172,6 @@ public abstract class AbstractJdbcStatement implements Statement {
         return false; // TODO
     }
 
-    @Override
-    public void close() throws SQLException {
-        
-        // FIXME
-        
-        synchronized (closeLock) {
-            closed = true;
-            connection.unregisterActiveStatement(this);
-            // TODO ...
-        }
-    }
-    
-    @Override
-    public boolean isClosed() throws SQLException {
-        return closed;
-    }
-    
 
     protected void setCurrentResult(ResultHolder newResult) {
         currentResult = newResult;

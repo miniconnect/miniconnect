@@ -8,6 +8,11 @@ import hu.webarticum.miniconnect.api.MiniResult;
 
 public class MiniJdbcStatement extends AbstractJdbcStatement {
 
+    private final Object closeLock = new Object();
+    
+    private volatile boolean closed = false;
+    
+    
     public MiniJdbcStatement(MiniJdbcConnection connection) {
         super(connection);
     }
@@ -102,4 +107,24 @@ public class MiniJdbcStatement extends AbstractJdbcStatement {
         // TODO
     }
 
+    @Override
+    public boolean isClosed() throws SQLException {
+        return closed;
+    }
+    
+    @Override
+    public void close() throws SQLException {
+        synchronized (closeLock) {
+            if (!closed) {
+                closeInternal();
+            }
+        }
+    }
+
+    // TODO
+    public void closeInternal() throws SQLException {
+        closed = true;
+        getConnection().unregisterActiveStatement(this);
+    }
+    
 }

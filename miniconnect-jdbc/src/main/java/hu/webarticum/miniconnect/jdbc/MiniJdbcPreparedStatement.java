@@ -16,16 +16,33 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.RowId;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
 
-public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements PreparedStatement {
+import hu.webarticum.miniconnect.jdbc.provider.PreparedStatementProvider;
 
-    MiniJdbcPreparedStatement(MiniJdbcConnection connection) {
+public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements PreparedStatement {
+    
+    private final String sql;
+    
+    private final PreparedStatementProvider preparedStatementProvider;
+
+    private final ArrayList<ParameterValue> parameters = new ArrayList<>(4);
+
+    private final Object closeLock = new Object();
+    
+    private volatile boolean closed = false;
+    
+    
+    MiniJdbcPreparedStatement(MiniJdbcConnection connection, String sql) {
         super(connection);
-        
+        this.sql = sql;
+        this.preparedStatementProvider =
+                connection.getDatabaseProvider().prepareStatement(connection.getMiniSession(), sql);
     }
     
 
@@ -102,7 +119,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     
     @Override
     public void setRowId(int parameterIndex, RowId x) throws SQLException {
-        // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
@@ -342,13 +359,26 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setObject(
-            int parameterIndex, Object x, int targetSqlType, int scaleOrLength) throws SQLException {
+            int parameterIndex, Object x, int targetSqlType, int scaleOrLength
+            ) throws SQLException {
         // TODO
+    }
+    
+    private synchronized void setParameter(int parameterIndex, ParameterValue parameter) {
+        int currentSize = parameters.size();
+        if (parameterIndex > currentSize) {
+            parameters.ensureCapacity(parameterIndex);
+            for (int i = currentSize; i < parameterIndex; i++) {
+                parameters.add(null);
+            }
+        }
+        
+        parameters.set(parameterIndex - 1, parameter);
     }
 
     @Override
-    public void clearParameters() throws SQLException {
-        // TODO
+    public synchronized void clearParameters() throws SQLException {
+        parameters.clear();
     }
 
     // [end]
@@ -407,6 +437,37 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
         throw createMethodNotAllowedException();
     }
 
+    // [end]
+    
+    
+    // --- CLOSE ---
+    // [start]
+    
+    @Override
+    public boolean isClosed() throws SQLException {
+        return closed;
+    }
+    
+    @Override
+    public void close() throws SQLException {
+        synchronized (closeLock) {
+            if (!closed) {
+                closeInternal();
+            }
+        }
+    }
+
+    // TODO
+    public void closeInternal() throws SQLException {
+        closed = true;
+        getConnection().unregisterActiveStatement(this);
+        try {
+            preparedStatementProvider.close();
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
+    }
+    
     // [end]
     
     

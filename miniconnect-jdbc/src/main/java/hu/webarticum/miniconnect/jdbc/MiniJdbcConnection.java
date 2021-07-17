@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLWarning;
 import java.sql.SQLXML;
 import java.sql.Savepoint;
@@ -21,10 +22,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.jdbc.provider.DatabaseProvider;
 
 public class MiniJdbcConnection implements Connection {
 
     private final MiniSession miniSession;
+    
+    private final DatabaseProvider databaseProvider;
     
     private final MiniJdbcDatabaseMetaData metaData;
     
@@ -35,8 +39,9 @@ public class MiniJdbcConnection implements Connection {
     private final CopyOnWriteArrayList<Statement> activeStatements = new CopyOnWriteArrayList<>();
     
     
-    public MiniJdbcConnection(MiniSession session) {
+    public MiniJdbcConnection(MiniSession session, DatabaseProvider databaseProvider) {
         this.miniSession = session;
+        this.databaseProvider = databaseProvider;
         this.metaData = new MiniJdbcDatabaseMetaData(this);
     }
 
@@ -47,6 +52,10 @@ public class MiniJdbcConnection implements Connection {
     
     public MiniSession getMiniSession() {
         return miniSession;
+    }
+
+    public DatabaseProvider getDatabaseProvider() {
+        return databaseProvider;
     }
     
     public void registerActiveStatement(Statement statement) {
@@ -210,7 +219,10 @@ public class MiniJdbcConnection implements Connection {
     
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
-        return null; // TODO
+        
+        // FIXME
+        return new MiniJdbcPreparedStatement(this, sql);
+        
     }
 
     @Override
@@ -249,14 +261,14 @@ public class MiniJdbcConnection implements Connection {
     
     @Override
     public CallableStatement prepareCall(String sql) throws SQLException {
-        return null; // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public CallableStatement prepareCall(
             String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-        
-        return null; // TODO
+
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
@@ -264,7 +276,7 @@ public class MiniJdbcConnection implements Connection {
             String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
         
-        return null; // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     // [end]
@@ -275,8 +287,9 @@ public class MiniJdbcConnection implements Connection {
 
     @Override
     public String nativeSQL(String sql) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        
+        return sql; // TODO
+        
     }
 
     // [end]
