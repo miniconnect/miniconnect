@@ -1,10 +1,12 @@
-package hu.webarticum.miniconnect.messenger.contentaccess;
+package hu.webarticum.miniconnect.tool.contentaccess;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.io.UncheckedIOException;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
-import hu.webarticum.miniconnect.messenger.util.ExceptionUtil;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
 public abstract class AbstractChargeableContentAccess implements ChargeableContentAccess {
@@ -124,7 +126,9 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
                     indexLock.wait();
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    throw ExceptionUtil.asUncheckedIOException(e);
+                    IOException ioException = new InterruptedIOException();
+                    ioException.addSuppressed(e);
+                    throw new UncheckedIOException(ioException);
                 }
                 checkClosed();
             }
