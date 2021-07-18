@@ -7,6 +7,19 @@ import java.sql.SQLException;
 
 public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
     
+    private static final int JDBC_MAJOR_VERSION = 4;
+    
+    private static final int JDBC_MINOR_VERSION = 2;
+    
+    private static final String DRIVER_NAME = "";
+    
+    private static final int DRIVER_MAJOR_VERSION = 0;
+    
+    private static final int DRIVER_MINOR_VERSION = 1;
+    
+    private static final String DRIVER_VERSION = DRIVER_MAJOR_VERSION + "." + DRIVER_MINOR_VERSION;
+    
+    
     private final MiniJdbcConnection connection;
     
 
@@ -36,19 +49,39 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
         return (type != null && type.isAssignableFrom(getClass()));
     }
 
+    @Override
+    public int getJDBCMajorVersion() throws SQLException {
+        return JDBC_MAJOR_VERSION;
+    }
+
+    @Override
+    public int getJDBCMinorVersion() throws SQLException {
+        return JDBC_MINOR_VERSION;
+    }
+
+    @Override
+    public String getDriverName() throws SQLException {
+        return DRIVER_NAME;
+    }
+
+    @Override
+    public String getDriverVersion() throws SQLException {
+        return DRIVER_VERSION;
+    }
+
+    @Override
+    public int getDriverMajorVersion() {
+        return DRIVER_MAJOR_VERSION;
+    }
+
+    @Override
+    public int getDriverMinorVersion() {
+        return DRIVER_MINOR_VERSION;
+    }
+
     
     // TODO ...
     
-    @Override
-    public boolean allProceduresAreCallable() throws SQLException {
-        return false; // TODO
-    }
-
-    @Override
-    public boolean allTablesAreSelectable() throws SQLException {
-        return false; // TODO
-    }
-
     @Override
     public String getURL() throws SQLException {
         return null; // TODO
@@ -57,6 +90,16 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
     @Override
     public String getUserName() throws SQLException {
         return null; // TODO
+    }
+
+    @Override
+    public boolean allProceduresAreCallable() throws SQLException {
+        return false; // TODO
+    }
+
+    @Override
+    public boolean allTablesAreSelectable() throws SQLException {
+        return false; // TODO
     }
 
     @Override
@@ -92,26 +135,6 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
     @Override
     public String getDatabaseProductVersion() throws SQLException {
         return null; // TODO
-    }
-
-    @Override
-    public String getDriverName() throws SQLException {
-        return null; // TODO
-    }
-
-    @Override
-    public String getDriverVersion() throws SQLException {
-        return null; // TODO
-    }
-
-    @Override
-    public int getDriverMajorVersion() {
-        return 0; // TODO
-    }
-
-    @Override
-    public int getDriverMinorVersion() {
-        return 0; // TODO
     }
 
     @Override
@@ -871,16 +894,6 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public int getDatabaseMinorVersion() throws SQLException {
-        return 0; // TODO
-    }
-
-    @Override
-    public int getJDBCMajorVersion() throws SQLException {
-        return 0; // TODO
-    }
-
-    @Override
-    public int getJDBCMinorVersion() throws SQLException {
         return 0; // TODO
     }
 

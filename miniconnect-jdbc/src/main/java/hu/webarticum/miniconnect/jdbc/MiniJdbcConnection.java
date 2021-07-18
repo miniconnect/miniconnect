@@ -415,7 +415,7 @@ public class MiniJdbcConnection implements Connection {
 
     @Override
     public boolean isValid(int timeout) throws SQLException {
-        return false; // TODO
+        return !closed; // TODO
     }
 
     @Override
