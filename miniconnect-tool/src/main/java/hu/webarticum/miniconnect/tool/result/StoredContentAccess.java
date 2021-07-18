@@ -53,7 +53,19 @@ public class StoredContentAccess implements MiniContentAccess, Serializable {
 
     @Override
     public InputStream inputStream() {
-        return content.asInputStream();
+        return content.inputStream();
+    }
+
+    @Override
+    public InputStream inputStream(long offset, long length) {
+        long contentLength = content.length();
+        long end = offset + length;
+        if (offset < 0L || end > contentLength) {
+            throw new IndexOutOfBoundsException(
+                    "offset " + offset + ", end " + end + ", contentLength " + contentLength);
+        }
+        
+        return content.inputStream((int) offset, (int) length);
     }
     
     @Override

@@ -18,6 +18,8 @@ public interface MiniContentAccess extends Closeable {
     public ByteString get(long start, int length);
 
     public InputStream inputStream();
+
+    public InputStream inputStream(long start, long length);
     
     @Override
     public void close();

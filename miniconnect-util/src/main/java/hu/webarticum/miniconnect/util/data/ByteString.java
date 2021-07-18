@@ -124,8 +124,12 @@ public class ByteString implements Serializable {
         return ByteBuffer.wrap(bytes).asReadOnlyBuffer();
     }
 
-    public ByteArrayInputStream asInputStream() {
+    public ByteArrayInputStream inputStream() {
         return new ByteArrayInputStream(bytes);
+    }
+
+    public ByteArrayInputStream inputStream(int offset, int length) {
+        return new ByteArrayInputStream(bytes, offset, length);
     }
 
     @Override

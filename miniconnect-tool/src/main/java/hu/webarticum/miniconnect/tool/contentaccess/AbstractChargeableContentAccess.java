@@ -47,6 +47,12 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
         checkClosed();
         return new LobInputStream();
     }
+
+    @Override
+    public InputStream inputStream(long offset, long length) {
+        checkClosed();
+        return new LobInputStream(offset, length);
+    }
     
     // FIXME: what if close occured during this write?
     // FIXME: what if other error occured (close with storing the exception? 'closeReason' or something)
@@ -200,9 +206,21 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
     
     private class LobInputStream extends InputStream {
         
-        private long position = 0L;
+        private long position;
+        
+        private long endPosition;
         
         private long mark = -1L;
+        
+        
+        private LobInputStream() {
+            this(0L, fullLength);
+        }
+        
+        private LobInputStream(long offset, long length) {
+            position = offset;
+            endPosition = offset + length;
+        }
         
 
         @Override
@@ -238,7 +256,10 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
         }
 
         private synchronized ByteString readPart(int length) {
-            int safeLength = position + length > fullLength ? (int) (fullLength - position) : length;
+            int safeLength =
+                    position + length > endPosition ?
+                    (int) (endPosition - position) :
+                    length;
             if (safeLength == 0) {
                 return null;
             }
