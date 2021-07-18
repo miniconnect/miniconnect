@@ -16,12 +16,17 @@ public class H2PreparedStatementProvider implements PreparedStatementProvider {
             Pattern.compile("'(?:[^']|'')*'|\"(?:[^\"]|\"\")*\"|\\?");
     
 
+    private final H2DatabaseProvider databaseProvider;
+
     private final MiniSession session;
     
     private final String[] sqlParts;
     
     
-    public H2PreparedStatementProvider(MiniSession session, String sql) {
+    public H2PreparedStatementProvider(
+            H2DatabaseProvider databaseProvider, MiniSession session, String sql) {
+        
+        this.databaseProvider = databaseProvider;
         this.session = session;
         this.sqlParts = compileSql(sql);
     }
@@ -64,23 +69,13 @@ public class H2PreparedStatementProvider implements PreparedStatementProvider {
         StringBuilder resultBuilder = new StringBuilder();
         for (int i = 0; i < expectedParameterCount; i++) {
             resultBuilder.append(sqlParts[i]);
-            resultBuilder.append(stringifyValue(parameters.get(i)));
+            resultBuilder.append(databaseProvider.stringifyValue(parameters.get(i)));
         }
         resultBuilder.append(sqlParts[expectedParameterCount]);
         
         return resultBuilder.toString();
     }
     
-    // TODO
-    private String stringifyValue(ParameterValue parameterValue) {
-        Object value = parameterValue.value();
-        if (value == null) {
-            return "NULL";
-        }
-        
-        return "'" + value + "'";
-    }
-
     @Override
     public void close() {
         // nothing to do

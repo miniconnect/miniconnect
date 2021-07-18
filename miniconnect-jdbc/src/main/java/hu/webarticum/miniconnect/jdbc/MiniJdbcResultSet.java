@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLWarning;
 import java.sql.SQLXML;
+import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
@@ -33,7 +34,7 @@ import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class MiniJdbcResultSet implements ResultSet {
     
-    private final MiniJdbcStatement statement;
+    private final Statement statement;
     
     private final MiniResultSet miniResultSet;
     
@@ -49,7 +50,7 @@ public class MiniJdbcResultSet implements ResultSet {
     private volatile int fetchSize = 0; // XXX ignored
     
 
-    public MiniJdbcResultSet(MiniJdbcStatement statement, MiniResultSet miniResultSet) {
+    public MiniJdbcResultSet(Statement statement, MiniResultSet miniResultSet) {
         this.statement = statement;
         this.miniResultSet = miniResultSet;
         this.metaData = new MiniJdbcResultSetMetaData(this);
@@ -64,7 +65,7 @@ public class MiniJdbcResultSet implements ResultSet {
     }
 
     @Override
-    public MiniJdbcStatement getStatement() throws SQLException {
+    public Statement getStatement() throws SQLException {
         return statement;
     }
 

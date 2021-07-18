@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -109,9 +110,42 @@ class MiniJdbcConnectionTest {
                 Connection connection = new MiniJdbcConnection(
                         miniSession, new H2DatabaseProvider());
                 ) {
-            
-            // TODO
-            
+            try (Statement createStatement = connection.createStatement()) {
+                createStatement.execute("CREATE TABLE data (id INTEGER, label TEXT)");
+            }
+            try (PreparedStatement insertPreparedStatement = connection.prepareStatement(
+                    "INSERT INTO data (id, label) VALUES (?, ?)")) {
+                insertPreparedStatement.setInt(1, 1);
+                insertPreparedStatement.setString(2, "lorem");
+                insertPreparedStatement.execute();
+                insertPreparedStatement.setInt(1, 3);
+                insertPreparedStatement.setString(2, "ipsum");
+                insertPreparedStatement.execute();
+                insertPreparedStatement.setInt(1, 7);
+                insertPreparedStatement.setString(2, "uuu");
+                insertPreparedStatement.execute();
+            }
+            try (PreparedStatement selectPreparedStatement = connection.prepareStatement(
+                    "SELECT label FROM data WHERE id = ?")) {
+                
+                selectPreparedStatement.setInt(1, 1);
+                try (ResultSet resultSet = selectPreparedStatement.executeQuery()) {
+                    assertThat(resultSet.next()).isTrue();
+                    assertThat(resultSet.getString(1)).isEqualTo("lorem");
+                }
+
+                selectPreparedStatement.setInt(1, 2);
+                try (ResultSet resultSet = selectPreparedStatement.executeQuery()) {
+                    assertThat(resultSet.next()).isFalse();
+                }
+
+                selectPreparedStatement.setInt(1, 3);
+                try (ResultSet resultSet = selectPreparedStatement.executeQuery()) {
+                    assertThat(resultSet.next()).isTrue();
+                    assertThat(resultSet.getString(1)).isEqualTo("ipsum");
+                }
+
+            }
         }
     }
 
