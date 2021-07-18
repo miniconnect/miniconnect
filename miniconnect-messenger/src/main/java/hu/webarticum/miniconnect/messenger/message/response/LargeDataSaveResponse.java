@@ -24,7 +24,6 @@ public class LargeDataSaveResponse implements Response, SessionMessage {
             int errorCode,
             String sqlState,
             String errorMessage) {
-
         this.sessionId = sessionId;
         this.exchangeId = exchangeId;
         this.success = success;

@@ -119,7 +119,6 @@ public class MessengerSession implements MiniSession {
         
     private boolean fetchResponseQueue(
             OrderAligningQueue<Response> responseQueue, MessengerResultSetCharger resultSet) {
-        
         Response response;
         try {
             response = responseQueue.take();

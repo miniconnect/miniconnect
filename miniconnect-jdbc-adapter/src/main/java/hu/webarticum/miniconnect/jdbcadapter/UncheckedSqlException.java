@@ -12,7 +12,7 @@ public class UncheckedSqlException extends RuntimeException {
     }
 
     @Override
-    public SQLException getCause() {
+    public SQLException getCause() { // NOSONAR no synchronization is required
         return (SQLException) super.getCause();
     }
 }

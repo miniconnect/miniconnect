@@ -163,7 +163,6 @@ public class SqlRepl implements Repl {
 
     private void printSuccessLargeDataSaveResult(
             MiniLargeDataSaveResult result, String name, long length) throws IOException {
-        
         out.append("  Successfully stored\n");
         out.append("  Size: " + length + " bytes\n");
         out.append("  Variable name: '" + name + "'\n");

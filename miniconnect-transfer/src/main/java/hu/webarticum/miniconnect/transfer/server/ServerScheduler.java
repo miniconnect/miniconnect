@@ -18,7 +18,6 @@ public class ServerScheduler<Q, R> implements Server<Q, R>, Closeable {
             Server<Q, R> server,
             ExecutorService executorService,
             boolean isExecutorServiceOwned) {
-        
         this.server = server;
         this.executorService = executorService;
         this.isExecutorServiceOwned = isExecutorServiceOwned;
@@ -31,7 +30,6 @@ public class ServerScheduler<Q, R> implements Server<Q, R>, Closeable {
     public static <Q, R> ServerScheduler<Q, R> start(
             Server<Q, R> server,
             ExecutorService executorService) {
-        
         return new ServerScheduler<>(server, executorService, false);
     }
     

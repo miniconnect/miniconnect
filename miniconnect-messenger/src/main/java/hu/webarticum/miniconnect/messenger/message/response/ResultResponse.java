@@ -35,7 +35,6 @@ public final class ResultResponse implements Response, SessionMessage {
             ImmutableList<ErrorData> warnings,
             boolean hasResultSet,
             ImmutableList<ColumnHeaderData> columnHeaders) {
-
         this.sessionId = sessionId;
         this.exchangeId = exchangeId;
         this.success = success;
@@ -101,7 +100,6 @@ public final class ResultResponse implements Response, SessionMessage {
                 String name,
                 String type,
                 ImmutableMap<String, ByteString> properties) {
-
             this.name = name;
             this.type = type;
             this.properties = properties;

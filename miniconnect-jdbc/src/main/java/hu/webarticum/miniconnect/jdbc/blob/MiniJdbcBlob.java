@@ -5,26 +5,36 @@ import java.io.OutputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
 
+import hu.webarticum.miniconnect.api.MiniContentAccess;
+
 public class MiniJdbcBlob implements Blob {
+    
+    private final MiniContentAccess contentAccess;
+    
+    
+    public MiniJdbcBlob(MiniContentAccess contentAccess) {
+        this.contentAccess = contentAccess;
+    }
+    
 
     @Override
     public long length() throws SQLException {
-        return 0; // TODO
+        return contentAccess.length();
     }
 
     @Override
     public byte[] getBytes(long pos, int length) throws SQLException {
-        return null; // TODO
+        return contentAccess.get(pos, length).extract();
     }
 
     @Override
     public InputStream getBinaryStream() throws SQLException {
-        return null; // TODO
+        return contentAccess.inputStream();
     }
 
     @Override
     public InputStream getBinaryStream(long pos, long length) throws SQLException {
-        return null; // TODO
+        return contentAccess.inputStream(pos, length);
     }
 
     @Override
@@ -59,7 +69,7 @@ public class MiniJdbcBlob implements Blob {
 
     @Override
     public void free() throws SQLException {
-        // TODO
+        contentAccess.close();
     }
 
 }

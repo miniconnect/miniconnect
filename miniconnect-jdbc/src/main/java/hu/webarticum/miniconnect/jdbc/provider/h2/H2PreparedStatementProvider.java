@@ -25,7 +25,6 @@ public class H2PreparedStatementProvider implements PreparedStatementProvider {
     
     public H2PreparedStatementProvider(
             H2DatabaseProvider databaseProvider, MiniSession session, String sql) {
-        
         this.databaseProvider = databaseProvider;
         this.session = session;
         this.sqlParts = compileSql(sql);

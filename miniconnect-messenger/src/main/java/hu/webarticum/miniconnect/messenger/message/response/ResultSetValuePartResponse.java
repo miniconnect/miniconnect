@@ -25,7 +25,6 @@ public final class ResultSetValuePartResponse implements Response, SessionMessag
             int columnIndex,
             long offset,
             ByteString content) {
-
         this.sessionId = sessionId;
         this.exchangeId = exchangeId;
         this.rowIndex = rowIndex;

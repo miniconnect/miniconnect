@@ -33,15 +33,13 @@ public class ChatClient implements Closeable {
             String senderName,
             BlockSource source,
             BlockTarget target) {
-
         this.in = in;
         this.out = out;
         this.senderName = senderName;
         this.target = target;
-        
-        DecodingBlockConsumer<ChatMessage> consumer =
-                new DecodingBlockConsumer<>(ChatMessage::decode, this::accept);
-        this.fetcher = BlockSourceFetcher.start(source, consumer);
+        this.fetcher = BlockSourceFetcher.start(
+                source,
+                new DecodingBlockConsumer<>(ChatMessage::decode, this::accept));
     }
     
     public static ChatClient start(

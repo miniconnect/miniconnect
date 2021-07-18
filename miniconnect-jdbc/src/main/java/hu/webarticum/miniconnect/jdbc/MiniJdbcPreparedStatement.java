@@ -391,7 +391,6 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     public void setObject(
             int parameterIndex, Object x, int targetSqlType, int scaleOrLength
             ) throws SQLException {
-        
         setParameter(parameterIndex, new ParameterValue(
                 Object.class, x, targetSqlType, null, scaleOrLength));
     }

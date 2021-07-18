@@ -29,7 +29,6 @@ public final class ResultSetRowsResponse implements Response, SessionMessage {
             ImmutableList<Integer> nullables,
             ImmutableMap<Integer, Integer> fixedSizes,
             ImmutableList<ImmutableList<CellData>> rows) {
-
         this.sessionId = sessionId;
         this.exchangeId = exchangeId;
         this.rowOffset = rowOffset;

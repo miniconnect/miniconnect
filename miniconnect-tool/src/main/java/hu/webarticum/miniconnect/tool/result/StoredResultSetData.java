@@ -29,7 +29,6 @@ public class StoredResultSetData implements Serializable {
     public StoredResultSetData(
             List<? extends MiniColumnHeader> columnHeaders,
             List<? extends List<? extends MiniValue>> rows) {
-
         this.columnHeaders = new ImmutableList<>(columnHeaders.stream()
                 .map(StoredColumnHeader::of)
                 .collect(Collectors.toList()));
@@ -43,7 +42,6 @@ public class StoredResultSetData implements Serializable {
     public StoredResultSetData(
             ImmutableList<? extends MiniColumnHeader> columnHeaders,
             ImmutableList<ImmutableList<? extends MiniValue>> rows) {
-
         this.columnHeaders = new ImmutableList<>(columnHeaders.stream()
                 .map(StoredColumnHeader::of)
                 .collect(Collectors.toList()));

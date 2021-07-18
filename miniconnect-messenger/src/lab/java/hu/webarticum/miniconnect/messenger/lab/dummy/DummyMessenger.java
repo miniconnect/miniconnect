@@ -141,7 +141,7 @@ public class DummyMessenger implements Messenger {
             int exchangeId,
             long offset,
             Consumer<Response> responseConsumer) {
-
+        
         int rowCount = dataRows.size();
         int columnCount = columnHeaders.size();
         

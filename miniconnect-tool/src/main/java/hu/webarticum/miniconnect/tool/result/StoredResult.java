@@ -48,7 +48,6 @@ public class StoredResult implements MiniResult, Serializable {
             ImmutableList<StoredError> warnings,
             boolean hasResultSet,
             StoredResultSetData resultSetData) {
-
         this.success = success;
         this.error = error;
         this.warnings = warnings.map(e -> e);

@@ -254,7 +254,6 @@ public class MiniJdbcConnection implements Connection {
     @Override
     public PreparedStatement prepareStatement(
             String sql, String[] columnNames) throws SQLException {
-        
         return null; // TODO
     }
 
@@ -267,7 +266,6 @@ public class MiniJdbcConnection implements Connection {
     @Override
     public CallableStatement prepareCall(
             String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-
         throw new SQLFeatureNotSupportedException();
     }
 
@@ -275,7 +273,6 @@ public class MiniJdbcConnection implements Connection {
     public CallableStatement prepareCall(
             String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
-        
         throw new SQLFeatureNotSupportedException();
     }
 
@@ -287,9 +284,7 @@ public class MiniJdbcConnection implements Connection {
 
     @Override
     public String nativeSQL(String sql) throws SQLException {
-        
         return sql; // TODO
-        
     }
 
     // [end]
@@ -300,38 +295,32 @@ public class MiniJdbcConnection implements Connection {
 
     @Override
     public Clob createClob() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        return null; // TODO
     }
 
     @Override
     public Blob createBlob() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        return null; // TODO
     }
 
     @Override
     public NClob createNClob() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        return null; // TODO
     }
 
     @Override
     public SQLXML createSQLXML() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        return null; // TODO
     }
 
     @Override
     public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        return null; // TODO
     }
 
     @Override
     public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        return null; // TODO
     }
 
     // [end]
@@ -342,74 +331,62 @@ public class MiniJdbcConnection implements Connection {
 
     @Override
     public void setAutoCommit(boolean autoCommit) throws SQLException {
-        // TODO Auto-generated method stub
-        
+        // TODO
     }
 
     @Override
     public boolean getAutoCommit() throws SQLException {
-        // TODO Auto-generated method stub
-        return false;
+        return false; // TODO
     }
 
     @Override
     public void setHoldability(int holdability) throws SQLException {
-        // TODO Auto-generated method stub
-        
+        // TODO
     }
 
     @Override
     public int getHoldability() throws SQLException {
-        // TODO Auto-generated method stub
-        return 0;
+        return 0; // TODO
     }
 
     @Override
     public void commit() throws SQLException {
-        // TODO Auto-generated method stub
-        
+        // TODO
     }
 
     @Override
     public void rollback() throws SQLException {
-        // TODO Auto-generated method stub
-        
+        // TODO
     }
 
     @Override
     public void setTransactionIsolation(int level) throws SQLException {
-        // TODO Auto-generated method stub
-        
+        // TODO
     }
 
     @Override
     public int getTransactionIsolation() throws SQLException {
-        // TODO Auto-generated method stub
-        return 0;
+        return 0; // TODO
     }
 
     @Override
     public Savepoint setSavepoint() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        return null; // TODO
     }
 
     @Override
     public Savepoint setSavepoint(String name) throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        return null; // TODO
     }
 
     @Override
     public void rollback(Savepoint savepoint) throws SQLException {
-        // TODO Auto-generated method stub
-        
+        // TODO
     }
 
     @Override
     public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-        // TODO Auto-generated method stub
-        
+        // TODO
     }
 
     // [end]
@@ -438,26 +415,22 @@ public class MiniJdbcConnection implements Connection {
 
     @Override
     public boolean isValid(int timeout) throws SQLException {
-        // TODO Auto-generated method stub
-        return false;
+        return false; // TODO
     }
 
     @Override
     public void abort(Executor executor) throws SQLException {
-        // TODO Auto-generated method stub
-        
+        // TODO
     }
 
     @Override
     public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
-        // TODO Auto-generated method stub
-        
+        // TODO
     }
 
     @Override
     public int getNetworkTimeout() throws SQLException {
-        // TODO Auto-generated method stub
-        return 0;
+        return 0; // TODO
     }
     
     // [end]

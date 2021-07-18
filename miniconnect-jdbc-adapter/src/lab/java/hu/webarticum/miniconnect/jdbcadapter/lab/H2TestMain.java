@@ -27,9 +27,9 @@ public class H2TestMain {
         runRepl(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD, SET_STATEMENT);
     }
     
-    private static void runRepl(String url, String username, String password, String setStatement
+    private static void runRepl(
+            String url, String username, String password, String setStatement
             ) throws SQLException, IOException {
-        
         try (Connection jdbcConnection = DriverManager.getConnection(url, username, password)) {
             SimpleJdbcLargeDataPutter largeDataPutter =
                     new SimpleJdbcLargeDataPutter(setStatement);

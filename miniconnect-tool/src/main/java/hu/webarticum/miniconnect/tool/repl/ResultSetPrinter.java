@@ -56,7 +56,6 @@ public class ResultSetPrinter {
             ImmutableList<DefaultValueInterpreter> valueInterpreters,
             Appendable out
             ) throws IOException {
-        
         int columnCount = columnNames.size();
         int[] widths = new int[columnCount];
         boolean[] aligns = new boolean[columnCount];
@@ -127,7 +126,10 @@ public class ResultSetPrinter {
     private String stringifyValue(MiniValue value, ValueInterpreter encoder) {
         if (!value.isNull()) {
             Object decoded = encoder.decode(value);
-            if (decoded instanceof Float || decoded instanceof Double || decoded instanceof BigDecimal) {
+            if (
+                    decoded instanceof Float ||
+                    decoded instanceof Double ||
+                    decoded instanceof BigDecimal) {
                 return String.format("%.3f", decoded);
             } else {
                 return decoded.toString();

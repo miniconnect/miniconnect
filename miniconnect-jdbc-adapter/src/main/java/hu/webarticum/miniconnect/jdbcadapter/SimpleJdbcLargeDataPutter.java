@@ -25,7 +25,6 @@ public class SimpleJdbcLargeDataPutter implements JdbcLargeDataPutter {
     @Override
     public MiniLargeDataSaveResult putLargeData(
             Connection jdbcConnection, String variableName, long length, InputStream dataSource) {
-        
         try (
                 PreparedStatement preparedStatement =
                 jdbcConnection.prepareStatement(String.format(setterStatementFormat, variableName))

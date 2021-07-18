@@ -95,7 +95,6 @@ class QueryPartial {
             int columnIndex,
             MiniValue value,
             List<IncompleteContentHolder> incompleteContents) {
-        
         MiniContentAccess contentAccess = value.contentAccess();
         ByteString headContent;
         if (contentAccess.length() <= MAX_INTACT_CONTENT_LENGTH) {
@@ -114,7 +113,6 @@ class QueryPartial {
             Consumer<Response> responseConsumer,
             long responseOffset,
             List<ImmutableList<CellData>> responseRowsBuilder) {
-        
         ImmutableList<ImmutableList<CellData>> rows = new ImmutableList<>(responseRowsBuilder);
         ImmutableList<Integer> nullables = ImmutableList.empty(); // FIXME / TODO
         ImmutableMap<Integer, Integer> fixedSizes = ImmutableMap.empty(); // FIXME / TODO
@@ -126,7 +124,6 @@ class QueryPartial {
     private void sendChunks(
             Consumer<Response> responseConsumer,
             List<IncompleteContentHolder> incompleteContents) {
-        
         for (IncompleteContentHolder contentHolder : incompleteContents) {
             long fullLength = contentHolder.contentAccess.length();
             for (
@@ -149,7 +146,6 @@ class QueryPartial {
             IncompleteContentHolder contentHolder,
             long offset,
             int length) {
-        
         ByteString contentPart = contentHolder.contentAccess.get(offset, length);
         ResultSetValuePartResponse partResponse = new ResultSetValuePartResponse(
                 sessionId,
@@ -181,7 +177,6 @@ class QueryPartial {
                 int columnIndex,
                 long contentOffset,
                 MiniContentAccess contentAccess) {
-
             this.exchangeId = exchangeId;
             this.rowIndex = rowIndex;
             this.columnIndex = columnIndex;

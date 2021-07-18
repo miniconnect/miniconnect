@@ -50,7 +50,6 @@ class LargeDataPartial {
     
     public void acceptLargeDataHeadRequest(
             LargeDataHeadRequest headRequest, Consumer<Response> responseConsumer) {
-        
         int exchangeId = headRequest.exchangeId();
         OrderAligningQueue<LargeDataPartRequest> partQueue =
                 requireLargeDataPartQueue(exchangeId);
@@ -84,7 +83,7 @@ class LargeDataPartial {
             LargeDataHeadRequest headRequest,
             Consumer<Response> responseConsumer,
             OrderAligningQueue<LargeDataPartRequest> partQueue) {
-
+        
         int exchangeId = headRequest.exchangeId();
 
         try {
