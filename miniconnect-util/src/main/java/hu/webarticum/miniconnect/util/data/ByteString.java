@@ -172,6 +172,10 @@ public class ByteString implements Serializable {
         private int length = 0;
 
 
+        public Builder append(ByteString part, int beginIndex, int length) {
+            return this.append(part.substringLength(beginIndex, length));
+        }
+
         public Builder append(ByteString part) {
             return this.append(part.bytes);
         }
@@ -180,12 +184,18 @@ public class ByteString implements Serializable {
             return this.append(new byte[] { part });
         }
 
+        public Builder append(byte[] partContainer, int beginIndex, int length) {
+            byte[] part = new byte[length];
+            System.arraycopy(partContainer, beginIndex, part, 0, length);
+            return append(part);
+        }
+        
         public Builder append(byte[] part) {
             parts.add(part);
             length += part.length;
             return this;
         }
-        
+
         public int length() {
             return length;
         }
