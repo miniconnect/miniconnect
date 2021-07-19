@@ -28,7 +28,7 @@ public class MiniJdbcBlob implements Blob {
     }
 
     public MiniJdbcBlob(long length) {
-        this(createChargeablecontentAccess(length), false);
+        this(createChargeableContentAccess(length), false);
     }
 
     private MiniJdbcBlob(MiniContentAccess contentAccess, boolean completed) {
@@ -36,7 +36,7 @@ public class MiniJdbcBlob implements Blob {
         this.completed = completed;
     }
     
-    private static ChargeableContentAccess createChargeablecontentAccess(long length) {
+    private static ChargeableContentAccess createChargeableContentAccess(long length) {
         if (length > MAX_MEMORY_CONTENT_SIZE) {
             return new FileChargeableContentAccess(length);
         } else {
