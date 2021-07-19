@@ -294,12 +294,12 @@ public class MiniJdbcConnection implements Connection {
     // [start]
 
     @Override
-    public Clob createClob() throws SQLException {
+    public Blob createBlob() throws SQLException {
         return null; // TODO
     }
 
     @Override
-    public Blob createBlob() throws SQLException {
+    public Clob createClob() throws SQLException {
         return null; // TODO
     }
 
