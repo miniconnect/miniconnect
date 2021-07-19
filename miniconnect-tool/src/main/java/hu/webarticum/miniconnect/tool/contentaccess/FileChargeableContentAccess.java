@@ -35,7 +35,7 @@ public class FileChargeableContentAccess extends AbstractChargeableContentAccess
     public FileChargeableContentAccess(long length, File file) {
         super(length);
         this.file = file;
-        this.randomAccessFile = createRandomAccessfile(file);
+        this.randomAccessFile = createRandomAccessFile(file);
     }
     
     // TODO: improve this
@@ -50,7 +50,7 @@ public class FileChargeableContentAccess extends AbstractChargeableContentAccess
         }
     }
     
-    private static RandomAccessFile createRandomAccessfile(File file) {
+    private static RandomAccessFile createRandomAccessFile(File file) {
         try {
             return new RandomAccessFile(file, FILE_ACCESS_MODE);
         } catch (FileNotFoundException e) {
