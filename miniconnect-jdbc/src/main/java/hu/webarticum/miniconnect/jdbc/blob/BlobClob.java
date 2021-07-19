@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.SQLException;
@@ -15,9 +16,9 @@ import java.sql.SQLFeatureNotSupportedException;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.io.output.WriterOutputStream;
 
-public class MiniJdbcClob implements NClob {
+public class BlobClob implements NClob {
 
-    private final MiniJdbcBlob blob;
+    private final Blob blob;
     
     private final Charset blobCharset;
     
@@ -26,8 +27,8 @@ public class MiniJdbcClob implements NClob {
     private final Charset targetCharset;
     
 
-    public MiniJdbcClob(
-            MiniJdbcBlob blob,
+    public BlobClob(
+            Blob blob,
             Charset blobCharset,
             int blobCharWidth,
             Charset targetCharset) {
@@ -106,8 +107,9 @@ public class MiniJdbcClob implements NClob {
         if (blobCharset == targetCharset) {
             return blob.setBinaryStream(bytePos);
         } else {
+            OutputStream byteStream = blob.setBinaryStream(bytePos);
             return new WriterOutputStream(
-                    new OutputStreamWriter(blob.setBinaryStream(bytePos), blobCharset),
+                    new OutputStreamWriter(byteStream, blobCharset),
                     targetCharset);
         }
     }
@@ -115,7 +117,8 @@ public class MiniJdbcClob implements NClob {
     @Override
     public Writer setCharacterStream(long pos) throws SQLException {
         long bytePos = ((pos - 1) * blobCharWidth) + 1;
-        return new OutputStreamWriter(blob.setBinaryStream(bytePos), blobCharset);
+        OutputStream byteStream = blob.setBinaryStream(bytePos);
+        return new OutputStreamWriter(byteStream, blobCharset);
     }
 
     @Override

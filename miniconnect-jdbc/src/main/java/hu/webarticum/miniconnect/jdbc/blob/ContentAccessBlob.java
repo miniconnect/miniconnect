@@ -13,7 +13,7 @@ import hu.webarticum.miniconnect.tool.contentaccess.FileChargeableContentAccess;
 import hu.webarticum.miniconnect.tool.contentaccess.MemoryChargeableContentAccess;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-public class MiniJdbcBlob implements Blob {
+public class ContentAccessBlob implements Blob {
     
     private static final int MAX_MEMORY_CONTENT_SIZE = 10 * 1024 * 1024;
     
@@ -23,15 +23,15 @@ public class MiniJdbcBlob implements Blob {
     private volatile boolean completed;
     
     
-    public MiniJdbcBlob(MiniContentAccess contentAccess) {
+    public ContentAccessBlob(MiniContentAccess contentAccess) {
         this(contentAccess, true);
     }
 
-    public MiniJdbcBlob(long length) {
+    public ContentAccessBlob(long length) {
         this(createChargeableContentAccess(length), false);
     }
 
-    private MiniJdbcBlob(MiniContentAccess contentAccess, boolean completed) {
+    private ContentAccessBlob(MiniContentAccess contentAccess, boolean completed) {
         this.contentAccess = contentAccess;
         this.completed = completed;
     }
