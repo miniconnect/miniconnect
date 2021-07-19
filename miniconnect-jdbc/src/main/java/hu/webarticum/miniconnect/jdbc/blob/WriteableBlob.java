@@ -11,7 +11,7 @@ import java.nio.file.Files;
 import java.sql.Blob;
 import java.sql.SQLException;
 
-// TODO: make writeout to file optional
+// TODO: make writeout to file optional ( BlobStorage:(MemoryStorage|FileStorage) )
 public class WriteableBlob implements Blob {
 
     private static final String FILE_ACCESS_MODE = "rw";
