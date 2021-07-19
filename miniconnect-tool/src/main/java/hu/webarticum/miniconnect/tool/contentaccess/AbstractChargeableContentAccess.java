@@ -141,7 +141,8 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
         }
     }
     
-    private boolean isAvailable(long start, long length) {
+    @Override
+    public boolean isAvailable(long start, long length) {
         long end = start + length;
         IndexEntry containerEntry = index.floor(new IndexEntry(start, end));
         return (containerEntry != null && !containerEntry.pending && containerEntry.end >= end);
