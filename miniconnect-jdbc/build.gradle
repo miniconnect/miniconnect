@@ -11,6 +11,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'commons-io:commons-io:2.11.0'
     implementation project(':miniconnect-api')
     
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
