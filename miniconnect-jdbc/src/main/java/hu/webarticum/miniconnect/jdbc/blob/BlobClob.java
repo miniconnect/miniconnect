@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.NClob;
@@ -27,6 +28,14 @@ public class BlobClob implements NClob {
     private final Charset targetCharset;
     
 
+    public BlobClob() {
+        this(StandardCharsets.UTF_8);
+    }
+    
+    public BlobClob(Charset targetCharset) {
+        this(new WriteableBlob(), StandardCharsets.UTF_16BE, 2, targetCharset);
+    }
+    
     public BlobClob(
             Blob blob,
             Charset blobCharset,
