@@ -22,6 +22,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.jdbc.blob.BlobClob;
+import hu.webarticum.miniconnect.jdbc.blob.WriteableBlob;
 import hu.webarticum.miniconnect.jdbc.provider.DatabaseProvider;
 
 public class MiniJdbcConnection implements Connection {
@@ -295,32 +297,34 @@ public class MiniJdbcConnection implements Connection {
 
     @Override
     public Blob createBlob() throws SQLException {
-        return null; // TODO
+        return new WriteableBlob();
     }
 
+    // TODO: use client encoding
     @Override
     public Clob createClob() throws SQLException {
-        return null; // TODO
+        return new BlobClob();
     }
 
+    // TODO: use client encoding
     @Override
     public NClob createNClob() throws SQLException {
-        return null; // TODO
+        return new BlobClob();
     }
 
     @Override
     public SQLXML createSQLXML() throws SQLException {
-        return null; // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
-        return null; // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
-        return null; // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     // [end]
@@ -328,6 +332,31 @@ public class MiniJdbcConnection implements Connection {
     
     // --- TRANSACTIONS ---
     // [start]
+
+    @Override
+    public void commit() throws SQLException {
+        // TODO
+    }
+
+    @Override
+    public void rollback() throws SQLException {
+        // TODO
+    }
+
+    @Override
+    public void rollback(Savepoint savepoint) throws SQLException {
+        // TODO
+    }
+
+    @Override
+    public Savepoint setSavepoint(String name) throws SQLException {
+        return null; // TODO
+    }
+
+    @Override
+    public void releaseSavepoint(Savepoint savepoint) throws SQLException {
+        // TODO
+    }
 
     @Override
     public void setAutoCommit(boolean autoCommit) throws SQLException {
@@ -350,16 +379,6 @@ public class MiniJdbcConnection implements Connection {
     }
 
     @Override
-    public void commit() throws SQLException {
-        // TODO
-    }
-
-    @Override
-    public void rollback() throws SQLException {
-        // TODO
-    }
-
-    @Override
     public void setTransactionIsolation(int level) throws SQLException {
         // TODO
     }
@@ -372,21 +391,6 @@ public class MiniJdbcConnection implements Connection {
     @Override
     public Savepoint setSavepoint() throws SQLException {
         return null; // TODO
-    }
-
-    @Override
-    public Savepoint setSavepoint(String name) throws SQLException {
-        return null; // TODO
-    }
-
-    @Override
-    public void rollback(Savepoint savepoint) throws SQLException {
-        // TODO
-    }
-
-    @Override
-    public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-        // TODO
     }
 
     // [end]
