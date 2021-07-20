@@ -12,10 +12,10 @@ import hu.webarticum.miniconnect.jdbc.provider.PreparedStatementProvider;
 
 public class H2PreparedStatementProvider implements PreparedStatementProvider {
     
-    private static final Pattern STRING_OR_QUESTION_MARK_PATTERN =
-            Pattern.compile("'(?:[^']|'')*'|\"(?:[^\"]|\"\")*\"|\\?");
+    private static final Pattern STRING_OR_QUESTION_MARK_PATTERN = Pattern.compile(
+            "'(?:[^']|'')*'|\"(?:[^\"]|\"\")*\"|\\$\\$(?:[^\\$]|\\$[^\\$])*\\$\\$|\\?");
     
-
+    
     private final H2DatabaseProvider databaseProvider;
 
     private final MiniSession session;
