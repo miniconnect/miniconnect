@@ -95,7 +95,8 @@ class WriteableBlobTest {
 
         blob.free();
     }
-    
+
+
     public static Stream<Arguments> provideArguments() {
         return Stream.of(
                 Arguments.of(new WriteableBlob()),
