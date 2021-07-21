@@ -28,6 +28,8 @@ import java.util.Objects;
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
+import hu.webarticum.miniconnect.jdbc.blob.BlobClob;
+import hu.webarticum.miniconnect.jdbc.blob.ContentAccessBlob;
 import hu.webarticum.miniconnect.jdbc.converter.GeneralConverter;
 import hu.webarticum.miniconnect.tool.result.DefaultValueInterpreter;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
@@ -507,17 +509,17 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public Blob getBlob(int columnIndex) throws SQLException {
-        return null; // TODO
+        return new ContentAccessBlob(getMiniValue(columnIndex).contentAccess());
     }
 
     @Override
     public Clob getClob(String columnLabel) throws SQLException {
-        return getClob(findColumn(columnLabel));
+        return getNClob(columnLabel);
     }
 
     @Override
     public Clob getClob(int columnIndex) throws SQLException {
-        return null; // TODO
+        return getNClob(columnIndex);
     }
 
     @Override
@@ -527,7 +529,12 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public NClob getNClob(int columnIndex) throws SQLException {
-        return null; // TODO
+        // TODO: convert character set?
+        return new BlobClob(
+                new ContentAccessBlob(getMiniValue(columnIndex).contentAccess()),
+                StandardCharsets.ISO_8859_1, // FIXME
+                1, // FIXME
+                StandardCharsets.UTF_8);
     }
 
     @Override
