@@ -97,7 +97,7 @@ class WriteableBlobTest {
     }
 
 
-    public static Stream<Arguments> provideArguments() {
+    static Stream<Arguments> provideArguments() {
         return Stream.of(
                 Arguments.of(new WriteableBlob()),
                 Arguments.of(new WriteableBlob(true)));
