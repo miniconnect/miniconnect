@@ -100,20 +100,22 @@ public class ByteString implements Serializable {
     public byte[] extractLength(int beginIndex, int length) {
         checkBounds(beginIndex, length);
         byte[] extractedBytes = new byte[length];
-        System.arraycopy(bytes, beginIndex, extractedBytes, 0, length);
+        if (length > 0) {
+            System.arraycopy(bytes, beginIndex, extractedBytes, 0, length);
+        }
         return extractedBytes;
     }
 
-    public void extractTo(byte[] target, int targetOffset, int selfOffset, int length) {
-        System.arraycopy(bytes, selfOffset, target, targetOffset, length);
-    }
-
     private void checkBounds(int beginIndex, int length) {
-        if (beginIndex < 0 || length <= 0 || (beginIndex + length) > bytes.length) {
+        if (beginIndex < 0 || length < 0 || (beginIndex + length) > bytes.length) {
             throw new IllegalArgumentException(String.format(
                     "Invalid substring, beginIndex: %d, length: %d, content length: %d",
                     beginIndex, length, bytes.length));
         }
+    }
+
+    public void extractTo(byte[] target, int targetOffset, int selfOffset, int length) {
+        System.arraycopy(bytes, selfOffset, target, targetOffset, length);
     }
 
     public void writeTo(OutputStream out) throws IOException {
