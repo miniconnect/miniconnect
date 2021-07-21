@@ -71,7 +71,7 @@ public class BlobClob implements NClob {
 
     @Override
     public String getSubString(long pos, int length) throws SQLException {
-        long bytePos = ((pos - 1) * blobCharWidth) + 1;
+        long bytePos = findBytePos(pos);
         int byteLength = length * blobCharWidth;
         byte[] bytes = blob.getBytes(bytePos, byteLength);
         return new String(bytes, blobCharset);
@@ -84,7 +84,7 @@ public class BlobClob implements NClob {
 
     @Override
     public Reader getCharacterStream(long pos, long length) throws SQLException {
-        long bytePos = ((pos - 1) * blobCharWidth) + 1;
+        long bytePos = findBytePos(pos);
         long byteLength = length * blobCharWidth;
         return new InputStreamReader(blob.getBinaryStream(bytePos, byteLength), blobCharset);
     }
@@ -111,24 +111,21 @@ public class BlobClob implements NClob {
     }
 
     @Override
-    public int setString(long pos, String str) throws SQLException {
-        long bytePos = ((pos - 1) * blobCharWidth) + 1;
-        int charCount = blob.setBytes(bytePos, str.getBytes(blobCharset));
-        return charCount / blobCharWidth;
+    public int setString(long pos, String str, int offset, int len) throws SQLException {
+        return setString(pos, str.substring(offset, offset + len));
     }
 
     @Override
-    public int setString(long pos, String str, int offset, int len) throws SQLException {
-        long bytePos = ((pos - 1) * blobCharWidth) + 1;
-        int byteOffset = offset * blobCharWidth;
-        int byteLen = len * blobCharWidth;
-        int charCount = blob.setBytes(bytePos, str.getBytes(blobCharset), byteOffset, byteLen);
-        return charCount / blobCharWidth;
+    public int setString(long pos, String str) throws SQLException {
+        long bytePos = findBytePos(pos);
+        byte[] bytes = str.getBytes(blobCharset);
+        blob.setBytes(bytePos, bytes);
+        return bytes.length;
     }
 
     @Override
     public OutputStream setAsciiStream(long pos) throws SQLException {
-        long bytePos = ((pos - 1) * blobCharWidth) + 1;
+        long bytePos = findBytePos(pos);
         if (blobCharset == targetCharset) {
             return blob.setBinaryStream(bytePos);
         } else {
@@ -141,7 +138,7 @@ public class BlobClob implements NClob {
 
     @Override
     public Writer setCharacterStream(long pos) throws SQLException {
-        long bytePos = ((pos - 1) * blobCharWidth) + 1;
+        long bytePos = findBytePos(pos);
         OutputStream byteStream = blob.setBinaryStream(bytePos);
         return new OutputStreamWriter(byteStream, blobCharset);
     }
@@ -154,6 +151,10 @@ public class BlobClob implements NClob {
     @Override
     public void free() throws SQLException {
         blob.free();
+    }
+    
+    private long findBytePos(long charPos) {
+        return ((charPos - 1) * blobCharWidth) + 1;
     }
     
 }
