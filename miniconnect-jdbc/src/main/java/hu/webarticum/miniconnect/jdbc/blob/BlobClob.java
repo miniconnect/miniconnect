@@ -48,15 +48,19 @@ public class BlobClob implements NClob {
     }
     
 
-    public Charset blobCharset() {
+    public Blob getBlob() {
+        return blob;
+    }
+
+    public Charset getBlobCharset() {
         return blobCharset;
     }
 
-    public int blobCharWidth() {
+    public int getBlobCharWidth() {
         return blobCharWidth;
     }
 
-    public Charset targetCharset() {
+    public Charset getTargetCharset() {
         return targetCharset;
     }
     
