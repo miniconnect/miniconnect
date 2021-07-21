@@ -47,6 +47,18 @@ public class BlobClob implements NClob {
         this.targetCharset = targetCharset;
     }
     
+
+    public Charset blobCharset() {
+        return blobCharset;
+    }
+
+    public int blobCharWidth() {
+        return blobCharWidth;
+    }
+
+    public Charset targetCharset() {
+        return targetCharset;
+    }
     
     @Override
     public long length() throws SQLException {
