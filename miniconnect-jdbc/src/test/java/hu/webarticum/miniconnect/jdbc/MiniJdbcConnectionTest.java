@@ -89,20 +89,6 @@ class MiniJdbcConnectionTest {
     }
 
     @Test
-    void testStatementBatch() throws Exception {
-        try (
-                Connection baseConnection = createInMemoryConnection();
-                MiniSession miniSession = new JdbcAdapterSession(baseConnection);
-                Connection connection = new MiniJdbcConnection(
-                        miniSession, new H2DatabaseProvider());
-                ) {
-            
-            // TODO
-            
-        }
-    }
-
-    @Test
     void testPreparedStatement() throws Exception {
         try (
                 Connection baseConnection = createInMemoryConnection();
