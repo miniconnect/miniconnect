@@ -257,7 +257,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setAsciiStream(int parameterIndex, InputStream x) throws SQLException {
-        // TODO
+        // TODO store in a WriteableBlob, and call setBlob(...)
     }
 
     @Override
@@ -272,7 +272,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setCharacterStream(int parameterIndex, Reader reader) throws SQLException {
-        // TODO
+        // TODO store in a BlobClob(WriteableBlob), and call setClob(...)
     }
 
     @Override
