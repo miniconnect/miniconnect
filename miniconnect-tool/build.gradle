@@ -25,6 +25,7 @@ sourceSets {
 }
 
 dependencies {
+    implementation 'hu.webarticum:regexbee:0.1.0'
     implementation project(':miniconnect-api')
     
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'

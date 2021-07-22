@@ -91,14 +91,14 @@ public class MiniJdbcConnection implements Connection {
 
     @Override
     public Map<String, Class<?>> getTypeMap() throws SQLException {
-        // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
-        // TODO Auto-generated method stub
-        
+        if (map != null && map.size() > 0) {
+            throw new SQLException("Only empty map is supported");
+        }
     }
 
     @Override

@@ -10,40 +10,79 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.regexbee.Bee;
+import hu.webarticum.regexbee.BeeFragment;
+import hu.webarticum.regexbee.Greediness;
 import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 
 // TODO: better abstraction (context/executor vs output-handling), builder
-// TODO: use regex-bee
 public class SqlRepl implements Repl {
-
-    private static final Pattern DATA_PATTERN = Pattern.compile(
-            "\\s*data:(?<name>([^:\\\\]|\\\\.)+):\\s*(?:\\s*(?<source>@?(?:([^\\)\\\\]|\\\\.)+))\\s*)(?:;\\s*)?",
-            Pattern.CASE_INSENSITIVE);
-
-    private static final Pattern HELP_PATTERN = Pattern.compile(
-            "\\s*help\\s*(?:\\(\\s*\\)\\s*)?(?:;\\s*)?",
-            Pattern.CASE_INSENSITIVE);
-
-    private static final Pattern QUIT_PATTERN = Pattern.compile(
-            "\\s*(?:quit|exit)\\s*(?:\\(\\s*\\)\\s*)?(?:;\\s*)?",
-            Pattern.CASE_INSENSITIVE);
     
-    private static final Pattern QUERY_PATTERN = Pattern.compile(
-            "(?:[^'\"`\\\\;]++|\\\\.|" +
-            "(?<s>['\"`])(?:(?:\\\\|\\k<s>)\\k<s>|(?!\\k<s>).)++\\k<s>)*;.*+");
-    
-    private static final Pattern COMMAND_PATTERN = Pattern.compile(
-            "^(?:" +
-                    DATA_PATTERN + "|" +
-                    HELP_PATTERN + "|" +
-                    QUIT_PATTERN + "|" +
-                    QUERY_PATTERN + ")$",
-            Pattern.MULTILINE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final BeeFragment TERMINATOR_FRAGMENT = Bee.simple("\\s*;");
 
-    private static final Pattern UNESCAPE_PATTERN = Pattern.compile(
-            "\\\\(.)");
+    private static final BeeFragment BRACKETS_FRAGMENT = Bee
+            .then(Bee.WHITESPACE.any())
+            .then(Bee.fixed("("))
+            .then(Bee.WHITESPACE.any())
+            .then(Bee.fixed(")"));
+    
+    private static final BeeFragment DATA_FRAGMENT = Bee
+            .then(Bee.WHITESPACE.any())
+            .then(Bee.fixed("data:"))
+            .then(Bee.simple("[^:\\\\]|\\\\.").more().as("name"))
+            .then(Bee.fixed(":"))
+            .then(Bee.WHITESPACE.any())
+            .then(Bee.fixed("@").optional()
+                    .then(Bee.simple("([^\\)\\\\]|\\\\.)").more()
+                    .as("source")))
+            .then(TERMINATOR_FRAGMENT.optional())
+            .then(Bee.WHITESPACE.any());
+    
+    private static final BeeFragment HELP_FRAGMENT = Bee
+            .then(Bee.WHITESPACE.any())
+            .then(Bee.fixed("help"))
+            .then(BRACKETS_FRAGMENT.optional())
+            .then(TERMINATOR_FRAGMENT.optional())
+            .then(Bee.WHITESPACE.any());
+    
+    private static final BeeFragment QUIT_FRAGMENT = Bee
+            .then(Bee.WHITESPACE.any())
+            .then(Bee.fixed("exit")
+                    .or(Bee.fixed("quit")))
+            .then(BRACKETS_FRAGMENT.optional())
+            .then(TERMINATOR_FRAGMENT.optional())
+            .then(Bee.WHITESPACE.any());
+    
+    private static final BeeFragment QUERY_FRAGMENT = Bee
+            .then(Bee.simple("[^'\"`\\\\;]").more(Greediness.POSSESSIVE)
+                    .or(Bee.simple("\\\\."))
+                    .or(Bee.simple("['\"`]").as("quote") // NOSONAR
+                            .then(Bee.fixed("\\").or(Bee.ref("quote")).then(Bee.ref("quote"))
+                                    .or(Bee.simple("(?!\\k<quote>).")) // FIXME: lookaround support?
+                                    .more(Greediness.POSSESSIVE))
+                            .then(Bee.ref("quote"))
+                    ))
+            .then(TERMINATOR_FRAGMENT.optional())
+            .then(Bee.WHITESPACE.any());
+    
+    private static final Pattern DATA_PATTERN = DATA_FRAGMENT.toPattern(Pattern.CASE_INSENSITIVE);
+    
+    private static final Pattern HELP_PATTERN = HELP_FRAGMENT.toPattern(Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern QUIT_PATTERN = QUIT_FRAGMENT.toPattern(Pattern.CASE_INSENSITIVE);
+    
+    private static final Pattern COMMAND_PATTERN = Bee
+            .then(Bee.BEGIN)
+            .then(DATA_FRAGMENT
+                    .or(HELP_FRAGMENT)
+                    .or(QUIT_FRAGMENT)
+                    .or(QUERY_FRAGMENT))
+            .then(Bee.END)
+            .toPattern(Pattern.MULTILINE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    
+    private static final Pattern UNESCAPE_PATTERN = Pattern.compile("\\\\(.)");
     
 
     private final MiniSession session;

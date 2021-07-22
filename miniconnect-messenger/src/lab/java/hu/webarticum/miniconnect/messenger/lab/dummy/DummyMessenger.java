@@ -39,6 +39,7 @@ import hu.webarticum.miniconnect.tool.result.ValueInterpreter;
 import hu.webarticum.miniconnect.util.data.ByteString;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
+import hu.webarticum.regexbee.Bee;
 
 public class DummyMessenger implements Messenger {
 
@@ -49,8 +50,23 @@ public class DummyMessenger implements Messenger {
     // FIXME/TODO: larger value
     private static final int DATA_CHUNK_LENGTH = 20;
     
-    private static final Pattern SELECT_ALL_QUERY_PATTERN = Pattern.compile(
-            "(?i)\\s*SELECT\\s+\\*\\s+FROM\\s+([\"`]?)(?-i)data(?i)\\1\\s*;?\\s*");
+
+    private static final Pattern SELECT_ALL_QUERY_PATTERN = Bee
+            .then(Bee.WHITESPACE.any())
+            .then(Bee.simple("(?i)")) // FIXME: modifier support?
+            .then(Bee.WHITESPACE.any())
+            .then(Bee.fixed("SELECT")).then(Bee.WHITESPACE.more())
+            .then(Bee.fixed("*")).then(Bee.WHITESPACE.more())
+            .then(Bee.fixed("FROM")).then(Bee.WHITESPACE.more())
+            .then(Bee.simple("[\"`]").optional().as("quote"))
+            .then(Bee.simple("(?-i)"))
+            .then(Bee.fixed("data"))
+            .then(Bee.simple("(?i)"))
+            .then(Bee.ref("quote"))
+            .then(Bee.WHITESPACE.any())
+            .then(Bee.fixed(";"))
+            .then(Bee.WHITESPACE.any())
+            .toPattern();
     
     private static final ImmutableList<MiniColumnHeader> columnHeaders = ImmutableList.of(
             new StoredColumnHeader("id", new StoredValueDefinition(Long.class.getName())),

@@ -9,11 +9,26 @@ import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.jdbc.ParameterValue;
 import hu.webarticum.miniconnect.jdbc.provider.PreparedStatementProvider;
+import hu.webarticum.regexbee.Bee;
+import hu.webarticum.regexbee.BeeFragment;
 
 public class H2PreparedStatementProvider implements PreparedStatementProvider {
     
-    private static final Pattern STRING_OR_QUESTION_MARK_PATTERN = Pattern.compile(
-            "'(?:[^']|'')*'|\"(?:[^\"]|\"\")*\"|\\$\\$(?:[^\\$]|\\$[^\\$])*\\$\\$|\\?");
+    private static final BeeFragment SINGLE_QUTED_FRAGMENT =
+            Bee.simple("'(?:[^']|'')*'");
+    
+    private static final BeeFragment DOUBLE_QUTED_FRAGMENT =
+            Bee.simple("\"(?:[^\"]|\"\")*\"");
+    
+    private static final BeeFragment TWODOLLARS_QUTED_FRAGMENT =
+            Bee.simple("\\$\\$(?:[^\\$]|\\$[^\\$])*\\$\\$");
+
+    public static final Pattern STRING_OR_QUESTION_MARK_PATTERN =
+            SINGLE_QUTED_FRAGMENT
+            .or(DOUBLE_QUTED_FRAGMENT)
+            .or(TWODOLLARS_QUTED_FRAGMENT)
+            .or(Bee.fixed("?"))
+            .toPattern();
     
     
     private final H2DatabaseProvider databaseProvider;
