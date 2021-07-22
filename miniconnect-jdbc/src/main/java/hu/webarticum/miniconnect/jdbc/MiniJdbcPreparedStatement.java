@@ -252,7 +252,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException {
-        setParameter(parameterIndex, new ParameterValue(SQLXML.class, xmlObject));
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
@@ -322,12 +322,12 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setArray(int parameterIndex, Array x) throws SQLException {
-        // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void setRef(int parameterIndex, Ref x) throws SQLException {
-        // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
