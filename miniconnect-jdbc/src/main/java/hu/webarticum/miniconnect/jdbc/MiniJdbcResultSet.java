@@ -439,12 +439,12 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public SQLXML getSQLXML(String columnLabel) throws SQLException {
-        return getSQLXML(findColumn(columnLabel));
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public SQLXML getSQLXML(int columnIndex) throws SQLException {
-        return getObject(columnIndex, SQLXML.class);
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
@@ -464,9 +464,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public Reader getCharacterStream(int columnIndex) throws SQLException {
-        // FIXME: character set...
-        // TODO: handle null
-        return new InputStreamReader(getBinaryStream(columnIndex), StandardCharsets.UTF_8);
+        return getNCharacterStream(columnIndex);
     }
 
     @Override
@@ -476,9 +474,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public Reader getNCharacterStream(int columnIndex) throws SQLException {
-        // FIXME: character set... always UTF_8? (see mysql)
-        // TODO: handle null
-        return new InputStreamReader(getBinaryStream(columnIndex), StandardCharsets.UTF_8);
+        return getObject(columnIndex, Reader.class);
     }
 
     @Override
@@ -498,8 +494,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public InputStream getBinaryStream(int columnIndex) throws SQLException {
-        // TODO: handle null
-        return getMiniValue(columnIndex).contentAccess().inputStream();
+        return getObject(columnIndex, InputStream.class);
     }
 
     @Override
@@ -509,7 +504,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public Blob getBlob(int columnIndex) throws SQLException {
-        return new ContentAccessBlob(getMiniValue(columnIndex).contentAccess());
+        return getObject(columnIndex, Blob.class);
     }
 
     @Override
@@ -529,12 +524,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public NClob getNClob(int columnIndex) throws SQLException {
-        // TODO: convert character set?
-        return new BlobClob(
-                new ContentAccessBlob(getMiniValue(columnIndex).contentAccess()),
-                StandardCharsets.ISO_8859_1, // FIXME
-                1, // FIXME
-                StandardCharsets.UTF_8);
+        return getObject(columnIndex, NClob.class);
     }
 
     @Override
@@ -549,12 +539,12 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public Array getArray(String columnLabel) throws SQLException {
-        return getArray(findColumn(columnLabel));
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public Array getArray(int columnIndex) throws SQLException {
-        return null; // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
@@ -583,7 +573,34 @@ public class MiniJdbcResultSet implements ResultSet {
     }
 
     public <T> T getObject(int columnIndex, Class<T> type, Object modifier) throws SQLException {
+        T streamResult = tryConvertStream(columnIndex, type);
+        if (streamResult != null) {
+            return streamResult;
+        }
+        
         return generalConverter.convert(getObject(columnIndex), type, modifier);
+    }
+    
+    @SuppressWarnings("unchecked")
+    private <T> T tryConvertStream(int columnIndex, Class<T> type) throws SQLException {
+        // FIXME: character sets?
+        if (type == InputStream.class) {
+            return (T) getMiniValue(columnIndex).contentAccess().inputStream();
+        } else if (type == Reader.class) {
+            return (T) new InputStreamReader(
+                    getMiniValue(columnIndex).contentAccess().inputStream(),
+                    StandardCharsets.UTF_8);
+        } else if (type == Blob.class) {
+            return (T) new ContentAccessBlob(getMiniValue(columnIndex).contentAccess());
+        } else if (type == Clob.class || type == NClob.class) {
+            return (T) new BlobClob(
+                    new ContentAccessBlob(getMiniValue(columnIndex).contentAccess()),
+                    StandardCharsets.ISO_8859_1, // FIXME
+                    1, // FIXME
+                    StandardCharsets.UTF_8);
+        } else {
+            return null;
+        }
     }
 
     @Override
