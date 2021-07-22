@@ -64,6 +64,17 @@ class BlobClobTest {
         Blob blob = clob.getBlob();
         assertThat(blob.getBinaryStream()).hasBinaryContent("uvwxyz".getBytes(blobCharset));
     }
+
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    void testNonAsciiCharacters(BlobClob clob) throws Exception {
+        clob.setString(1, "\u00E1bcd\u00E9fg");
+        assertThat(clob.length()).isEqualTo(7L);
+        assertThat(clob.getSubString(1L, 7)).isEqualTo("\u00E1bcd\u00E9fg");
+        assertThat(clob.getSubString(2L, 4)).isEqualTo("bcd\u00E9");
+        assertThat(IOUtils.toString(clob.getCharacterStream())).isEqualTo("\u00E1bcd\u00E9fg");
+        assertThat(IOUtils.toString(clob.getCharacterStream(4L, 3))).isEqualTo("d\u00E9f");
+    }
     
     
     static Stream<Arguments> provideArguments() {
