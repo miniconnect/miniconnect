@@ -30,6 +30,10 @@ public class BlobClob implements NClob {
     
     private final Charset targetCharset;
     
+    private final boolean lengthIsCachable;
+    
+    private volatile long cachedLength = -1;
+    
 
     public BlobClob() {
         this(StandardCharsets.UTF_8);
@@ -42,12 +46,22 @@ public class BlobClob implements NClob {
     public BlobClob(Blob blob, Charset blobCharset, Charset targetCharset) {
         this(blob, blobCharset, 0, targetCharset);
     }
-    
+
     public BlobClob(Blob blob, Charset blobCharset, int blobCharWidth, Charset targetCharset) {
+        this(blob, blobCharset, blobCharWidth, targetCharset, false);
+    }
+    
+    public BlobClob(
+            Blob blob,
+            Charset blobCharset,
+            int blobCharWidth,
+            Charset targetCharset,
+            boolean lengthIsCachable) {
         this.blob = blob;
         this.blobCharset = blobCharset;
         this.blobCharWidth = blobCharWidth;
         this.targetCharset = targetCharset;
+        this.lengthIsCachable = lengthIsCachable;
     }
     
 
@@ -69,6 +83,19 @@ public class BlobClob implements NClob {
     
     @Override
     public long length() throws SQLException {
+        if (cachedLength >= 0) {
+            return cachedLength;
+        } else if (!lengthIsCachable) {
+            return calculateLength();
+        }
+        
+        synchronized (this) {
+            cachedLength = calculateLength();
+            return cachedLength;
+        }
+    }
+    
+    private long calculateLength() throws SQLException {
         if (blobCharWidth > 0) {
             return blob.length() / blobCharWidth;
         } else {
