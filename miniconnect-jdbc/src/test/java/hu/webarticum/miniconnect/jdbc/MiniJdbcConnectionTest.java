@@ -142,7 +142,7 @@ class MiniJdbcConnectionTest {
                 selectPreparedStatement.setInt(1, 3);
                 try (ResultSet resultSet = selectPreparedStatement.executeQuery()) {
                     assertThat(resultSet.next()).isTrue();
-                    assertThat(resultSet.getString(1)).isEqualTo("ipsum");
+                    assertThat(resultSet.getClob(1).getSubString(1L, 5)).isEqualTo("ipsum");
                 }
 
             }
