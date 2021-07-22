@@ -257,67 +257,68 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setAsciiStream(int parameterIndex, InputStream x) throws SQLException {
-        // TODO store in a WriteableBlob, and call setBlob(...)
+        // TODO see setBinaryStream(...)
     }
 
     @Override
     public void setAsciiStream(int parameterIndex, InputStream x, int length) throws SQLException {
-        // TODO
+        setAsciiStream(parameterIndex, x, (long) length);
     }
 
     @Override
     public void setAsciiStream(int parameterIndex, InputStream x, long length) throws SQLException {
-        // TODO
+        setBinaryStream(parameterIndex, x, length);
     }
 
     @Override
     public void setCharacterStream(int parameterIndex, Reader reader) throws SQLException {
-        // TODO store in a BlobClob(WriteableBlob), and call setClob(...)
+        // TODO see setBinaryStream(...)
     }
 
     @Override
     public void setCharacterStream(
             int parameterIndex, Reader reader, int length) throws SQLException {
-        // TODO
+        setCharacterStream(parameterIndex, reader, (long) length);
     }
 
     @Override
     public void setCharacterStream(
             int parameterIndex, Reader reader, long length) throws SQLException {
-        // TODO
+        setNCharacterStream(parameterIndex, reader, length);
     }
 
     @Override
     public void setNCharacterStream(int parameterIndex, Reader value) throws SQLException {
-        // TODO
+        // TODO see setBinaryStream(...)
     }
 
     @Override
     public void setNCharacterStream(
             int parameterIndex, Reader value, long length) throws SQLException {
-        // TODO
+        setParameter(parameterIndex, new ParameterValue(Reader.class, value, length));
     }
 
     @Override
     public void setUnicodeStream(
             int parameterIndex, InputStream x, int length) throws SQLException {
-        // TODO
+        throw new SQLFeatureNotSupportedException();
     }
 
     @Override
     public void setBinaryStream(int parameterIndex, InputStream x) throws SQLException {
-        // TODO
+        // TODO store in a WriteableBlob, and call setBlob(...) - when to close?
+        //      see org.h2.engine.Session::addTemporaryLob(...)
     }
 
     @Override
     public void setBinaryStream(int parameterIndex, InputStream x, int length) throws SQLException {
-        // TODO
+        setBinaryStream(parameterIndex, x, (long) length);
     }
 
     @Override
     public void setBinaryStream(
             int parameterIndex, InputStream x, long length) throws SQLException {
-        // TODO
+        setParameter(parameterIndex, new ParameterValue(InputStream.class, x, length));
     }
 
     @Override
@@ -332,48 +333,48 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setBlob(int parameterIndex, Blob x) throws SQLException {
-        // TODO
+        setParameter(parameterIndex, new ParameterValue(Blob.class, x));
     }
 
     @Override
     public void setBlob(int parameterIndex, InputStream inputStream) throws SQLException {
-        // TODO
+        // TODO see setBinaryStream(...)
     }
 
     @Override
     public void setBlob(
             int parameterIndex, InputStream inputStream, long length) throws SQLException {
-        // TODO
+        // TODO see setBinaryStream(...)
     }
 
     @Override
     public void setClob(int parameterIndex, Clob x) throws SQLException {
-        // TODO
+        setParameter(parameterIndex, new ParameterValue(Clob.class, x));
     }
 
     @Override
     public void setClob(int parameterIndex, Reader reader) throws SQLException {
-        // TODO
+        // TODO see setBinaryStream(...)
     }
 
     @Override
     public void setClob(int parameterIndex, Reader reader, long length) throws SQLException {
-        // TODO
+        // TODO see setBinaryStream(...)
     }
 
     @Override
     public void setNClob(int parameterIndex, NClob value) throws SQLException {
-        // TODO
+        setParameter(parameterIndex, new ParameterValue(NClob.class, value));
     }
 
     @Override
     public void setNClob(int parameterIndex, Reader reader) throws SQLException {
-        // TODO
+        // TODO see setBinaryStream(...)
     }
 
     @Override
     public void setNClob(int parameterIndex, Reader reader, long length) throws SQLException {
-        // TODO
+        // TODO see setBinaryStream(...)
     }
 
     @Override

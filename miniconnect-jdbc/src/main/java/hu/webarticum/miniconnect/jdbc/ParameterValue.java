@@ -16,7 +16,11 @@ public class ParameterValue {
 
 
     public ParameterValue(Class<?> type, Object value) {
-        this(type, value, Types.OTHER, null, null);
+        this(type, value, null);
+    }
+
+    public ParameterValue(Class<?> type, Object value, Object modifier) {
+        this(type, value, Types.OTHER, null, modifier);
     }
     
     public ParameterValue(
