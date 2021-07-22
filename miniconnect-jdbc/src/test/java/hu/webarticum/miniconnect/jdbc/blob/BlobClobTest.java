@@ -2,6 +2,7 @@ package hu.webarticum.miniconnect.jdbc.blob;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.sql.Blob;
@@ -20,6 +21,22 @@ class BlobClobTest {
         clob.setString(1, "abcdefg");
         assertThat(clob.length()).isEqualTo(7L);
         assertThat(clob.getSubString(1L, 7)).isEqualTo("abcdefg");
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    void testSetWriter(BlobClob clob) throws Exception {
+        Writer writer = clob.setCharacterStream(1L);
+        writer.write("uvw");
+        writer.close();
+        assertThat(clob.length()).isEqualTo(3L);
+        assertThat(clob.getSubString(1L, 3)).isEqualTo("uvw");
+        
+        Writer updateWriter = clob.setCharacterStream(3L);
+        updateWriter.write("nmop");
+        updateWriter.close();
+        assertThat(clob.length()).isEqualTo(6L);
+        assertThat(clob.getSubString(1L, 6)).isEqualTo("uvnmop");
     }
 
     @ParameterizedTest
@@ -53,7 +70,9 @@ class BlobClobTest {
         return Stream.of(
                 Arguments.of(clobOf(StandardCharsets.ISO_8859_1, 1, StandardCharsets.ISO_8859_1)),
                 Arguments.of(clobOf(StandardCharsets.ISO_8859_1, 1, StandardCharsets.UTF_16BE)),
-                Arguments.of(clobOf(StandardCharsets.UTF_16BE, 2, StandardCharsets.UTF_8)));
+                Arguments.of(clobOf(StandardCharsets.UTF_16BE, 2, StandardCharsets.UTF_8)),
+                Arguments.of(clobOf(StandardCharsets.UTF_8, 0, StandardCharsets.UTF_8)),
+                Arguments.of(clobOf(StandardCharsets.UTF_8, 0, StandardCharsets.ISO_8859_1)));
     }
 
     private static BlobClob clobOf(Charset blobCharset, int blobCharWidth, Charset targetCharset) {
