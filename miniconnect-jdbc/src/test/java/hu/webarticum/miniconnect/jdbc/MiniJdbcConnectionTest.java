@@ -149,20 +149,6 @@ class MiniJdbcConnectionTest {
         }
     }
 
-    @Test
-    void testPreparedStatementBatch() throws Exception {
-        try (
-                Connection baseConnection = createInMemoryConnection();
-                MiniSession miniSession = new JdbcAdapterSession(baseConnection);
-                Connection connection = new MiniJdbcConnection(
-                        miniSession, new H2DatabaseProvider());
-                ) {
-            
-            // TODO
-            
-        }
-    }
-    
     private Connection createInMemoryConnection() throws SQLException {
         return DriverManager.getConnection("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
     }
