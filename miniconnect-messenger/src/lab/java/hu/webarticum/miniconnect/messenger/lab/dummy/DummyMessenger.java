@@ -64,8 +64,6 @@ public class DummyMessenger implements Messenger {
             .then(Bee.simple("(?i)"))
             .then(Bee.ref("quote"))
             .then(Bee.WHITESPACE.any())
-            .then(Bee.fixed(";"))
-            .then(Bee.WHITESPACE.any())
             .toPattern();
     
     private static final ImmutableList<MiniColumnHeader> columnHeaders = ImmutableList.of(
