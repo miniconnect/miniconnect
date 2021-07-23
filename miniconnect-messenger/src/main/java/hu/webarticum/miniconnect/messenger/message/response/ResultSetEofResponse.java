@@ -2,7 +2,7 @@ package hu.webarticum.miniconnect.messenger.message.response;
 
 import hu.webarticum.miniconnect.messenger.message.SessionMessage;
 
-public class ResultSetEofResponse implements Response, SessionMessage {
+public final class ResultSetEofResponse implements Response, SessionMessage {
 
     private final long sessionId;
 

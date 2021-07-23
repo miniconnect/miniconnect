@@ -15,7 +15,7 @@ import java.util.Objects;
 /**
  * Simple immutable wrapper for byte arrays
  */
-public class ByteString implements Serializable {
+public final class ByteString implements Serializable {
 
     private static final long serialVersionUID = 2392643209772967829L;
     

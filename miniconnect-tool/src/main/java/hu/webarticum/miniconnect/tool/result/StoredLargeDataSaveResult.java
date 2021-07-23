@@ -5,7 +5,7 @@ import java.io.Serializable;
 import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 
-public class StoredLargeDataSaveResult implements MiniLargeDataSaveResult, Serializable {
+public final class StoredLargeDataSaveResult implements MiniLargeDataSaveResult, Serializable {
 
     private static final long serialVersionUID = 1L;
     

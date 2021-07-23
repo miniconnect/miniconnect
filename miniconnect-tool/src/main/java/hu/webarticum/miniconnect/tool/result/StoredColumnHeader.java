@@ -5,7 +5,7 @@ import java.io.Serializable;
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
 
-public class StoredColumnHeader implements MiniColumnHeader, Serializable {
+public final class StoredColumnHeader implements MiniColumnHeader, Serializable {
 
     private static final long serialVersionUID = 1L;
     

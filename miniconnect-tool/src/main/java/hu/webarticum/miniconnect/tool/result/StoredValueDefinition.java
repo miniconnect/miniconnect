@@ -6,7 +6,7 @@ import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.util.data.ByteString;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
-public class StoredValueDefinition implements MiniValueDefinition, Serializable {
+public final class StoredValueDefinition implements MiniValueDefinition, Serializable {
     
     private static final long serialVersionUID = 1L;
 

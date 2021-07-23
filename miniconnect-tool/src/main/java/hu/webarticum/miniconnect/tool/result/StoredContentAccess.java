@@ -6,7 +6,7 @@ import java.io.Serializable;
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-public class StoredContentAccess implements MiniContentAccess, Serializable {
+public final class StoredContentAccess implements MiniContentAccess, Serializable {
 
     private static final long serialVersionUID = 1L;
     

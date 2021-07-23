@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ImmutableMap<K, V> implements Serializable {
+public final class ImmutableMap<K, V> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import hu.webarticum.miniconnect.api.MiniError;
 
-public class StoredError implements MiniError, Serializable {
+public final class StoredError implements MiniError, Serializable {
 
     private static final long serialVersionUID = 1L;
     

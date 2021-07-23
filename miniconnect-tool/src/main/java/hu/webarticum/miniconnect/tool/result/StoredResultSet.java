@@ -7,7 +7,7 @@ import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
-public class StoredResultSet implements MiniResultSet, Serializable {
+public final class StoredResultSet implements MiniResultSet, Serializable {
 
     private static final long serialVersionUID = 1L;
 
