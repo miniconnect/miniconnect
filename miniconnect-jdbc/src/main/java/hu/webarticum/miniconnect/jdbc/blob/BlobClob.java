@@ -16,9 +16,10 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.BoundedReader;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.io.output.WriterOutputStream;
+
+import hu.webarticum.miniconnect.jdbc.io.LongBoundedReader;
 
 public class BlobClob implements NClob {
 
@@ -159,16 +160,10 @@ public class BlobClob implements NClob {
             long pos, long length) throws SQLException {
         long zeroBasedPos = pos - 1;
         long until = zeroBasedPos + length;
-        if (until > Integer.MAX_VALUE) {
-            throw new SQLException(
-                    "Large positioning is not supported for variable-length encodings");
-        }
-        int zeroBasedPosAsInt = (int) zeroBasedPos;
-        int untilAsInt = (int) until;
-        Reader reader = new BoundedReader(
-                new InputStreamReader(blob.getBinaryStream()), untilAsInt);
+        Reader reader = new LongBoundedReader(
+                new InputStreamReader(blob.getBinaryStream()), until);
         try {
-            reader.skip(zeroBasedPosAsInt);
+            reader.skip(zeroBasedPos);
         } catch (IOException e) {
             throw new SQLException(e);
         }

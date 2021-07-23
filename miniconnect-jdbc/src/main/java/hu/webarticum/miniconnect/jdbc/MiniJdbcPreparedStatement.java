@@ -1,7 +1,10 @@
 package hu.webarticum.miniconnect.jdbc;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Reader;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Array;
@@ -24,8 +27,14 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BoundedInputStream;
+
 import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniResult;
+import hu.webarticum.miniconnect.jdbc.blob.BlobClob;
+import hu.webarticum.miniconnect.jdbc.blob.WriteableBlob;
+import hu.webarticum.miniconnect.jdbc.io.LongBoundedReader;
 import hu.webarticum.miniconnect.jdbc.provider.PreparedStatementProvider;
 
 public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements PreparedStatement {
@@ -257,7 +266,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setAsciiStream(int parameterIndex, InputStream x) throws SQLException {
-        // TODO see setBinaryStream(...)
+        setBinaryStream(parameterIndex, x);
     }
 
     @Override
@@ -272,7 +281,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setCharacterStream(int parameterIndex, Reader reader) throws SQLException {
-        // TODO see setBinaryStream(...)
+        setClob(parameterIndex, reader);
     }
 
     @Override
@@ -289,7 +298,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setNCharacterStream(int parameterIndex, Reader value) throws SQLException {
-        // TODO see setBinaryStream(...)
+        setNClob(parameterIndex, value);
     }
 
     @Override
@@ -306,8 +315,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setBinaryStream(int parameterIndex, InputStream x) throws SQLException {
-        // TODO store in a WriteableBlob, and call setBlob(...) - when to close?
-        //      see org.h2.engine.Session::addTemporaryLob(...)
+        setBlob(parameterIndex, x);
     }
 
     @Override
@@ -338,13 +346,15 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setBlob(int parameterIndex, InputStream inputStream) throws SQLException {
-        // TODO see setBinaryStream(...)
+        setParameter(parameterIndex, new ParameterValue(
+                Blob.class, blobOf(inputStream), Types.OTHER, null, null, true));
     }
 
     @Override
     public void setBlob(
             int parameterIndex, InputStream inputStream, long length) throws SQLException {
-        // TODO see setBinaryStream(...)
+        setParameter(parameterIndex, new ParameterValue(
+                Blob.class, blobOf(inputStream, length), Types.OTHER, null, null, true));
     }
 
     @Override
@@ -354,12 +364,14 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setClob(int parameterIndex, Reader reader) throws SQLException {
-        // TODO see setBinaryStream(...)
+        setParameter(parameterIndex, new ParameterValue(
+                Clob.class, clobOf(reader), Types.OTHER, null, null, true));
     }
 
     @Override
     public void setClob(int parameterIndex, Reader reader, long length) throws SQLException {
-        // TODO see setBinaryStream(...)
+        setParameter(parameterIndex, new ParameterValue(
+                Clob.class, clobOf(reader, length), Types.OTHER, null, null, true));
     }
 
     @Override
@@ -369,12 +381,14 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setNClob(int parameterIndex, Reader reader) throws SQLException {
-        // TODO see setBinaryStream(...)
+        setParameter(parameterIndex, new ParameterValue(
+                NClob.class, clobOf(reader), Types.OTHER, null, null, true));
     }
 
     @Override
     public void setNClob(int parameterIndex, Reader reader, long length) throws SQLException {
-        // TODO see setBinaryStream(...)
+        setParameter(parameterIndex, new ParameterValue(
+                NClob.class, clobOf(reader, length), Types.OTHER, null, null, true));
     }
 
     @Override
@@ -405,7 +419,12 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
             }
         }
         
-        parameters.set(parameterIndex - 1, parameter);
+        int zeroBasedIndex = parameterIndex - 1;
+        if (currentSize > zeroBasedIndex) {
+            closeSilentlyIfNecessary(parameters.get(zeroBasedIndex));
+        }
+        
+        parameters.set(zeroBasedIndex, parameter);
     }
 
     @Override
@@ -493,6 +512,9 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     public void closeInternal() throws SQLException {
         closed = true;
         getConnection().unregisterActiveStatement(this);
+        for (ParameterValue parameterValue : parameters) {
+            closeSilentlyIfNecessary(parameterValue);
+        }
         try {
             preparedStatementProvider.close();
         } catch (Exception e) {
@@ -502,7 +524,59 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     
     // [end]
     
+
+    private void closeSilentlyIfNecessary(ParameterValue parameterValue) {
+        if (parameterValue == null || !parameterValue.managed()) {
+            return;
+        }
+        
+        try {
+            closeIfCan(parameterValue.value());
+        } catch (Exception e) {
+            // we are silent
+        }
+    }
     
+    private void closeIfCan(Object value) throws Exception {
+        if (value instanceof Blob) {
+            ((Blob) value).free();
+        } else if (value instanceof Clob) {
+            ((Clob) value).free();
+        } else if (value instanceof AutoCloseable) {
+            ((AutoCloseable) value).close();
+        }
+    }
+
+    private Blob blobOf(InputStream inputStream, long length) throws SQLException {
+        return blobOf(new BoundedInputStream(inputStream, length));
+    }
+    
+    private Blob blobOf(InputStream inputStream) throws SQLException {
+        WriteableBlob blob = new WriteableBlob();
+        OutputStream blobOutputStream = blob.setBinaryStream(1);
+        try {
+            IOUtils.copy(inputStream, blobOutputStream);
+        } catch (IOException e) {
+            throw new SQLException(e);
+        }
+        return blob;
+    }
+
+    private NClob clobOf(Reader reader, long length) throws SQLException {
+        return clobOf(new LongBoundedReader(reader, length));
+    }
+    
+    private NClob clobOf(Reader reader) throws SQLException {
+        BlobClob clob = new BlobClob();
+        Writer clobWriter = clob.setCharacterStream(1);
+        try {
+            IOUtils.copy(reader, clobWriter);
+        } catch (IOException e) {
+            throw new SQLException(e);
+        }
+        return clob;
+    }
+
     private SQLException createMethodNotAllowedException() {
         return new SQLException("Method not allowed for prepared statement");
     }

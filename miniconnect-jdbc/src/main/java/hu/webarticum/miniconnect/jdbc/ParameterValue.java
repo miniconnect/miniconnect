@@ -13,6 +13,8 @@ public class ParameterValue {
     private final String typeName;
     
     private final Object modifier;
+    
+    private final boolean managed;
 
 
     public ParameterValue(Class<?> type, Object value) {
@@ -29,12 +31,22 @@ public class ParameterValue {
             int sqlType,
             String typeName,
             Object modifier) {
-        
+        this(type, value, sqlType, typeName, modifier, false);
+    }
+
+    public ParameterValue(
+            Class<?> type,
+            Object value,
+            int sqlType,
+            String typeName,
+            Object modifier,
+            boolean managed) {
         this.type = type;
         this.value = value;
         this.sqlType = sqlType;
         this.typeName = typeName;
         this.modifier = modifier;
+        this.managed = managed;
     }
 
 
@@ -56,6 +68,10 @@ public class ParameterValue {
 
     public Object modifier() {
         return modifier;
+    }
+
+    public boolean managed() {
+        return managed;
     }
     
 }
