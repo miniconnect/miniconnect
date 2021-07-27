@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
     implementation 'commons-io:commons-io:2.11.0'
-    implementation 'hu.webarticum:regexbee:0.1.0'
+    implementation 'hu.webarticum:regexbee:0.2.0'
     implementation project(':miniconnect-api')
     
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'

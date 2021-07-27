@@ -53,18 +53,15 @@ public class DummyMessenger implements Messenger {
 
     private static final Pattern SELECT_ALL_QUERY_PATTERN = Bee
             .then(Bee.WHITESPACE.any())
-            .then(Bee.simple("(?i)")) // FIXME: modifier support?
             .then(Bee.WHITESPACE.any())
             .then(Bee.fixed("SELECT")).then(Bee.WHITESPACE.more())
             .then(Bee.fixed("*")).then(Bee.WHITESPACE.more())
             .then(Bee.fixed("FROM")).then(Bee.WHITESPACE.more())
-            .then(Bee.simple("[\"`]").optional().as("quote"))
-            .then(Bee.simple("(?-i)"))
-            .then(Bee.fixed("data"))
-            .then(Bee.simple("(?i)"))
+            .then(Bee.simple("[\"`]").optional().as("quote")) // TODO: use oneCharOf(...)
+            .then(Bee.without(Pattern.CASE_INSENSITIVE, Bee.fixed("data")))
             .then(Bee.ref("quote"))
             .then(Bee.WHITESPACE.any())
-            .toPattern();
+            .toPattern(Pattern.CASE_INSENSITIVE);
     
     private static final ImmutableList<MiniColumnHeader> columnHeaders = ImmutableList.of(
             new StoredColumnHeader("id", new StoredValueDefinition(Long.class.getName())),

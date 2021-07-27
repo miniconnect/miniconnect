@@ -24,7 +24,7 @@ sourceSets {
 }
 
 dependencies {
-    implementation 'hu.webarticum:regexbee:0.1.0'
+    implementation 'hu.webarticum:regexbee:0.2.0'
     implementation project(':miniconnect-api')
     implementation project(':miniconnect-util')
     implementation project(':miniconnect-tool')

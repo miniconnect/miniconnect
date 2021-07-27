@@ -11,19 +11,27 @@ import hu.webarticum.miniconnect.jdbc.ParameterValue;
 import hu.webarticum.miniconnect.jdbc.provider.PreparedStatementProvider;
 import hu.webarticum.regexbee.Bee;
 import hu.webarticum.regexbee.BeeFragment;
+import hu.webarticum.regexbee.common.StringLiteralFragment;
 
 public class H2PreparedStatementProvider implements PreparedStatementProvider {
     
-    private static final BeeFragment SINGLE_QUTED_FRAGMENT =
-            Bee.simple("'(?:[^']|'')*'");
+    private static final BeeFragment SINGLE_QUTED_FRAGMENT = StringLiteralFragment.builder()
+            .withDelimiter("'")
+            .withEscaping('\\', true)
+            .build();
     
-    private static final BeeFragment DOUBLE_QUTED_FRAGMENT =
-            Bee.simple("\"(?:[^\"]|\"\")*\"");
+    private static final BeeFragment DOUBLE_QUTED_FRAGMENT = StringLiteralFragment.builder()
+            .withDelimiter("\"")
+            .withEscaping('\\', true)
+            .build();
     
-    private static final BeeFragment TWODOLLARS_QUTED_FRAGMENT =
-            Bee.simple("\\$\\$(?:[^\\$]|\\$[^\\$])*\\$\\$");
+    private static final BeeFragment TWODOLLARS_QUTED_FRAGMENT = StringLiteralFragment.builder()
+            .withDelimiter("$$")
+            .withSelfEscapingDisabled() // TODO: use withoutAnyEscaping()
+            .withNormalEscapingDisabled()
+            .build();
 
-    public static final Pattern STRING_OR_QUESTION_MARK_PATTERN =
+    private static final Pattern STRING_OR_QUESTION_MARK_PATTERN =
             SINGLE_QUTED_FRAGMENT
             .or(DOUBLE_QUTED_FRAGMENT)
             .or(TWODOLLARS_QUTED_FRAGMENT)

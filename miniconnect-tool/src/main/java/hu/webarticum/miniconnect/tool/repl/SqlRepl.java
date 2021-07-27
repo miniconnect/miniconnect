@@ -20,7 +20,9 @@ import hu.webarticum.miniconnect.api.MiniResult;
 // TODO: better abstraction (context/executor vs output-handling), builder
 public class SqlRepl implements Repl {
     
-    private static final BeeFragment TERMINATOR_FRAGMENT = Bee.simple("\\s*;");
+    private static final BeeFragment TERMINATOR_FRAGMENT = Bee
+            .then(Bee.WHITESPACE.any())
+            .then(Bee.fixed(";"));
 
     private static final BeeFragment BRACKETS_FRAGMENT = Bee
             .then(Bee.WHITESPACE.any())
@@ -31,11 +33,11 @@ public class SqlRepl implements Repl {
     private static final BeeFragment DATA_FRAGMENT = Bee
             .then(Bee.WHITESPACE.any())
             .then(Bee.fixed("data:"))
-            .then(Bee.simple("[^:\\\\]|\\\\.").more().as("name"))
+            .then(Bee.simple("[^:\\\\]|\\\\.").more().as("name")) //TODO: use oneCharOf(...)
             .then(Bee.fixed(":"))
             .then(Bee.WHITESPACE.any())
             .then(Bee.fixed("@").optional()
-                    .then(Bee.simple("([^\\)\\\\]|\\\\.)").more()
+                    .then(Bee.simple("([^\\)\\\\]|\\\\.)").more() //TODO: use oneCharOf(...)
                     .as("source")))
             .then(TERMINATOR_FRAGMENT.optional())
             .then(Bee.WHITESPACE.any());
@@ -56,11 +58,11 @@ public class SqlRepl implements Repl {
             .then(Bee.WHITESPACE.any());
     
     private static final BeeFragment QUERY_FRAGMENT = Bee
-            .then(Bee.simple("[^'\"`\\\\;]").more(Greediness.POSSESSIVE)
+            .then(Bee.simple("[^'\"`\\\\;]").more(Greediness.POSSESSIVE) //TODO: use oneCharOf(...)
                     .or(Bee.simple("\\\\."))
-                    .or(Bee.simple("['\"`]").as("quote") // NOSONAR
+                    .or(Bee.simple("['\"`]").as("quote") // NOSONAR //TODO: use oneCharOf(...)
                             .then(Bee.fixed("\\").or(Bee.ref("quote")).then(Bee.ref("quote"))
-                                    .or(Bee.simple("(?!\\k<quote>).")) // FIXME: lookaround support?
+                                    .or(Bee.lookAheadNot(Bee.ref("quote")))
                                     .more(Greediness.POSSESSIVE))
                             .then(Bee.ref("quote"))
                     ))

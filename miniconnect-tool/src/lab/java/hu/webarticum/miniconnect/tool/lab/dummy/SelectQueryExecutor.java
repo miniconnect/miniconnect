@@ -8,6 +8,7 @@ import hu.webarticum.miniconnect.tool.result.StoredError;
 import hu.webarticum.miniconnect.tool.result.StoredResult;
 import hu.webarticum.miniconnect.tool.result.StoredResultSetData;
 import hu.webarticum.regexbee.Bee;
+import hu.webarticum.regexbee.common.StringLiteralFragment;
 
 public class SelectQueryExecutor implements QueryExecutor {
     
@@ -20,12 +21,14 @@ public class SelectQueryExecutor implements QueryExecutor {
             .then(Bee.fixed("*").then(Bee.WHITESPACE.more()))
             .then(Bee.fixed("FROM").then(Bee.WHITESPACE.more()))
             .then(Bee.IDENTIFIER
-                    .or(Bee.fixed("`")
-                            .then(Bee.simple("(?:[^`\\\\]|``|\\\\.)+")) // FIXME: escape support?
-                            .then(Bee.fixed("`")))
-                    .or(Bee.fixed("\"")
-                            .then(Bee.simple("(?:[^\"\\\\]|\"\"|\\\\.)+"))
-                            .then(Bee.fixed("\"")))
+                    .or(StringLiteralFragment.builder()
+                            .withDelimiter('`')
+                            .withEscaping('\\', true)
+                            .build())
+                    .or(StringLiteralFragment.builder()
+                            .withDelimiter('"')
+                            .withEscaping('\\', true)
+                            .build())
                     .as("table"))
             .then(Bee.WHITESPACE.any().then(Bee.fixed(";")).optional())
             .then(Bee.WHITESPACE.any())
