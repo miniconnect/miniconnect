@@ -57,7 +57,7 @@ public class DummyMessenger implements Messenger {
             .then(Bee.fixed("SELECT")).then(Bee.WHITESPACE.more())
             .then(Bee.fixed("*")).then(Bee.WHITESPACE.more())
             .then(Bee.fixed("FROM")).then(Bee.WHITESPACE.more())
-            .then(Bee.simple("[\"`]").optional().as("quote")) // TODO: use oneCharOf(...)
+            .then(Bee.oneCharOf("\"`").optional().as("quote"))
             .then(Bee.without(Pattern.CASE_INSENSITIVE, Bee.fixed("data")))
             .then(Bee.ref("quote"))
             .then(Bee.WHITESPACE.any())

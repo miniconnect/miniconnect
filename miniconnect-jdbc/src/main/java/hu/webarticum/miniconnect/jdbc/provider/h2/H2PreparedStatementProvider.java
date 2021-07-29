@@ -27,8 +27,7 @@ public class H2PreparedStatementProvider implements PreparedStatementProvider {
     
     private static final BeeFragment TWODOLLARS_QUTED_FRAGMENT = StringLiteralFragment.builder()
             .withDelimiter("$$")
-            .withSelfEscapingDisabled() // TODO: use withoutAnyEscaping()
-            .withNormalEscapingDisabled()
+            .withoutAnyEscaping()
             .build();
 
     private static final Pattern STRING_OR_QUESTION_MARK_PATTERN =

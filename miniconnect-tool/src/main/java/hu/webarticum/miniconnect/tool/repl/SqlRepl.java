@@ -33,11 +33,11 @@ public class SqlRepl implements Repl {
     private static final BeeFragment DATA_FRAGMENT = Bee
             .then(Bee.WHITESPACE.any())
             .then(Bee.fixed("data:"))
-            .then(Bee.simple("[^:\\\\]|\\\\.").more().as("name")) //TODO: use oneCharOf(...)
+            .then(Bee.simple("[^:\\\\]|\\\\.").more().as("name")) // TODO: use range/or?
             .then(Bee.fixed(":"))
             .then(Bee.WHITESPACE.any())
             .then(Bee.fixed("@").optional()
-                    .then(Bee.simple("([^\\)\\\\]|\\\\.)").more() //TODO: use oneCharOf(...)
+                    .then(Bee.simple("([^\\)\\\\]|\\\\.)").more() // TODO: use range/or?
                     .as("source")))
             .then(TERMINATOR_FRAGMENT.optional())
             .then(Bee.WHITESPACE.any());
@@ -58,9 +58,9 @@ public class SqlRepl implements Repl {
             .then(Bee.WHITESPACE.any());
     
     private static final BeeFragment QUERY_FRAGMENT = Bee
-            .then(Bee.simple("[^'\"`\\\\;]").more(Greediness.POSSESSIVE) //TODO: use oneCharOf(...)
-                    .or(Bee.simple("\\\\."))
-                    .or(Bee.simple("['\"`]").as("quote") // NOSONAR //TODO: use oneCharOf(...)
+            .then(Bee.simple("[^'\"`\\\\;]").more(Greediness.POSSESSIVE) // TODO: range?
+                    .or(Bee.fixed("\\").then(Bee.CHAR))
+                    .or(Bee.oneCharOf("'\"`").as("quote")
                             .then(Bee.fixed("\\").or(Bee.ref("quote")).then(Bee.ref("quote"))
                                     .or(Bee.lookAheadNot(Bee.ref("quote")))
                                     .more(Greediness.POSSESSIVE))
