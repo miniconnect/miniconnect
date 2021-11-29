@@ -83,9 +83,6 @@ public class SqlRepl implements Repl {
                     .or(QUERY_FRAGMENT))
             .then(Bee.END)
             .toPattern(Pattern.MULTILINE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    static {
-        System.out.println(COMMAND_PATTERN.toString());
-    }
     
     private static final Pattern UNESCAPE_PATTERN = Pattern.compile("\\\\(.)");
     
