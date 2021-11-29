@@ -1,7 +1,11 @@
+## build ##
 /bin/
 /build/
 /.gradle/
-/.settings/
 
+## editors ##
 /.classpath
 /.project
+/.settings/
+/.idea/
+/.vscode/
