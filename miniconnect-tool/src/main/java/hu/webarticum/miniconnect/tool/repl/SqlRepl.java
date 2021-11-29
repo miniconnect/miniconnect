@@ -29,7 +29,8 @@ public class SqlRepl implements Repl {
             .then(Bee.fixed("("))
             .then(Bee.WHITESPACE.any())
             .then(Bee.fixed(")"));
-    
+
+    //private static final BeeFragment DATA_FRAGMENT = Bee.fixed("DATA!");
     private static final BeeFragment DATA_FRAGMENT = Bee
             .then(Bee.WHITESPACE.any())
             .then(Bee.fixed("data:"))
@@ -37,7 +38,7 @@ public class SqlRepl implements Repl {
             .then(Bee.fixed(":"))
             .then(Bee.WHITESPACE.any())
             .then(Bee.fixed("@").optional()
-                    .then(Bee.simple("([^\\)\\\\]|\\\\.)").more() // TODO: use range/or?
+                    .then(Bee.simple("[^\\)\\\\]|\\\\.").more() // TODO: use range/or?
                     .as("source")))
             .then(TERMINATOR_FRAGMENT.optional())
             .then(Bee.WHITESPACE.any());
@@ -51,13 +52,12 @@ public class SqlRepl implements Repl {
     
     private static final BeeFragment QUIT_FRAGMENT = Bee
             .then(Bee.WHITESPACE.any())
-            .then(Bee.fixed("exit")
-                    .or(Bee.fixed("quit")))
+            .then(Bee.oneFixedOf("exit", "quit"))
             .then(BRACKETS_FRAGMENT.optional())
             .then(TERMINATOR_FRAGMENT.optional())
             .then(Bee.WHITESPACE.any());
     
-    private static final BeeFragment QUERY_FRAGMENT = Bee
+    private static final BeeFragment QUERY_FRAGMENT = Bee.ANYTHING;Object x = Bee
             .then(Bee.simple("[^'\"`\\\\;]").more(Greediness.POSSESSIVE) // TODO: range?
                     .or(Bee.fixed("\\").then(Bee.CHAR))
                     .or(Bee.oneCharOf("'\"`").as("quote")
@@ -83,6 +83,9 @@ public class SqlRepl implements Repl {
                     .or(QUERY_FRAGMENT))
             .then(Bee.END)
             .toPattern(Pattern.MULTILINE | Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    static {
+        System.out.println(COMMAND_PATTERN.toString());
+    }
     
     private static final Pattern UNESCAPE_PATTERN = Pattern.compile("\\\\(.)");
     
