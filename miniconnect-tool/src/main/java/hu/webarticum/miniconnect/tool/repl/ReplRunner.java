@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.regex.Pattern;
 
-// TODO: handle incomplete lines
 public class ReplRunner implements Runnable {
 
     private final Repl repl;
