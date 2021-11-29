@@ -1,5 +1,5 @@
 
-rootProject.name = 'miniconnect-transfer'
+rootProject.name = 'miniconnect-transfer-old'
 
 // FIXME
 include ':miniconnect-api'
