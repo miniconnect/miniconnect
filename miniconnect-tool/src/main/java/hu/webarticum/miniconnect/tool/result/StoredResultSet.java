@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.tool.result;
 
 import java.io.Serializable;
+import java.util.Iterator;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResultSet;
@@ -13,8 +14,6 @@ public final class StoredResultSet implements MiniResultSet, Serializable {
 
 
     private final StoredResultSetData data;
-
-    private int position = 0;
 
 
     public StoredResultSet() {
@@ -32,18 +31,10 @@ public final class StoredResultSet implements MiniResultSet, Serializable {
     }
 
     @Override
-    public ImmutableList<MiniValue> fetch() {
-        ImmutableList<ImmutableList<MiniValue>> rows = rows();
-        if (position >= rows.size()) {
-            return null;
-        }
-
-        ImmutableList<MiniValue> result = rows.get(position);
-        position++;
-
-        return result;
+    public Iterator<ImmutableList<MiniValue>> iterator() {
+        return data.iterator();
     }
-
+    
     public ImmutableList<ImmutableList<MiniValue>> rows() {
         return data.rows();
     }

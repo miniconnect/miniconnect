@@ -12,7 +12,7 @@ import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
-public final class StoredResultSetData implements Serializable {
+public final class StoredResultSetData implements Iterable<ImmutableList<MiniValue>>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -56,11 +56,7 @@ public final class StoredResultSetData implements Serializable {
         MiniResultSet resultSet = result.resultSet();
         List<MiniColumnHeader> headers = resultSet.columnHeaders().toList();
         List<List<MiniValue>> rows = new ArrayList<>();
-        for (
-                ImmutableList<MiniValue> row = resultSet.fetch();
-                row != null;
-                row = resultSet.fetch()) {
-
+        for (ImmutableList<MiniValue> row : resultSet) {
             rows.add(row.toList());
         }
         return new StoredResultSetData(headers, rows);
@@ -71,6 +67,7 @@ public final class StoredResultSetData implements Serializable {
         return columnHeaders;
     }
 
+    @Override
     public Iterator<ImmutableList<MiniValue>> iterator() {
         return rows.iterator();
     }

@@ -11,6 +11,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -69,6 +70,8 @@ public class JdbcAdapterResultSet implements MiniResultSet {
     
     private final ResultSet jdbcResultSet;
     
+    private final JdbcResultSetIterator<ImmutableList<MiniValue>> rowIterator;
+    
     
     public JdbcAdapterResultSet(Statement jdbcStatement, ResultSet jdbcResultSet) {
         this.jdbcStatement = jdbcStatement;
@@ -76,8 +79,10 @@ public class JdbcAdapterResultSet implements MiniResultSet {
         this.javaTypes = extractJavaTypes();
         this.interpreters = javaTypes.map(DefaultValueInterpreter::new);
         this.columnHeaders = extractColumnHeaders();
+        this.rowIterator = new JdbcResultSetIterator<>(jdbcResultSet, r -> extractRow());
     }
 
+    
     private final ImmutableList<Class<?>> extractJavaTypes() {
         try {
             return extractJavaTypesThrowing();
@@ -85,7 +90,6 @@ public class JdbcAdapterResultSet implements MiniResultSet {
             throw new UncheckedSqlException(e);
         }
     }
-    
     
     private final ImmutableList<Class<?>> extractJavaTypesThrowing() throws SQLException {
         ResultSetMetaData jdbcMetaData = jdbcResultSet.getMetaData();
@@ -140,23 +144,18 @@ public class JdbcAdapterResultSet implements MiniResultSet {
     }
 
     @Override
-    public ImmutableList<MiniValue> fetch() {
+    public Iterator<ImmutableList<MiniValue>> iterator() {
+        return rowIterator;
+    }
+    
+    private ImmutableList<MiniValue> extractRow()  {
         try {
-            return fetchThrowing();
+            return extractRowThrowing();
         } catch (SQLException e) {
             throw new UncheckedSqlException(e);
         }
     }
     
-    private ImmutableList<MiniValue> fetchThrowing() throws SQLException {
-        if (!jdbcResultSet.next()) {
-            return null;
-        }
-        
-        return extractRowThrowing();
-    }
-    
-    // TODO
     private ImmutableList<MiniValue> extractRowThrowing() throws SQLException {
         int columnCount = jdbcResultSet.getMetaData().getColumnCount();
         List<MiniValue> resultBuilder = new ArrayList<>(columnCount);

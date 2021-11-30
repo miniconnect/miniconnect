@@ -26,9 +26,8 @@ public class ResultSetPrinter {
         ImmutableList<DefaultValueInterpreter> valueInterpreters = columnHeaders.map(
                 h -> new DefaultValueInterpreter(h.valueDefinition()));
         List<ImmutableList<String>> stringRowsBuffer = new ArrayList<>();
-        ImmutableList<MiniValue> row;
         boolean foundAny = false;
-        while ((row = resultSet.fetch()) != null) {
+        for (ImmutableList<MiniValue> row : resultSet) {
             foundAny = true;
             ImmutableList<String> stringRow = row.mapIndex(
                     (i, value) -> stringifyValue(value, valueInterpreters.get(i)));

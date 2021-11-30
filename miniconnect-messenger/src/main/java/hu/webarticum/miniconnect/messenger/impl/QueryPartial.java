@@ -63,9 +63,8 @@ class QueryPartial {
             long responseOffset = 0;
             List<ImmutableList<CellData>> responseRowsBuilder = new ArrayList<>();
             List<IncompleteContentHolder> incompleteContents = new ArrayList<>();
-            ImmutableList<MiniValue> row;
             long offset = 0;
-            while ((row = resultSet.fetch()) != null) {
+            for (ImmutableList<MiniValue> row : resultSet) {
                 long r = offset;
                 ImmutableList<CellData> responseRow =
                         row.mapIndex((c, v) -> extractCell(

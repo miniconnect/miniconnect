@@ -2,8 +2,10 @@ package hu.webarticum.miniconnect.messenger.adapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -43,6 +45,10 @@ public class MessengerResultSetCharger {
                 resultResponse.columnHeaders().map(ColumnHeaderData::toMiniColumnHeader));
     }
 
+    
+    public MiniResultSet resultSet() {
+        return resultSet;
+    }
     
     public synchronized void accept(ResultSetRowsResponse rowsResponse) {
         long rowIndex = rowsResponse.rowOffset();
@@ -148,10 +154,6 @@ public class MessengerResultSetCharger {
             Thread.currentThread().interrupt();
         }
     }
-    
-    public MiniResultSet resultSet() {
-        return resultSet;
-    }
 
     
     private static class CellPosition {
@@ -196,9 +198,15 @@ public class MessengerResultSetCharger {
         
         private volatile long currentRowIndex = -1;
         
-        private volatile ImmutableList<MiniValue> currentRow; // NOSONAR
+        private volatile ImmutableList<MiniValue> currentRow = null; // NOSONAR
+        
+        private volatile boolean isNextRowFetched = false;
+        
+        private volatile ImmutableList<MiniValue> nextRow = null; // NOSONAR
         
         private volatile boolean finished = false;
+        
+        private final ResultSetIterator iterator = new ResultSetIterator();
         
         
         public MessengerResultSet(ImmutableList<MiniColumnHeader> columnHeaders) {
@@ -210,17 +218,38 @@ public class MessengerResultSetCharger {
         public ImmutableList<MiniColumnHeader> columnHeaders() {
             return columnHeaders;
         }
-    
+        
+
         @Override
-        public synchronized ImmutableList<MiniValue> fetch() {
+        public Iterator<ImmutableList<MiniValue>> iterator() {
+            return iterator;
+        }
+
+        private synchronized boolean hasNextForIterator() { // NOSONAR should be here
             if (finished) {
-                // XXX
-                return null;
+                return false;
+            }
+            
+            if (!isNextRowFetched) {
+                nextRow = takeRow();
+                isNextRowFetched = true;
+            }
+            
+            if (isEofRow(nextRow)) {
+                finished = true;
+                return false;
+            }
+            
+            return true;
+        }
+        
+        private synchronized ImmutableList<MiniValue> nextForIterator() { // NOSONAR should be here
+            if (!hasNextForIterator()) {
+                throw new NoSuchElementException();
             }
             
             closeCurrentRow();
-            fetchNextRow();
-            handleEof();
+            loadRow();
             
             return currentRow;
         }
@@ -248,17 +277,27 @@ public class MessengerResultSetCharger {
             }
         }
 
-        private void fetchNextRow() {
+        private void loadRow() {
+            if (isNextRowFetched) {
+                currentRow = nextRow;
+                nextRow = null;
+                isNextRowFetched = false;
+            } else {
+                currentRow = takeRow();
+            }
+            
+            currentRowIndex++; // NOSONAR
+        }
+        
+        private ImmutableList<MiniValue> takeRow() {
             try {
-                currentRow = rowQueue.take();
+                return rowQueue.take();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw closeImplicitly(ExceptionUtil.asUncheckedIOException(e));
             } catch (Exception e) {
                 throw closeImplicitly(ExceptionUtil.asUncheckedIOException(e));
             }
-
-            currentRowIndex++; // NOSONAR
         }
         
         private RuntimeException closeImplicitly(RuntimeException existingException) {
@@ -268,13 +307,6 @@ public class MessengerResultSetCharger {
                 existingException.addSuppressed(closeException);
             }
             return existingException;
-        }
-        
-        private void handleEof() {
-            if (isEofRow(currentRow)) {
-                currentRow = null;
-                finished = true;
-            }
         }
         
         
@@ -288,11 +320,24 @@ public class MessengerResultSetCharger {
 
         @Override
         public void close() {
-            
-            // TODO
+            closeCurrentRow();
+        }
+
+        
+        private class ResultSetIterator implements Iterator<ImmutableList<MiniValue>> {
+
+            @Override
+            public boolean hasNext() {
+                return hasNextForIterator();
+            }
+
+            @Override
+            public ImmutableList<MiniValue> next() { // NOSONAR NoSuchElementException is handled
+                return nextForIterator();
+            }
             
         }
-    
+
     }
 
 }

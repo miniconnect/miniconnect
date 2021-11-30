@@ -22,6 +22,7 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
@@ -231,9 +232,14 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public boolean next() throws SQLException {
-        ImmutableList<MiniValue> nextRow = miniResultSet.fetch();
-        currentRow = nextRow;
-        return (nextRow != null);
+        Iterator<ImmutableList<MiniValue>> iterator = miniResultSet.iterator();
+        if (!iterator.hasNext()) {
+            currentRow = null;
+            return false;
+        }
+        
+        currentRow = iterator.next();
+        return true;
     }
 
     @Override
