@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2021-11-30T15:53:37.120Z" agent="5.0 (X11)" etag="9VezdkM1qRXA7TTWg0vY" version="15.8.7" type="github">
+<mxfile host="app.diagrams.net" modified="2021-12-02T21:05:02.595Z" agent="5.0 (X11)" etag="TIyPlFkAiTpTjpn0Fwnz" version="15.8.7" type="github">
   <diagram id="ixj4y4hjwhb4YOG2y_js" name="Page-1">
     <mxGraphModel dx="868" dy="459" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -25,22 +25,22 @@
         <mxCell id="1le4CJm7EljkVnDH3UbC-17" value="apply defaults then contraints" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=1 1;startArrow=classic;startFill=1;startSize=6;strokeColor=default;" parent="1" source="1le4CJm7EljkVnDH3UbC-14" target="1le4CJm7EljkVnDH3UbC-16" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="1le4CJm7EljkVnDH3UbC-14" value="HighLevelDiffSpec" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" parent="1" vertex="1">
+        <mxCell id="1le4CJm7EljkVnDH3UbC-14" value="&lt;div&gt;HighLevelDiffSpec&lt;/div&gt;(UserDefinedUpdates)" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" parent="1" vertex="1">
           <mxGeometry x="280" y="260" width="160" height="40" as="geometry" />
         </mxCell>
         <mxCell id="1le4CJm7EljkVnDH3UbC-20" value="" style="edgeStyle=orthogonalEdgeStyle;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=none;startFill=0;startSize=6;strokeColor=default;" parent="1" source="1le4CJm7EljkVnDH3UbC-16" target="1le4CJm7EljkVnDH3UbC-18" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="1le4CJm7EljkVnDH3UbC-16" value="&lt;div&gt;LowLevelDiffSpec&lt;/div&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" parent="1" vertex="1">
+        <mxCell id="1le4CJm7EljkVnDH3UbC-16" value="&lt;div&gt;LowLevelDiffSpec&lt;/div&gt;&lt;div&gt;(TableDiff - per table)&lt;br&gt;&lt;/div&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" parent="1" vertex="1">
           <mxGeometry x="250" y="370" width="160" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="10c5vMCeDToL0KiBsEDk-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;startArrow=classic;startFill=1;endArrow=none;endFill=0;" edge="1" parent="1" source="1le4CJm7EljkVnDH3UbC-18" target="10c5vMCeDToL0KiBsEDk-1">
+        <mxCell id="10c5vMCeDToL0KiBsEDk-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;startArrow=classic;startFill=1;endArrow=none;endFill=0;" parent="1" source="1le4CJm7EljkVnDH3UbC-18" target="10c5vMCeDToL0KiBsEDk-1" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="10c5vMCeDToL0KiBsEDk-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.567;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;startArrow=classic;startFill=1;" edge="1" parent="1" source="1le4CJm7EljkVnDH3UbC-18" target="10c5vMCeDToL0KiBsEDk-2">
+        <mxCell id="10c5vMCeDToL0KiBsEDk-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.567;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;startArrow=classic;startFill=1;" parent="1" source="1le4CJm7EljkVnDH3UbC-18" target="10c5vMCeDToL0KiBsEDk-2" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="10c5vMCeDToL0KiBsEDk-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=classic;startFill=1;endArrow=none;endFill=0;" edge="1" parent="1" source="1le4CJm7EljkVnDH3UbC-18" target="10c5vMCeDToL0KiBsEDk-5">
+        <mxCell id="10c5vMCeDToL0KiBsEDk-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=classic;startFill=1;endArrow=none;endFill=0;" parent="1" source="1le4CJm7EljkVnDH3UbC-18" target="10c5vMCeDToL0KiBsEDk-5" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="1le4CJm7EljkVnDH3UbC-18" value="&lt;div&gt;Storage API&lt;/div&gt;&lt;div&gt;(tables, indexes, data, etc.)&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
@@ -102,13 +102,13 @@
             <mxPoint x="940" y="304.5" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="10c5vMCeDToL0KiBsEDk-1" value="&lt;div&gt;Dummy storage&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="10c5vMCeDToL0KiBsEDk-1" value="&lt;div&gt;Dummy storage&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="130" y="560" width="120" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="10c5vMCeDToL0KiBsEDk-2" value="HoloDB" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="10c5vMCeDToL0KiBsEDk-2" value="HoloDB" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="270" y="560" width="120" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="10c5vMCeDToL0KiBsEDk-5" value="..." style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="10c5vMCeDToL0KiBsEDk-5" value="..." style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="410" y="560" width="120" height="30" as="geometry" />
         </mxCell>
       </root>
