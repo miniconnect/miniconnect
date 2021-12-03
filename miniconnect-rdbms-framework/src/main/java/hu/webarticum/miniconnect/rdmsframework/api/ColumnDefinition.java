@@ -2,6 +2,12 @@ package hu.webarticum.miniconnect.rdmsframework.api;
 
 public interface ColumnDefinition {
 
-    // TODO column definition...
+    public boolean isNullable();
+    
+    public String sqlType(); // FIXME
+    
+    public Class<?> javaType();
+    
+    // TODO: default value/generator, value restrictions
     
 }

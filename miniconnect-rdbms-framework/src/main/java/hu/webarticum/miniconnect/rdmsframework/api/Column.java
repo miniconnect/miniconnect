@@ -4,6 +4,6 @@ public interface Column extends NamedResource {
 
     public ColumnDefinition definition();
     
-    // TODO: get data
+    public Object get(int index);
     
 }
