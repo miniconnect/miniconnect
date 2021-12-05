@@ -1,9 +1,16 @@
 package hu.webarticum.miniconnect.rdmsframework.api;
 
-public interface Transaction extends StorageAccess {
+import java.io.Closeable;
+
+public interface Transaction extends StorageAccess, Closeable {
 
     public void commit();
     
     public void rollback();
+    
+    @Override
+    public default void close() {
+        rollback();
+    }
     
 }
