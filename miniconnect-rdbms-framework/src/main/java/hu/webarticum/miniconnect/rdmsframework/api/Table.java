@@ -13,5 +13,9 @@ public interface Table extends NamedResource {
     public BigInteger size();
     
     public ImmutableList<Object> row(BigInteger rowIndex);
+
+    public boolean isWritable();
+
+    public void applyPatch(TablePatch patch);
     
 }

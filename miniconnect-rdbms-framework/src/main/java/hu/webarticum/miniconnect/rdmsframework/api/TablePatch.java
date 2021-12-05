@@ -1,6 +1,6 @@
 package hu.webarticum.miniconnect.rdmsframework.api;
 
-public class StoragePatch {
+public class TablePatch {
 
     // TODO: patch structure...
     
