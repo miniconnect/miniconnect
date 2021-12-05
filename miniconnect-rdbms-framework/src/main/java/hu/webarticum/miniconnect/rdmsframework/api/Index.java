@@ -8,7 +8,7 @@ public interface Index extends NamedResource {
 
     public boolean isUnique();
 
-    public boolean isOrdered();
+    public boolean isOrdered(); // TODO/FIXME: different order keys?
     
     public Iterable<BigInteger> find(
             ImmutableList<?> from,
