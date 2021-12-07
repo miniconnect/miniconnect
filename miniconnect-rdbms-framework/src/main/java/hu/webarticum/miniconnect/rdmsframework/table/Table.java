@@ -11,7 +11,7 @@ public interface Table extends NamedResource {
 
     public NamedResourceStore<Column> columns();
 
-    public NamedResourceStore<Index> indexes();
+    public NamedResourceStore<TableIndex> indexes();
     
     public BigInteger size();
     

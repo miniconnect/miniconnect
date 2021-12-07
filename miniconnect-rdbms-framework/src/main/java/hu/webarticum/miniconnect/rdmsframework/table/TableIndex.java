@@ -5,7 +5,7 @@ import java.math.BigInteger;
 import hu.webarticum.miniconnect.rdmsframework.database.NamedResource;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
-public interface Index extends NamedResource {
+public interface TableIndex extends NamedResource {
 
     public boolean isUnique();
 

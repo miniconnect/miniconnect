@@ -11,7 +11,7 @@ import hu.webarticum.miniconnect.rdmsframework.database.NamedResourceStore;
 import hu.webarticum.miniconnect.rdmsframework.database.TablePatch;
 import hu.webarticum.miniconnect.rdmsframework.table.Column;
 import hu.webarticum.miniconnect.rdmsframework.table.ColumnDefinition;
-import hu.webarticum.miniconnect.rdmsframework.table.Index;
+import hu.webarticum.miniconnect.rdmsframework.table.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.table.Table;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
@@ -59,7 +59,7 @@ public class SimpleTable implements Table {
     }
 
     @Override
-    public NamedResourceStore<Index> indexes() {
+    public NamedResourceStore<TableIndex> indexes() {
         
         // TODO
         return null;
