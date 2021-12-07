@@ -46,15 +46,11 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
         return new ImmutableList<>(Arrays.asList(items));
     }
 
-    public static <T> ImmutableList<T> fromIterable(
-            Iterable<? extends T> iterable) {
-
+    public static <T> ImmutableList<T> fromIterable(Iterable<? extends T> iterable) {
         return fromIterator(iterable.iterator());
     }
 
-    public static <T> ImmutableList<T> fromIterator(
-            Iterator<? extends T> iterator) {
-
+    public static <T> ImmutableList<T> fromIterator(Iterator<? extends T> iterator) {
         List<T> data = new ArrayList<>();
         iterator.forEachRemaining(data::add);
         return new ImmutableList<>(data);
@@ -73,10 +69,26 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
         return data.get(index);
     }
 
-    public boolean contains(T item) {
+    public boolean contains(Object item) {
         return data.contains(item);
     }
+
+    public boolean containsAll(ImmutableList<?> items) {
+        return data.containsAll(items.data);
+    }
+
+    public boolean containsAll(Collection<?> items) {
+        return data.containsAll(items);
+    }
     
+    public int indexOf(T item) {
+        return data.indexOf(item);
+    }
+
+    public int lastIndexOf(T item) {
+        return data.lastIndexOf(item);
+    }
+
     public <U> ImmutableList<U> map(Function<T, U> mapper) {
         List<U> mappedData = new ArrayList<>(data.size());
         for (T item : data) {
