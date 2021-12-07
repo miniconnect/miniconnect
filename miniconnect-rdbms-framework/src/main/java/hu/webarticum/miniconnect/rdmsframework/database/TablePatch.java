@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.rdmsframework.api;
+package hu.webarticum.miniconnect.rdmsframework.database;
 
 public class TablePatch {
 

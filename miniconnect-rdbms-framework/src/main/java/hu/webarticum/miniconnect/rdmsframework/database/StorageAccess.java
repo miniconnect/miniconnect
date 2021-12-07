@@ -1,4 +1,6 @@
-package hu.webarticum.miniconnect.rdmsframework.api;
+package hu.webarticum.miniconnect.rdmsframework.database;
+
+import hu.webarticum.miniconnect.rdmsframework.table.Table;
 
 public interface StorageAccess {
     
