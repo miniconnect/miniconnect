@@ -61,6 +61,8 @@ public class SimpleTable implements Table {
     @Override
     public NamedResourceStore<TableIndex> indexes() {
         
+        // FIXME: use very simple on-the-fly table-scan indexes? (instead of patchable index)
+        
         // TODO
         return null;
         
