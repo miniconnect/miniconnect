@@ -11,8 +11,6 @@ public interface TableIndex extends NamedResource {
 
     public boolean isUnique();
 
-    public boolean isOrdered(); // TODO/FIXME: different order keys?
-    
     public Iterable<BigInteger> find(
             ImmutableList<?> from,
             boolean fromInclusive,

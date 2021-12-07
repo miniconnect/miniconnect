@@ -30,11 +30,6 @@ public class TableIndexReaderProxy implements TableIndex {
     }
 
     @Override
-    public boolean isOrdered() {
-        return baseIndex.isOrdered();
-    }
-
-    @Override
     public Iterable<BigInteger> find(
             ImmutableList<?> from,
             boolean fromInclusive,

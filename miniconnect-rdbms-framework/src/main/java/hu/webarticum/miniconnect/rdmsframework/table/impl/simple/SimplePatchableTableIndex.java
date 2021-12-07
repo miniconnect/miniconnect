@@ -42,11 +42,6 @@ public class SimplePatchableTableIndex implements PatchableTableIndex {
     }
 
     @Override
-    public boolean isOrdered() {
-        return true;
-    }
-
-    @Override
     public Iterable<BigInteger> find(
             ImmutableList<?> from,
             boolean fromInclusive,
