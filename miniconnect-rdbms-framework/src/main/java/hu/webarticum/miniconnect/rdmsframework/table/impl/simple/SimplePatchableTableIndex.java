@@ -1,11 +1,11 @@
 package hu.webarticum.miniconnect.rdmsframework.table.impl.simple;
 
-import java.math.BigInteger;
 import java.util.Comparator;
 
 import hu.webarticum.miniconnect.rdmsframework.database.TablePatch;
 import hu.webarticum.miniconnect.rdmsframework.table.PatchableTableIndex;
 import hu.webarticum.miniconnect.rdmsframework.table.Table;
+import hu.webarticum.miniconnect.rdmsframework.util.selection.Selection;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class SimplePatchableTableIndex implements PatchableTableIndex {
@@ -51,7 +51,7 @@ public class SimplePatchableTableIndex implements PatchableTableIndex {
     }
 
     @Override
-    public Iterable<BigInteger> find(
+    public Selection find(
             ImmutableList<?> from,
             boolean fromInclusive,
             ImmutableList<?> to,
