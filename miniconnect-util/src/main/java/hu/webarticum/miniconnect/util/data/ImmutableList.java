@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -115,6 +116,19 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
             }
         }
         return new ImmutableList<>(filteredData, null);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public ImmutableList<T> sort() {
+        List<T> sortedData = new ArrayList<>(data);
+        Collections.sort((List) sortedData);
+        return new ImmutableList<>(sortedData, null);
+    }
+
+    public ImmutableList<T> sort(Comparator<T> comparator) {
+        List<T> sortedData = new ArrayList<>(data);
+        Collections.sort(sortedData, comparator);
+        return new ImmutableList<>(sortedData, null);
     }
 
     @Override
