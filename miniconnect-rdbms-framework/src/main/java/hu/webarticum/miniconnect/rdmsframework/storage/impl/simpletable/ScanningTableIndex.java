@@ -2,9 +2,13 @@ package hu.webarticum.miniconnect.rdmsframework.storage.impl.simpletable;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
+import hu.webarticum.miniconnect.rdmsframework.storage.Column;
+import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
@@ -21,23 +25,15 @@ public class ScanningTableIndex implements TableIndex {
     
     private final ImmutableList<Integer> columnIndexes;
     
-    private final Comparator<Object> comparator; // FIXME???
+    private final MultiComparator multiComparator;
     
     
     public ScanningTableIndex(Table table, String name, ImmutableList<String> columnNames) {
-        this(table, name, columnNames, null);
-    }
-
-    public ScanningTableIndex(
-            Table table,
-            String name,
-            ImmutableList<String> columnNames,
-            Comparator<Object> comparator) {
         this.table = table;
         this.name = name;
         this.columnNames = columnNames;
         this.columnIndexes = collectColumnIndexes(table, columnNames);
-        this.comparator = comparator;
+        this.multiComparator = createMultiComparator(table, columnNames);
     }
     
     private static ImmutableList<Integer> collectColumnIndexes(
@@ -56,6 +52,18 @@ public class ScanningTableIndex implements TableIndex {
             indexes[i] = columnIndex;
         }
         return ImmutableList.of(indexes);
+    }
+
+    private static MultiComparator createMultiComparator(
+            Table table,
+            ImmutableList<String> columnNames) {
+        NamedResourceStore<Column> columns = table.columns();
+        List<Comparator<?>> comparators = new ArrayList<>(columnNames.size());
+        for (String columnName : columnNames) {
+            Comparator<?> comparator = columns.get(columnName).definition().comparator();
+            comparators.add(comparator);
+        }
+        return new MultiComparator(comparators);
     }
     
 
@@ -85,6 +93,28 @@ public class ScanningTableIndex implements TableIndex {
             ImmutableList<?> to,
             boolean toInclusive,
             boolean sort) {
+        
+        List<SortHelper> foundEntries = collectEntries(from, fromInclusive, to, toInclusive);
+        
+        if (sort) {
+            Collections.sort(foundEntries, Comparator.comparing(e -> e.values, multiComparator));
+        }
+
+        Object orderKey = sort ? new Object() : table.rowOrderKey();
+        ImmutableList<BigInteger> rowIndexes =
+                new ImmutableList<>(foundEntries).map(e -> e.index);
+        Iterable<BigInteger> orderIndexes = sort ?
+                new Sequence(BigInteger.valueOf(rowIndexes.size())) :
+                rowIndexes;
+        return new SimpleSelection(orderKey, rowIndexes, orderIndexes);
+        
+    }
+    
+    private List<SortHelper> collectEntries(
+            ImmutableList<?> from,
+            boolean fromInclusive,
+            ImmutableList<?> to,
+            boolean toInclusive) {
         BigInteger tableSize = table.size();
         List<SortHelper> foundRowEntries = new ArrayList<>();
         for (
@@ -93,24 +123,11 @@ public class ScanningTableIndex implements TableIndex {
                 i = i.add(BigInteger.ONE)) {
             ImmutableList<Object> row = table.row(i);
             ImmutableList<Object> values = extractValues(row);
-            if (checkValues(values, from, fromInclusive, to, toInclusive)) {
+            if (checkValues(values, from, fromInclusive, to, toInclusive)) { // FIXME
                 foundRowEntries.add(new SortHelper(i, values));
             }
         }
-        
-        if (sort) {
-            // TODO
-            // Collections.sort(foundRowEntries, e -> ...);
-        }
-
-        // FIXME
-        Object orderKey = sort ? new Object() : table.rowOrderKey();
-        
-        // FIXME
-        return new SimpleSelection(
-                orderKey,
-                new ImmutableList<>(foundRowEntries).map(e -> e.index));
-        
+        return foundRowEntries;
     }
     
     private ImmutableList<Object> extractValues(ImmutableList<Object> row) {
@@ -145,7 +162,7 @@ public class ScanningTableIndex implements TableIndex {
         for (int i = 0; i < prefixWidth; i++) {
             Object prefixValue = prefix.get(i);
             Object value = values.get(i);
-            if (!value.equals(prefixValue)) { // FIXME: comparator?
+            if (!Objects.equals(value, prefixValue)) { // FIXME: comparator?
                 return false;
             }
         }

@@ -29,8 +29,9 @@ class ScanningTableIndexTest {
                 .addRow(ImmutableList.of(2, "Adam", "Smith", "England"))
                 .addRow(ImmutableList.of(3, "Will", "Smith", "USA"))
                 .addRow(ImmutableList.of(4, "Karl", "Marx", "Germany"))
-                .addRow(ImmutableList.of(4, "Anton", "Bruckner", "Germany"))
-                .addRow(ImmutableList.of(5, "Anonymus", null, "Hungary"))
+                .addRow(ImmutableList.of(5, "Anton", "Bruckner", "Germany"))
+                .addRow(ImmutableList.of(6, "Anonymus", null, "Hungary"))
+                .addRow(ImmutableList.of(7, "Anton", "Bruckner", "Germany"))
                 .build();
     }
 
@@ -40,14 +41,42 @@ class ScanningTableIndexTest {
     }
 
     @Test
-    void testNotFound() {
+    void testNoResult() {
         assertThat(index("id").findValue(99)).isEmpty();
     }
     
     @Test
-    void testFindSingle() {
-        assertThat(index("id").findValue(3)).map(TableSelectionEntry::tableIndex)
+    void testSingleResult() {
+        assertThat(index("id").findValue(3))
+                .map(TableSelectionEntry::tableIndex)
                 .containsExactly(bigs(2));
+    }
+
+    @Test
+    void testMoreResults() {
+        assertThat(index("lastname").findValue("Smith"))
+                .map(TableSelectionEntry::tableIndex)
+                .containsExactly(bigs(1, 2));
+    }
+
+    @Test
+    void testMultiColumnNoResult() {
+        assertThat(index("firstname", "lastname").findValue(ImmutableList.of("Lorem", "Ipsum")))
+                .isEmpty();
+    }
+
+    @Test
+    void testMultiColumnSingleResult() {
+        assertThat(index("firstname", "lastname").find(ImmutableList.of("Karl", "Marx")))
+                .map(TableSelectionEntry::tableIndex)
+                .containsExactly(bigs(3));
+    }
+
+    @Test
+    void testMultiColumnMoreResults() {
+        assertThat(index("firstname", "lastname").find(ImmutableList.of("Anton", "Bruckner")))
+                .map(TableSelectionEntry::tableIndex)
+                .containsExactly(bigs(4, 6));
     }
     
     // TODO

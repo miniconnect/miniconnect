@@ -13,17 +13,13 @@ public class SimpleSelection implements TableSelection {
     
     private final ImmutableList<BigInteger> rowIndexes;
     
-    private final ImmutableList<BigInteger> orderIndexes;
+    private final Iterable<BigInteger> orderIndexes;
     
 
-    public SimpleSelection(Object orderKey, ImmutableList<BigInteger> rowIndexes) {
-        this(orderKey, rowIndexes, rowIndexes);
-    }
-    
     public SimpleSelection(
             Object orderKey,
             ImmutableList<BigInteger> rowIndexes,
-            ImmutableList<BigInteger> orderIndexes) {
+            Iterable<BigInteger> orderIndexes) {
         this.orderKey = orderKey;
         this.rowIndexes = rowIndexes;
         this.orderIndexes = orderIndexes;
