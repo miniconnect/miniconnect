@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.rdmsframework.table;
+package hu.webarticum.miniconnect.rdmsframework.storage;
 
 public interface ColumnDefinition {
 

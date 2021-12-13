@@ -1,10 +1,7 @@
-package hu.webarticum.miniconnect.rdmsframework.table;
+package hu.webarticum.miniconnect.rdmsframework.storage;
 
 import java.math.BigInteger;
 
-import hu.webarticum.miniconnect.rdmsframework.database.NamedResource;
-import hu.webarticum.miniconnect.rdmsframework.database.NamedResourceStore;
-import hu.webarticum.miniconnect.rdmsframework.database.TablePatch;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public interface Table extends NamedResource {
@@ -16,6 +13,8 @@ public interface Table extends NamedResource {
     public BigInteger size();
     
     public ImmutableList<Object> row(BigInteger rowIndex);
+    
+    public Object rowOrderKey();
 
     public boolean isWritable();
 

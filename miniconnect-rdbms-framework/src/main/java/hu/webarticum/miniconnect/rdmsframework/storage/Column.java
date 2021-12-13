@@ -1,8 +1,6 @@
-package hu.webarticum.miniconnect.rdmsframework.table;
+package hu.webarticum.miniconnect.rdmsframework.storage;
 
 import java.math.BigInteger;
-
-import hu.webarticum.miniconnect.rdmsframework.database.NamedResource;
 
 public interface Column extends NamedResource {
 

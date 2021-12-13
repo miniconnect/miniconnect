@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.rdmsframework.database;
+package hu.webarticum.miniconnect.rdmsframework.storage;
 
 import java.io.Closeable;
 
