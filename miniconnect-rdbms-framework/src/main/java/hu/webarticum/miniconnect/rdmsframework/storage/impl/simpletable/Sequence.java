@@ -8,8 +8,16 @@ public class Sequence implements Iterable<BigInteger> {
     
     private final BigInteger until;
     
+
+    public Sequence(long until) {
+        this(BigInteger.valueOf(until));
+    }
     
     public Sequence(BigInteger until) {
+        if (until.compareTo(BigInteger.ZERO) < 0) {
+            throw new IllegalArgumentException();
+        }
+        
         this.until = until;
     }
     
