@@ -14,6 +14,7 @@ public interface Table extends NamedResource {
     
     public ImmutableList<Object> row(BigInteger rowIndex);
     
+    // TODO: should be changed on updates
     public Object rowOrderKey();
 
     public boolean isWritable();
