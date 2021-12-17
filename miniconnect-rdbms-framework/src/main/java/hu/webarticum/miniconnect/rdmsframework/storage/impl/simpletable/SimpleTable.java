@@ -20,8 +20,6 @@ import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
 public class SimpleTable implements Table {
     
-    private final Object rowOrderKey = new Object();
-    
     private final String name;
     
     private final boolean writable;
@@ -39,6 +37,11 @@ public class SimpleTable implements Table {
     private final SimpleColumnStore columnStore = new SimpleColumnStore();
     
     private final SimpleTableIndexStore tableIndexStore = new SimpleTableIndexStore();
+
+    
+    private volatile Object rowOrderKey = new Object(); // NOSONAR
+    
+    private volatile Object reverseRowOrderKey = new Object(); // NOSONAR
     
     
     private SimpleTable(SimpleTableBuilder builder) {
@@ -89,6 +92,11 @@ public class SimpleTable implements Table {
     @Override
     public Object rowOrderKey() {
         return rowOrderKey;
+    }
+    
+    @Override
+    public Object reverseRowOrderKey() {
+        return reverseRowOrderKey;
     }
 
     @Override

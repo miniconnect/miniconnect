@@ -17,6 +17,9 @@ public interface Table extends NamedResource {
     // TODO: should be changed on updates
     public Object rowOrderKey();
 
+    // TODO: should be changed on updates
+    public Object reverseRowOrderKey();
+
     public boolean isWritable();
 
     public void applyPatch(TablePatch patch);
