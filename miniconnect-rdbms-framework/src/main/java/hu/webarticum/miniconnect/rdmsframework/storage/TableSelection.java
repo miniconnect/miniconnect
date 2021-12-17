@@ -8,4 +8,6 @@ public interface TableSelection extends Iterable<TableSelectionEntry> {
     
     public boolean containsRow(BigInteger rowIndex);
     
+    public TableSelection reverse();
+    
 }

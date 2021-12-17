@@ -41,6 +41,17 @@ public class SimpleSelection implements TableSelection {
         return rowIndexes.contains(rowIndex);
     }
     
+    @Override
+    public TableSelection reverse() {
+        
+        
+        // TODO
+        // FIXME: how to reverse rowIndexes?
+        return null;
+        
+        
+    }
+    
     
     private class SimpleSelectionIterator implements Iterator<TableSelectionEntry> {
 
