@@ -12,7 +12,6 @@ import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
-import hu.webarticum.miniconnect.rdmsframework.storage.impl.selection.SimpleSelection;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class ScanningTableIndex implements TableIndex {
@@ -100,14 +99,16 @@ public class ScanningTableIndex implements TableIndex {
             Collections.sort(foundEntries, Comparator.comparing(e -> e.values, multiComparator));
         }
 
-        Object orderKey = sort ? new Object() : table.rowOrderKey();
-        ImmutableList<BigInteger> rowIndexes =
-                new ImmutableList<>(foundEntries).map(e -> e.index);
-        Iterable<BigInteger> orderIndexes = sort ?
-                new Sequence(BigInteger.valueOf(rowIndexes.size())) :
-                rowIndexes;
-        return new SimpleSelection(orderKey, rowIndexes, orderIndexes);
-        
+        ImmutableList<BigInteger> rowIndexes = new ImmutableList<>(foundEntries).map(e -> e.index);
+        if (sort) {
+            return new SimpleSelection(rowIndexes);
+        } else {
+            return new SimpleSelection(
+                    table.rowOrderKey(),
+                    table.reverseRowOrderKey(),
+                    rowIndexes,
+                    rowIndexes);
+        }
     }
     
     private List<SortHelper> collectEntries(
