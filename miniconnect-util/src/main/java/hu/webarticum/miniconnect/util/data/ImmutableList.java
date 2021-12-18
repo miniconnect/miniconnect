@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -116,6 +117,23 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
             }
         }
         return new ImmutableList<>(filteredData, null);
+    }
+    
+    public Iterable<T> reverseOrder() {
+        ListIterator<T> listIterator = data.listIterator(data.size());
+        return () -> new Iterator<T>() {
+
+            @Override
+            public boolean hasNext() {
+                return listIterator.hasPrevious();
+            }
+
+            @Override
+            public T next() { // NOSONAR
+                return listIterator.previous();
+            }
+            
+        };
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
