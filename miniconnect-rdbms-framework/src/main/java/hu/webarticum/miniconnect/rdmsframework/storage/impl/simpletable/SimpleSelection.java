@@ -33,10 +33,11 @@ public class SimpleSelection implements TableSelection {
                 rowIndexes,
                 rowIndexes.reverseOrder(),
                 new Sequence(BigInteger.valueOf(rowIndexes.size())),
-                new CountDown(BigInteger.valueOf(rowIndexes.size())));
+                new Sequence(BigInteger.valueOf(rowIndexes.size())));
     }
 
     public SimpleSelection(
+            BigInteger tableSize,
             Object orderKey,
             Object reverseOrderKey,
             ImmutableList<BigInteger> rowIndexes,
@@ -48,7 +49,7 @@ public class SimpleSelection implements TableSelection {
                 rowIndexes,
                 rowIndexes.reverseOrder(),
                 orderIndexes,
-                orderIndexes.reverseOrder());
+                orderIndexes.map(tableSize.subtract(BigInteger.ONE)::subtract).reverseOrder());
     }
     
     public SimpleSelection(

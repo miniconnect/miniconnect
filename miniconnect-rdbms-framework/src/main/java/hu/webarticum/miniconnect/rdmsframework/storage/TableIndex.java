@@ -2,7 +2,6 @@ package hu.webarticum.miniconnect.rdmsframework.storage;
 
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
-// TODO: add some support for group by
 public interface TableIndex extends NamedResource {
     
     public ImmutableList<String> columnNames();

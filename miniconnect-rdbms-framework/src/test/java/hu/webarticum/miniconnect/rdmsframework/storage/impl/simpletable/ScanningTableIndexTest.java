@@ -61,7 +61,7 @@ class ScanningTableIndexTest {
 
     @Test
     void testMultiColumnNoResult() {
-        assertThat(index("firstname", "lastname").findValue(ImmutableList.of("Lorem", "Ipsum")))
+        assertThat(index("firstname", "lastname").find(ImmutableList.of("Lorem", "Ipsum")))
                 .isEmpty();
     }
 

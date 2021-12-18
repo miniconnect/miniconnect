@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
@@ -104,6 +103,7 @@ public class ScanningTableIndex implements TableIndex {
             return new SimpleSelection(rowIndexes);
         } else {
             return new SimpleSelection(
+                    table.size(),
                     table.rowOrderKey(),
                     table.reverseRowOrderKey(),
                     rowIndexes,
@@ -118,17 +118,34 @@ public class ScanningTableIndex implements TableIndex {
             boolean toInclusive) {
         BigInteger tableSize = table.size();
         List<SortHelper> foundRowEntries = new ArrayList<>();
+        boolean fromAndToAreEqual = areEqual(from, to);
         for (
                 BigInteger i = BigInteger.ZERO;
                 i.compareTo(tableSize) < 0;
                 i = i.add(BigInteger.ONE)) {
             ImmutableList<Object> row = table.row(i);
             ImmutableList<Object> values = extractValues(row);
-            if (checkValues(values, from, fromInclusive, to, toInclusive)) { // FIXME
+            if (checkValues(values, from, fromInclusive, to, toInclusive, fromAndToAreEqual)) {
                 foundRowEntries.add(new SortHelper(i, values));
             }
         }
         return foundRowEntries;
+    }
+    
+    private boolean areEqual(ImmutableList<?> from, ImmutableList<?> to) {
+        if (from == to) {
+            return true;
+        }
+        if (from == null || to == null) {
+            return false;
+        }
+        int fromSize = from.size();
+        if (fromSize != to.size() || fromSize != columnNames.size()) {
+            return false;
+        }
+        @SuppressWarnings("unchecked")
+        int cmp = multiComparator.compare((ImmutableList<Object>) from, (ImmutableList<Object>) to);
+        return cmp == 0;
     }
     
     private ImmutableList<Object> extractValues(ImmutableList<Object> row) {
@@ -145,13 +162,21 @@ public class ScanningTableIndex implements TableIndex {
             ImmutableList<?> from,
             boolean fromInclusive,
             ImmutableList<?> to,
-            boolean toInclusive) {
-        if (from.equals(to)) { // FIXME: handle find(single), else use comparator
+            boolean toInclusive,
+            boolean fromAndToAreEqual) {
+        if (fromAndToAreEqual) {
+            if (from == null) {
+                return true;
+            }
+            if (!fromInclusive || !toInclusive) {
+                return false;
+            }
             return isPrefixOf(from, values);
         }
         
         // TODO
         return false;
+        
     }
     
     private boolean isPrefixOf(ImmutableList<?> prefix, ImmutableList<?> values) {
@@ -160,10 +185,14 @@ public class ScanningTableIndex implements TableIndex {
             return false;
         }
         
+        NamedResourceStore<Column> columns = table.columns();
         for (int i = 0; i < prefixWidth; i++) {
+            @SuppressWarnings("unchecked")
+            Comparator<Object> comparator =
+                    (Comparator<Object>) columns.get(columnNames.get(i)).definition().comparator();
             Object prefixValue = prefix.get(i);
             Object value = values.get(i);
-            if (!Objects.equals(value, prefixValue)) { // FIXME: comparator?
+            if (comparator.compare(value, prefixValue) != 0) {
                 return false;
             }
         }
