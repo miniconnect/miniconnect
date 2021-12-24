@@ -1,15 +1,13 @@
 package hu.webarticum.miniconnect.rdmsframework.session;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.function.Consumer;
 
+import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
-import hu.webarticum.miniconnect.messenger.Messenger;
-import hu.webarticum.miniconnect.messenger.message.request.QueryRequest;
-import hu.webarticum.miniconnect.messenger.message.request.Request;
-import hu.webarticum.miniconnect.messenger.message.response.Response;
-import hu.webarticum.miniconnect.messenger.message.response.ResultResponse;
+import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.rdmsframework.execution.ParsingSqlExecutor;
 import hu.webarticum.miniconnect.rdmsframework.execution.SqlExecutor;
 import hu.webarticum.miniconnect.rdmsframework.execution.fake.FakeQueryExecutor;
@@ -17,21 +15,13 @@ import hu.webarticum.miniconnect.rdmsframework.execution.fake.FakeSqlParser;
 import hu.webarticum.miniconnect.tool.result.StoredError;
 import hu.webarticum.miniconnect.tool.result.StoredResult;
 
-public class FakeFrameworkMessenger implements Messenger {
-
+public class FakeFrameworkSession implements MiniSession {
+    
     @Override
-    public void accept(Request request, Consumer<Response> responseConsumer) {
-        if (!(request instanceof QueryRequest)) {
-            throw new IllegalArgumentException("oops");
-        }
-
-        QueryRequest queryRequest = (QueryRequest) request;
-        long sessionId = queryRequest.sessionId();
-        int exchangeId = queryRequest.exchangeId();
-        String sql = queryRequest.query();
+    public MiniResult execute(String query) {
         SqlExecutor sqlExecutor =
                 new ParsingSqlExecutor(new FakeSqlParser(), new FakeQueryExecutor());
-        Future<Object> future = sqlExecutor.execute(sql); // TODO
+        Future<Object> future = sqlExecutor.execute(query); // TODO
         Exception exception = null;
         Object executionResult = null;
         try {
@@ -50,8 +40,23 @@ public class FakeFrameworkMessenger implements Messenger {
         } else {
             result = new StoredResult(new StoredError(99, "00099", "Nincs hiba sajnos..."));
         }
-        Response response = ResultResponse.of(result, sessionId, exchangeId);
-        responseConsumer.accept(response);
+        return result;
+    }
+
+    @Override
+    public MiniLargeDataSaveResult putLargeData(
+            String variableName, long length, InputStream dataSource) {
+        
+        // TODO
+        return null;
+        
+    }
+
+    @Override
+    public void close() throws IOException {
+        
+        // TODO
+        
     }
 
 }

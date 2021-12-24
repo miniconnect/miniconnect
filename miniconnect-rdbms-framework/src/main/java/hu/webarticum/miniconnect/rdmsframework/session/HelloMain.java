@@ -5,15 +5,12 @@ import java.io.IOException;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniValue;
-import hu.webarticum.miniconnect.messenger.Messenger;
-import hu.webarticum.miniconnect.messenger.adapter.MessengerSession;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class HelloMain {
 
     public static void main(String[] args) throws IOException {
-        Messenger messenger = new FakeFrameworkMessenger();
-        try (MiniSession session = new MessengerSession(1L, messenger)) {
+        try (MiniSession session = new FakeFrameworkSession()) {
             MiniResult result = session.execute("Hello");
             if (!result.success()) {
                 System.out.println("oops");
