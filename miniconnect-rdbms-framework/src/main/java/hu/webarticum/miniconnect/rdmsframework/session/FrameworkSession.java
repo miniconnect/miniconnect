@@ -1,0 +1,127 @@
+package hu.webarticum.miniconnect.rdmsframework.session;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.function.Supplier;
+
+import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
+import hu.webarticum.miniconnect.api.MiniResult;
+import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.rdmsframework.execution.DatabaseException;
+import hu.webarticum.miniconnect.rdmsframework.execution.Query;
+import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
+import hu.webarticum.miniconnect.rdmsframework.execution.SqlParser;
+import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
+import hu.webarticum.miniconnect.tool.result.StoredError;
+import hu.webarticum.miniconnect.tool.result.StoredResult;
+
+public class FrameworkSession implements MiniSession {
+    
+    private final SqlParser sqlParser;
+    
+    private final QueryExecutor queryExecutor;
+    
+    private final StorageAccess storageAccess;
+    
+    
+    private volatile boolean closed = false;
+    
+    
+    public FrameworkSession(
+            SqlParser sqlParser,
+            QueryExecutor queryExecutor,
+            Supplier<StorageAccess> storageAccessFactory) {
+        this.sqlParser = sqlParser;
+        this.queryExecutor = queryExecutor;
+        this.storageAccess = storageAccessFactory.get();
+    }
+    
+    
+    @Override
+    public MiniResult execute(String sql) {
+        checkClosed();
+        try {
+            Query query = sqlParser.parse(sql);
+            return execute(query);
+        } catch (Exception e) {
+            return resultOfException(e);
+        }
+    }
+    
+    public MiniResult execute(Query query) {
+        checkClosed();
+        Exception exception;
+        try {
+            return executeThrowing(query);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            exception = e;
+        } catch (ExecutionException e) {
+            exception = (Exception) e.getCause();
+        } catch (Exception e) {
+            exception = e;
+        }
+        return resultOfException(exception);
+    }
+
+    public MiniResult executeThrowing(Query query) throws InterruptedException, ExecutionException {
+        Future<Object> future = queryExecutor.execute(storageAccess, query); // TODO
+        Object executionResult = future.get(); // TODO
+        
+        // TODO
+        
+        return new StoredResult(new StoredError(99, "00099", "Nincs hiba sajnos..."));
+    }
+
+    @Override
+    public MiniLargeDataSaveResult putLargeData(
+            String variableName, long length, InputStream dataSource) {
+        if (closed) {
+            throw new IllegalStateException("Session is closed");
+        }
+        
+        // TODO
+        return null;
+        
+    }
+
+    @Override
+    public void close() {
+        closed = true;
+        if (storageAccess instanceof AutoCloseable) {
+            try {
+                ((AutoCloseable) storageAccess).close();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            } catch (Exception e) {
+                IOException ioException = new IOException("Unexpected exception");
+                ioException.addSuppressed(e);
+                throw new UncheckedIOException(ioException);
+            }
+        }
+    }
+    
+    private void checkClosed() {
+        if (closed) {
+            throw new IllegalStateException("Session is closed");
+        }
+    }
+    
+    private MiniResult resultOfException(Exception exception) {
+        if (!(exception instanceof DatabaseException)) {
+            // FIXME
+            String message = "Unexpected error: " + exception.getMessage();
+            return new StoredResult(new StoredError(99999, "99999", message));
+        }
+        
+        DatabaseException databaseException = (DatabaseException) exception;
+        return new StoredResult(new StoredError(
+                databaseException.code(),
+                databaseException.sqlState(),
+                databaseException.message()));
+    }
+
+}

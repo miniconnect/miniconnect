@@ -135,6 +135,10 @@ public class SimpleTable implements Table {
         private SimpleColumn(String name) {
             this.name = name;
             this.columnIndex = columnNames.indexOf(name);
+            
+            if (this.columnIndex == -1) {
+                throw new IllegalArgumentException("Unknown column: " + name);
+            }
         }
 
 

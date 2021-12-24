@@ -233,7 +233,7 @@ public class MessengerSession implements MiniSession {
     }
     
     @Override
-    public void close() throws IOException {
+    public void close() {
         
         // TODO
 

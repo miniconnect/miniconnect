@@ -10,4 +10,7 @@ public interface MiniSession extends Closeable {
     public MiniLargeDataSaveResult putLargeData(
             String variableName, long length, InputStream dataSource);
 
+    @Override
+    public void close();
+
 }

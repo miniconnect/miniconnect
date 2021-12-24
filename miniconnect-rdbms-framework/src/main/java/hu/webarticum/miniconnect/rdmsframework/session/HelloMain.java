@@ -1,16 +1,27 @@
 package hu.webarticum.miniconnect.rdmsframework.session;
 
 import java.io.IOException;
+import java.util.function.Supplier;
 
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniValue;
+import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
+import hu.webarticum.miniconnect.rdmsframework.execution.SqlParser;
+import hu.webarticum.miniconnect.rdmsframework.execution.fake.FakeQueryExecutor;
+import hu.webarticum.miniconnect.rdmsframework.execution.fake.FakeSqlParser;
+import hu.webarticum.miniconnect.rdmsframework.execution.fake.FakeStorageAccess;
+import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class HelloMain {
 
     public static void main(String[] args) throws IOException {
-        try (MiniSession session = new FakeFrameworkSession()) {
+        SqlParser sqlParser = new FakeSqlParser();
+        QueryExecutor queryExecutor = new FakeQueryExecutor();
+        Supplier<StorageAccess> storageAccessFactory = FakeStorageAccess::new;
+        try (MiniSession session = new FrameworkSession(
+                sqlParser, queryExecutor, storageAccessFactory)) {
             MiniResult result = session.execute("Hello");
             if (!result.success()) {
                 System.out.println("oops");

@@ -1,6 +1,5 @@
 package hu.webarticum.miniconnect.tool.lab.dummy;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +52,7 @@ public class DummySession implements MiniSession {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         closed = true;
     }
 
