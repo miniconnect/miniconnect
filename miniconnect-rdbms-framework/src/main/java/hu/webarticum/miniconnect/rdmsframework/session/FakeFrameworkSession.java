@@ -8,8 +8,8 @@ import java.util.concurrent.Future;
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
-import hu.webarticum.miniconnect.rdmsframework.execution.ParsingSqlExecutor;
-import hu.webarticum.miniconnect.rdmsframework.execution.SqlExecutor;
+import hu.webarticum.miniconnect.rdmsframework.execution.Query;
+import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.execution.fake.FakeQueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.execution.fake.FakeSqlParser;
 import hu.webarticum.miniconnect.tool.result.StoredError;
@@ -18,14 +18,15 @@ import hu.webarticum.miniconnect.tool.result.StoredResult;
 public class FakeFrameworkSession implements MiniSession {
     
     @Override
-    public MiniResult execute(String query) {
-        SqlExecutor sqlExecutor =
-                new ParsingSqlExecutor(new FakeSqlParser(), new FakeQueryExecutor());
-        Future<Object> future = sqlExecutor.execute(query); // TODO
-        Exception exception = null;
-        Object executionResult = null;
+    public MiniResult execute(String sql) {
+        Query query = new FakeSqlParser().parse(sql);
+        return execute(query);
+    }
+    
+    public MiniResult execute(Query query) {
+        Exception exception;
         try {
-            executionResult = future.get();
+            return executeThrowing(query);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             exception = e;
@@ -34,13 +35,14 @@ public class FakeFrameworkSession implements MiniSession {
         } catch (Exception e) {
             exception = e;
         }
-        MiniResult result;
-        if (exception != null) {
-            result = new StoredResult(new StoredError(1, "00001", exception.getMessage()));
-        } else {
-            result = new StoredResult(new StoredError(99, "00099", "Nincs hiba sajnos..."));
-        }
-        return result;
+        return new StoredResult(new StoredError(1, "00001", exception.getMessage()));
+    }
+
+    public MiniResult executeThrowing(Query query) throws InterruptedException, ExecutionException {
+        QueryExecutor queryExecutor = new FakeQueryExecutor();
+        Future<Object> future = queryExecutor.execute(query); // TODO
+        Object executionResult = future.get(); // TODO
+        return new StoredResult(new StoredError(99, "00099", "Nincs hiba sajnos..."));
     }
 
     @Override
