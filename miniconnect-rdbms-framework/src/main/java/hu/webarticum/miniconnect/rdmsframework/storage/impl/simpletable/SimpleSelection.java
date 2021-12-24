@@ -86,7 +86,7 @@ public class SimpleSelection implements TableSelection {
     }
     
     @Override
-    public TableSelection reverse() {
+    public TableSelection reversed() {
         return new SimpleSelection(
                 containmentPredicate,
                 reverseOrderKey,
