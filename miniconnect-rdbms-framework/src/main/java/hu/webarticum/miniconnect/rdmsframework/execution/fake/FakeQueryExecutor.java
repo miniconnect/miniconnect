@@ -3,9 +3,9 @@ package hu.webarticum.miniconnect.rdmsframework.execution.fake;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import hu.webarticum.miniconnect.rdmsframework.execution.DatabaseException;
-import hu.webarticum.miniconnect.rdmsframework.execution.Query;
+import hu.webarticum.miniconnect.rdmsframework.DatabaseException;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
+import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 
 public class FakeQueryExecutor implements QueryExecutor {

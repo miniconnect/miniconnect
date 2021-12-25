@@ -1,6 +1,5 @@
 package hu.webarticum.miniconnect.rdmsframework.session;
 
-import java.io.IOException;
 import java.util.function.Supplier;
 
 import hu.webarticum.miniconnect.api.MiniResult;
@@ -16,9 +15,9 @@ import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class HelloMain {
 
-    public static void main(String[] args) throws IOException {
-        SqlParser sqlParser = new FakeSqlParser();
-        QueryExecutor queryExecutor = new FakeQueryExecutor();
+    public static void main(String[] args) {
+        Supplier<SqlParser> sqlParser = FakeSqlParser::new;
+        Supplier<QueryExecutor> queryExecutor = FakeQueryExecutor::new;
         Supplier<StorageAccess> storageAccessFactory = FakeStorageAccess::new;
         try (MiniSession session = new FrameworkSession(
                 sqlParser, queryExecutor, storageAccessFactory)) {

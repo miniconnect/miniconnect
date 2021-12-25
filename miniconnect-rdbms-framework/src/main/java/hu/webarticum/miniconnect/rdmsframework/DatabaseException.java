@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.rdmsframework.execution;
+package hu.webarticum.miniconnect.rdmsframework;
 
 public class DatabaseException extends RuntimeException {
     

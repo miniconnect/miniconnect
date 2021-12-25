@@ -10,19 +10,19 @@ import java.util.function.Supplier;
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
-import hu.webarticum.miniconnect.rdmsframework.execution.DatabaseException;
-import hu.webarticum.miniconnect.rdmsframework.execution.Query;
+import hu.webarticum.miniconnect.rdmsframework.DatabaseException;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.execution.SqlParser;
+import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 import hu.webarticum.miniconnect.tool.result.StoredError;
 import hu.webarticum.miniconnect.tool.result.StoredResult;
 
 public class FrameworkSession implements MiniSession {
     
-    private final SqlParser sqlParser;
+    private final Supplier<SqlParser> sqlParserFactory;
     
-    private final QueryExecutor queryExecutor;
+    private final Supplier<QueryExecutor> queryExecutorFactory;
     
     private final StorageAccess storageAccess;
     
@@ -31,11 +31,11 @@ public class FrameworkSession implements MiniSession {
     
     
     public FrameworkSession(
-            SqlParser sqlParser,
-            QueryExecutor queryExecutor,
+            Supplier<SqlParser> sqlParserFactory,
+            Supplier<QueryExecutor> queryExecutorFactory,
             Supplier<StorageAccess> storageAccessFactory) {
-        this.sqlParser = sqlParser;
-        this.queryExecutor = queryExecutor;
+        this.sqlParserFactory = sqlParserFactory;
+        this.queryExecutorFactory = queryExecutorFactory;
         this.storageAccess = storageAccessFactory.get();
     }
     
@@ -44,6 +44,7 @@ public class FrameworkSession implements MiniSession {
     public MiniResult execute(String sql) {
         checkClosed();
         try {
+            SqlParser sqlParser = sqlParserFactory.get();
             Query query = sqlParser.parse(sql);
             return execute(query);
         } catch (Exception e) {
@@ -68,6 +69,7 @@ public class FrameworkSession implements MiniSession {
     }
 
     public MiniResult executeThrowing(Query query) throws InterruptedException, ExecutionException {
+        QueryExecutor queryExecutor = queryExecutorFactory.get();
         Future<Object> future = queryExecutor.execute(storageAccess, query); // TODO
         Object executionResult = future.get(); // TODO
         
