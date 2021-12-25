@@ -3,7 +3,6 @@ package hu.webarticum.miniconnect.rdmsframework.execution.fake;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import hu.webarticum.miniconnect.rdmsframework.DatabaseException;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
@@ -27,7 +26,7 @@ public class FakeQueryExecutor implements QueryExecutor {
     }
     
     public Object createResult() {
-        
+
         // TODO
         //throw new DatabaseException(4, "00004", "Error four");
         throw new NumberFormatException("You are out of luck");

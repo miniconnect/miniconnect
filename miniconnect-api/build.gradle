@@ -11,5 +11,5 @@ repositories {
 }
 
 dependencies {
-    implementation project(':miniconnect-util')
+    api project(':miniconnect-util')
 }

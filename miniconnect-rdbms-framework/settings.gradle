@@ -2,9 +2,6 @@
 rootProject.name = 'miniconnect-rdbms-framework'
 
 // FIXME
-include ':miniconnect-messenger'
-project(':miniconnect-messenger').projectDir = new File('../miniconnect-messenger')
-// FIXME
 include ':miniconnect-api'
 project(':miniconnect-api').projectDir = new File('../miniconnect-api')
 
@@ -15,7 +12,3 @@ project(':miniconnect-util').projectDir = new File('../miniconnect-util')
 // FIXME
 include ':miniconnect-tool'
 project(':miniconnect-tool').projectDir = new File('../miniconnect-tool')
-
-// FIXME
-include ':miniconnect-jdbc-adapter'
-project(':miniconnect-jdbc-adapter').projectDir = new File('../miniconnect-jdbc-adapter')

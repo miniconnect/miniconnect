@@ -1,5 +1,6 @@
 plugins {
     id 'java-library'
+    id 'antlr'
 }
 
 group 'hu.webarticum.miniconnect'
@@ -11,7 +12,11 @@ repositories {
 }
 
 dependencies {
-    implementation project(':miniconnect-messenger')
+    api project(':miniconnect-api')
+    api project(':miniconnect-util')
+    api project(':miniconnect-tool')
+    
+    antlr 'org.antlr:antlr4:4.9.3'
     
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.7.1'
@@ -19,3 +24,8 @@ dependencies {
     testImplementation 'org.junit.platform:junit-platform-launcher:1.7.1'
     testImplementation 'org.assertj:assertj-core:3.19.0'
 }
+
+generateGrammarSource {
+    arguments += ["-visitor", "-long-messages"]
+}
+
