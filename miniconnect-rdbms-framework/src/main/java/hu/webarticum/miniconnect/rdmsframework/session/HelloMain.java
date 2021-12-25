@@ -23,7 +23,7 @@ public class HelloMain {
         Supplier<StorageAccess> storageAccessFactory = FakeStorageAccess::new;
         try (MiniSession session = new FrameworkSession(
                 sqlParser, queryExecutor, storageAccessFactory)) {
-            MiniResult result = session.execute("SELECT 1 AS lorem");
+            MiniResult result = session.execute("SELECT lorem FROM ipsum");
             if (!result.success()) {
                 System.out.println("oops");
                 System.out.println(result.error().message());

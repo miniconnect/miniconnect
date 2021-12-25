@@ -6,12 +6,38 @@ package hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar;
 
 simplifiedQuery: selectQuery;
 
-selectQuery: SELECT LIT_INTEGER alias?;
-alias: AS NAME;
+selectQuery: SELECT ( selectFields | '*' ) FROM tableName=identifier wherePart? orderPart?;
+selectFields: selectItem ( ',' selectItem )*;
+selectItem: field=identifier ( AS? alias=identifier )?;
+
+// TODO: insert, update, delete
+
+wherePart: WHERE whereItem ( AND whereItem )*;
+whereItem: identifier '=' value | '(' whereItem ')';
+orderPart: ORDER BY identifier ( ASC | DESC )?;
+identifier: SIMPLENAME | QUOTEDNAME;
+value: LIT_STRING | LIT_DECIMAL | LIT_INTEGER;
 
 SELECT: S E L E C T;
+INSERT: I N S E R T;
+UPDATE: U P D A T E;
+DELETE: D E L E T E;
 AS: A S;
-NAME: [a-zA-Z_] [a-zA-Z_0-9]+;
+FROM: F R O M;
+WHERE: W H E R E;
+AND: A N D;
+ORDER: O R D E R;
+BY: B Y;
+ASC: A S C;
+DESC: D E S C;
+VALUES: V A L U E S;
+SET: S E T;
+
+QUOTEDNAME: '"' ('\\' . | '""' | ~[\\"] )* '"';
+SIMPLENAME: [a-zA-Z_] [a-zA-Z_0-9]+;
+
+LIT_STRING: '\'' ('\\' . | '\'\'' | ~[\\'] )* '\'';
+LIT_DECIMAL: '-'? [0-9]+ '.' [0-9]+;
 LIT_INTEGER: '-'? [0-9]+;
 
 WHITESPACE: [ \n\t\r] -> skip;

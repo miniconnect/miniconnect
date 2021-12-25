@@ -7,7 +7,7 @@ public class SimplifiedQueryVisitor extends SimplifiedQueryBaseVisitor<Object> {
 
     @Override
     public String visitSimplifiedQuery(SimplifiedQueryContext ctx) {
-        return ctx.selectQuery().alias().NAME().getText();
+        return ctx.selectQuery().selectFields().selectItem(0).field.getText();
     }
     
 }
