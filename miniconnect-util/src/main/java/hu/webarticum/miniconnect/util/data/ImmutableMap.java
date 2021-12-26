@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public final class ImmutableMap<K, V> implements Serializable {
 
@@ -41,6 +42,10 @@ public final class ImmutableMap<K, V> implements Serializable {
 
     public V get(K key) {
         return data.get(key);
+    }
+    
+    public Set<Map.Entry<K, V>> entrySet() {
+        return Collections.unmodifiableMap(data).entrySet();
     }
 
     public Map<K, V> toMap() {
