@@ -21,7 +21,7 @@ public class HelloMain {
         Supplier<StorageAccess> storageAccessFactory = FakeStorageAccess::new;
         try (MiniSession session = new FrameworkSession(
                 sqlParser, queryExecutor, storageAccessFactory)) {
-            MiniResult result = session.execute("SELECT lorem FROM `ipsum`");
+            MiniResult result = session.execute("SELECT lorem, ipsum AS dolor FROM data");
             if (!result.success()) {
                 System.out.println("oops");
                 System.out.println(result.error().message());

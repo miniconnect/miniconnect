@@ -6,8 +6,9 @@ package hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar;
 
 simplifiedQuery: ( selectQuery | updateQuery | insertQuery | deleteQuery ) EOF ;
 
-selectQuery: SELECT ( selectFields | '*' ) FROM tableName wherePart? orderPart?;
-selectFields: selectItem ( ',' selectItem )*;
+selectQuery: SELECT selectPart FROM tableName wherePart? orderPart?;
+selectPart: selectItems | '*';
+selectItems: selectItem ( ',' selectItem )*;
 selectItem: field ( AS? alias=identifier )?;
 
 updateQuery: UPDATE tableName SET updateItem ( ',' updateItem )* wherePart?;
