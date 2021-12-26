@@ -1,6 +1,10 @@
 # MiniConnect
 
-Minimalistic DB connector framework and JDBC bridge 
+Minimalistic DB connector framework and JDBC bridge.
+
+> :construction: This project is in an incubating state.
+
+## Overview of subprojects
 
 It consists of several independent components:
 
