@@ -6,9 +6,27 @@ Minimalistic DB connector framework and JDBC bridge.
 
 ## Overview of subprojects
 
-It consists of several independent components:
+It consists of several separated components:
 
-> TODO: table of components and their description
+| Subproject | Description |
+| ---------- | ----------- |
+| :green_circle: `api` | Minimalistic API for database access |
+| :computer: `client` | Lightweight client implementation of `api` |
+| :old_key: `jdbc` | Makes available any `api` session as a JDBC connection |
+| :electric_plug: `jdbc-adapter` | Makes available any JDBC connection as an `api` session |
+| :envelope: `messenger` | Message definitions (mainly for `client` and `server`) |
+| :building_construction: `rdbms-framework` | Framework for building database engines or drivers for `api` |
+| :desktop_computer: `server` | Lightweight server implementation of `messenger` |
+| :gear: `tool` | Miscellaneous tools (like REPL etc.) |
+| :truck: `transfer` | Commons for transfering messages (mainly for `client` and `server`) |
+| :hammer_and_wrench: `util` | Essential interfaces (like `ImmutableList` or `ByteString`) |
+
+And there are some related repositories:
+
+| Repository | Description |
+| ---------- | ----------- |
+| [HoloDB](https://github.com/davidsusu/holodb) | Holographical database engine |
+| HoloDB value sets | Useful value sets for HoloDB (planned) |
 
 From a user perspective, the session API is most interesting.
 
