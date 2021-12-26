@@ -92,6 +92,6 @@ As initialization is a no-op, it's particularly suitable for testing
 and, in the case of a read-only database,
 flexible orchestration, replication like a static content.
 
-HoloDB can be found in a separated repository:
+HoloDB can be found in its own repository:
 
 https://github.com/davidsusu/holodb
