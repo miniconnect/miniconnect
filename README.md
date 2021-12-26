@@ -70,7 +70,7 @@ to interpret the `PREPARE FROM` query.
 The simple session API make it very easy to make a connector to any custom database.
 
 There are built-in JDBC->MiniConnect and MiniConnect->JDBC bridges,
-so any tool that understands JDBC (e. g. Hibernate) can use you MiniConnect driver,
+so any tool that understands JDBC (e. g. Hibernate) can use your MiniConnect driver,
 and, vica versa, any JDBC connection can be used via MiniConnect.
 
 The `rdbms-framework` subproject provides a framework for implementing
