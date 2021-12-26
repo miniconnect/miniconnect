@@ -65,16 +65,28 @@ and have no SQL equivalent.
 The best solution is to supplement the H2 driver with the ability
 to interpret the `PREPARE FROM` query.
 
-## Custom database engines
+## Database engines
 
 The simple session API make it very easy to make a connector to any custom database.
+
+The `rdbms-framework` subproject provides a framework for implementing
+a MiniConnect driver (or even a complete database engine).
 
 There are built-in JDBC->MiniConnect and MiniConnect->JDBC bridges,
 so any tool that understands JDBC (e. g. Hibernate) can use your MiniConnect driver,
 and, vica versa, any JDBC connection can be used via MiniConnect.
 
-The `rdbms-framework` subproject provides a framework for implementing
-a MiniConnect driver (or even a complete database engine).
+Using a MiniConnect session via JDBC:
+
+```java
+Connection connection = new MiniJdbcConnection(miniSession, provider);
+```
+
+Using a JDBC connection via MiniConnect:
+
+```java
+MiniSession session = new JdbcAdapterSession(connection, largeDataPutter);
+```
 
 ## HoloDB
 
