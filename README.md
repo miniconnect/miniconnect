@@ -1,54 +1,73 @@
-# miniConnect
+# MiniConnect
 
 Minimalistic DB connector framework and JDBC bridge 
 
-## TODO:
+It consists of several independent components:
 
-- Finalize api design
-- Design exception policy
-- Design and implement the client-server protocol
-- - subprojects:
-- - - miniconnect-protocol (with the main documentation)
-- - - miniconnect-server
-- - - miniconnect-client
-- - later: client for other platforms (node, python, php, c++ etc.)
-- Create dummy implementation
-- - First create a minimalistic version for high-level testing
-- - Create a sample implementation with a handy set of query types (with in-memory arrays)
-- Create a JDBC implementation
+> TODO: table of components and their description
 
-## Data types
+From a user perspective, the session API is most interesting.
 
-TODO: add direct support for known SQL data types
+## Session API usage
 
-| Java                   | JDBC                 |
-|:-----------------------|:---------------------|
-| `boolean`              | `BIT`                |
-| `java.lang.Boolean`    | `BIT`                |
-| `byte`                 | `TINYINT`            |
-| `java.lang.Byte`       | `TINYINT`            |
-| `double`               | `DOUBLE`             |
-| `java.lang.Double`     | `DOUBLE`             |
-| `float`                | `REAL`               |
-| `java.lang.Float`      | `REAL`               |
-| `int`                  | `INTEGER`            |
-| `java.lang.Integer`    | `INTEGER`            |
-| `long`                 | `BIGINT`             |
-| `java.lang.Long`       | `BIGINT`             |
-| `short`                | `SMALLINT`           |
-| `java.lang.Short`      | `SMALLINT`           |
-| `java.math.BigDecimal` | `DECIMAL`            |
-| `java.math.BigInteger` | `DECIMAL`            |
-| `char`                 | `CHAR`               |
-| `java.lang.Character`  | `CHAR`               |
-| `java.lang.String`     | `VARCHAR`/ `CLOB`    |
-| `Serializable`         | `BLOB`               |
-| `byte[]`               | `BLOB`               |
-| `java.util.Date`       | `TIMESTAMP` (`DATE`) |
-| `java.sql.Date`        | `DATE`               |
-| `java.sql.Time`        | `TIME`               |
-| `java.sql.Timestamp`   | `TIMESTAMP`          |
+The session API is an alternative for JDBC.
+The philosophy is, that a minimalistic database access API should
+do two things and nothing more:
 
-More info:
+- send SQL queries and input data to the server
+- accept the results
 
-https://docs.oracle.com/cd/E19830-01/819-4721/beajw/index.html
+That's exactly what MiniConnect session API provides.
+Here is a minimal example:
+
+```java
+try (MiniSession session = connectionFactory.connect()) {
+    MiniResult result = session.execute("SELECT label FROM data");
+    for (ImmutableList<MiniValue> row : result.resultSet()) {
+        String label = row.get(0).contentAccess().get().toString();
+        System.out.println("label: " + label);
+    }
+}
+```
+
+No odd abstractions like `startTransaction()` or `setCatalog()`.
+No JDBC freaks like `nativeSQL()` or `setTypeMap()`.
+Just a lightweight SQL interpreter.
+(Also, to take advantage of this, there is a built-in REPL.)
+
+At the some time there are some cons.
+The main difficulty comes with prepared queries.
+Most databases support the `PREPARE FROM` SQL statement,
+while some others (such as H2) just implement JDBC's `prepareStatement()`,
+and have no SQL equivalent.
+The best solution is to supplement the H2 driver with the ability
+to interpret the `PREPARE FROM` query.
+
+## Custom database engines
+
+The simple session API make it very easy to make a connector to any custom database.
+
+There are built-in JDBC->MiniConnect and MiniConnect->JDBC bridges,
+so any tool that understands JDBC (e. g. Hibernate) can use you MiniConnect driver,
+and, vica versa, any JDBC connection can be used via MiniConnect.
+
+The `rdbms-framework` subproject provides a framework for implementing
+a MiniConnect driver (or even a complete database engine).
+
+## HoloDB
+
+HoloDB is a storage engine for the `rdbms-framework`,
+whic introduces the theory of holographic databases.
+
+It provides an arbitrarily large database filled with constrained random data.
+Initialization ("filling" with data) of the tables is a no-op.
+Query results are calculated on-the-fly.
+A single field of a column is calculated usually in `O(1)`, but at most in `O(log(tableSize))`.
+
+As initialization is a no-op, it's particularly suitable for testing
+and, in the case of a read-only database,
+flexible orchestration, replication like a static content.
+
+HoloDB is in a separated repository:
+
+https://github.com/davidsusu/holodb
