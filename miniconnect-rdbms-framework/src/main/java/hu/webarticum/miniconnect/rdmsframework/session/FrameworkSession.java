@@ -112,10 +112,9 @@ public class FrameworkSession implements MiniSession {
         }
     }
     
-    private MiniResult resultOfException(Exception exception) {
+    private MiniResult resultOfException(Throwable exception) {
         if (!(exception instanceof DatabaseException)) {
-            // FIXME
-            String message = "Unexpected error: " + exception.getMessage();
+            String message = "Unexpected error: " + extractMessage(exception);
             return new StoredResult(new StoredError(99999, "99999", message));
         }
         
@@ -124,6 +123,20 @@ public class FrameworkSession implements MiniSession {
                 databaseException.code(),
                 databaseException.sqlState(),
                 databaseException.message()));
+    }
+    
+    private String extractMessage(Throwable exception) {
+        String message = exception.getMessage();
+        if (message != null) {
+            return message;
+        }
+        
+        Throwable cause = exception.getCause();
+        if (cause != null) {
+            return extractMessage(cause);
+        }
+        
+        return exception.getClass().getName();
     }
 
 }

@@ -4,26 +4,37 @@ grammar SimplifiedQuery;
 package hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar;
 }
 
-simplifiedQuery: selectQuery;
+simplifiedQuery: ( selectQuery | updateQuery | insertQuery | deleteQuery ) EOF ;
 
-selectQuery: SELECT ( selectFields | '*' ) FROM tableName=identifier wherePart? orderPart?;
+selectQuery: SELECT ( selectFields | '*' ) FROM tableName wherePart? orderPart?;
 selectFields: selectItem ( ',' selectItem )*;
-selectItem: field=identifier ( AS? alias=identifier )?;
+selectItem: field ( AS? alias=identifier )?;
 
-// TODO: insert, update, delete
+updateQuery: UPDATE tableName SET updateItem ( ',' updateItem )* wherePart?;
+updateItem: field '=' value;
+
+insertQuery: INSERT INTO tableName fieldList? VALUES valueList;
+fieldList: '(' field ( ',' field )* ')';
+valueList: '(' value ( ',' value )* ')';
+
+deleteQuery: DELETE FROM tableName wherePart?;
 
 wherePart: WHERE whereItem ( AND whereItem )*;
 whereItem: identifier '=' value | '(' whereItem ')';
 orderPart: ORDER BY identifier ( ASC | DESC )?;
-identifier: SIMPLENAME | QUOTEDNAME;
-value: LIT_STRING | LIT_DECIMAL | LIT_INTEGER;
+field: identifier;
+tableName: identifier;
+identifier: SIMPLENAME | QUOTEDNAME | BACKTICKEDNAME;
+value: LIT_STRING | LIT_DECIMAL | LIT_INTEGER | NULL;
 
 SELECT: S E L E C T;
 INSERT: I N S E R T;
 UPDATE: U P D A T E;
 DELETE: D E L E T E;
+
 AS: A S;
 FROM: F R O M;
+INTO: I N T O;
 WHERE: W H E R E;
 AND: A N D;
 ORDER: O R D E R;
@@ -32,11 +43,13 @@ ASC: A S C;
 DESC: D E S C;
 VALUES: V A L U E S;
 SET: S E T;
+NULL: N U L L;
 
-QUOTEDNAME: '"' ('\\' . | '""' | ~[\\"] )* '"';
 SIMPLENAME: [a-zA-Z_] [a-zA-Z_0-9]+;
+QUOTEDNAME: '"' ( '\\' . | '""' | ~[\\"] )* '"';
+BACKTICKEDNAME: '`' ( '``' | ~[`] )* '`';
 
-LIT_STRING: '\'' ('\\' . | '\'\'' | ~[\\'] )* '\'';
+LIT_STRING: '\'' ( '\\' . | '\'\'' | ~[\\'] )* '\'';
 LIT_DECIMAL: '-'? [0-9]+ '.' [0-9]+;
 LIT_INTEGER: '-'? [0-9]+;
 

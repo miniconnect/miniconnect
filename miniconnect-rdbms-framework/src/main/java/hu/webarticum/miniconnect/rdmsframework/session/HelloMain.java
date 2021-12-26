@@ -8,22 +8,20 @@ import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.execution.SqlParser;
 import hu.webarticum.miniconnect.rdmsframework.execution.fake.FakeQueryExecutor;
-import hu.webarticum.miniconnect.rdmsframework.execution.fake.FakeSqlParser;
 import hu.webarticum.miniconnect.rdmsframework.execution.fake.FakeStorageAccess;
-import hu.webarticum.miniconnect.rdmsframework.query.GeneralSqlParser;
+import hu.webarticum.miniconnect.rdmsframework.query.AntlrSqlParser;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class HelloMain {
 
     public static void main(String[] args) {
-        //Supplier<SqlParser> sqlParser = FakeSqlParser::new;
-        Supplier<SqlParser> sqlParser = GeneralSqlParser::new;
+        Supplier<SqlParser> sqlParser = AntlrSqlParser::new;
         Supplier<QueryExecutor> queryExecutor = FakeQueryExecutor::new;
         Supplier<StorageAccess> storageAccessFactory = FakeStorageAccess::new;
         try (MiniSession session = new FrameworkSession(
                 sqlParser, queryExecutor, storageAccessFactory)) {
-            MiniResult result = session.execute("SELECT lorem FROM ipsum");
+            MiniResult result = session.execute("SELECT lorem FROM `ipsum`");
             if (!result.success()) {
                 System.out.println("oops");
                 System.out.println(result.error().message());
