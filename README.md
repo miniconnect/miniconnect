@@ -57,7 +57,7 @@ No odd abstractions like `startTransaction()` or `setCatalog()`.
 No JDBC freaks like `nativeSQL()` or `setTypeMap()`.
 Just a lightweight, REPL-able SQL interpreter.
 
-At the some time there are some cons.
+At the same time there are some cons.
 The main difficulty comes with prepared queries.
 Most databases support the `PREPARE FROM` SQL statement,
 while some others (such as H2) just implement JDBC's `prepareStatement()`,
