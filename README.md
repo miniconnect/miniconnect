@@ -1,6 +1,6 @@
 # MiniConnect
 
-Minimalistic DB connector framework and JDBC bridge.
+Minimalistic database API and JDBC bridge.
 
 > :construction: This project is in an incubating state.
 
@@ -11,14 +11,15 @@ It consists of several separated components:
 | Subproject | Description |
 | ---------- | ----------- |
 | :green_circle: `api` | Minimalistic API for database access |
-| :computer: `client` | Lightweight client implementation of `api` |
+| :computer: `client` | Lightweight client implementation of `api` (planned) |
 | :old_key: `jdbc` | Makes available any `api` session as a JDBC connection |
 | :electric_plug: `jdbc-adapter` | Makes available any JDBC connection as an `api` session |
 | :envelope: `messenger` | Message definitions (mainly for `client` and `server`) |
+| :repeat: `repl` | REPL client for `api` (planned) |
 | :building_construction: `rdbms-framework` | Framework for building database engines or drivers for `api` |
-| :desktop_computer: `server` | Lightweight server implementation of `messenger` |
+| :desktop_computer: `server` | Lightweight server implementation of `messenger` (planned) |
 | :gear: `tool` | Miscellaneous tools (like REPL etc.) |
-| :truck: `transfer` | Commons for transfering messages (mainly for `client` and `server`) |
+| :truck: `transfer` | Commons for transfering messages (mainly for `client` and `server`) (planned) |
 | :hammer_and_wrench: `util` | Essential interfaces (like `ImmutableList` or `ByteString`) |
 
 And there are some related repositories:
@@ -32,7 +33,7 @@ From a user perspective, the session API is most interesting.
 
 ## Session API usage
 
-The session API is an alternative for JDBC.
+The session API is an alternative to JDBC.
 The philosophy is, that a minimalistic database access API should
 do two things and nothing more:
 
@@ -54,8 +55,7 @@ try (MiniSession session = connectionFactory.connect()) {
 
 No odd abstractions like `startTransaction()` or `setCatalog()`.
 No JDBC freaks like `nativeSQL()` or `setTypeMap()`.
-Just a lightweight SQL interpreter.
-(Also, to take advantage of this, there is a built-in REPL.)
+Just a lightweight, REPL-able SQL interpreter.
 
 At the some time there are some cons.
 The main difficulty comes with prepared queries.

@@ -1,5 +1,10 @@
 # TODO
 
+## Open questions
+
+
+- should `execute()` return with `Future<Result>`?
+
 
 ## TODOs for components
 
@@ -111,9 +116,8 @@ Just make it working in java
 
 ## Some helpful info for the implementation
 
-## Standard data types
 
-TODO: add direct support for known SQL data types
+### Standard data types
 
 | Java                   | JDBC                 |
 |:-----------------------|:---------------------|
