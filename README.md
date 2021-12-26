@@ -11,15 +11,15 @@ It consists of several separated components:
 | Subproject | Description |
 | ---------- | ----------- |
 | :green_circle: `api` | Minimalistic API for database access |
-| :computer: `client` | Lightweight client implementation of `api` (planned) |
+| :computer: `client` | Lightweight client implementation of `api` (:zzz: planned) |
 | :old_key: `jdbc` | Makes available any `api` session as a JDBC connection |
 | :electric_plug: `jdbc-adapter` | Makes available any JDBC connection as an `api` session |
 | :envelope: `messenger` | Message definitions (mainly for `client` and `server`) |
-| :repeat: `repl` | REPL client for `api` (planned) |
+| :repeat: `repl` | REPL client for `api` (:zzz: planned) |
 | :building_construction: `rdbms-framework` | Framework for building database engines or drivers for `api` |
-| :desktop_computer: `server` | Lightweight server implementation of `messenger` (planned) |
+| :desktop_computer: `server` | Lightweight server implementation of `messenger` (:zzz: planned) |
 | :gear: `tool` | Miscellaneous tools (like REPL etc.) |
-| :truck: `transfer` | Commons for transfering messages (mainly for `client` and `server`) (planned) |
+| :truck: `transfer` | Commons for transfering messages (mainly for `client` and `server`) (:zzz: planned) |
 | :hammer_and_wrench: `util` | Essential interfaces (like `ImmutableList` or `ByteString`) |
 
 And there are some related repositories:
@@ -27,7 +27,7 @@ And there are some related repositories:
 | Repository | Description |
 | ---------- | ----------- |
 | [HoloDB](https://github.com/davidsusu/holodb) | Holographical database engine |
-| HoloDB value sets | Useful value sets for HoloDB (planned) |
+| HoloDB value sets | Useful value sets for HoloDB (:zzz: planned) |
 
 From a user perspective, the session API is most interesting.
 
