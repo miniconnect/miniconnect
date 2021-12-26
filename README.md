@@ -12,8 +12,8 @@ It consists of several separated components:
 | ---------- | ----------- |
 | :green_circle: `api` | Minimalistic API for database access |
 | :computer: `client` | Lightweight client implementation of `api` (:zzz: planned) |
-| :old_key: `jdbc` | Makes available any `api` session as a JDBC connection |
-| :electric_plug: `jdbc-adapter` | Makes available any JDBC connection as an `api` session |
+| :old_key: `jdbc` | Makes any `api` session available as a JDBC connection |
+| :electric_plug: `jdbc-adapter` | Makes any JDBC connection available as an `api` session |
 | :envelope: `messenger` | Message definitions (mainly for `client` and `server`) |
 | :repeat: `repl` | REPL client for `api` (:zzz: planned) |
 | :building_construction: `rdbms-framework` | Framework for building database engines or drivers for `api` |
