@@ -57,9 +57,10 @@ a MiniConnect driver (or even a complete database engine).
 ## HoloDB
 
 HoloDB is a storage engine for the `rdbms-framework`,
-whic introduces the theory of holographic databases.
+which introduces the theory of holographic databases.
 
 It provides an arbitrarily large database filled with constrained random data.
+Parameters and constraints can be specified in a configuration file.
 Initialization ("filling" with data) of the tables is a no-op.
 Query results are calculated on-the-fly.
 A single field of a column is calculated usually in `O(1)`, but at most in `O(log(tableSize))`.
@@ -68,6 +69,6 @@ As initialization is a no-op, it's particularly suitable for testing
 and, in the case of a read-only database,
 flexible orchestration, replication like a static content.
 
-HoloDB is in a separated repository:
+HoloDB can be found in a separated repository:
 
 https://github.com/davidsusu/holodb
