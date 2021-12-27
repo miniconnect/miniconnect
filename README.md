@@ -14,12 +14,12 @@ It consists of several separated components:
 | :computer: `client` | Lightweight client implementation of `api` (:zzz: planned) |
 | :old_key: `jdbc` | Makes any `api` session available as a JDBC connection |
 | :electric_plug: `jdbc-adapter` | Makes any JDBC connection available as an `api` session |
-| :envelope: `messenger` | Message definitions and messaging implementation of `api` (mainly for `client` and `server`) |
+| :envelope: `messenger` | Message definitions and messaging implementation of `api` |
 | :repeat: `repl` | REPL client for `api` (:zzz: planned) |
 | :building_construction: `rdbms-framework` | Framework for building database engines or drivers for `api` |
 | :desktop_computer: `server` | Lightweight server implementation of `messenger` (:zzz: planned) |
 | :gear: `tool` | Miscellaneous tools (like REPL etc.) |
-| :truck: `transfer` | Commons for transfering messages (mainly for `client` and `server`) (:zzz: planned) |
+| :truck: `transfer` | Commons for transfering messages (:zzz: planned) |
 | :hammer_and_wrench: `util` | Essential interfaces (like `ImmutableList` or `ByteString`) |
 
 And there are some related repositories:
