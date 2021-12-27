@@ -14,6 +14,7 @@ import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryLexer
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.DeleteQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.IdentifierContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.InsertQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByPartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectItemContext;
@@ -46,8 +47,11 @@ public class AntlrSqlParser implements SqlParser {
             return parseSelectNode(selectQueryNode);
         }
         
-        // TODO: insert
-
+        InsertQueryContext insertQueryNode = rootNode.insertQuery();
+        if (insertQueryNode != null) {
+            return parseInsertNode(insertQueryNode);
+        }
+        
         UpdateQueryContext updateQueryNode = rootNode.updateQuery();
         if (updateQueryNode != null) {
             return parseUpdateNode(updateQueryNode);
@@ -76,6 +80,18 @@ public class AntlrSqlParser implements SqlParser {
                 .from(tableName)
                 .where(where)
                 .orderBy(orderBy)
+                .build();
+    }
+
+    private InsertQuery parseInsertNode(InsertQueryContext insertQueryNode) {
+        IdentifierContext identifierNode = insertQueryNode.tableName().identifier();
+        String tableName = parseIdentifierNode(identifierNode);
+        
+        // TODO
+
+        return Queries.insert()
+                .into(tableName)
+                // TODO
                 .build();
     }
 

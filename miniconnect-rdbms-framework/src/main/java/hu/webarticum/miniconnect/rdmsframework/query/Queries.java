@@ -6,8 +6,10 @@ public interface Queries {
         return new SelectQuery.SelectQueryBuilder();
     }
 
-    // TODO: insert
-    
+    public static InsertQuery.InsertQueryBuilder insert() {
+        return new InsertQuery.InsertQueryBuilder();
+    }
+
     public static UpdateQuery.UpdateQueryBuilder update() {
         return new UpdateQuery.UpdateQueryBuilder();
     }
