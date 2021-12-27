@@ -26,9 +26,21 @@ public final class SelectQuery implements Query {
         return new SelectQueryBuilder();
     }
     
-    
+
+    public Map<String, String> fields() {
+        return new LinkedHashMap<>(fields);
+    }
+
     public String fromTableName() {
         return fromTableName;
+    }
+
+    public Map<String, Object> where() {
+        return new LinkedHashMap<>(where);
+    }
+    
+    public Map<String, Boolean> orderBy() {
+        return new LinkedHashMap<>(orderBy);
     }
     
     
