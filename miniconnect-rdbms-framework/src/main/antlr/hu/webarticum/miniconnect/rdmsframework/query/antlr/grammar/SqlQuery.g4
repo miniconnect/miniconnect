@@ -11,7 +11,8 @@ selectPart: selectItems | '*';
 selectItems: selectItem ( ',' selectItem )*;
 selectItem: fieldName ( AS? alias=identifier )?;
 
-updateQuery: UPDATE tableName SET updateItem ( ',' updateItem )* wherePart?;
+updateQuery: UPDATE tableName updatePart wherePart?;
+updatePart: SET updateItem ( ',' updateItem )*;
 updateItem: fieldName '=' value;
 
 insertQuery: INSERT INTO tableName fieldList? VALUES valueList;

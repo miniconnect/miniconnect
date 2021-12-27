@@ -23,8 +23,9 @@ public class HelloMain {
                 sqlParser, queryExecutor, storageAccessFactory)) {
             MiniResult result = session.execute(
                     //"SELECT lorem, ipsum AS dolor FROM data " +
-                    //        "WHERE x = 1 AND y = 'apple' ORDER BY a ASC, b DESC");
-                    "DELETE FROM data WHERE a = 1 AND b = 'banana'");
+                    //        "WHERE x=1 AND y='apple' ORDER BY a ASC, b DESC");
+                    //"DELETE FROM data WHERE a=1 AND b='banana'");
+                    "UPDATE data SET col1=NULL, col2=99, col3='str' WHERE a=1 AND b='banana'");
             if (!result.success()) {
                 System.out.println("oops");
                 System.out.println(result.error().message());

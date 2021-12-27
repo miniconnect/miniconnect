@@ -12,6 +12,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import hu.webarticum.miniconnect.rdmsframework.execution.SqlParser;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryLexer;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.DeleteQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.IdentifierContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByPartContext;
@@ -20,6 +21,9 @@ import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParse
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectPartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SqlQueryContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UpdateItemContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UpdatePartContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UpdateQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ValueContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.WhereItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.WherePartContext;
@@ -42,27 +46,63 @@ public class AntlrSqlParser implements SqlParser {
             return parseSelectNode(selectQueryNode);
         }
         
-        // TODO: insert, update, delete
+        // TODO: insert
+
+        UpdateQueryContext updateQueryNode = rootNode.updateQuery();
+        if (updateQueryNode != null) {
+            return parseUpdateNode(updateQueryNode);
+        }
+        
+        DeleteQueryContext deleteQueryNode = rootNode.deleteQuery();
+        if (deleteQueryNode != null) {
+            return parseDeleteNode(deleteQueryNode);
+        }
         
         throw new IllegalArgumentException("Query type not supported");
     }
 
     private SelectQuery parseSelectNode(SelectQueryContext selectQueryNode) {
-        IdentifierContext identifierNode = selectQueryNode.tableName().identifier();
-        String fromTableName = parseIdentifierNode(identifierNode);
         SelectPartContext selectPartNode = selectQueryNode.selectPart();
         LinkedHashMap<String, String> fields = parseSelectPartNode(selectPartNode);
+        IdentifierContext identifierNode = selectQueryNode.tableName().identifier();
+        String tableName = parseIdentifierNode(identifierNode);
         WherePartContext wherePartNode = selectQueryNode.wherePart();
         LinkedHashMap<String, Object> where = parseWherePartNode(wherePartNode);
-
         OrderByPartContext orderByNode = selectQueryNode.orderByPart();
         LinkedHashMap<String, Boolean> orderBy = parseOrderByPartNode(orderByNode);
         
         return Queries.select()
                 .fields(fields)
-                .from(fromTableName)
+                .from(tableName)
                 .where(where)
                 .orderBy(orderBy)
+                .build();
+    }
+
+    private UpdateQuery parseUpdateNode(UpdateQueryContext updateQueryNode) {
+        IdentifierContext identifierNode = updateQueryNode.tableName().identifier();
+        String tableName = parseIdentifierNode(identifierNode);
+        UpdatePartContext updatePartNode = updateQueryNode.updatePart();
+        LinkedHashMap<String, Object> values = parseUpdatePartNode(updatePartNode);
+        WherePartContext wherePartNode = updateQueryNode.wherePart();
+        LinkedHashMap<String, Object> where = parseWherePartNode(wherePartNode);
+
+        return Queries.update()
+                .table(tableName)
+                .set(values)
+                .where(where)
+                .build();
+    }
+
+    private DeleteQuery parseDeleteNode(DeleteQueryContext deleteQueryNode) {
+        IdentifierContext identifierNode = deleteQueryNode.tableName().identifier();
+        String tableName = parseIdentifierNode(identifierNode);
+        WherePartContext wherePartNode = deleteQueryNode.wherePart();
+        LinkedHashMap<String, Object> where = parseWherePartNode(wherePartNode);
+        
+        return Queries.delete()
+                .from(tableName)
+                .where(where)
                 .build();
     }
     
@@ -109,6 +149,16 @@ public class AntlrSqlParser implements SqlParser {
             String fieldName = parseIdentifierNode(orderByItemNode.fieldName().identifier());
             Boolean ascOrder = (orderByItemNode.DESC() == null);
             result.put(fieldName, ascOrder);
+        }
+        return result;
+    }
+    
+    private LinkedHashMap<String, Object> parseUpdatePartNode(UpdatePartContext updatePartNode) {
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+        for (UpdateItemContext updateItemNode : updatePartNode.updateItem()) {
+            String fieldName = parseIdentifierNode(updateItemNode.fieldName().identifier());
+            Object value = parseValueNode(updateItemNode.value());
+            result.put(fieldName, value);
         }
         return result;
     }
