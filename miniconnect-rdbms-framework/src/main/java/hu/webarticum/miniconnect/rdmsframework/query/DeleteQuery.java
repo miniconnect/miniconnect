@@ -52,7 +52,7 @@ public final class DeleteQuery implements Query {
             if (first) {
                 first = false;
             } else {
-                sqlBuilder.append(',');
+                sqlBuilder.append(" AND");
             }
             sqlBuilder.append(' ');
             sqlBuilder.append(SqlUtil.quoteIdentifier(fieldName));
