@@ -13,12 +13,16 @@ import hu.webarticum.miniconnect.rdmsframework.execution.SqlParser;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryLexer;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.IdentifierContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.OrderByItemContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.OrderByPartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.SelectItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.SelectItemsContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.SelectPartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.SelectQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.SimplifiedQueryContext;
-import hu.webarticum.miniconnect.util.data.ImmutableList;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.ValueContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.WhereItemContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.WherePartContext;
 
 public class AntlrSqlParser implements SqlParser {
 
@@ -26,16 +30,8 @@ public class AntlrSqlParser implements SqlParser {
     public Query parse(String sql) {
         SimplifiedQueryLexer lexer = new SimplifiedQueryLexer(CharStreams.fromString(sql));
         SimplifiedQueryParser parser = new SimplifiedQueryParser(new CommonTokenStream(lexer));
-        
-        // TODO: proper error handling
         parser.removeErrorListeners();
-        parser.addErrorListener(new BaseErrorListener() {
-            @Override
-            public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-                throw new IllegalArgumentException(e);
-            }
-        });
-
+        parser.addErrorListener(new ParseErrorListener());
         SimplifiedQueryContext rootNode = parser.simplifiedQuery();
         return parseRootNode(rootNode);
     }
@@ -46,31 +42,77 @@ public class AntlrSqlParser implements SqlParser {
             return parseSelectNode(selectQueryNode);
         }
         
-        // TODO
-        throw new IllegalArgumentException("Query type not supported");
+        // TODO: insert, update, delete
         
+        throw new IllegalArgumentException("Query type not supported");
     }
 
     private SimpleSelectQuery parseSelectNode(SelectQueryContext selectQueryNode) {
         IdentifierContext identifierNode = selectQueryNode.tableName().identifier();
         String fromTableName = parseIdentifierNode(identifierNode);
         SelectPartContext selectPartNode = selectQueryNode.selectPart();
-        LinkedHashMap<String, String> selected = parseSelectPartNode(selectPartNode);
-        ImmutableList<String> fields = selected != null ?
-                new ImmutableList<>(selected.values()) :
-                null;
-        ImmutableList<String> aliases = selected != null ?
-                new ImmutableList<>(selected.keySet()) :
-                null;
+        LinkedHashMap<String, String> fields = parseSelectPartNode(selectPartNode);
+        WherePartContext wherePartNode = selectQueryNode.wherePart();
+        LinkedHashMap<String, Object> where = parseWherePartNode(wherePartNode);
+
+        OrderByPartContext orderByNode = selectQueryNode.orderByPart();
+        LinkedHashMap<String, Boolean> orderBy = parseOrderByPartNode(orderByNode);
+        
         return Queries.select()
                 .fields(fields)
-                .aliases(aliases)
                 .from(fromTableName)
-                //.where(null) // TODO
-                //.orderBy(null, true) // TODO
+                .where(where)
+                .orderBy(orderBy)
                 .build();
     }
     
+    private LinkedHashMap<String, String> parseSelectPartNode(SelectPartContext selectPartNode) {
+        LinkedHashMap<String, String> result = new LinkedHashMap<>();
+        
+        SelectItemsContext selectItemsNode = selectPartNode.selectItems();
+        if (selectItemsNode == null) {
+            return result;
+        }
+        
+        for (SelectItemContext selectItemNode : selectItemsNode.selectItem()) {
+            String fieldName = parseIdentifierNode(selectItemNode.fieldName().identifier());
+            String alias = selectItemNode.alias != null ?
+                    selectItemNode.alias.getText() :
+                    fieldName;
+            result.put(alias, fieldName);
+        }
+        return result;
+    }
+    
+    private LinkedHashMap<String, Object> parseWherePartNode(WherePartContext wherePartNode) {
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+        if (wherePartNode == null) {
+            return result;
+        }
+        
+        for (WhereItemContext whereItemNode : wherePartNode.whereItem()) {
+            String fieldName = parseIdentifierNode(whereItemNode.fieldName().identifier());
+            Object value = parseValueNode(whereItemNode.value());
+            result.put(fieldName, value);
+        }
+        return result;
+    }
+
+    private LinkedHashMap<String, Boolean> parseOrderByPartNode(
+            OrderByPartContext orderByPartNode) {
+        LinkedHashMap<String, Boolean> result = new LinkedHashMap<>();
+        if (orderByPartNode == null) {
+            return result;
+        }
+        
+        for (OrderByItemContext orderByItemNode : orderByPartNode.orderByItem()) {
+            String fieldName = parseIdentifierNode(orderByItemNode.fieldName().identifier());
+            Boolean ascOrder = (orderByItemNode.DESC() == null);
+            result.put(fieldName, ascOrder);
+        }
+        return result;
+    }
+
     private String parseIdentifierNode(IdentifierContext identifierNode) {
         TerminalNode simpleNameNode = identifierNode.SIMPLENAME();
         if (simpleNameNode != null) {
@@ -89,22 +131,47 @@ public class AntlrSqlParser implements SqlParser {
         
         throw new IllegalArgumentException("Invalid identifier: " + identifierNode.getText());
     }
-
-    private LinkedHashMap<String, String> parseSelectPartNode(SelectPartContext selectPartNode) {
-        SelectItemsContext selectItemsNode = selectPartNode.selectItems();
-        if (selectItemsNode == null) {
-            return null;
+    
+    private Object parseValueNode(ValueContext valueNode) {
+        TerminalNode integerNode = valueNode.LIT_INTEGER();
+        if (integerNode != null) {
+            return parseIntegerNode(integerNode);
         }
         
-        LinkedHashMap<String, String> result = new LinkedHashMap<>();
-        for (SelectItemContext selectItemNode : selectItemsNode.selectItem()) {
-            String fieldName = selectItemNode.field().identifier().getText();
-            String alias = selectItemNode.alias != null ?
-                    selectItemNode.alias.getText() :
-                    fieldName;
-            result.put(alias, fieldName);
+        TerminalNode stringNode = valueNode.LIT_STRING();
+        if (stringNode != null) {
+            return parseStringNode(stringNode);
         }
-        return result;
+        
+        if (valueNode.NULL() != null) {
+            return null;
+        }
+
+        throw new IllegalArgumentException("Invalid literal: " + valueNode.getText());
+    }
+    
+    private Integer parseIntegerNode(TerminalNode integerNode) {
+        return Integer.parseInt(integerNode.getText());
+    }
+
+    private String parseStringNode(TerminalNode stringNode) {
+        return SqlUtil.unquoteString(stringNode.getText());
+    }
+    
+    
+    private static class ParseErrorListener extends BaseErrorListener {
+        
+        @Override
+        public void syntaxError(
+                Recognizer<?, ?> recognizer,
+                Object offendingSymbol,
+                int line,
+                int charPositionInLine,
+                String msg,
+                RecognitionException e) {
+            throw new IllegalArgumentException(e);
+        }
+        
     }
 
 }

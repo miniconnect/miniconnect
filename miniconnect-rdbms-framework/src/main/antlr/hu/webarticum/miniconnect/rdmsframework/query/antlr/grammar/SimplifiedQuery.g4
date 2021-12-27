@@ -6,27 +6,28 @@ package hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar;
 
 simplifiedQuery: ( selectQuery | updateQuery | insertQuery | deleteQuery ) EOF ;
 
-selectQuery: SELECT selectPart FROM tableName wherePart? orderPart?;
+selectQuery: SELECT selectPart FROM tableName wherePart? orderByPart?;
 selectPart: selectItems | '*';
 selectItems: selectItem ( ',' selectItem )*;
-selectItem: field ( AS? alias=identifier )?;
+selectItem: fieldName ( AS? alias=identifier )?;
 
 updateQuery: UPDATE tableName SET updateItem ( ',' updateItem )* wherePart?;
-updateItem: field '=' value;
+updateItem: fieldName '=' value;
 
 insertQuery: INSERT INTO tableName fieldList? VALUES valueList;
-fieldList: '(' field ( ',' field )* ')';
+fieldList: '(' fieldName ( ',' fieldName )* ')';
 valueList: '(' value ( ',' value )* ')';
 
 deleteQuery: DELETE FROM tableName wherePart?;
 
 wherePart: WHERE whereItem ( AND whereItem )*;
-whereItem: identifier '=' value | '(' whereItem ')';
-orderPart: ORDER BY identifier ( ASC | DESC )?;
-field: identifier;
+whereItem: fieldName '=' value | '(' whereItem ')';
+orderByPart: ORDER BY orderByItem ( ',' orderByItem )*;
+orderByItem: fieldName ( ASC | DESC )?;
+fieldName: identifier;
 tableName: identifier;
 identifier: SIMPLENAME | QUOTEDNAME | BACKTICKEDNAME;
-value: LIT_STRING | LIT_DECIMAL | LIT_INTEGER | NULL;
+value: LIT_STRING | LIT_INTEGER | NULL;
 
 SELECT: S E L E C T;
 INSERT: I N S E R T;
@@ -46,12 +47,11 @@ VALUES: V A L U E S;
 SET: S E T;
 NULL: N U L L;
 
-SIMPLENAME: [a-zA-Z_] [a-zA-Z_0-9]+;
+SIMPLENAME: [a-zA-Z_] [a-zA-Z_0-9]*;
 QUOTEDNAME: '"' ( '\\' . | '""' | ~[\\"] )* '"';
 BACKTICKEDNAME: '`' ( '``' | ~[`] )* '`';
 
 LIT_STRING: '\'' ( '\\' . | '\'\'' | ~[\\'] )* '\'';
-LIT_DECIMAL: '-'? [0-9]+ '.' [0-9]+;
 LIT_INTEGER: '-'? [0-9]+;
 
 WHITESPACE: [ \n\t\r] -> skip;
