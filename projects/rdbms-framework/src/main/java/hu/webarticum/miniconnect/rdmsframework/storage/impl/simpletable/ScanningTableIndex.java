@@ -174,9 +174,54 @@ public class ScanningTableIndex implements TableIndex {
             return isPrefixOf(from, values);
         }
         
-        // TODO
-        return false;
+        if (!checkFrom(values, from, fromInclusive)) {
+            return false;
+        }
+
+        return checkTo(values, to, toInclusive);
+    }
+    
+    private boolean checkFrom(
+            ImmutableList<Object> values,
+            ImmutableList<?> from,
+            boolean fromInclusive) {
+        return checkBound(values, from, fromInclusive, true);
+    }
+
+    private boolean checkTo(
+            ImmutableList<Object> values,
+            ImmutableList<?> to,
+            boolean toInclusive) {
+        return checkBound(values, to, toInclusive, false);
+    }
+    
+    private boolean checkBound(
+            ImmutableList<Object> values,
+            ImmutableList<?> bound,
+            boolean boundInclusive,
+            boolean isFrom) {
         
+        if (bound == null) {
+            return true;
+        }
+        
+        int valuesSize = values.size();
+        int boundSize = bound.size();
+        
+        if (boundSize > valuesSize) {
+            return checkBound(values, bound.section(0, valuesSize), boundInclusive, isFrom);
+        }
+        
+        if (boundInclusive && isPrefixOf(bound, values)) {
+            return true;
+        }
+        
+        ImmutableList<Object> leftValues = values.section(0, boundSize);
+        @SuppressWarnings("unchecked")
+        ImmutableList<Object> comparableTo = (ImmutableList<Object>) bound;
+        int cmp = multiComparator.compare(comparableTo, leftValues);
+        
+        return isFrom ? (cmp < 0) : (cmp > 0);
     }
     
     private boolean isPrefixOf(ImmutableList<?> prefix, ImmutableList<?> values) {
