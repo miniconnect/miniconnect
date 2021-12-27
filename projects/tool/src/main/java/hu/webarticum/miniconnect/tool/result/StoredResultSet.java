@@ -1,5 +1,7 @@
 package hu.webarticum.miniconnect.tool.result;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.Iterator;
 
@@ -14,6 +16,8 @@ public final class StoredResultSet implements MiniResultSet, Serializable {
 
 
     private final StoredResultSetData data;
+    
+    private transient Iterator<ImmutableList<MiniValue>> iterator;
 
 
     public StoredResultSet() {
@@ -22,6 +26,13 @@ public final class StoredResultSet implements MiniResultSet, Serializable {
 
     public StoredResultSet(StoredResultSetData data) {
         this.data = data;
+        this.iterator = data.iterator();
+    }
+    
+    private void readObject(ObjectInputStream inputStream)
+            throws IOException, ClassNotFoundException {
+        inputStream.defaultReadObject();
+        this.iterator = data.iterator();
     }
 
 
@@ -32,7 +43,7 @@ public final class StoredResultSet implements MiniResultSet, Serializable {
 
     @Override
     public Iterator<ImmutableList<MiniValue>> iterator() {
-        return data.iterator();
+        return iterator;
     }
     
     public ImmutableList<ImmutableList<MiniValue>> rows() {
