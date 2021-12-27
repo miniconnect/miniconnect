@@ -44,7 +44,6 @@ public final class SelectQuery implements Query {
     }
     
     
-    // FIXME: Query::toSqlString() ?
     @Override
     public String toString() {
         StringBuilder resultBuilder = new StringBuilder("SELECT");
