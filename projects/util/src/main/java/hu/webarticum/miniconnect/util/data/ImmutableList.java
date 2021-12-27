@@ -119,6 +119,25 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
         return new ImmutableList<>(filteredData, null);
     }
     
+    public ImmutableList<T> section(int from, int until) {
+        return new ImmutableList<>(data.subList(from, until));
+    }
+
+    public ImmutableList<T> concat(ImmutableList<? extends T> other) {
+        List<T> newData = new ArrayList<>(data.size() + other.size());
+        newData.addAll(data);
+        newData.addAll(other.data);
+        return new ImmutableList<>(newData, null);
+    }
+
+    public ImmutableList<T> concat(Iterable<? extends T> other) {
+        List<T> newData = new ArrayList<>(data);
+        for (T item : other) {
+            newData.add(item);
+        }
+        return new ImmutableList<>(newData, null);
+    }
+    
     public Iterable<T> reverseOrder() {
         ListIterator<T> listIterator = data.listIterator(data.size());
         return () -> new Iterator<T>() {
