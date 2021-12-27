@@ -22,8 +22,9 @@ public class HelloMain {
         try (MiniSession session = new FrameworkSession(
                 sqlParser, queryExecutor, storageAccessFactory)) {
             MiniResult result = session.execute(
-                    "SELECT lorem, ipsum AS dolor FROM data " +
-                            "WHERE x = 1 AND y = 'apple' ORDER BY a ASC, b DESC");
+                    //"SELECT lorem, ipsum AS dolor FROM data " +
+                    //        "WHERE x = 1 AND y = 'apple' ORDER BY a ASC, b DESC");
+                    "DELETE FROM data WHERE a = 1 AND b = 'banana'");
             if (!result.success()) {
                 System.out.println("oops");
                 System.out.println(result.error().message());
