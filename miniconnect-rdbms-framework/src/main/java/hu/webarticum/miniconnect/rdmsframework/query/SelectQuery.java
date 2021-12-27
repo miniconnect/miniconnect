@@ -8,7 +8,7 @@ public final class SelectQuery implements Query {
     
     private final LinkedHashMap<String, String> fields;
 
-    private final String fromTableName;
+    private final String tableName;
     
     private final LinkedHashMap<String, Object> where;
     
@@ -17,7 +17,7 @@ public final class SelectQuery implements Query {
     
     private SelectQuery(SelectQueryBuilder builder) {
         this.fields = builder.fields;
-        this.fromTableName = Objects.requireNonNull(builder.fromTableName);
+        this.tableName = Objects.requireNonNull(builder.tableName);
         this.where = Objects.requireNonNull(builder.where);
         this.orderBy = Objects.requireNonNull(builder.orderBy);
     }
@@ -31,8 +31,8 @@ public final class SelectQuery implements Query {
         return new LinkedHashMap<>(fields);
     }
 
-    public String fromTableName() {
-        return fromTableName;
+    public String tableName() {
+        return tableName;
     }
 
     public Map<String, Object> where() {
@@ -49,7 +49,7 @@ public final class SelectQuery implements Query {
         StringBuilder resultBuilder = new StringBuilder("SELECT");
         appendFieldsSql(resultBuilder);
         resultBuilder.append(" FROM ");
-        resultBuilder.append(SqlUtil.quoteIdentifier(fromTableName));
+        resultBuilder.append(SqlUtil.quoteIdentifier(tableName));
         appendWhereSql(resultBuilder);
         appendOrderBySql(resultBuilder);
         return resultBuilder.toString();
@@ -141,7 +141,7 @@ public final class SelectQuery implements Query {
         
         private LinkedHashMap<String, String> fields = new LinkedHashMap<>();
 
-        private String fromTableName = null;
+        private String tableName = null;
         
         private LinkedHashMap<String, Object> where = new LinkedHashMap<>();
         
@@ -153,8 +153,8 @@ public final class SelectQuery implements Query {
             return this;
         }
 
-        public SelectQueryBuilder from(String fromTableName) {
-            this.fromTableName = fromTableName;
+        public SelectQueryBuilder from(String tableName) {
+            this.tableName = tableName;
             return this;
         }
 
