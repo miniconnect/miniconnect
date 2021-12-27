@@ -15,15 +15,15 @@ public final class SelectQuery implements Query {
     private final LinkedHashMap<String, Boolean> orderBy;
     
     
-    private SelectQuery(SimpleSelectQueryBuilder builder) {
+    private SelectQuery(SelectQueryBuilder builder) {
         this.fields = builder.fields;
         this.fromTableName = Objects.requireNonNull(builder.fromTableName);
         this.where = Objects.requireNonNull(builder.where);
         this.orderBy = Objects.requireNonNull(builder.orderBy);
     }
     
-    public static SimpleSelectQueryBuilder builder() {
-        return new SimpleSelectQueryBuilder();
+    public static SelectQueryBuilder builder() {
+        return new SelectQueryBuilder();
     }
     
     
@@ -126,7 +126,7 @@ public final class SelectQuery implements Query {
     }
     
     
-    public static final class SimpleSelectQueryBuilder {
+    public static final class SelectQueryBuilder {
         
         private LinkedHashMap<String, String> fields = new LinkedHashMap<>();
 
@@ -137,22 +137,22 @@ public final class SelectQuery implements Query {
         private LinkedHashMap<String, Boolean> orderBy = new LinkedHashMap<>();
         
         
-        public SimpleSelectQueryBuilder fields(Map<String, String> fields) {
+        public SelectQueryBuilder fields(Map<String, String> fields) {
             this.fields = new LinkedHashMap<>(fields);
             return this;
         }
 
-        public SimpleSelectQueryBuilder from(String fromTableName) {
+        public SelectQueryBuilder from(String fromTableName) {
             this.fromTableName = fromTableName;
             return this;
         }
 
-        public SimpleSelectQueryBuilder where(Map<String, Object> where) {
+        public SelectQueryBuilder where(Map<String, Object> where) {
             this.where = new LinkedHashMap<>(where);
             return this;
         }
 
-        public SimpleSelectQueryBuilder orderBy(Map<String, Boolean> orderBy) {
+        public SelectQueryBuilder orderBy(Map<String, Boolean> orderBy) {
             this.orderBy = new LinkedHashMap<>(orderBy);
             return this;
         }
