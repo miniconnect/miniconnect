@@ -27,7 +27,7 @@ public class MultiComparator implements Comparator<ImmutableList<Object>> {
     
     @Override
     public int compare(ImmutableList<Object> values1, ImmutableList<Object> values2) {
-        Iterator<Comparator<Object>> iteratorOfValues2 = comparators.iterator();
+        Iterator<Object> iteratorOfValues2 = values2.iterator();
         Iterator<Comparator<Object>> iteratorOfComparators = comparators.iterator();
         for (Object value1 : values1) {
             Object value2 = iteratorOfValues2.next();
