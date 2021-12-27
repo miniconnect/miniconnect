@@ -15,6 +15,5 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.7.1'
     testImplementation 'org.junit.platform:junit-platform-launcher:1.7.1'
     testImplementation 'org.assertj:assertj-core:3.19.0'
-    testImplementation project(':projects:messenger')
     testImplementation project(':projects:jdbc-adapter')
 }
