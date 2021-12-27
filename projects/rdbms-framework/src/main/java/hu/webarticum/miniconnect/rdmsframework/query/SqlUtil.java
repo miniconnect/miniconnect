@@ -24,6 +24,19 @@ public final class SqlUtil {
     
     // FIXME: context dependent quoting?
     
+    public static String stringifyValue(Object value) {
+        if (value == null) {
+            return "NULL";
+        } else if (value instanceof Integer) {
+            return Integer.toString((Integer) value);
+        } else if (value instanceof String) {
+            return quoteString((String) value);
+        } else {
+            throw new IllegalArgumentException(
+                    "Unknown type to stringify: " + value.getClass().getName());
+        }
+    }
+
     public static String quoteIdentifier(String identifier) {
         Matcher matcher = TO_QUOTE_IDENTIFIER_PATTERN.matcher(identifier);
         return "\"" + matcher.replaceAll("\\\\$0") + "\"";
