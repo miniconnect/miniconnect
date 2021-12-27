@@ -10,33 +10,33 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import hu.webarticum.miniconnect.rdmsframework.execution.SqlParser;
-import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryLexer;
-import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser;
-import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.IdentifierContext;
-import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.OrderByItemContext;
-import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.OrderByPartContext;
-import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.SelectItemContext;
-import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.SelectItemsContext;
-import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.SelectPartContext;
-import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.SelectQueryContext;
-import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.SimplifiedQueryContext;
-import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.ValueContext;
-import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.WhereItemContext;
-import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SimplifiedQueryParser.WherePartContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryLexer;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.IdentifierContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByItemContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByPartContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectItemContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectItemsContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectPartContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectQueryContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SqlQueryContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ValueContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.WhereItemContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.WherePartContext;
 
 public class AntlrSqlParser implements SqlParser {
 
     @Override
     public Query parse(String sql) {
-        SimplifiedQueryLexer lexer = new SimplifiedQueryLexer(CharStreams.fromString(sql));
-        SimplifiedQueryParser parser = new SimplifiedQueryParser(new CommonTokenStream(lexer));
+        SqlQueryLexer lexer = new SqlQueryLexer(CharStreams.fromString(sql));
+        SqlQueryParser parser = new SqlQueryParser(new CommonTokenStream(lexer));
         parser.removeErrorListeners();
         parser.addErrorListener(new ParseErrorListener());
-        SimplifiedQueryContext rootNode = parser.simplifiedQuery();
+        SqlQueryContext rootNode = parser.sqlQuery();
         return parseRootNode(rootNode);
     }
 
-    private Query parseRootNode(SimplifiedQueryContext rootNode) {
+    private Query parseRootNode(SqlQueryContext rootNode) {
         SelectQueryContext selectQueryNode = rootNode.selectQuery();
         if (selectQueryNode != null) {
             return parseSelectNode(selectQueryNode);
@@ -47,7 +47,7 @@ public class AntlrSqlParser implements SqlParser {
         throw new IllegalArgumentException("Query type not supported");
     }
 
-    private SimpleSelectQuery parseSelectNode(SelectQueryContext selectQueryNode) {
+    private SelectQuery parseSelectNode(SelectQueryContext selectQueryNode) {
         IdentifierContext identifierNode = selectQueryNode.tableName().identifier();
         String fromTableName = parseIdentifierNode(identifierNode);
         SelectPartContext selectPartNode = selectQueryNode.selectPart();

@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public final class SimpleSelectQuery implements Query {
+public final class SelectQuery implements Query {
     
     private final LinkedHashMap<String, String> fields;
 
@@ -15,7 +15,7 @@ public final class SimpleSelectQuery implements Query {
     private final LinkedHashMap<String, Boolean> orderBy;
     
     
-    private SimpleSelectQuery(SimpleSelectQueryBuilder builder) {
+    private SelectQuery(SimpleSelectQueryBuilder builder) {
         this.fields = builder.fields;
         this.fromTableName = Objects.requireNonNull(builder.fromTableName);
         this.where = Objects.requireNonNull(builder.where);
@@ -158,8 +158,8 @@ public final class SimpleSelectQuery implements Query {
         }
         
         
-        public SimpleSelectQuery build() {
-            return new SimpleSelectQuery(this);
+        public SelectQuery build() {
+            return new SelectQuery(this);
         }
         
     }

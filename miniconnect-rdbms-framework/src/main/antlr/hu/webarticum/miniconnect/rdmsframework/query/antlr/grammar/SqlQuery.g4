@@ -1,10 +1,10 @@
-grammar SimplifiedQuery;
+grammar SqlQuery;
 
 @header {
 package hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar;
 }
 
-simplifiedQuery: ( selectQuery | updateQuery | insertQuery | deleteQuery ) EOF ;
+sqlQuery: ( selectQuery | updateQuery | insertQuery | deleteQuery ) EOF ;
 
 selectQuery: SELECT selectPart FROM tableName wherePart? orderByPart?;
 selectPart: selectItems | '*';
