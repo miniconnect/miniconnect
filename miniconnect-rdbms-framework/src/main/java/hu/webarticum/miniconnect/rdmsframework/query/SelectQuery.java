@@ -102,19 +102,6 @@ public final class SelectQuery implements Query {
         }
     }
     
-    private String stringifyValue(Object value) {
-        if (value == null) {
-            return "NULL";
-        } else if (value instanceof Integer) {
-            return Integer.toString((Integer) value);
-        } else if (value instanceof String) {
-            return SqlUtil.quoteString((String) value);
-        } else {
-            throw new IllegalArgumentException(
-                    "Unknown type to stringify: " + value.getClass().getName());
-        }
-    }
-
     private void appendOrderBySql(StringBuilder sqlBuilder) {
         if (orderBy.isEmpty()) {
             return;
@@ -135,7 +122,20 @@ public final class SelectQuery implements Query {
             sqlBuilder.append(SqlUtil.quoteIdentifier(fieldName));
             sqlBuilder.append(ascOrder ? " ASC" : " DESC");        }
     }
-    
+
+    private String stringifyValue(Object value) {
+        if (value == null) {
+            return "NULL";
+        } else if (value instanceof Integer) {
+            return Integer.toString((Integer) value);
+        } else if (value instanceof String) {
+            return SqlUtil.quoteString((String) value);
+        } else {
+            throw new IllegalArgumentException(
+                    "Unknown type to stringify: " + value.getClass().getName());
+        }
+    }
+
     
     public static final class SelectQueryBuilder {
         
