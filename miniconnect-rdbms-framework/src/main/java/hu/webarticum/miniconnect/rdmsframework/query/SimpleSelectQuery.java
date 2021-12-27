@@ -19,7 +19,7 @@ public final class SimpleSelectQuery implements Query {
         this.fields = builder.fields;
         this.fromTableName = Objects.requireNonNull(builder.fromTableName);
         this.where = Objects.requireNonNull(builder.where);
-        this.orderBy = builder.orderBy; // FIXME
+        this.orderBy = Objects.requireNonNull(builder.orderBy);
     }
     
     public static SimpleSelectQueryBuilder builder() {
