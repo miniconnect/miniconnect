@@ -1,6 +1,8 @@
 package hu.webarticum.miniconnect.rdmsframework.query;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStreams;
@@ -13,6 +15,8 @@ import hu.webarticum.miniconnect.rdmsframework.execution.SqlParser;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryLexer;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.DeleteQueryContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.FieldListContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.FieldNameContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.IdentifierContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.InsertQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByItemContext;
@@ -26,8 +30,10 @@ import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParse
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UpdatePartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UpdateQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ValueContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ValueListContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.WhereItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.WherePartContext;
+import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class AntlrSqlParser implements SqlParser {
 
@@ -86,13 +92,37 @@ public class AntlrSqlParser implements SqlParser {
     private InsertQuery parseInsertNode(InsertQueryContext insertQueryNode) {
         IdentifierContext identifierNode = insertQueryNode.tableName().identifier();
         String tableName = parseIdentifierNode(identifierNode);
-        
-        // TODO
-
+        FieldListContext fieldListNode = insertQueryNode.fieldList();
+        ImmutableList<String> fields = parseFieldListNode(fieldListNode);
+        ValueListContext valueListNode = insertQueryNode.valueList();
+        ImmutableList<Object> values = parseValueListNode(valueListNode);
         return Queries.insert()
                 .into(tableName)
-                // TODO
+                .fields(fields)
+                .values(values)
                 .build();
+    }
+
+    private ImmutableList<String> parseFieldListNode(FieldListContext fieldListNode) {
+        if (fieldListNode == null) {
+            return null;
+        }
+        
+        List<String> resultBuilder = new ArrayList<>();
+        for (FieldNameContext fieldNameNode : fieldListNode.fieldName()) {
+            String fieldName = parseIdentifierNode(fieldNameNode.identifier());
+            resultBuilder.add(fieldName);
+        }
+        return new ImmutableList<>(resultBuilder);
+    }
+
+    private ImmutableList<Object> parseValueListNode(ValueListContext valueListNode) {
+        List<Object> resultBuilder = new ArrayList<>();
+        for (ValueContext valueNode : valueListNode.value()) {
+            Object value = parseValueNode(valueNode);
+            resultBuilder.add(value);
+        }
+        return new ImmutableList<>(resultBuilder);
     }
 
     private UpdateQuery parseUpdateNode(UpdateQueryContext updateQueryNode) {

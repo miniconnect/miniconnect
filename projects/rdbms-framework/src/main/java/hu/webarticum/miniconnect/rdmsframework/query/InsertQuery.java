@@ -2,16 +2,28 @@ package hu.webarticum.miniconnect.rdmsframework.query;
 
 import java.util.Objects;
 
+import hu.webarticum.miniconnect.util.data.ImmutableList;
+
 public final class InsertQuery implements Query {
     
     private final String tableName;
     
-    // TODO: fields, values
+    private final ImmutableList<String> fields;
+    
+    private final ImmutableList<Object> values;
     
     
     private InsertQuery(InsertQueryBuilder builder) {
+        if (
+                builder.fields != null &&
+                builder.values != null &&
+                builder.fields.size() != builder.values.size()) {
+            throw new IllegalArgumentException("Size of fields and values must be the same");
+        }
+        
         this.tableName = Objects.requireNonNull(builder.tableName);
-        // TODO: fields, values
+        this.fields = builder.fields;
+        this.values = Objects.requireNonNull(builder.values);
     }
     
     public static InsertQueryBuilder builder() {
@@ -30,23 +42,45 @@ public final class InsertQuery implements Query {
     public String toString() {
         StringBuilder resultBuilder = new StringBuilder("INSERT INTO ");
         resultBuilder.append(SqlUtil.quoteIdentifier(tableName));
-        // TODO
+        appendFieldsSql(resultBuilder);
+        appendValuesSql(resultBuilder);
         return resultBuilder.toString();
     }
     
-    // TODO
-    
-    private String stringifyValue(Object value) {
-        if (value == null) {
-            return "NULL";
-        } else if (value instanceof Integer) {
-            return Integer.toString((Integer) value);
-        } else if (value instanceof String) {
-            return SqlUtil.quoteString((String) value);
-        } else {
-            throw new IllegalArgumentException(
-                    "Unknown type to stringify: " + value.getClass().getName());
+    private void appendFieldsSql(StringBuilder sqlBuilder) {
+        if (fields == null) {
+            return;
         }
+
+        sqlBuilder.append(" (");
+        
+        boolean first = true;
+        for (String fieldName : fields) {
+            if (first) {
+                first = false;
+            } else {
+                sqlBuilder.append(", ");
+            }
+            sqlBuilder.append(SqlUtil.quoteIdentifier(fieldName));
+        }
+        
+        sqlBuilder.append(")");
+    }
+
+    private void appendValuesSql(StringBuilder sqlBuilder) {
+        sqlBuilder.append(" VALUES (");
+        
+        boolean first = true;
+        for (Object value : values) {
+            if (first) {
+                first = false;
+            } else {
+                sqlBuilder.append(", ");
+            }
+            sqlBuilder.append(SqlUtil.stringifyValue(value));
+        }
+        
+        sqlBuilder.append(")");
     }
 
     
@@ -54,13 +88,25 @@ public final class InsertQuery implements Query {
         
         private String tableName = null;
         
+        private ImmutableList<String> fields = null;
+        
+        private ImmutableList<Object> values = null;
+        
         
         public InsertQueryBuilder into(String tableName) {
             this.tableName = tableName;
             return this;
         }
 
-        // TODO: fields, values
+        public InsertQueryBuilder fields(ImmutableList<String> fields) {
+            this.fields = fields;
+            return this;
+        }
+
+        public InsertQueryBuilder values(ImmutableList<Object> values) {
+            this.values = values;
+            return this;
+        }
         
         
         public InsertQuery build() {

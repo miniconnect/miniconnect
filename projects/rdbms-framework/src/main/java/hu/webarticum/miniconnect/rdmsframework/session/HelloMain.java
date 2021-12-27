@@ -26,7 +26,7 @@ public class HelloMain {
                     //        "WHERE x=1 AND y='apple' ORDER BY a ASC, b DESC");
                     //"DELETE FROM data WHERE a=1 AND b='banana'");
                     //"UPDATE data SET col1=NULL, col2=99, col3='str' WHERE a=1 AND b='banana'");
-                    "INSERT INTO data VALUES (1, 'banana', NULL)");
+                    "INSERT INTO data (id, label, description) VALUES (1, 'banana', NULL)");
             if (!result.success()) {
                 System.out.println("oops");
                 System.out.println(result.error().message());
