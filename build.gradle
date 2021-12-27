@@ -1,0 +1,11 @@
+description = "MiniConnect"
+defaultTasks "build"
+
+allprojects {
+    group "org.springframework.boot"
+    version '1.0-SNAPSHOT'
+
+    repositories {
+        jcenter()
+    }
+}

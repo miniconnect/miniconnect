@@ -1,0 +1,10 @@
+rootProject.name = 'miniconnect'
+
+include 'projects:api'
+include 'projects:jdbc'
+include 'projects:jdbc-adapter'
+include 'projects:messenger'
+include 'projects:rdbms-framework'
+include 'projects:tool'
+include 'projects:transfer-old'
+include 'projects:util'

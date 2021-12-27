@@ -1,0 +1,35 @@
+plugins {
+    id 'java-library'
+    id 'me.champeau.gradle.jmh' version '0.5.0'
+}
+
+sourceCompatibility = 1.8
+
+configurations {
+    jmh
+    lab
+}
+
+sourceSets {
+    lab {
+        java {
+            srcDirs = ['src/lab/java']
+        }
+    }
+}
+
+dependencies {
+    implementation 'org.apache.commons:commons-lang3:3.0'
+    implementation project(':projects:util')
+    implementation project(':projects:tool')
+
+    labImplementation sourceSets.main.output
+    labImplementation configurations.lab
+
+
+    jmh 'org.openjdk.jmh:jmh-core:1.23'
+    jmh 'org.openjdk.jmh:jmh-generator-annprocess:1.23'
+
+    jmhImplementation sourceSets.main.output
+    jmhImplementation configurations.jmh
+}
