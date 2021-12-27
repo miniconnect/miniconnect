@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
+import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelectionEntry;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.fakecolumn.FakeColumnDefinition;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
@@ -41,45 +42,72 @@ class ScanningTableIndexTest {
     }
 
     @Test
-    void testNoResult() {
+    void testFindValueNoResult() {
         assertThat(index("id").findValue(99)).isEmpty();
     }
     
     @Test
-    void testSingleResult() {
+    void testFindValueSingleResult() {
         assertThat(index("id").findValue(3))
                 .map(TableSelectionEntry::tableIndex)
                 .containsExactly(bigs(2));
     }
 
     @Test
-    void testMoreResults() {
+    void testFindValueMoreResults() {
         assertThat(index("lastname").findValue("Smith"))
                 .map(TableSelectionEntry::tableIndex)
                 .containsExactly(bigs(1, 2));
     }
 
     @Test
-    void testMultiColumnNoResult() {
+    void testFindMultiColumnNoResult() {
         assertThat(index("firstname", "lastname").find(ImmutableList.of("Lorem", "Ipsum")))
                 .isEmpty();
     }
 
     @Test
-    void testMultiColumnSingleResult() {
+    void testFindMultiColumnSingleResult() {
         assertThat(index("firstname", "lastname").find(ImmutableList.of("Karl", "Marx")))
                 .map(TableSelectionEntry::tableIndex)
                 .containsExactly(bigs(3));
     }
 
     @Test
-    void testMultiColumnMoreResults() {
+    void testFindMultiColumnMoreResults() {
         assertThat(index("firstname", "lastname").find(ImmutableList.of("Anton", "Bruckner")))
                 .map(TableSelectionEntry::tableIndex)
                 .containsExactly(bigs(4, 6));
     }
+
+    @Test
+    void testFindMultiColumnPartialMoreResults() {
+        assertThat(index("lastname", "firstname").find(ImmutableList.of("Smith")))
+                .map(TableSelectionEntry::tableIndex)
+                .containsExactly(bigs(1, 2));
+    }
+
+    @Test
+    void testFindMultiColumnPartialNoResult() {
+        assertThat(index("lastname", "firstname").find(ImmutableList.of("Lorem")))
+                .map(TableSelectionEntry::tableIndex)
+                .isEmpty();
+    }
     
-    // TODO
+    // TODO: more tests (from/to, inclusive/exclusive, partial/full etc.)
+
+    @Test
+    void testFindOddRangeInclusiveSomeResults() {
+        TableSelection selection = index("lastname", "firstname").find(
+                ImmutableList.of("Bruckner"),
+                false,
+                ImmutableList.of("Smith", "Adam"),
+                true,
+                true);
+        assertThat(selection)
+                .map(TableSelectionEntry::tableIndex)
+                .containsExactly(bigs(3, 0, 1));
+    }
     
     
     private ScanningTableIndex index(String... columnNames) {
