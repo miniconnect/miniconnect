@@ -95,7 +95,20 @@ class ScanningTableIndexTest {
     }
 
     @Test
-    void testFindToExclusive() {
+    void testFindToInclusive() {
+        TableSelection selection = index("lastname", "firstname").find(
+                null,
+                false,
+                ImmutableList.of("Marx", "Karl"),
+                true,
+                false);
+        assertThat(selection)
+                .map(TableSelectionEntry::tableIndex)
+                .containsExactly(bigs(3, 4, 5, 6));
+    }
+
+    @Test
+    void testFindToExclusiveSomeResultsNotSorted() {
         TableSelection selection = index("lastname", "firstname").find(
                 null,
                 false,
@@ -105,6 +118,58 @@ class ScanningTableIndexTest {
         assertThat(selection)
                 .map(TableSelectionEntry::tableIndex)
                 .containsExactlyInAnyOrder(bigs(4, 5, 6));
+    }
+
+    @Test
+    void testFindToNonExistingExclusiveSomeResultsNotSorted() {
+        TableSelection selection = index("lastname", "firstname").find(
+                null,
+                false,
+                ImmutableList.of("Nash", "John"),
+                false,
+                false);
+        assertThat(selection)
+                .map(TableSelectionEntry::tableIndex)
+                .containsExactlyInAnyOrder(bigs(3, 4, 5, 6));
+    }
+
+    @Test
+    void testFindFromInclusive() {
+        TableSelection selection = index("lastname", "firstname").find(
+                ImmutableList.of("Marx", "Karl"),
+                true,
+                null,
+                false,
+                true);
+        assertThat(selection)
+                .map(TableSelectionEntry::tableIndex)
+                .containsExactly(bigs(3, 0, 1, 2));
+    }
+
+    @Test
+    void testFindFromExclusiveSomeResults() {
+        TableSelection selection = index("lastname", "firstname").find(
+                ImmutableList.of("Marx", "Karl"),
+                false,
+                null,
+                false,
+                true);
+        assertThat(selection)
+                .map(TableSelectionEntry::tableIndex)
+                .containsExactly(bigs(0, 1, 2));
+    }
+
+    @Test
+    void testFindFromNonExistingExclusiveSomeResults() {
+        TableSelection selection = index("lastname", "firstname").find(
+                ImmutableList.of("Nash", "John"),
+                false,
+                null,
+                false,
+                true);
+        assertThat(selection)
+                .map(TableSelectionEntry::tableIndex)
+                .containsExactly(bigs(0, 1, 2));
     }
     
     @Test
