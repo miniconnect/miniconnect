@@ -93,9 +93,20 @@ class ScanningTableIndexTest {
                 .map(TableSelectionEntry::tableIndex)
                 .isEmpty();
     }
-    
-    // TODO: more tests (from/to, inclusive/exclusive, partial/full etc.)
 
+    @Test
+    void testFindRangeExclusiveSingleResult() {
+        TableSelection selection = index("lastname", "firstname").find(
+                ImmutableList.of("Marx", "Karl"),
+                false,
+                ImmutableList.of("Smith", "Adam"),
+                false,
+                true);
+        assertThat(selection)
+                .map(TableSelectionEntry::tableIndex)
+                .containsExactly(bigs(0));
+    }
+    
     @Test
     void testFindOddRangeInclusiveSomeResults() {
         TableSelection selection = index("lastname", "firstname").find(
