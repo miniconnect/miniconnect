@@ -95,6 +95,19 @@ class ScanningTableIndexTest {
     }
 
     @Test
+    void testFindToExclusive() {
+        TableSelection selection = index("lastname", "firstname").find(
+                null,
+                false,
+                ImmutableList.of("Marx", "Karl"),
+                false,
+                false);
+        assertThat(selection)
+                .map(TableSelectionEntry::tableIndex)
+                .containsExactlyInAnyOrder(bigs(4, 5, 6));
+    }
+    
+    @Test
     void testFindRangeExclusiveSingleResult() {
         TableSelection selection = index("lastname", "firstname").find(
                 ImmutableList.of("Marx", "Karl"),
