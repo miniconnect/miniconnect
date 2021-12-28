@@ -39,11 +39,6 @@ public class SimpleTable implements Table {
     private final SimpleTableIndexStore tableIndexStore = new SimpleTableIndexStore();
 
     
-    private volatile Object rowOrderKey = new Object(); // NOSONAR
-    
-    private volatile Object reverseRowOrderKey = new Object(); // NOSONAR
-    
-    
     private SimpleTable(SimpleTableBuilder builder) {
         this.name = builder.name;
         this.writable = builder.writable;
@@ -87,16 +82,6 @@ public class SimpleTable implements Table {
     @Override
     public boolean isWritable() {
         return writable;
-    }
-
-    @Override
-    public Object rowOrderKey() {
-        return rowOrderKey;
-    }
-    
-    @Override
-    public Object reverseRowOrderKey() {
-        return reverseRowOrderKey;
     }
 
     @Override

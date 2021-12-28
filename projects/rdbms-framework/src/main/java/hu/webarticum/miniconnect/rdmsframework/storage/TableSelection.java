@@ -4,7 +4,7 @@ import java.math.BigInteger;
 
 public interface TableSelection extends Iterable<TableSelectionEntry> {
 
-    public Object orderKey();
+    public OrderKey orderKey();
     
     public boolean containsRow(BigInteger rowIndex);
     

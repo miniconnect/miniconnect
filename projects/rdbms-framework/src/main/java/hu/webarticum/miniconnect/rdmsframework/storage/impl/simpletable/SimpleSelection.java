@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.function.Predicate;
 
+import hu.webarticum.miniconnect.rdmsframework.storage.OrderKey;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelectionEntry;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
@@ -12,9 +13,9 @@ public class SimpleSelection implements TableSelection {
     
     private final Predicate<BigInteger> containmentPredicate;
     
-    private final Object orderKey;
+    private final OrderKey orderKey;
     
-    private final Object reverseOrderKey;
+    private final OrderKey reverseOrderKey;
     
     private final Iterable<BigInteger> rowIndexes;
     
@@ -28,8 +29,8 @@ public class SimpleSelection implements TableSelection {
     public SimpleSelection(ImmutableList<BigInteger> rowIndexes) {
         this(
                 rowIndexes::contains,
-                new Object(),
-                new Object(),
+                OrderKey.adHoc(),
+                OrderKey.adHoc(),
                 rowIndexes,
                 rowIndexes.reverseOrder(),
                 new Sequence(BigInteger.valueOf(rowIndexes.size())),
@@ -38,8 +39,8 @@ public class SimpleSelection implements TableSelection {
 
     public SimpleSelection(
             BigInteger tableSize,
-            Object orderKey,
-            Object reverseOrderKey,
+            OrderKey orderKey,
+            OrderKey reverseOrderKey,
             ImmutableList<BigInteger> rowIndexes,
             ImmutableList<BigInteger> orderIndexes) {
         this(
@@ -54,8 +55,8 @@ public class SimpleSelection implements TableSelection {
     
     public SimpleSelection(
             Predicate<BigInteger> containmentPredicate,
-            Object orderKey,
-            Object reverseOrderKey,
+            OrderKey orderKey,
+            OrderKey reverseOrderKey,
             Iterable<BigInteger> rowIndexes,
             Iterable<BigInteger> reverseRowIndexes,
             Iterable<BigInteger> orderIndexes,
@@ -76,7 +77,7 @@ public class SimpleSelection implements TableSelection {
     }
 
     @Override
-    public Object orderKey() {
+    public OrderKey orderKey() {
         return orderKey;
     }
 

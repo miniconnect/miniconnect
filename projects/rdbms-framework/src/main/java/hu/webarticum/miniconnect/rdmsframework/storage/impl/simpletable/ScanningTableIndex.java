@@ -8,6 +8,7 @@ import java.util.List;
 
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
+import hu.webarticum.miniconnect.rdmsframework.storage.StandardOrderKey;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
@@ -100,12 +101,13 @@ public class ScanningTableIndex implements TableIndex {
 
         ImmutableList<BigInteger> rowIndexes = new ImmutableList<>(foundEntries).map(e -> e.index);
         if (sort) {
+            // TODO: use StandardOrderKey in this case too
             return new SimpleSelection(rowIndexes);
         } else {
             return new SimpleSelection(
                     table.size(),
-                    table.rowOrderKey(),
-                    table.reverseRowOrderKey(),
+                    new StandardOrderKey(table.name(), true),
+                    new StandardOrderKey(table.name(), false),
                     rowIndexes,
                     rowIndexes);
         }
