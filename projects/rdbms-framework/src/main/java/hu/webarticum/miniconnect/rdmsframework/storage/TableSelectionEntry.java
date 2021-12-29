@@ -2,6 +2,18 @@ package hu.webarticum.miniconnect.rdmsframework.storage;
 
 import java.math.BigInteger;
 
+/**
+ * Entry data class for {@link TableSelection} implementations.
+ * 
+ * <p>
+ * Two entries are comparable and mergeable
+ * in the same transaction or non-transactional query execution
+ * iff their <code>orderKey</code>s are equal.
+ * </p>
+ * 
+ * @see OrderKey
+ * @see TableSelection
+ */
 public class TableSelectionEntry {
 
     private final OrderKey orderKey;
