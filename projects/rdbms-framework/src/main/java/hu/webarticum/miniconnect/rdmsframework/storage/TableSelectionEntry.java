@@ -4,21 +4,21 @@ import java.math.BigInteger;
 
 public class TableSelectionEntry {
 
-    private final Object orderKey;
+    private final OrderKey orderKey;
     
     private final BigInteger rowIndex;
     
     private final BigInteger orderIndex;
 
     
-    public TableSelectionEntry(Object orderKey, BigInteger rowIndex, BigInteger orderIndex) {
+    public TableSelectionEntry(OrderKey orderKey, BigInteger rowIndex, BigInteger orderIndex) {
         this.orderKey = orderKey;
         this.rowIndex = rowIndex;
         this.orderIndex = orderIndex;
     }
 
 
-    public Object orderKey() {
+    public OrderKey orderKey() {
         return orderKey;
     }
 
