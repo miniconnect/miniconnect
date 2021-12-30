@@ -24,7 +24,7 @@ public class FakeColumnDefinition implements ColumnDefinition {
     
     @Override
     public Comparator<?> comparator() {
-        return Comparator.nullsFirst(Comparator.naturalOrder());
+        return Comparator.naturalOrder();
     }
 
 }

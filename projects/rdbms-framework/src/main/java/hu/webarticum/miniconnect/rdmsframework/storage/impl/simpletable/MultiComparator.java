@@ -21,7 +21,8 @@ public class MultiComparator implements Comparator<ImmutableList<Object>> {
 
     @SuppressWarnings("unchecked")
     public MultiComparator(ImmutableList<? extends Comparator<?>> comparators) {
-        this.comparators = (ImmutableList<Comparator<Object>>) comparators;
+        this.comparators = ((ImmutableList<Comparator<Object>>) comparators)
+                .map(Comparator::nullsFirst);
     }
 
     
