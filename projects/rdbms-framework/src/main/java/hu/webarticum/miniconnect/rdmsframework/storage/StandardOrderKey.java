@@ -6,35 +6,40 @@ public final class StandardOrderKey implements OrderKey {
     
     private final String tableName;
     
-    private final ImmutableList<String> columnNames;
+    private final ImmutableList<Entry> columnEntries;
     
-    private final boolean ascOrder;
-    
-    private final boolean nullsFirst;
+    private final boolean groupAscOrder;
     
 
-    public StandardOrderKey(String tableName, boolean ascOrder) {
-        this(tableName, ImmutableList.empty(), ascOrder, true);
+    public StandardOrderKey(String tableName, boolean rowAscOrder) {
+        this(tableName, ImmutableList.empty(), rowAscOrder);
     }
-    
+
     public StandardOrderKey(
-            String tableName,
-            ImmutableList<String> columnNames,
-            boolean ascOrder,
-            boolean nullsFirst) {
+            String tableName, ImmutableList<Entry> columnEntries, boolean groupAscOrder) {
         this.tableName = tableName;
-        this.columnNames = columnNames;
-        this.ascOrder = ascOrder;
-        this.nullsFirst = nullsFirst;
+        this.columnEntries = columnEntries;
+        this.groupAscOrder = groupAscOrder;
     }
     
+    
+    public String tableName() {
+        return tableName;
+    }
+
+    public ImmutableList<Entry> columnEntries() {
+        return columnEntries;
+    }
+
+    public boolean isGroupAscOrder() {
+        return groupAscOrder;
+    }
     
     @Override
     public int hashCode() {
         int result = tableName.hashCode();
-        result = result | columnNames.hashCode();
-        result = (result * 37) + (ascOrder ? 1 : 0);
-        result = (result * 37) + (nullsFirst ? 1 : 0);
+        result = result ^ columnEntries.hashCode();
+        result = (result * 37) + (groupAscOrder ? 1 : 0);
         return result;
     }
     
@@ -49,9 +54,61 @@ public final class StandardOrderKey implements OrderKey {
         StandardOrderKey otherKey = (StandardOrderKey) other;
         return
                 tableName.equals(otherKey.tableName) &&
-                columnNames.equals(otherKey.columnNames) &&
-                ascOrder == otherKey.ascOrder &&
-                nullsFirst == otherKey.nullsFirst;
+                columnEntries.equals(otherKey.columnEntries) &&
+                groupAscOrder == otherKey.groupAscOrder;
+    }
+    
+    
+    public static final class Entry {
+        
+        private final String columnName;
+        
+        private final boolean ascOrder;
+        
+        private final boolean nullHighest;
+        
+        
+        public Entry(String columnName, boolean ascOrder, boolean nullHighest) {
+            this.columnName = columnName;
+            this.ascOrder = ascOrder;
+            this.nullHighest = nullHighest;
+        }
+
+        
+        public String columnName() {
+            return columnName;
+        }
+
+        public boolean isAscOrder() {
+            return ascOrder;
+        }
+
+        public boolean isNullHighest() {
+            return nullHighest;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = columnName.hashCode();
+            result = (result * 37) + (ascOrder ? 1 : 0);
+            result = (result * 37) + (nullHighest ? 1 : 0);
+            return result;
+        }
+        
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            } else if (!(other instanceof Entry)) {
+                return false;
+            }
+            
+            Entry otherEntry = (Entry) other;
+            return
+                    columnName.equals(otherEntry.columnName) &&
+                    ascOrder == otherEntry.ascOrder &&
+                    nullHighest == otherEntry.nullHighest;
+        }
     }
     
 }
