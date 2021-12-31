@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.rdmsframework.execution.fake;
+package hu.webarticum.miniconnect.rdmsframework.storage.impl.simple;
 
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResource;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;

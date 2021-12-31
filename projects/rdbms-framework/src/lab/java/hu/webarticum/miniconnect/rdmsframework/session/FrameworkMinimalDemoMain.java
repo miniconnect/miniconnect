@@ -10,7 +10,10 @@ import hu.webarticum.miniconnect.rdmsframework.execution.SqlParser;
 import hu.webarticum.miniconnect.rdmsframework.execution.fake.FakeQueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.AntlrSqlParser;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
+import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleStorageAccess;
+import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleTable;
+import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleTableManager;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class FrameworkMinimalDemoMain {
@@ -44,7 +47,11 @@ public class FrameworkMinimalDemoMain {
     }
     
     public static StorageAccess createStorageAccess() {
-        return new SimpleStorageAccess();
+        SimpleStorageAccess storageAccess =  new SimpleStorageAccess();
+        SimpleTableManager tableManager = storageAccess.tables();
+        Table table = SimpleTable.builder().name("data").build(); // TODO
+        tableManager.registerTable(table);
+        return storageAccess;
     }
     
 }
