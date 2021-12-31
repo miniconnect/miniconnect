@@ -30,6 +30,7 @@ public class FrameworkSession implements MiniSession {
     private volatile boolean closed = false;
     
     
+    // TODO: create an abstraction to storageAccess (transaction manager)
     public FrameworkSession(
             Supplier<SqlParser> sqlParserFactory,
             Supplier<QueryExecutor> queryExecutorFactory,
@@ -75,7 +76,7 @@ public class FrameworkSession implements MiniSession {
         
         // TODO
         
-        return new StoredResult(new StoredError(99, "00099", "Nincs hiba sajnos..."));
+        return new StoredResult(new StoredError(99, "00099", "No error"));
     }
 
     @Override

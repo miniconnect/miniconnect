@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelectionEntry;
-import hu.webarticum.miniconnect.rdmsframework.storage.impl.fakecolumn.FakeColumnDefinition;
+import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleColumnDefinition;
+import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.ScanningTableIndex;
+import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleTable;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,10 +24,10 @@ class ScanningTableIndexTest {
     @BeforeEach
     void init() {
         table = SimpleTable.builder()
-                .addColumn("id", new FakeColumnDefinition())
-                .addColumn("firstname", new FakeColumnDefinition())
-                .addColumn("lastname", new FakeColumnDefinition())
-                .addColumn("country", new FakeColumnDefinition())
+                .addColumn("id", new SimpleColumnDefinition())
+                .addColumn("firstname", new SimpleColumnDefinition())
+                .addColumn("lastname", new SimpleColumnDefinition())
+                .addColumn("country", new SimpleColumnDefinition())
                 .addRow(ImmutableList.of(1, "Sándor", "Petőfi", "Hungary"))
                 .addRow(ImmutableList.of(2, "Adam", "Smith", "England"))
                 .addRow(ImmutableList.of(3, "Will", "Smith", "USA"))

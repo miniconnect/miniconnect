@@ -1,11 +1,11 @@
-package hu.webarticum.miniconnect.rdmsframework.storage.impl.fakecolumn;
+package hu.webarticum.miniconnect.rdmsframework.storage.impl.simple;
 
 import java.util.Comparator;
 
 import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
 
 // FIXME: create a proper column definition class
-public class FakeColumnDefinition implements ColumnDefinition {
+public class SimpleColumnDefinition implements ColumnDefinition {
 
     @Override
     public boolean isNullable() {

@@ -8,17 +8,17 @@ import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.execution.SqlParser;
 import hu.webarticum.miniconnect.rdmsframework.execution.fake.FakeQueryExecutor;
-import hu.webarticum.miniconnect.rdmsframework.execution.fake.FakeStorageAccess;
 import hu.webarticum.miniconnect.rdmsframework.query.AntlrSqlParser;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
+import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleStorageAccess;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
-public class HelloMain {
+public class FrameworkMinimalDemoMain {
 
     public static void main(String[] args) {
         Supplier<SqlParser> sqlParser = AntlrSqlParser::new;
         Supplier<QueryExecutor> queryExecutor = FakeQueryExecutor::new;
-        Supplier<StorageAccess> storageAccessFactory = FakeStorageAccess::new;
+        Supplier<StorageAccess> storageAccessFactory = FrameworkMinimalDemoMain::createStorageAccess;
         try (MiniSession session = new FrameworkSession(
                 sqlParser, queryExecutor, storageAccessFactory)) {
             MiniResult result = session.execute(
@@ -41,6 +41,10 @@ public class HelloMain {
                 }
             }
         }
+    }
+    
+    public static StorageAccess createStorageAccess() {
+        return new SimpleStorageAccess();
     }
     
 }

@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.rdmsframework.storage.impl.simpletable;
+package hu.webarticum.miniconnect.rdmsframework.storage.impl.simple;
 
 import java.util.Collection;
 import java.util.Comparator;
