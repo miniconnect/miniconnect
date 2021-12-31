@@ -1,1 +1,5 @@
 /.gradle/
+/.metadata/
+/.settings/
+
+/.project
