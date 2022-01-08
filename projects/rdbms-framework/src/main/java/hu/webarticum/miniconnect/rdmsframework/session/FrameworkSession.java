@@ -63,7 +63,7 @@ public class FrameworkSession implements MiniSession, CheckableCloseable {
         
         // TODO
         
-        return new StoredResult(new StoredError(99, "00099", "No error"));
+        return new StoredResult(new StoredError(99, "00099", "No error occured"));
     }
 
     @Override
