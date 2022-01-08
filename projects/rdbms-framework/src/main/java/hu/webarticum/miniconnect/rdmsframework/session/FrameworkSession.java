@@ -1,8 +1,6 @@
 package hu.webarticum.miniconnect.rdmsframework.session;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
@@ -10,7 +8,9 @@ import java.util.function.Supplier;
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
 import hu.webarticum.miniconnect.rdmsframework.DatabaseException;
+import hu.webarticum.miniconnect.rdmsframework.engine.EngineSession;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.execution.SqlParser;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
@@ -18,26 +18,22 @@ import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 import hu.webarticum.miniconnect.tool.result.StoredError;
 import hu.webarticum.miniconnect.tool.result.StoredResult;
 
-public class FrameworkSession implements MiniSession {
+public class FrameworkSession implements MiniSession, CheckableCloseable {
     
     private final Supplier<SqlParser> sqlParserFactory;
     
     private final Supplier<QueryExecutor> queryExecutorFactory;
     
-    private final StorageAccess storageAccess;
+    private final EngineSession engineSession;
     
     
-    private volatile boolean closed = false;
-    
-    
-    // TODO: create an abstraction to storageAccess (transaction manager)
     public FrameworkSession(
-            Supplier<SqlParser> sqlParserFactory,
-            Supplier<QueryExecutor> queryExecutorFactory,
-            Supplier<StorageAccess> storageAccessFactory) {
+            Supplier<SqlParser> sqlParserFactory, // FIXME: from engine?
+            Supplier<QueryExecutor> queryExecutorFactory, // FIXME: from engine?
+            EngineSession engineSession) {
         this.sqlParserFactory = sqlParserFactory;
         this.queryExecutorFactory = queryExecutorFactory;
-        this.storageAccess = storageAccessFactory.get();
+        this.engineSession = engineSession;
     }
     
     
@@ -71,6 +67,7 @@ public class FrameworkSession implements MiniSession {
 
     public MiniResult executeThrowing(Query query) throws InterruptedException, ExecutionException {
         QueryExecutor queryExecutor = queryExecutorFactory.get();
+        StorageAccess storageAccess = engineSession.storageAccess();
         Future<Object> future = queryExecutor.execute(storageAccess, query); // TODO
         Object executionResult = future.get(); // TODO
         
@@ -82,9 +79,7 @@ public class FrameworkSession implements MiniSession {
     @Override
     public MiniLargeDataSaveResult putLargeData(
             String variableName, long length, InputStream dataSource) {
-        if (closed) {
-            throw new IllegalStateException("Session is closed");
-        }
+        checkClosed();
         
         // TODO
         return null;
@@ -93,24 +88,12 @@ public class FrameworkSession implements MiniSession {
 
     @Override
     public void close() {
-        closed = true;
-        if (storageAccess instanceof AutoCloseable) {
-            try {
-                ((AutoCloseable) storageAccess).close();
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            } catch (Exception e) {
-                IOException ioException = new IOException("Unexpected exception");
-                ioException.addSuppressed(e);
-                throw new UncheckedIOException(ioException);
-            }
-        }
+        engineSession.close();
     }
-    
-    private void checkClosed() {
-        if (closed) {
-            throw new IllegalStateException("Session is closed");
-        }
+
+    @Override
+    public boolean isClosed() {
+        return engineSession.isClosed();
     }
     
     private MiniResult resultOfException(Throwable exception) {

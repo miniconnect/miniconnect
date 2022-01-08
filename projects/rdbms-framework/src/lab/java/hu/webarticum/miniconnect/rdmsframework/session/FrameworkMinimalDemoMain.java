@@ -5,6 +5,9 @@ import java.util.function.Supplier;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniValue;
+import hu.webarticum.miniconnect.rdmsframework.engine.Engine;
+import hu.webarticum.miniconnect.rdmsframework.engine.EngineSession;
+import hu.webarticum.miniconnect.rdmsframework.engine.impl.SimpleEngine;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.execution.SqlParser;
 import hu.webarticum.miniconnect.rdmsframework.execution.fake.FakeQueryExecutor;
@@ -21,9 +24,12 @@ public class FrameworkMinimalDemoMain {
     public static void main(String[] args) {
         Supplier<SqlParser> sqlParser = AntlrSqlParser::new;
         Supplier<QueryExecutor> queryExecutor = FakeQueryExecutor::new;
-        Supplier<StorageAccess> storageAccessFactory = FrameworkMinimalDemoMain::createStorageAccess;
-        try (MiniSession session = new FrameworkSession(
-                sqlParser, queryExecutor, storageAccessFactory)) {
+        StorageAccess storageAccess = createStorageAccess();
+        try (
+                Engine engine = new SimpleEngine(storageAccess);
+                EngineSession engineSession = engine.openSession();
+                MiniSession session = new FrameworkSession(
+                        sqlParser, queryExecutor, engineSession)) {
             MiniResult result = session.execute(
                     //"SELECT lorem, ipsum AS dolor FROM data " +
                     //        "WHERE x=1 AND y='apple' ORDER BY a ASC, b DESC");
