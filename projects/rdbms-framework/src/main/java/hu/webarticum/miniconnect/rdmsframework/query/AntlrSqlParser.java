@@ -263,9 +263,14 @@ public class AntlrSqlParser implements SqlParser {
                 Object offendingSymbol,
                 int line,
                 int charPositionInLine,
-                String msg,
+                String message,
                 RecognitionException e) {
-            throw new IllegalArgumentException(e);
+            String fullMessage = String.format(
+                    "SQL syntax error at line %d at %d: %s",
+                    line,
+                    charPositionInLine,
+                    message);
+            throw new IllegalArgumentException(fullMessage, e);
         }
         
     }

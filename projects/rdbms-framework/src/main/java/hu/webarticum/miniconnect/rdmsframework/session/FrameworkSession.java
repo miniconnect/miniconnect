@@ -3,7 +3,6 @@ package hu.webarticum.miniconnect.rdmsframework.session;
 import java.io.InputStream;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.function.Supplier;
 
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
@@ -20,19 +19,10 @@ import hu.webarticum.miniconnect.tool.result.StoredResult;
 
 public class FrameworkSession implements MiniSession, CheckableCloseable {
     
-    private final Supplier<SqlParser> sqlParserFactory;
-    
-    private final Supplier<QueryExecutor> queryExecutorFactory;
-    
     private final EngineSession engineSession;
     
     
-    public FrameworkSession(
-            Supplier<SqlParser> sqlParserFactory, // FIXME: from engine?
-            Supplier<QueryExecutor> queryExecutorFactory, // FIXME: from engine?
-            EngineSession engineSession) {
-        this.sqlParserFactory = sqlParserFactory;
-        this.queryExecutorFactory = queryExecutorFactory;
+    public FrameworkSession(EngineSession engineSession) {
         this.engineSession = engineSession;
     }
     
@@ -41,7 +31,7 @@ public class FrameworkSession implements MiniSession, CheckableCloseable {
     public MiniResult execute(String sql) {
         checkClosed();
         try {
-            SqlParser sqlParser = sqlParserFactory.get();
+            SqlParser sqlParser = engineSession.sqlParser();
             Query query = sqlParser.parse(sql);
             return execute(query);
         } catch (Exception e) {
@@ -66,7 +56,7 @@ public class FrameworkSession implements MiniSession, CheckableCloseable {
     }
 
     public MiniResult executeThrowing(Query query) throws InterruptedException, ExecutionException {
-        QueryExecutor queryExecutor = queryExecutorFactory.get();
+        QueryExecutor queryExecutor = engineSession.queryExecutor();
         StorageAccess storageAccess = engineSession.storageAccess();
         Future<Object> future = queryExecutor.execute(storageAccess, query); // TODO
         Object executionResult = future.get(); // TODO

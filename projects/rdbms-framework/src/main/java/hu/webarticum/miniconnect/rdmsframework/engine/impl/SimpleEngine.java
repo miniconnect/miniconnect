@@ -5,14 +5,25 @@ import java.io.UncheckedIOException;
 
 import hu.webarticum.miniconnect.rdmsframework.engine.Engine;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSession;
+import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
+import hu.webarticum.miniconnect.rdmsframework.execution.SqlParser;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 
 public class SimpleEngine implements Engine {
     
+    private final SqlParser sqlParser;
+    
+    private final QueryExecutor queryExecutor;
+    
     private final StorageAccess storageAccess;
     
     
-    public SimpleEngine(StorageAccess storageAccess) {
+    public SimpleEngine(
+            SqlParser sqlParser,
+            QueryExecutor queryExecutor,
+            StorageAccess storageAccess) {
+        this.sqlParser = sqlParser;
+        this.queryExecutor = queryExecutor;
         this.storageAccess = storageAccess;
     }
     
@@ -20,6 +31,14 @@ public class SimpleEngine implements Engine {
     @Override
     public EngineSession openSession() {
         return new SimpleEngineSession(this);
+    }
+
+    public SqlParser sqlParser() {
+        return sqlParser;
+    }
+    
+    public QueryExecutor queryExecutor() {
+        return queryExecutor;
     }
     
     public StorageAccess storageAccess() {

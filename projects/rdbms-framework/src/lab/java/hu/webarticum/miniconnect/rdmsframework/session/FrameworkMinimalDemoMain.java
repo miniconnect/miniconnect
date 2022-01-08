@@ -1,7 +1,5 @@
 package hu.webarticum.miniconnect.rdmsframework.session;
 
-import java.util.function.Supplier;
-
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniValue;
@@ -22,14 +20,13 @@ import hu.webarticum.miniconnect.util.data.ImmutableList;
 public class FrameworkMinimalDemoMain {
 
     public static void main(String[] args) {
-        Supplier<SqlParser> sqlParser = AntlrSqlParser::new;
-        Supplier<QueryExecutor> queryExecutor = FakeQueryExecutor::new;
+        SqlParser sqlParser = new AntlrSqlParser();
+        QueryExecutor queryExecutor = new FakeQueryExecutor();
         StorageAccess storageAccess = createStorageAccess();
         try (
-                Engine engine = new SimpleEngine(storageAccess);
+                Engine engine = new SimpleEngine(sqlParser, queryExecutor, storageAccess);
                 EngineSession engineSession = engine.openSession();
-                MiniSession session = new FrameworkSession(
-                        sqlParser, queryExecutor, engineSession)) {
+                MiniSession session = new FrameworkSession(engineSession)) {
             MiniResult result = session.execute(
                     //"SELECT lorem, ipsum AS dolor FROM data " +
                     //        "WHERE x=1 AND y='apple' ORDER BY a ASC, b DESC");
