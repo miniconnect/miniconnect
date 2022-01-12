@@ -1,0 +1,50 @@
+package hu.webarticum.miniconnect.transfer.old.lab.clientserver;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+
+import hu.webarticum.miniconnect.transfer.old.channel.BlockSource;
+import hu.webarticum.miniconnect.transfer.old.channel.BlockTarget;
+import hu.webarticum.miniconnect.transfer.old.channel.singlestream.SingleStreamBlockSource;
+import hu.webarticum.miniconnect.transfer.old.channel.singlestream.SingleStreamBlockTarget;
+
+public class ClientServerMain {
+
+    public static void main(String[] args) throws IOException {
+        PipedOutputStream innerRequestOut = new PipedOutputStream();
+        InputStream innerRequestIn = new PipedInputStream(innerRequestOut);
+
+        BlockTarget innerRequestBlockTarget = new SingleStreamBlockTarget(innerRequestOut);
+        BlockSource innerRequestBlockSource = new SingleStreamBlockSource(innerRequestIn);
+
+        PipedOutputStream innerResponseOut = new PipedOutputStream();
+        InputStream innerResponseIn = new PipedInputStream(innerResponseOut);
+
+        BlockTarget innerResponseBlockTarget = new SingleStreamBlockTarget(innerResponseOut);
+        BlockSource innerResponseBlockSource = new SingleStreamBlockSource(innerResponseIn);
+
+        try (DemoClient client = DemoClient.start(innerResponseBlockSource, innerRequestBlockTarget)) {
+            try (DemoServer server = DemoServer.start(String::toUpperCase)) {
+                try (DemoConnector connector = DemoConnector.start(
+                        server, innerRequestBlockSource, innerResponseBlockTarget)) {
+    
+                    runQuery(client, "Lorem");
+                    runQuery(client, "ipsum");
+                    runQuery(client, "XXX yyy");
+                    runQuery(client, "Aaa Bbb Ccc");
+                }
+            }
+        }
+    }
+    
+    public static void runQuery(DemoClient client, String query) throws IOException {
+        System.out.print(String.format("%s --> ", query));
+        
+        String result = client.query(query);
+        
+        System.out.println(result);
+    }
+
+}
