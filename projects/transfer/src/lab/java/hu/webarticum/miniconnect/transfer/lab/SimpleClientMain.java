@@ -11,17 +11,29 @@ import hu.webarticum.miniconnect.transfer.SocketClient;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class SimpleClientMain {
+    
+    private static final String DEFAULT_HOST = "localhost";
+    
+    private static final int DEFAULT_PORT = 9999;
+    
 
     public static void main(String[] args) throws IOException {
-        String host = readInput("Host: ");
-        int port = Integer.parseInt(readInput("Port: "));
-        System.out.println("Connect to " + host + ":" + port);
+        String host = readHost(args);
+        int port = readPort(args);
+        
         System.out.println();
+        System.out.println("Connect to " + host + ":" + port + " ...");
+        System.out.println();
+        System.out.println("Submit any non-empty input.");
+        System.out.println("The server will transform it like:");
+        System.out.println("  'lorem ipsum' --> 'LOREM_IPSUM'");
+        System.out.println("Submit empty input to exit");
         
         Socket socket = new Socket(host, port);
         Consumer<Packet> consumer = SimpleClientMain::consume;
         try (SocketClient client = new SocketClient(socket, consumer)) {
             while (true) {
+                System.out.println();
                 String input = readInput("Input: ");
                 if (input.isEmpty()) {
                     break;
@@ -32,11 +44,29 @@ public class SimpleClientMain {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
-                System.out.println();
             }
         } finally {
+            System.out.println();
             System.out.println("Client closed");
         }
+    }
+    
+    private static String readHost(String[] args) throws IOException {
+        if (args.length >= 1) {
+            return args[0];
+        }
+        
+        String hostInput = readInput("Host [" + DEFAULT_HOST + "]: ");
+        return hostInput.isEmpty() ? DEFAULT_HOST : hostInput;
+    }
+
+    private static int readPort(String[] args) throws IOException {
+        if (args.length >= 2) {
+            return Integer.parseInt(args[1]);
+        }
+
+        String portString = readInput("Port [" + DEFAULT_PORT + "]: ");
+        return portString.isEmpty() ? DEFAULT_PORT : Integer.parseInt(portString);
     }
     
     private static String readInput(String prompt) throws IOException {

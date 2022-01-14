@@ -1,6 +1,8 @@
 package hu.webarticum.miniconnect.transfer.lab;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.util.function.Supplier;
 
@@ -12,13 +14,16 @@ import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class SimpleServerMain {
     
+    private static final int DEFAULT_PORT = 9999;
+    
+    
     public static void main(String[] args) throws IOException {
-        int port = 9999;
-        if (args.length > 0) {
-            port = Integer.parseInt(args[0]);
-        }
-        
+        int port = readPort(args);
+
+        System.out.println();
         System.out.println("Start listening on port " + port);
+        System.out.println("Press ENTER to exit");
+        System.out.println();
         ServerSocket serverSocket = new ServerSocket(port);
         Supplier<PacketExchanger> exchanger = () -> SimpleServerMain::handlePacket;
         SocketServer server = new SocketServer(serverSocket, exchanger);
@@ -29,6 +34,20 @@ public class SimpleServerMain {
         server.close();
         
         System.out.println("Server stopped");
+    }
+
+    private static int readPort(String[] args) throws IOException {
+        if (args.length >= 1) {
+            return Integer.parseInt(args[0]);
+        }
+
+        String portString = readInput("Port [" + DEFAULT_PORT + "]: ");
+        return portString.isEmpty() ? DEFAULT_PORT : Integer.parseInt(portString);
+    }
+
+    private static String readInput(String prompt) throws IOException {
+        System.out.print(prompt);
+        return new BufferedReader(new InputStreamReader(System.in)).readLine();
     }
     
     private static void handlePacket(Packet request, PacketTarget responseTarget) {
