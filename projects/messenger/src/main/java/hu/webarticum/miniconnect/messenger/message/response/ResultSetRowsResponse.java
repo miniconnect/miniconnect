@@ -2,12 +2,12 @@ package hu.webarticum.miniconnect.messenger.message.response;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.api.MiniValue;
-import hu.webarticum.miniconnect.messenger.message.SessionMessage;
+import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 import hu.webarticum.miniconnect.util.data.ByteString;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
-public final class ResultSetRowsResponse implements Response, SessionMessage {
+public final class ResultSetRowsResponse implements Response, ExchangeMessage {
 
     private final long sessionId;
 
@@ -43,6 +43,7 @@ public final class ResultSetRowsResponse implements Response, SessionMessage {
         return sessionId;
     }
 
+    @Override
     public int exchangeId() {
         return exchangeId;
     }

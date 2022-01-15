@@ -1,8 +1,8 @@
 package hu.webarticum.miniconnect.messenger.message.request;
 
-import hu.webarticum.miniconnect.messenger.message.SessionMessage;
+import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 
-public final class LargeDataHeadRequest implements Request, SessionMessage {
+public final class LargeDataHeadRequest implements Request, ExchangeMessage {
 
     private final long sessionId;
 
@@ -27,6 +27,7 @@ public final class LargeDataHeadRequest implements Request, SessionMessage {
         return sessionId;
     }
 
+    @Override
     public int exchangeId() {
         return exchangeId;
     }

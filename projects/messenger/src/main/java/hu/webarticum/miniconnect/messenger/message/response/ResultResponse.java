@@ -3,14 +3,14 @@ package hu.webarticum.miniconnect.messenger.message.response;
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniResult;
-import hu.webarticum.miniconnect.messenger.message.SessionMessage;
+import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 import hu.webarticum.miniconnect.tool.result.StoredColumnHeader;
 import hu.webarticum.miniconnect.tool.result.StoredValueDefinition;
 import hu.webarticum.miniconnect.util.data.ByteString;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
-public final class ResultResponse implements Response, SessionMessage {
+public final class ResultResponse implements Response, ExchangeMessage {
 
     private final long sessionId;
 
@@ -62,6 +62,7 @@ public final class ResultResponse implements Response, SessionMessage {
         return sessionId;
     }
 
+    @Override
     public int exchangeId() {
         return exchangeId;
     }

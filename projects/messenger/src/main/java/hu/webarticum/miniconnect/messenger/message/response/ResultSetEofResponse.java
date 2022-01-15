@@ -1,8 +1,8 @@
 package hu.webarticum.miniconnect.messenger.message.response;
 
-import hu.webarticum.miniconnect.messenger.message.SessionMessage;
+import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 
-public final class ResultSetEofResponse implements Response, SessionMessage {
+public final class ResultSetEofResponse implements Response, ExchangeMessage {
 
     private final long sessionId;
 
@@ -23,6 +23,7 @@ public final class ResultSetEofResponse implements Response, SessionMessage {
         return sessionId;
     }
 
+    @Override
     public int exchangeId() {
         return exchangeId;
     }
