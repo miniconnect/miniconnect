@@ -1,0 +1,11 @@
+plugins {
+    id 'java-library'
+}
+
+sourceCompatibility = 1.8
+
+dependencies {
+    api project(':projects:util')
+    api project(':projects:messenger')
+    api project(':projects:transfer')
+}
