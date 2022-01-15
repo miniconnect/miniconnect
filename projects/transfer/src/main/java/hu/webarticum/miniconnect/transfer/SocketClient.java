@@ -59,23 +59,39 @@ public class SocketClient implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         synchronized (this) {
             if (closed) {
                 return;
             }
             closed = true;
         }
-        
-        OutputStream out = socket.getOutputStream();
-        out.write(TransferConstants.CLOSE_BYTE);
-        out.flush();
-        socket.close();
+
+        IOException socketCloseException = null;
+        try {
+            finalizeSocket();
+        } catch (IOException e) {
+            socketCloseException = e;
+        }
         
         try {
             socketThread.join(CLOSE_TIMEOUT_SECONDS * 1000L);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        }
+        
+        if (socketCloseException != null) {
+            throw new UncheckedIOException(socketCloseException);
+        }
+    }
+    
+    private void finalizeSocket() throws IOException {
+        try {
+            OutputStream out = socket.getOutputStream();
+            out.write(TransferConstants.CLOSE_BYTE);
+            out.flush();
+        } finally {
+            socket.close();
         }
     }
     
