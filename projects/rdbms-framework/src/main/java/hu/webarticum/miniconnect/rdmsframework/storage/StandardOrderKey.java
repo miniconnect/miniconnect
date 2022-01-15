@@ -1,5 +1,7 @@
 package hu.webarticum.miniconnect.rdmsframework.storage;
 
+import java.util.Objects;
+
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public final class StandardOrderKey implements OrderKey {
@@ -37,16 +39,15 @@ public final class StandardOrderKey implements OrderKey {
     
     @Override
     public int hashCode() {
-        int result = tableName.hashCode();
-        result = result ^ columnEntries.hashCode();
-        result = (result * 37) + (groupAscOrder ? 1 : 0);
-        return result;
+        return Objects.hash(tableName, columnEntries, groupAscOrder);
     }
     
     @Override
     public boolean equals(Object other) {
         if (this == other) {
             return true;
+        } else if (other == null) {
+            return false;
         } else if (!(other instanceof StandardOrderKey)) {
             return false;
         }
@@ -89,16 +90,15 @@ public final class StandardOrderKey implements OrderKey {
 
         @Override
         public int hashCode() {
-            int result = columnName.hashCode();
-            result = (result * 37) + (ascOrder ? 1 : 0);
-            result = (result * 37) + (nullHighest ? 1 : 0);
-            return result;
+            return Objects.hash(columnName, ascOrder, nullHighest);
         }
         
         @Override
         public boolean equals(Object other) {
             if (this == other) {
                 return true;
+            } else if (other == null) {
+                return false;
             } else if (!(other instanceof Entry)) {
                 return false;
             }

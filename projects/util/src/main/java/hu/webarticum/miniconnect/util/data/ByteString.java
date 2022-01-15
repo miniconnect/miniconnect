@@ -141,7 +141,11 @@ public final class ByteString implements Serializable {
 
     @Override
     public boolean equals(Object other) {
-        if (!(other instanceof ByteString)) {
+        if (this == other) {
+            return true;
+        } else if (other == null) {
+            return false;
+        } else if (!(other instanceof ByteString)) {
             return false;
         }
 

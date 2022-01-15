@@ -182,7 +182,7 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
         public int compareTo(IndexEntry other) {
             return Long.compare(start, other.start);
         }
-        
+
         @Override
         public int hashCode() {
             return Long.hashCode(start);
@@ -190,7 +190,11 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
         
         @Override
         public boolean equals(Object other) {
-            if (!(other instanceof IndexEntry)) {
+            if (this == other) {
+                return true;
+            } else if (other == null) {
+                return false;
+            } else if (!(other instanceof IndexEntry)) {
                 return false;
             }
             

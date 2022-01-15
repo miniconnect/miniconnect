@@ -51,7 +51,7 @@ public final class ImmutableMap<K, V> implements Serializable {
     public Map<K, V> toMap() {
         return new HashMap<>(data);
     }
-    
+
     @Override
     public int hashCode() {
         return data.hashCode();
@@ -59,11 +59,11 @@ public final class ImmutableMap<K, V> implements Serializable {
     
     @Override
     public boolean equals(Object other) {
-        if (other == this) {
+        if (this == other) {
             return true;
-        }
-        
-        if (!(other instanceof ImmutableMap)) {
+        } else if (other == null) {
+            return false;
+        } else if (!(other instanceof ImmutableMap)) {
             return false;
         }
         

@@ -27,7 +27,7 @@ public final class Packet {
         return payload;
     }
     
-    
+
     @Override
     public int hashCode() {
         return header.hashCode() ^ payload.hashCode();
@@ -35,7 +35,11 @@ public final class Packet {
     
     @Override
     public boolean equals(Object other) {
-        if (!(other instanceof Packet)) {
+        if (this == other) {
+            return true;
+        } else if (other == null) {
+            return false;
+        } else if (!(other instanceof Packet)) {
             return false;
         }
         

@@ -184,7 +184,7 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
     public List<T> toList() {
         return new ArrayList<>(data);
     }
-    
+
     @Override
     public int hashCode() {
         return data.hashCode();
@@ -192,11 +192,11 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
     
     @Override
     public boolean equals(Object other) {
-        if (other == this) {
+        if (this == other) {
             return true;
-        }
-        
-        if (!(other instanceof ImmutableList)) {
+        } else if (other == null) {
+            return false;
+        } else if (!(other instanceof ImmutableList)) {
             return false;
         }
         

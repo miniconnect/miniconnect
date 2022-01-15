@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -168,10 +169,19 @@ public class MessengerResultSetCharger {
             this.columnIndex = columnIndex;
         }
         
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(rowIndex, columnIndex);
+        }
         
         @Override
         public boolean equals(Object other) {
-            if (!(other instanceof CellPosition)) {
+            if (this == other) {
+                return true;
+            } else if (other == null) {
+                return false;
+            } else if (!(other instanceof CellPosition)) {
                 return false;
             }
             
@@ -179,11 +189,6 @@ public class MessengerResultSetCharger {
             return (
                     otherCellIndex.rowIndex == rowIndex &&
                     otherCellIndex.columnIndex == columnIndex);
-        }
-        
-        @Override
-        public int hashCode() {
-            return (Long.hashCode(rowIndex) * 31) + columnIndex;
         }
         
     }
