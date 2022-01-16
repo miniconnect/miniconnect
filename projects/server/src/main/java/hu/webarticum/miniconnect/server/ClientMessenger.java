@@ -27,8 +27,8 @@ public class ClientMessenger implements Messenger, Closeable {
 
     // TODO: When to remove the listening consumer? (lapsed listener problem)
     //       Do some of these:
-    //         - use a weak map --> require Messenger clients to keep a hard reference to consumers
-    //         - maximum concurrent number of consumers
+    //         - use weak references --> require Messenger clients to keep a hard reference to consumers
+    //         - define a maximum concurrent number of consumers
     //         - use a lifetime
     //       Temporary solution: map with maximum capacity of 2
     //       Source of the LinkedHashMap idea:
