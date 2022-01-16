@@ -1,5 +1,9 @@
 package hu.webarticum.miniconnect.server;
 
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+
 import hu.webarticum.miniconnect.transfer.Packet;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
@@ -18,10 +22,15 @@ import hu.webarticum.miniconnect.util.data.ByteString;
 public class HeaderDecoder {
 
     public HeaderData decode(ByteString headerBytes) {
-
-        // TODO
-        return null;
-        
+        try (DataInputStream in = new DataInputStream(headerBytes.inputStream())) {
+            int messageTypeOrdinal = in.readInt();
+            MessageType messageType = MessageType.values()[messageTypeOrdinal];
+            long sessionId = in.readLong();
+            int exchangeId = in.readInt();
+            return HeaderData.of(messageType, sessionId, exchangeId);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
     
 }

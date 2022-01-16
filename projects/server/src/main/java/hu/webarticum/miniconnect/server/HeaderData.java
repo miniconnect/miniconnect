@@ -1,5 +1,7 @@
 package hu.webarticum.miniconnect.server;
 
+import java.util.Objects;
+
 import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 import hu.webarticum.miniconnect.messenger.message.Message;
 import hu.webarticum.miniconnect.messenger.message.SessionMessage;
@@ -46,6 +48,29 @@ public class HeaderData {
 
     public int getExchangeId() {
         return exchangeId;
+    }
+    
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(messageType, sessionId, exchangeId);
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        } else if (other == null) {
+            return false;
+        } else if (!(other instanceof HeaderData)) {
+            return false;
+        }
+        
+        HeaderData otherHeaderData = (HeaderData) other;
+        return
+                messageType == otherHeaderData.messageType &&
+                sessionId == otherHeaderData.sessionId &&
+                exchangeId == otherHeaderData.exchangeId;
     }
 
 }
