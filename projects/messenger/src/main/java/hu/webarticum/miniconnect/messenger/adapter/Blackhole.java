@@ -13,7 +13,7 @@ public class Blackhole {
     
     public int tlr; // NOSONAR
     
-    public volatile int tlrMask;
+    public volatile int tlrMask; // NOSONAR
     
 
     public Blackhole() {
