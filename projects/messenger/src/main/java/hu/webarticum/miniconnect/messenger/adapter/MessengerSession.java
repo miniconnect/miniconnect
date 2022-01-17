@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
@@ -44,6 +45,7 @@ public class MessengerSession implements MiniSession {
     
     private final Messenger messenger;
     
+    private final Blackhole blackhole = new Blackhole();
 
     private final AtomicInteger exchangeIdCounter = new AtomicInteger();
 
@@ -177,10 +179,11 @@ public class MessengerSession implements MiniSession {
         int exchangeId = exchangeIdCounter.incrementAndGet();
         
         CompletableFuture<Response> responseFuture = new CompletableFuture<>();
+        Consumer<Response> responseConsumer = responseFuture::complete;
         
         LargeDataHeadRequest largeDataHeadRequest =
                 new LargeDataHeadRequest(sessionId, exchangeId, variableName, length);
-        messenger.accept(largeDataHeadRequest, responseFuture::complete);
+        messenger.accept(largeDataHeadRequest, responseConsumer);
 
         byte[] buffer = new byte[DATA_SEND_CHUNK_SIZE];
         int readSize = 0;
@@ -193,6 +196,9 @@ public class MessengerSession implements MiniSession {
             messenger.accept(largeDataPartRequest);
             offset += readSize;
         }
+        
+        // we must be sure that responseConsumer is reachable until this point
+        blackhole.consume(responseConsumer);
         
         Response response = null;
         try {
