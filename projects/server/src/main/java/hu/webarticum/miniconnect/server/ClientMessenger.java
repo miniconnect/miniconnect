@@ -2,9 +2,8 @@ package hu.webarticum.miniconnect.server;
 
 import java.io.Closeable;
 import java.net.Socket;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.function.Consumer;
 
 import hu.webarticum.miniconnect.messenger.Messenger;
@@ -25,23 +24,8 @@ public class ClientMessenger implements Messenger, Closeable {
     
     private final MessageEncoder encoder = new MessageEncoder();
 
-    // TODO: When to remove the listening consumer? (lapsed listener problem)
-    //       Do some of these:
-    //         - use weak references --> require Messenger clients to keep a hard reference to consumers
-    //         - define a maximum concurrent number of consumers
-    //         - use a lifetime
-    //       Temporary solution: map with maximum capacity of 2
-    //       Source of the LinkedHashMap idea:
-    //         https://stackoverflow.com/a/11469731/3948862
-    private final Map<Integer, Consumer<Response>> exchangeResponseConsumers =
-            Collections.unmodifiableMap(new LinkedHashMap<Integer, Consumer<Response>>(
-                    2, 0.7f, false) {
-                private static final long serialVersionUID = 1L;
-                @Override
-                protected boolean removeEldestEntry(Map.Entry<Integer, Consumer<Response>> eldest) {
-                    return size() > 2;
-                }
-            });
+    private final WeakHashMap<Consumer<Response>, Integer> exchangeResponseConsumers =
+            new WeakHashMap<>();
     
     
     public ClientMessenger(long sessionId, Socket socket) {
@@ -60,7 +44,7 @@ public class ClientMessenger implements Messenger, Closeable {
             }
             if (responseConsumer != null && request instanceof ExchangeMessage) {
                 int exchangeId = ((ExchangeMessage) request).exchangeId();
-                exchangeResponseConsumers.put(exchangeId, responseConsumer);
+                exchangeResponseConsumers.put(responseConsumer, exchangeId);
             }
         }
         socketClient.send(encoder.encode(request));
@@ -73,8 +57,12 @@ public class ClientMessenger implements Messenger, Closeable {
             if (requestSessionId == sessionId) {
                 if (response instanceof ExchangeMessage) {
                     int exchangeId = ((ExchangeMessage) response).exchangeId();
-                    Consumer<Response> responseConsumer = exchangeResponseConsumers.get(exchangeId);
-                    responseConsumer.accept(response);
+                    Consumer<Response> responseConsumer = findResponseConsumer(exchangeId);
+                    if (responseConsumer != null) {
+                        responseConsumer.accept(response);
+                    } else {
+                        // TODO unexpected exchange id, what to do?
+                    }
                 }
             } else {
                 // TODO alien response, what to do?
@@ -82,6 +70,15 @@ public class ClientMessenger implements Messenger, Closeable {
         } else {
             // TODO non-session response, what to do
         }
+    }
+    
+    private Consumer<Response> findResponseConsumer(int exchangeId) {
+        for (Map.Entry<Consumer<Response>, Integer> entry : exchangeResponseConsumers.entrySet()) {
+            if (entry.getValue() == exchangeId) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 
     @Override
