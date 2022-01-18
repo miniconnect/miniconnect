@@ -38,15 +38,15 @@ public class HeaderData {
         return HeaderData.of(messageType, sessionId, exchangeId);
     }
 
-    public MessageType getMessageType() {
+    public MessageType messageType() {
         return messageType;
     }
 
-    public long getSessionId() {
+    public long sessionId() {
         return sessionId;
     }
 
-    public int getExchangeId() {
+    public int exchangeId() {
         return exchangeId;
     }
     

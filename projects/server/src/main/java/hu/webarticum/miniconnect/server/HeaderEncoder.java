@@ -9,9 +9,9 @@ public class HeaderEncoder {
     public ByteString encode(HeaderData headerData) {
         int length = (Integer.BYTES * 2) + Long.BYTES;
         byte[] bytes = ByteBuffer.allocate(length)
-                .putInt(headerData.getMessageType().ordinal())
-                .putLong(headerData.getSessionId())
-                .putInt(headerData.getExchangeId())
+                .put((byte) headerData.messageType().symbol())
+                .putLong(headerData.sessionId())
+                .putInt(headerData.exchangeId())
                 .array();
         return ByteString.wrap(bytes);
     }

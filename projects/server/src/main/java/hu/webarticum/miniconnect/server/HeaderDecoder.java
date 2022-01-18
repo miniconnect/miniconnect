@@ -23,8 +23,8 @@ public class HeaderDecoder {
 
     public HeaderData decode(ByteString headerBytes) {
         try (DataInputStream in = new DataInputStream(headerBytes.inputStream())) {
-            int messageTypeOrdinal = in.readInt();
-            MessageType messageType = MessageType.values()[messageTypeOrdinal];
+            char symbol = (char) (byte) in.read();
+            MessageType messageType = MessageType.ofSymbol(symbol);
             long sessionId = in.readLong();
             int exchangeId = in.readInt();
             return HeaderData.of(messageType, sessionId, exchangeId);
