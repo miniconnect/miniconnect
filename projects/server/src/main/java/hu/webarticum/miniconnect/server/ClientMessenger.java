@@ -11,6 +11,7 @@ import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 import hu.webarticum.miniconnect.messenger.message.SessionMessage;
 import hu.webarticum.miniconnect.messenger.message.request.Request;
 import hu.webarticum.miniconnect.messenger.message.response.Response;
+import hu.webarticum.miniconnect.server.translator.DefaultMessageTranslator;
 import hu.webarticum.miniconnect.transfer.Packet;
 import hu.webarticum.miniconnect.transfer.SocketClient;
 
@@ -20,17 +21,31 @@ public class ClientMessenger implements Messenger, Closeable {
     
     private final SocketClient socketClient;
 
-    private final MessageDecoder decoder = new MessageDecoder();
+    private final MessageDecoder decoder;
     
-    private final MessageEncoder encoder = new MessageEncoder();
+    private final MessageEncoder encoder;
 
     private final WeakHashMap<Consumer<Response>, Integer> exchangeResponseConsumers =
             new WeakHashMap<>();
     
-    
+
     public ClientMessenger(long sessionId, Socket socket) {
+        this(sessionId, socket, new DefaultMessageTranslator());
+    }
+
+    public ClientMessenger(long sessionId, Socket socket, MessageTranslator translator) {
+        this(sessionId, socket, translator, translator);
+    }
+    
+    public ClientMessenger(
+            long sessionId,
+            Socket socket,
+            MessageDecoder decoder,
+            MessageEncoder encoder) {
         this.sessionId = sessionId;
         this.socketClient = new SocketClient(socket, this::acceptResponsePacket);
+        this.decoder = decoder;
+        this.encoder = encoder;
     }
     
 
