@@ -3,7 +3,6 @@ package hu.webarticum.miniconnect.jdbc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.nio.ByteBuffer;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -112,7 +111,7 @@ class MiniJdbcConnectionTest {
     
     private ByteString asByteString(Object value) {
         if (value instanceof Integer) {
-            return ByteString.of(ByteBuffer.allocate(Integer.BYTES).putInt((int) value).array());
+            return ByteString.ofInt((int) value);
         } else if (value instanceof String) {
             return ByteString.of((String) value);
         } else {

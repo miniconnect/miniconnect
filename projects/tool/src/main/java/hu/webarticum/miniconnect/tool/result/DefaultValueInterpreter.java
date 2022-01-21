@@ -2,7 +2,6 @@ package hu.webarticum.miniconnect.tool.result;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import hu.webarticum.miniconnect.api.MiniValue;
@@ -67,20 +66,11 @@ public class DefaultValueInterpreter implements ValueInterpreter {
             byte byteValue = (byte) value;
             return new StoredValue(ByteString.wrap(new byte[] { byteValue }));
         } else if (value instanceof Short) {
-            short shortValue = (short) value;
-            ByteBuffer byteBuffer = ByteBuffer.allocate(Short.BYTES);
-            byteBuffer.putShort(shortValue);
-            return new StoredValue(ByteString.wrap(byteBuffer.array()));
+            return new StoredValue(ByteString.ofShort((short) value));
         } else if (value instanceof Integer) {
-            int intValue = (int) value;
-            ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.BYTES);
-            byteBuffer.putInt(intValue);
-            return new StoredValue(ByteString.wrap(byteBuffer.array()));
+            return new StoredValue(ByteString.ofInt((int) value));
         } else if (value instanceof Long) {
-            long longValue = (long) value;
-            ByteBuffer byteBuffer = ByteBuffer.allocate(Long.BYTES);
-            byteBuffer.putLong(longValue);
-            return new StoredValue(ByteString.wrap(byteBuffer.array()));
+            return new StoredValue(ByteString.ofLong((long) value));
         } else if (value instanceof String) {
             String stringValue = (String) value;
             return new StoredValue(ByteString.wrap(
@@ -94,10 +84,7 @@ public class DefaultValueInterpreter implements ValueInterpreter {
         } else if (value instanceof BigDecimal) {
             ByteString.Builder builder = ByteString.builder();
             BigDecimal bigDecimalValue = (BigDecimal) value;
-            int scale = bigDecimalValue.scale();
-            ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.BYTES);
-            byteBuffer.putInt(scale);
-            builder.append(byteBuffer.array());
+            builder.appendInt(bigDecimalValue.scale());
             BigInteger bigIntegerValue = bigDecimalValue.unscaledValue();
             builder.append(bigIntegerValue.toByteArray());
             return new StoredValue(builder.build());
@@ -119,14 +106,11 @@ public class DefaultValueInterpreter implements ValueInterpreter {
         } else if (type.equals(Byte.class)) {
             return content.byteAt(0);
         } else if (type.equals(Short.class)) {
-            ByteBuffer byteBuffer = content.asBuffer();
-            return byteBuffer.getShort();
+            return content.reader().readShort();
         } else if (type.equals(Integer.class)) {
-            ByteBuffer byteBuffer = content.asBuffer();
-            return byteBuffer.getInt();
+            return content.reader().readInt();
         } else if (type.equals(Long.class)) {
-            ByteBuffer byteBuffer = content.asBuffer();
-            return byteBuffer.getLong();
+            return content.reader().readLong();
         } else if (type.equals(String.class)) {
             return content.toString(StandardCharsets.UTF_8);
         } else if (type.equals(ByteString.class)) {
@@ -135,7 +119,7 @@ public class DefaultValueInterpreter implements ValueInterpreter {
             return new BigInteger(content.extract());
         } else if (type.equals(BigDecimal.class)) {
             ByteString.Reader reader = content.reader();
-            int scale = ByteBuffer.wrap(reader.read(Integer.BYTES)).getInt();
+            int scale = reader.readInt();
             BigInteger bigIntegerValue = new BigInteger(reader.readRemaining());
             return new BigDecimal(bigIntegerValue, scale);
         } else {
