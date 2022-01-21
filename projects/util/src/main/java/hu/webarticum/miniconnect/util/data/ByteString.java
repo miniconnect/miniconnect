@@ -50,6 +50,18 @@ public final class ByteString implements Serializable {
         return ByteString.wrap(string.getBytes(charset));
     }
 
+    public static ByteString ofShort(short shortValue) {
+        return ByteString.wrap(ByteBuffer.allocate(Short.BYTES).putShort(shortValue).array());
+    }
+
+    public static ByteString ofInt(int intValue) {
+        return ByteString.wrap(ByteBuffer.allocate(Integer.BYTES).putInt(intValue).array());
+    }
+
+    public static ByteString ofLong(long longValue) {
+        return ByteString.wrap(ByteBuffer.allocate(Short.BYTES).putLong(longValue).array());
+    }
+
     public static ByteString wrap(byte[] bytes) {
         return new ByteString(bytes);
     }
@@ -202,6 +214,18 @@ public final class ByteString implements Serializable {
             return this;
         }
 
+        public Builder appendShort(short shortValue) {
+            return append(ByteBuffer.allocate(Short.BYTES).putShort(shortValue).array());
+        }
+
+        public Builder appendInt(int intValue) {
+            return append(ByteBuffer.allocate(Integer.BYTES).putInt(intValue).array());
+        }
+
+        public Builder appendLong(long longValue) {
+            return append(ByteBuffer.allocate(Long.BYTES).putLong(longValue).array());
+        }
+
         public int length() {
             return length;
         }
@@ -243,6 +267,18 @@ public final class ByteString implements Serializable {
 
         public byte[] readRemaining() {
             return read(bytes.length - position);
+        }
+
+        public short readShort() {
+            return ByteBuffer.wrap(read(Short.BYTES)).getShort();
+        }
+
+        public int readInt() {
+            return ByteBuffer.wrap(read(Integer.BYTES)).getInt();
+        }
+
+        public long readLong() {
+            return ByteBuffer.wrap(read(Long.BYTES)).getLong();
         }
 
     }
