@@ -226,6 +226,7 @@ public class ScanningTableIndex implements TableIndex {
         return isFrom ? (cmp < 0) : (cmp > 0);
     }
     
+    // FIXME handle null values!
     private boolean isPrefixOf(ImmutableList<?> prefix, ImmutableList<?> values) {
         int prefixWidth = prefix.size();
         if (prefixWidth > values.size()) {
