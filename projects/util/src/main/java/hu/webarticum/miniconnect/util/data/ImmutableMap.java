@@ -43,7 +43,11 @@ public final class ImmutableMap<K, V> implements Serializable {
     public V get(K key) {
         return data.get(key);
     }
-    
+
+    public V getOrDefault(K key, V defaultValue) {
+        return data.getOrDefault(key, defaultValue);
+    }
+
     public Set<Map.Entry<K, V>> entrySet() {
         return Collections.unmodifiableMap(data).entrySet();
     }
