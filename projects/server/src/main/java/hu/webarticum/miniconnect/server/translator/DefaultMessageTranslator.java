@@ -25,7 +25,7 @@ public class DefaultMessageTranslator implements MessageTranslator {
                     drivers.put(messageType, new LargeDataHeadRequestTranslatorDriver());
                     break;
                 case LARGE_DATA_PART_REQUEST:
-                    drivers.put(messageType, new LargeDataPartTranslatorDriver());
+                    drivers.put(messageType, new LargeDataPartRequestTranslatorDriver());
                     break;
                 case RESULT_RESPONSE:
                     drivers.put(messageType, new ResultResponseTranslatorDriver());

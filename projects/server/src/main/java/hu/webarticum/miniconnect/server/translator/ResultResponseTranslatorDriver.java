@@ -5,7 +5,7 @@ import hu.webarticum.miniconnect.server.HeaderData;
 import hu.webarticum.miniconnect.transfer.Packet;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-public class ResultResponseTranslatorDriver implements TranslatorDriver {
+class ResultResponseTranslatorDriver implements TranslatorDriver {
 
     @Override
     public Message decode(HeaderData header, ByteString payload) {
