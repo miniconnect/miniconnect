@@ -1,6 +1,5 @@
 package hu.webarticum.miniconnect.jdbcadapter.lab;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -28,8 +27,7 @@ public class H2TestMain {
     }
     
     private static void runRepl(
-            String url, String username, String password, String setStatement
-            ) throws SQLException, IOException {
+            String url, String username, String password, String setStatement) throws SQLException {
         try (Connection jdbcConnection = DriverManager.getConnection(url, username, password)) {
             SimpleJdbcLargeDataPutter largeDataPutter =
                     new SimpleJdbcLargeDataPutter(setStatement);
