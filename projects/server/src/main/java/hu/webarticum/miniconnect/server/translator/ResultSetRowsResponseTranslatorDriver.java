@@ -7,12 +7,12 @@ import java.util.Map;
 
 import hu.webarticum.miniconnect.messenger.message.Message;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse;
-import hu.webarticum.miniconnect.messenger.message.response.ResultSetValuePartResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse.CellData;
 import hu.webarticum.miniconnect.server.HeaderData;
 import hu.webarticum.miniconnect.server.HeaderEncoder;
 import hu.webarticum.miniconnect.transfer.Packet;
 import hu.webarticum.miniconnect.util.data.ByteString;
+import hu.webarticum.miniconnect.util.data.ByteString.Builder;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
@@ -107,7 +107,7 @@ class ResultSetRowsResponseTranslatorDriver implements TranslatorDriver {
 
     private CellData readCell(ByteString.Reader reader, boolean nullable, int fixedSize) {
         if (nullable) {
-            boolean isNull = TranslatorUtil.readBoolean(reader);
+            boolean isNull = !TranslatorUtil.readBoolean(reader);
             if (isNull) {
                 return new CellData(true, 0, ByteString.empty());
             }
@@ -136,12 +136,85 @@ class ResultSetRowsResponseTranslatorDriver implements TranslatorDriver {
         ResultSetRowsResponse resultSetRowsResponse = (ResultSetRowsResponse) message;
         HeaderData headerData = HeaderData.ofMessage(message);
         ByteString header = new HeaderEncoder().encode(headerData);
-        ByteString payload = ByteString.builder()
-                
-                // TODO
-                
-                .build();
-        return Packet.of(header, payload);
+        ImmutableList<Integer> nullables = resultSetRowsResponse.nullables();
+        ImmutableMap<Integer, Integer> fixedSizes = resultSetRowsResponse.fixedSizes();
+        ByteString.Builder payloadBuilder = ByteString.builder();
+        payloadBuilder.appendLong(resultSetRowsResponse.rowOffset());
+        appendNullables(payloadBuilder, nullables);
+        appendFixedSizes(payloadBuilder, fixedSizes);
+        appendRows(payloadBuilder, resultSetRowsResponse.rows(), nullables, fixedSizes);
+        return Packet.of(header, payloadBuilder.build());
+    }
+
+    private void appendNullables(Builder payloadBuilder, ImmutableList<Integer> nullables) {
+        payloadBuilder.appendInt(nullables.size());
+        for (int nullable : nullables) {
+            payloadBuilder.appendInt(nullable);
+        }
+    }
+
+    private void appendFixedSizes(
+            Builder payloadBuilder,
+            ImmutableMap<Integer, Integer> fixedSizes) {
+        payloadBuilder.appendInt(fixedSizes.size());
+        for (Map.Entry<Integer, Integer> entry : fixedSizes.entrySet()) {
+            payloadBuilder.appendInt(entry.getKey());
+            payloadBuilder.appendInt(entry.getValue());
+        }
+    }
+
+    private void appendRows(
+            Builder payloadBuilder,
+            ImmutableList<ImmutableList<CellData>> rows,
+            ImmutableList<Integer> nullables,
+            ImmutableMap<Integer, Integer> fixedSizes) {
+        int rowsSize = rows.size();
+        payloadBuilder.appendInt(rowsSize);
+        int columnsSize = rowsSize > 0 ? rows.get(0).size() : 0;
+        payloadBuilder.appendInt(columnsSize);
+        for (ImmutableList<CellData> row : rows) {
+            appendRow(payloadBuilder, row, columnsSize, nullables, fixedSizes);
+        }
+    }
+
+    private void appendRow(
+            Builder payloadBuilder,
+            ImmutableList<CellData> row,
+            int columnsSize,
+            ImmutableList<Integer> nullables,
+            ImmutableMap<Integer, Integer> fixedSizes) {
+        for (int i = 0; i < columnsSize; i++) {
+            boolean nullable = nullables.contains(i);
+            int fixedSize = fixedSizes.getOrDefault(i, -1);
+            appendCell(payloadBuilder, row.get(i), nullable, fixedSize);
+        }
+    }
+
+    private void appendCell(
+            Builder payloadBuilder,
+            CellData cellData,
+            boolean nullable,
+            int fixedSize) {
+        if (nullable) {
+            if (cellData.isNull()) {
+                payloadBuilder.append(TranslatorUtil.encodeBoolean(false));
+                return;
+            } else {
+                payloadBuilder.append(TranslatorUtil.encodeBoolean(true));
+            }
+        }
+        ByteString content = cellData.content();
+        if (fixedSize == -1) {
+            long fullLength = cellData.fullLength();
+            int contentLength = content.length();
+            boolean partial = contentLength < fullLength;
+            payloadBuilder.append(TranslatorUtil.encodeBoolean(partial));
+            if (partial) {
+                payloadBuilder.appendLong(fullLength);
+            }
+            payloadBuilder.appendInt(contentLength);
+        }
+        payloadBuilder.append(content);
     }
 
 }
