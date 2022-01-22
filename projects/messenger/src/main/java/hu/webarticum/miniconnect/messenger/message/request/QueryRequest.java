@@ -9,7 +9,6 @@ public final class QueryRequest implements Request, ExchangeMessage {
 
     private final long sessionId;
 
-    // FIXME: int? (long? String? byte[]?)
     private final int exchangeId;
 
     private final String query;
