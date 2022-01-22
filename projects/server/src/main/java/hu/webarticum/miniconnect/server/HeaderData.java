@@ -5,6 +5,7 @@ import java.util.Objects;
 import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 import hu.webarticum.miniconnect.messenger.message.Message;
 import hu.webarticum.miniconnect.messenger.message.SessionMessage;
+import hu.webarticum.miniconnect.util.data.ToStringBuilder;
 
 public class HeaderData {
 
@@ -71,6 +72,15 @@ public class HeaderData {
                 messageType == otherHeaderData.messageType &&
                 sessionId == otherHeaderData.sessionId &&
                 exchangeId == otherHeaderData.exchangeId;
+    }
+    
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .add("messageType", messageType)
+                .add("sessionId", sessionId)
+                .add("exchangeId", exchangeId)
+                .build();
     }
 
 }
