@@ -1,7 +1,10 @@
 package hu.webarticum.miniconnect.messenger.message.request;
 
+import java.util.Objects;
+
 import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 import hu.webarticum.miniconnect.util.data.ByteString;
+import hu.webarticum.miniconnect.util.data.ToStringBuilder;
 
 public final class LargeDataPartRequest implements Request, ExchangeMessage {
 
@@ -38,6 +41,39 @@ public final class LargeDataPartRequest implements Request, ExchangeMessage {
 
     public ByteString content() {
         return content;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sessionId, exchangeId, offset, content);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        } else if (other == null) {
+            return false;
+        } else if (!(other instanceof LargeDataPartRequest)) {
+            return false;
+        }
+        
+        LargeDataPartRequest otherLargeDataPartRequest = (LargeDataPartRequest) other;
+        return
+                sessionId == otherLargeDataPartRequest.sessionId &&
+                exchangeId == otherLargeDataPartRequest.exchangeId &&
+                offset == otherLargeDataPartRequest.offset &&
+                content.equals(otherLargeDataPartRequest.content);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .add("sessionId", sessionId)
+                .add("exchangeId", exchangeId)
+                .add("offset", offset)
+                .add("content", content.toArrayString())
+                .build();
     }
 
 }
