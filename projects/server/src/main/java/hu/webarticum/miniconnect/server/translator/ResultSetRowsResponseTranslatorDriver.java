@@ -12,7 +12,6 @@ import hu.webarticum.miniconnect.server.HeaderData;
 import hu.webarticum.miniconnect.server.HeaderEncoder;
 import hu.webarticum.miniconnect.transfer.Packet;
 import hu.webarticum.miniconnect.util.data.ByteString;
-import hu.webarticum.miniconnect.util.data.ByteString.Builder;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
@@ -146,7 +145,9 @@ class ResultSetRowsResponseTranslatorDriver implements TranslatorDriver {
         return Packet.of(header, payloadBuilder.build());
     }
 
-    private void appendNullables(Builder payloadBuilder, ImmutableList<Integer> nullables) {
+    private void appendNullables(
+            ByteString.Builder payloadBuilder,
+            ImmutableList<Integer> nullables) {
         payloadBuilder.appendInt(nullables.size());
         for (int nullable : nullables) {
             payloadBuilder.appendInt(nullable);
@@ -154,7 +155,7 @@ class ResultSetRowsResponseTranslatorDriver implements TranslatorDriver {
     }
 
     private void appendFixedSizes(
-            Builder payloadBuilder,
+            ByteString.Builder payloadBuilder,
             ImmutableMap<Integer, Integer> fixedSizes) {
         payloadBuilder.appendInt(fixedSizes.size());
         for (Map.Entry<Integer, Integer> entry : fixedSizes.entrySet()) {
@@ -164,7 +165,7 @@ class ResultSetRowsResponseTranslatorDriver implements TranslatorDriver {
     }
 
     private void appendRows(
-            Builder payloadBuilder,
+            ByteString.Builder payloadBuilder,
             ImmutableList<ImmutableList<CellData>> rows,
             ImmutableList<Integer> nullables,
             ImmutableMap<Integer, Integer> fixedSizes) {
@@ -178,7 +179,7 @@ class ResultSetRowsResponseTranslatorDriver implements TranslatorDriver {
     }
 
     private void appendRow(
-            Builder payloadBuilder,
+            ByteString.Builder payloadBuilder,
             ImmutableList<CellData> row,
             int columnsSize,
             ImmutableList<Integer> nullables,
@@ -191,7 +192,7 @@ class ResultSetRowsResponseTranslatorDriver implements TranslatorDriver {
     }
 
     private void appendCell(
-            Builder payloadBuilder,
+            ByteString.Builder payloadBuilder,
             CellData cellData,
             boolean nullable,
             int fixedSize) {

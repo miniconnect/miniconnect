@@ -13,8 +13,6 @@ import hu.webarticum.miniconnect.server.HeaderData;
 import hu.webarticum.miniconnect.server.HeaderEncoder;
 import hu.webarticum.miniconnect.transfer.Packet;
 import hu.webarticum.miniconnect.util.data.ByteString;
-import hu.webarticum.miniconnect.util.data.ByteString.Builder;
-import hu.webarticum.miniconnect.util.data.ByteString.Reader;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
@@ -38,7 +36,7 @@ class ResultResponseTranslatorDriver implements TranslatorDriver {
                 columnHeaders);
     }
 
-    private ImmutableList<ErrorData> readWarnings(Reader reader) {
+    private ImmutableList<ErrorData> readWarnings(ByteString.Reader reader) {
         int errorsSize = reader.readInt();
         List<ErrorData> warningsBuilder = new ArrayList<>(errorsSize);
         for (int i = 0; i < errorsSize; i++) {
@@ -47,14 +45,14 @@ class ResultResponseTranslatorDriver implements TranslatorDriver {
         return new ImmutableList<>(warningsBuilder);
     }
 
-    private ErrorData readErrorData(Reader reader) {
+    private ErrorData readErrorData(ByteString.Reader reader) {
         int code = reader.readInt();
         String sqlState = TranslatorUtil.readString(reader);
         String message = TranslatorUtil.readString(reader);
         return new ErrorData(code, sqlState, message);
     }
 
-    private ImmutableList<ColumnHeaderData> readColumnHeaders(Reader reader) {
+    private ImmutableList<ColumnHeaderData> readColumnHeaders(ByteString.Reader reader) {
         int columnsSize = reader.readInt();
         List<ColumnHeaderData> columnHeadersBuilder = new ArrayList<>(columnsSize);
         for (int i = 0; i < columnsSize; i++) {
@@ -63,14 +61,14 @@ class ResultResponseTranslatorDriver implements TranslatorDriver {
         return new ImmutableList<>(columnHeadersBuilder);
     }
 
-    private ColumnHeaderData readColumnHeaderData(Reader reader) {
+    private ColumnHeaderData readColumnHeaderData(ByteString.Reader reader) {
         String name = TranslatorUtil.readString(reader);
         String type = TranslatorUtil.readString(reader);
         ImmutableMap<String, ByteString> properties = readProperties(reader);
         return new ColumnHeaderData(name, type, properties);
     }
 
-    private ImmutableMap<String, ByteString> readProperties(Reader reader) {
+    private ImmutableMap<String, ByteString> readProperties(ByteString.Reader reader) {
         int propertiesSize = reader.readInt();
         Map<String, ByteString> propertiesBuilder = new HashMap<>(propertiesSize);
         for (int i = 0; i < propertiesSize; i++) {
@@ -119,14 +117,16 @@ class ResultResponseTranslatorDriver implements TranslatorDriver {
         }
     }
 
-    private void appendColumnHeaderData(Builder payloadBuilder, ColumnHeaderData header) {
+    private void appendColumnHeaderData(
+            ByteString.Builder payloadBuilder,
+            ColumnHeaderData header) {
         payloadBuilder.append(TranslatorUtil.encodeString(header.name()));
         payloadBuilder.append(TranslatorUtil.encodeString(header.type()));
         appendProperties(payloadBuilder, header.properties());
     }
 
     private void appendProperties(
-            Builder payloadBuilder,
+            ByteString.Builder payloadBuilder,
             ImmutableMap<String, ByteString> properties) {
         payloadBuilder.appendInt(properties.size());
         for (Map.Entry<String, ByteString> entry : properties.entrySet()) {
