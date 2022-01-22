@@ -9,7 +9,7 @@ public class ToStringBuilder {
     
     public ToStringBuilder(Object object) {
         stringBuilder.append(object.getClass().getSimpleName());
-        stringBuilder.append(" {");
+        stringBuilder.append(" { ");
     }
     
     
@@ -26,7 +26,7 @@ public class ToStringBuilder {
     }
     
     public String build() {
-        return stringBuilder.toString() + "}";
+        return stringBuilder.toString() + " }";
     }
     
 }
