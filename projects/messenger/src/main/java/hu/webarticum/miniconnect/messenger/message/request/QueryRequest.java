@@ -38,7 +38,7 @@ public final class QueryRequest implements Request, ExchangeMessage {
 
     @Override
     public int hashCode() {
-        return Objects.hash(exchangeId, query, sessionId);
+        return Objects.hash(sessionId, exchangeId, query);
     }
 
     @Override
