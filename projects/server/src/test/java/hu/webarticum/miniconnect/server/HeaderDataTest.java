@@ -8,16 +8,16 @@ class HeaderDataTest {
     
     @Test
     void testHashCodeAndEquals() {
-        HeaderData headerData1 = HeaderData.of(MessageType.QUERY_REQUEST, 584279845L, 347268);
-        HeaderData headerData2 = HeaderData.of(MessageType.QUERY_REQUEST, 4154L, 41748554);
-        HeaderData headerData3 = HeaderData.of(MessageType.QUERY_REQUEST, 584279845L, 347268);
+        HeaderData instance1 = HeaderData.of(MessageType.QUERY_REQUEST, 584279845L, 347268);
+        HeaderData instance2 = HeaderData.of(MessageType.QUERY_REQUEST, 4154L, 41748554);
+        HeaderData instance3 = HeaderData.of(MessageType.QUERY_REQUEST, 584279845L, 347268);
 
-        assertThat(headerData1)
-                .hasSameHashCodeAs(headerData3)
-                .isNotEqualTo(headerData2)
-                .isEqualTo(headerData3);
-        assertThat(headerData2)
-                .isNotEqualTo(headerData3);
+        assertThat(instance1)
+                .hasSameHashCodeAs(instance3)
+                .isNotEqualTo(instance2)
+                .isEqualTo(instance3);
+        assertThat(instance2)
+                .isNotEqualTo(instance3);
     }
 
 }
