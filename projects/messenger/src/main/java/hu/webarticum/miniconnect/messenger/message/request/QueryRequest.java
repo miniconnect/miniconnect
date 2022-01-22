@@ -58,7 +58,6 @@ public final class QueryRequest implements Request, ExchangeMessage {
                 query.equals(otherQueryRequest.query);
     }
 
-
     @Override
     public String toString() {
         return new ToStringBuilder(this)
