@@ -21,7 +21,7 @@ public final class LargeDataPartRequest implements Request, ExchangeMessage {
         this.sessionId = sessionId;
         this.exchangeId = exchangeId;
         this.offset = offset;
-        this.content = content;
+        this.content = Objects.requireNonNull(content);
     }
 
 
