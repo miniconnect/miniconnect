@@ -1,6 +1,9 @@
 package hu.webarticum.miniconnect.messenger.message.response;
 
+import java.util.Objects;
+
 import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
+import hu.webarticum.miniconnect.util.data.ToStringBuilder;
 
 public final class ResultSetEofResponse implements Response, ExchangeMessage {
 
@@ -30,6 +33,37 @@ public final class ResultSetEofResponse implements Response, ExchangeMessage {
 
     public long endOffset() {
         return endOffset;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sessionId, exchangeId, endOffset);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        } else if (other == null) {
+            return false;
+        } else if (!(other instanceof ResultSetEofResponse)) {
+            return false;
+        }
+        
+        ResultSetEofResponse otherResultSetEofResponse = (ResultSetEofResponse) other;
+        return
+                sessionId == otherResultSetEofResponse.sessionId &&
+                exchangeId == otherResultSetEofResponse.exchangeId &&
+                endOffset == otherResultSetEofResponse.endOffset;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .add("sessionId", sessionId)
+                .add("exchangeId", exchangeId)
+                .add("endOffset", endOffset)
+                .build();
     }
 
 }

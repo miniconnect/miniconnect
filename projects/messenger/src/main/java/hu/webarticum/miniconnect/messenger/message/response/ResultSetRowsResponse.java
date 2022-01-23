@@ -1,11 +1,14 @@
 package hu.webarticum.miniconnect.messenger.message.response;
 
+import java.util.Objects;
+
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 import hu.webarticum.miniconnect.util.data.ByteString;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
+import hu.webarticum.miniconnect.util.data.ToStringBuilder;
 
 public final class ResultSetRowsResponse implements Response, ExchangeMessage {
 
@@ -32,9 +35,9 @@ public final class ResultSetRowsResponse implements Response, ExchangeMessage {
         this.sessionId = sessionId;
         this.exchangeId = exchangeId;
         this.rowOffset = rowOffset;
-        this.nullables = nullables;
-        this.fixedSizes = fixedSizes;
-        this.rows = rows;
+        this.nullables = Objects.requireNonNull(nullables);
+        this.fixedSizes = Objects.requireNonNull(fixedSizes);
+        this.rows = Objects.requireNonNull(rows);
     }
 
 
@@ -64,6 +67,43 @@ public final class ResultSetRowsResponse implements Response, ExchangeMessage {
         return rows;
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(sessionId, exchangeId, rowOffset, nullables, fixedSizes, rows);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        } else if (other == null) {
+            return false;
+        } else if (!(other instanceof ResultSetRowsResponse)) {
+            return false;
+        }
+        
+        ResultSetRowsResponse otherResultSetRowsResponse = (ResultSetRowsResponse) other;
+        return
+                sessionId == otherResultSetRowsResponse.sessionId &&
+                exchangeId == otherResultSetRowsResponse.exchangeId &&
+                rowOffset == otherResultSetRowsResponse.rowOffset &&
+                nullables.equals(otherResultSetRowsResponse.nullables) &&
+                fixedSizes.equals(otherResultSetRowsResponse.fixedSizes) &&
+                rows.equals(otherResultSetRowsResponse.rows);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .add("sessionId", sessionId)
+                .add("exchangeId", exchangeId)
+                .add("rowOffset", rowOffset)
+                .add("nullables", nullables)
+                .add("fixedSizes", fixedSizes)
+                .add("rows", rows)
+                .build();
+    }
+
 
     public static final class CellData {
 
@@ -77,7 +117,7 @@ public final class ResultSetRowsResponse implements Response, ExchangeMessage {
         public CellData(boolean isNull, long fullLength, ByteString content) {
             this.isNull = isNull;
             this.fullLength = fullLength;
-            this.content = content;
+            this.content = Objects.requireNonNull(content);
         }
         
         public static CellData of(MiniValue value) {
@@ -100,7 +140,38 @@ public final class ResultSetRowsResponse implements Response, ExchangeMessage {
         public ByteString content() {
             return content;
         }
-        
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(isNull, fullLength, content);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            } else if (other == null) {
+                return false;
+            } else if (!(other instanceof CellData)) {
+                return false;
+            }
+            
+            CellData otherCellData = (CellData) other;
+            return
+                    isNull == otherCellData.isNull &&
+                    fullLength == otherCellData.fullLength &&
+                    content.equals(otherCellData.content);
+        }
+
+        @Override
+        public String toString() {
+            return new ToStringBuilder(this)
+                    .add("isNull", isNull)
+                    .add("fullLength", fullLength)
+                    .add("content", content)
+                    .build();
+        }
+
     }
 
 }

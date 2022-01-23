@@ -1,5 +1,7 @@
 package hu.webarticum.miniconnect.messenger.message.response;
 
+import java.util.Objects;
+
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniResult;
@@ -9,6 +11,7 @@ import hu.webarticum.miniconnect.tool.result.StoredValueDefinition;
 import hu.webarticum.miniconnect.util.data.ByteString;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
+import hu.webarticum.miniconnect.util.data.ToStringBuilder;
 
 public final class ResultResponse implements Response, ExchangeMessage {
 
@@ -38,10 +41,10 @@ public final class ResultResponse implements Response, ExchangeMessage {
         this.sessionId = sessionId;
         this.exchangeId = exchangeId;
         this.success = success;
-        this.error = error;
-        this.warnings = warnings;
+        this.error = Objects.requireNonNull(error);
+        this.warnings = Objects.requireNonNull(warnings);
         this.hasResultSet = hasResultSet;
-        this.columnHeaders = columnHeaders;
+        this.columnHeaders = Objects.requireNonNull(columnHeaders);
     }
     
     public static ResultResponse of(MiniResult result, long sessionId, int exchangeId) {
@@ -87,6 +90,46 @@ public final class ResultResponse implements Response, ExchangeMessage {
         return columnHeaders;
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                sessionId, exchangeId, success, error, warnings, hasResultSet, columnHeaders);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        } else if (other == null) {
+            return false;
+        } else if (!(other instanceof ResultResponse)) {
+            return false;
+        }
+        
+        ResultResponse otherResultResponse = (ResultResponse) other;
+        return
+                sessionId == otherResultResponse.sessionId &&
+                exchangeId == otherResultResponse.exchangeId &&
+                success == otherResultResponse.success &&
+                error.equals(otherResultResponse.error) &&
+                warnings.equals(otherResultResponse.warnings) &&
+                hasResultSet == otherResultResponse.hasResultSet &&
+                columnHeaders.equals(otherResultResponse.columnHeaders);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .add("sessionId", sessionId)
+                .add("exchangeId", exchangeId)
+                .add("success", success)
+                .add("error", error)
+                .add("warnings", warnings)
+                .add("hasResultSet", hasResultSet)
+                .add("columnHeaders", columnHeaders)
+                .build();
+    }
+
 
     public static class ColumnHeaderData {
 
@@ -101,9 +144,9 @@ public final class ResultResponse implements Response, ExchangeMessage {
                 String name,
                 String type,
                 ImmutableMap<String, ByteString> properties) {
-            this.name = name;
-            this.type = type;
-            this.properties = properties;
+            this.name = Objects.requireNonNull(name);
+            this.type = Objects.requireNonNull(type);
+            this.properties = Objects.requireNonNull(properties);
         }
         
         public static ColumnHeaderData of(MiniColumnHeader header) {
@@ -130,6 +173,37 @@ public final class ResultResponse implements Response, ExchangeMessage {
             return new StoredColumnHeader(name, new StoredValueDefinition(type, properties));
         }
 
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, type, properties);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            } else if (other == null) {
+                return false;
+            } else if (!(other instanceof ColumnHeaderData)) {
+                return false;
+            }
+            
+            ColumnHeaderData otherColumnHeaderData = (ColumnHeaderData) other;
+            return
+                    name.equals(otherColumnHeaderData.name) &&
+                    type.equals(otherColumnHeaderData.type) &&
+                    properties.equals(otherColumnHeaderData.properties);
+        }
+
+        @Override
+        public String toString() {
+            return new ToStringBuilder(this)
+                    .add("name", name)
+                    .add("type", type)
+                    .add("properties", properties)
+                    .build();
+        }
+
     }
     
 
@@ -144,8 +218,8 @@ public final class ResultResponse implements Response, ExchangeMessage {
         
         public ErrorData(int code, String sqlState, String message) {
             this.code = code;
-            this.sqlState = sqlState;
-            this.message = message;
+            this.sqlState = Objects.requireNonNull(sqlState);
+            this.message = Objects.requireNonNull(message);
         }
         
         public static ErrorData of(MiniError error) {
@@ -163,6 +237,37 @@ public final class ResultResponse implements Response, ExchangeMessage {
 
         public String message() {
             return message;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(code, sqlState, message);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            } else if (other == null) {
+                return false;
+            } else if (!(other instanceof ErrorData)) {
+                return false;
+            }
+            
+            ErrorData otherErrorData = (ErrorData) other;
+            return
+                    code == otherErrorData.code &&
+                    sqlState.equals(otherErrorData.sqlState) &&
+                    message.equals(otherErrorData.message);
+        }
+
+        @Override
+        public String toString() {
+            return new ToStringBuilder(this)
+                    .add("code", code)
+                    .add("sqlState", sqlState)
+                    .add("message", message)
+                    .build();
         }
 
     }

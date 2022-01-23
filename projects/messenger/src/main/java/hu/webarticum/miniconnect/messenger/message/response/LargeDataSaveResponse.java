@@ -1,6 +1,9 @@
 package hu.webarticum.miniconnect.messenger.message.response;
 
+import java.util.Objects;
+
 import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
+import hu.webarticum.miniconnect.util.data.ToStringBuilder;
 
 public final class LargeDataSaveResponse implements Response, ExchangeMessage {
 
@@ -28,8 +31,8 @@ public final class LargeDataSaveResponse implements Response, ExchangeMessage {
         this.exchangeId = exchangeId;
         this.success = success;
         this.errorCode = errorCode;
-        this.sqlState = sqlState;
-        this.errorMessage = errorMessage;
+        this.sqlState = Objects.requireNonNull(sqlState);
+        this.errorMessage = Objects.requireNonNull(errorMessage);
     }
 
 
@@ -57,6 +60,43 @@ public final class LargeDataSaveResponse implements Response, ExchangeMessage {
     
     public String errorMessage() {
         return errorMessage;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sessionId, exchangeId, success, errorCode, sqlState, errorMessage);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        } else if (other == null) {
+            return false;
+        } else if (!(other instanceof LargeDataSaveResponse)) {
+            return false;
+        }
+        
+        LargeDataSaveResponse otherLargeDataSaveResponse = (LargeDataSaveResponse) other;
+        return
+                sessionId == otherLargeDataSaveResponse.sessionId &&
+                exchangeId == otherLargeDataSaveResponse.exchangeId &&
+                success == otherLargeDataSaveResponse.success &&
+                errorCode == otherLargeDataSaveResponse.errorCode &&
+                sqlState.equals(otherLargeDataSaveResponse.sqlState) &&
+                errorMessage.equals(otherLargeDataSaveResponse.errorMessage);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .add("sessionId", sessionId)
+                .add("exchangeId", exchangeId)
+                .add("success", success)
+                .add("errorCode", errorCode)
+                .add("sqlState", sqlState)
+                .add("errorMessage", errorMessage)
+                .build();
     }
 
 }
