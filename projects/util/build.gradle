@@ -26,3 +26,7 @@ dependencies {
     labImplementation sourceSets.main.output
     labImplementation configurations.lab
 }
+
+test {
+    useJUnitPlatform()
+}
