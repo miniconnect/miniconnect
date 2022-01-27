@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.tool.result;
+package hu.webarticum.miniconnect.tool.mock;
 
 import java.io.InputStream;
 import java.util.function.Function;

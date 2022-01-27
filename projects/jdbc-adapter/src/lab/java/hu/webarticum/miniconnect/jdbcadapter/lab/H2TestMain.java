@@ -1,11 +1,12 @@
 package hu.webarticum.miniconnect.jdbcadapter.lab;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.function.Supplier;
 
 import hu.webarticum.miniconnect.api.MiniSession;
-import hu.webarticum.miniconnect.jdbcadapter.JdbcAdapterSession;
+import hu.webarticum.miniconnect.api.MiniSessionManager;
+import hu.webarticum.miniconnect.jdbcadapter.JdbcAdapterSessionManager;
+import hu.webarticum.miniconnect.jdbcadapter.JdbcLargeDataPutter;
 import hu.webarticum.miniconnect.jdbcadapter.SimpleJdbcLargeDataPutter;
 import hu.webarticum.miniconnect.tool.repl.Repl;
 import hu.webarticum.miniconnect.tool.repl.ReplRunner;
@@ -28,15 +29,15 @@ public class H2TestMain {
     
     private static void runRepl(
             String url, String username, String password, String setStatement) throws SQLException {
-        try (Connection jdbcConnection = DriverManager.getConnection(url, username, password)) {
-            SimpleJdbcLargeDataPutter largeDataPutter =
-                    new SimpleJdbcLargeDataPutter(setStatement);
-            try (MiniSession session = new JdbcAdapterSession(jdbcConnection, largeDataPutter)) {
-                Repl repl = new SqlRepl(
-                        session,
-                        System.out); // NOSONAR
-                new ReplRunner(repl, System.in).run();
-            }
+        Supplier<JdbcLargeDataPutter> largeDataPutterFactory =
+                () -> new SimpleJdbcLargeDataPutter(setStatement);
+        MiniSessionManager sessionManager =
+                new JdbcAdapterSessionManager(url, username, password, largeDataPutterFactory);
+        try (MiniSession session = sessionManager.openSession()) {
+            Repl repl = new SqlRepl(
+                    session,
+                    System.out); // NOSONAR
+            new ReplRunner(repl, System.in).run();
         }
     }
     

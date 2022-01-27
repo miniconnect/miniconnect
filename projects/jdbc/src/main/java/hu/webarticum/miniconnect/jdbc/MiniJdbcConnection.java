@@ -404,11 +404,19 @@ public class MiniJdbcConnection implements Connection {
         synchronized (closeLock) {
             if (closed) {
                 return;
+            } else {
+                closed = true;
             }
-            
-            for (Statement activeStatement : activeStatements) {
-                activeStatement.close();
-            }
+        }
+        
+        for (Statement activeStatement : activeStatements) {
+            activeStatement.close();
+        }
+        
+        try {
+            miniSession.close();
+        } catch (Exception e) {
+            throw new SQLException(e); // FIXME
         }
     }
 

@@ -19,11 +19,12 @@ import org.junit.jupiter.api.Test;
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.api.MiniSessionManager;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.jdbc.provider.h2.H2DatabaseProvider;
 import hu.webarticum.miniconnect.jdbcadapter.JdbcAdapterSession;
-import hu.webarticum.miniconnect.tool.result.MockSession;
+import hu.webarticum.miniconnect.tool.mock.MockSessionManager;
 import hu.webarticum.miniconnect.tool.result.StoredColumnHeader;
 import hu.webarticum.miniconnect.tool.result.StoredResult;
 import hu.webarticum.miniconnect.tool.result.StoredResultSetData;
@@ -33,51 +34,49 @@ import hu.webarticum.miniconnect.util.data.ByteString;
 
 class MiniJdbcConnectionTest {
     
-    // TODO: eliminate the use of DummyMessenger
     @Test
     void testResultSetWithDummyMessenger() throws Exception {
-        try (MiniSession session = new MockSession(this::mockResult)) {
-            // FIXME: close?
-            // FIXME: DatabaseProvider?
-            Connection connection = new MiniJdbcConnection(session, null);
-            try (Statement selectStatement = connection.createStatement()) {
-                boolean executeResult = selectStatement.execute("SELECT * FROM data");
-                assertThat(executeResult).isTrue();
+        MiniSessionManager sessionManager = new MockSessionManager(this::mockResult);
+        try (
+                Connection connection = new MiniJdbcConnection(sessionManager.openSession(), null);
+                Statement selectStatement = connection.createStatement()) {
+            
+            boolean executeResult = selectStatement.execute("SELECT * FROM data");
+            assertThat(executeResult).isTrue();
+            
+            try (ResultSet resultSet = selectStatement.getResultSet()) {
+                assertThat(resultSet.findColumn("id")).isEqualTo(1);
+                assertThat(resultSet.findColumn("label")).isEqualTo(2);
+                assertThat(resultSet.findColumn("description")).isEqualTo(3);
+                assertThatThrownBy(() -> resultSet.findColumn("xxxxx"))
+                        .isInstanceOf(SQLException.class);
                 
-                try (ResultSet resultSet = selectStatement.getResultSet()) {
-                    assertThat(resultSet.findColumn("id")).isEqualTo(1);
-                    assertThat(resultSet.findColumn("label")).isEqualTo(2);
-                    assertThat(resultSet.findColumn("description")).isEqualTo(3);
-                    assertThatThrownBy(() -> resultSet.findColumn("xxxxx"))
-                            .isInstanceOf(SQLException.class);
-                    
-                    ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-                    assertThat(resultSetMetaData.getColumnCount()).isEqualTo(3);
-                    assertThat(resultSetMetaData.getColumnLabel(1)).isEqualTo("id");
-                    assertThat(resultSetMetaData.getColumnLabel(2)).isEqualTo("label");
-                    assertThat(resultSetMetaData.getColumnLabel(3)).isEqualTo("description");
-                    
-                    boolean next1Result = resultSet.next();
-                    assertThat(next1Result).isTrue();
-                    assertThat(resultSet.getInt(1)).isEqualTo(1);
-                    assertThat(resultSet.getString(2)).isEqualTo("first");
-                    assertThat(resultSet.getString(3)).isEqualTo("hello world");
+                ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+                assertThat(resultSetMetaData.getColumnCount()).isEqualTo(3);
+                assertThat(resultSetMetaData.getColumnLabel(1)).isEqualTo("id");
+                assertThat(resultSetMetaData.getColumnLabel(2)).isEqualTo("label");
+                assertThat(resultSetMetaData.getColumnLabel(3)).isEqualTo("description");
+                
+                boolean next1Result = resultSet.next();
+                assertThat(next1Result).isTrue();
+                assertThat(resultSet.getInt(1)).isEqualTo(1);
+                assertThat(resultSet.getString(2)).isEqualTo("first");
+                assertThat(resultSet.getString(3)).isEqualTo("hello world");
 
-                    boolean next2Result = resultSet.next();
-                    assertThat(next2Result).isTrue();
-                    assertThat(resultSet.getInt(1)).isEqualTo(2);
-                    assertThat(resultSet.getString(2)).isEqualTo("second");
-                    assertThat(resultSet.getString(3)).isEqualTo("lorem ipsum");
-                    
-                    boolean next3Result = resultSet.next();
-                    assertThat(next3Result).isTrue();
-                    assertThat(resultSet.getInt(1)).isEqualTo(3);
-                    assertThat(resultSet.getString(2)).isEqualTo("third");
-                    assertThat(resultSet.getString(3)).isEqualTo("xxx yyy");
-                    
-                    boolean next4Result = resultSet.next();
-                    assertThat(next4Result).isFalse();
-                }
+                boolean next2Result = resultSet.next();
+                assertThat(next2Result).isTrue();
+                assertThat(resultSet.getInt(1)).isEqualTo(2);
+                assertThat(resultSet.getString(2)).isEqualTo("second");
+                assertThat(resultSet.getString(3)).isEqualTo("lorem ipsum");
+                
+                boolean next3Result = resultSet.next();
+                assertThat(next3Result).isTrue();
+                assertThat(resultSet.getInt(1)).isEqualTo(3);
+                assertThat(resultSet.getString(2)).isEqualTo("third");
+                assertThat(resultSet.getString(3)).isEqualTo("xxx yyy");
+                
+                boolean next4Result = resultSet.next();
+                assertThat(next4Result).isFalse();
             }
         }
     }
