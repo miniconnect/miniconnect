@@ -53,14 +53,13 @@ public class DummyMessenger implements Messenger {
 
     private static final Pattern SELECT_ALL_QUERY_PATTERN = Bee
             .then(Bee.WHITESPACE.any())
-            .then(Bee.WHITESPACE.any())
             .then(Bee.fixed("SELECT")).then(Bee.WHITESPACE.more())
             .then(Bee.fixed("*")).then(Bee.WHITESPACE.more())
             .then(Bee.fixed("FROM")).then(Bee.WHITESPACE.more())
             .then(Bee.oneCharOf("\"`").optional().as("quote"))
             .then(Bee.without(Pattern.CASE_INSENSITIVE, Bee.fixed("data")))
-            .then(Bee.ref("quote"))
-            .then(Bee.WHITESPACE.any())
+            .then(Bee.ref("quote")).then(Bee.WHITESPACE.any())
+            .then(Bee.fixed(";").optional()).then(Bee.WHITESPACE.any())
             .toPattern(Pattern.CASE_INSENSITIVE);
     
     private static final ImmutableList<MiniColumnHeader> columnHeaders = ImmutableList.of(
@@ -223,7 +222,7 @@ public class DummyMessenger implements Messenger {
                 new ResultResponse.ErrorData(
                         1,
                         SQLSTATE_SYNTAXERROR,
-                        "Bad query, only select all is supported"),
+                        "Bad query, try select from 'data' (put data as LOB)"),
                 ImmutableList.empty(),
                 true,
                 ImmutableList.empty());

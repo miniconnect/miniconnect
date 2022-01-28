@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -50,10 +51,11 @@ public class MessengerSession implements MiniSession {
     private final AtomicInteger exchangeIdCounter = new AtomicInteger();
 
 
-    public MessengerSession(long sessionId, Messenger messenger) {
-        this.sessionId = sessionId;
+    public MessengerSession(Messenger messenger) {
+        this.sessionId = UUID.randomUUID().getMostSignificantBits(); // FIXME request a session id!!!
         this.messenger = messenger;
     }
+
 
     @Override
     public MiniResult execute(String query) {

@@ -1,17 +1,16 @@
 package hu.webarticum.miniconnect.messenger.lab.dummy;
 
-import java.io.IOException;
-
 import hu.webarticum.miniconnect.api.MiniSession;
-import hu.webarticum.miniconnect.messenger.adapter.MessengerSession;
+import hu.webarticum.miniconnect.api.MiniSessionManager;
+import hu.webarticum.miniconnect.messenger.adapter.MessengerSessionManager;
 import hu.webarticum.miniconnect.tool.repl.ReplRunner;
 import hu.webarticum.miniconnect.tool.repl.SqlRepl;
 
 public class DummyMessengerMain {
 
-    public static void main(String[] args) throws IOException {
-        long sessionId = 1L;
-        try (MiniSession session = new MessengerSession(sessionId, new DummyMessenger())) {
+    public static void main(String[] args) {
+        MiniSessionManager sessionManager = new MessengerSessionManager(new DummyMessenger());
+        try (MiniSession session = sessionManager.openSession()) {
             new ReplRunner(new SqlRepl(session, System.out), System.in).run(); // NOSONAR
         }
     }
