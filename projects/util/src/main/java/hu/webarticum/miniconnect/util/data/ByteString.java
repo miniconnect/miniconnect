@@ -59,7 +59,7 @@ public final class ByteString implements Serializable {
     }
 
     public static ByteString ofLong(long longValue) {
-        return ByteString.wrap(ByteBuffer.allocate(Short.BYTES).putLong(longValue).array());
+        return ByteString.wrap(ByteBuffer.allocate(Long.BYTES).putLong(longValue).array());
     }
 
     public static ByteString wrap(byte[] bytes) {
