@@ -14,6 +14,8 @@ import hu.webarticum.miniconnect.messenger.message.Message;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataHeadRequest;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataPartRequest;
 import hu.webarticum.miniconnect.messenger.message.request.QueryRequest;
+import hu.webarticum.miniconnect.messenger.message.request.SessionCloseRequest;
+import hu.webarticum.miniconnect.messenger.message.request.SessionInitRequest;
 import hu.webarticum.miniconnect.messenger.message.response.LargeDataSaveResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultResponse.ColumnHeaderData;
@@ -21,6 +23,8 @@ import hu.webarticum.miniconnect.messenger.message.response.ResultResponse.Error
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetEofResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetValuePartResponse;
+import hu.webarticum.miniconnect.messenger.message.response.SessionCloseResponse;
+import hu.webarticum.miniconnect.messenger.message.response.SessionInitResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse.CellData;
 import hu.webarticum.miniconnect.server.MessageType;
 import hu.webarticum.miniconnect.util.data.ByteString;
@@ -33,14 +37,18 @@ class DefaultMessageTranslatorTest {
     void testAllBackAndForth() {
         DefaultMessageTranslator translator = new DefaultMessageTranslator();
         List<Message> messages = Arrays.asList(
+                createSessionInitRequest(),
                 createQueryRequest(),
                 createLargeDataHeadRequest(),
                 createLargeDataPartRequest(),
+                createSessionCloseRequest(),
+                createSessionInitResponse(),
                 createResultResponse(),
                 createResultSetRowsResponse(),
                 createResultSetValuePartResponse(),
                 createResultSetEofResponse(),
-                createLargeDataSaveResponse());
+                createLargeDataSaveResponse(),
+                createSessionCloseResponse());
         List<MessageType> messageTypes = messages.stream()
                 .map(m -> MessageType.ofMessage(m))
                 .collect(Collectors.toList());
@@ -51,6 +59,10 @@ class DefaultMessageTranslatorTest {
 
         assertThat(messageTypes).contains(MessageType.values());
         assertThat(recoveredMessages).isEqualTo(messages);
+    }
+    
+    private Message createSessionInitRequest() {
+        return new SessionInitRequest();
     }
 
     private Message createQueryRequest() {
@@ -64,7 +76,15 @@ class DefaultMessageTranslatorTest {
     private Message createLargeDataPartRequest() {
         return new LargeDataPartRequest(23L, 2, 43L, ByteString.of("abc"));
     }
-    
+
+    private Message createSessionCloseRequest() {
+        return new SessionCloseRequest(5L, 3);
+    }
+
+    private Message createSessionInitResponse() {
+        return new SessionInitResponse(9L);
+    }
+
     private Message createResultResponse() {
         ErrorData error = new ErrorData(3, "00003", "Error");
         ImmutableList<ErrorData> warnings = ImmutableList.of(
@@ -107,4 +127,9 @@ class DefaultMessageTranslatorTest {
     private Message createLargeDataSaveResponse() {
         return new LargeDataSaveResponse(2L, 3, false, 1, "00001", "Error");
     }
+
+    private Message createSessionCloseResponse() {
+        return new SessionCloseResponse(2L, 5);
+    }
+
 }

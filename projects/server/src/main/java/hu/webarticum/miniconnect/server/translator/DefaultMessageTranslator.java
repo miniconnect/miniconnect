@@ -18,6 +18,9 @@ public class DefaultMessageTranslator implements MessageTranslator {
         // with this switch based solution we can statically detect missing drivers
         for (MessageType messageType : MessageType.values()) {
             switch (messageType) {
+                case SESSION_INIT_REQUEST:
+                    drivers.put(messageType, new SessionInitRequestTranslatorDriver());
+                    break;
                 case QUERY_REQUEST:
                     drivers.put(messageType, new QueryRequestTranslatorDriver());
                     break;
@@ -26,6 +29,12 @@ public class DefaultMessageTranslator implements MessageTranslator {
                     break;
                 case LARGE_DATA_PART_REQUEST:
                     drivers.put(messageType, new LargeDataPartRequestTranslatorDriver());
+                    break;
+                case SESSION_CLOSE_REQUEST:
+                    drivers.put(messageType, new SessionCloseRequestTranslatorDriver());
+                    break;
+                case SESSION_INIT_RESPONSE:
+                    drivers.put(messageType, new SessionInitResponseTranslatorDriver());
                     break;
                 case RESULT_RESPONSE:
                     drivers.put(messageType, new ResultResponseTranslatorDriver());
@@ -41,6 +50,9 @@ public class DefaultMessageTranslator implements MessageTranslator {
                     break;
                 case LARGE_DATA_SAVE_RESPONSE:
                     drivers.put(messageType, new LargeDataSaveResponseTranslatorDriver());
+                    break;
+                case SESSION_CLOSE_RESPONSE:
+                    drivers.put(messageType, new SessionCloseResponseTranslatorDriver());
                     break;
             }
         }

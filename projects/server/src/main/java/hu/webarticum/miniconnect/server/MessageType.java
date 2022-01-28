@@ -4,22 +4,30 @@ import hu.webarticum.miniconnect.messenger.message.Message;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataHeadRequest;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataPartRequest;
 import hu.webarticum.miniconnect.messenger.message.request.QueryRequest;
+import hu.webarticum.miniconnect.messenger.message.request.SessionCloseRequest;
+import hu.webarticum.miniconnect.messenger.message.request.SessionInitRequest;
 import hu.webarticum.miniconnect.messenger.message.response.LargeDataSaveResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetEofResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetValuePartResponse;
+import hu.webarticum.miniconnect.messenger.message.response.SessionCloseResponse;
+import hu.webarticum.miniconnect.messenger.message.response.SessionInitResponse;
 
 public enum MessageType {
 
-    // TODO: start/close session
-    // FIXME: sending out session ids?
+    SESSION_INIT_REQUEST('I', SessionInitRequest.class),
 
     QUERY_REQUEST('Q', QueryRequest.class),
     
     LARGE_DATA_HEAD_REQUEST('L', LargeDataHeadRequest.class),
     
     LARGE_DATA_PART_REQUEST('D', LargeDataPartRequest.class),
+    
+    SESSION_CLOSE_REQUEST('C', SessionCloseRequest.class),
+    
+
+    SESSION_INIT_RESPONSE('i', SessionInitResponse.class),
 
     RESULT_RESPONSE('q', ResultResponse.class),
 
@@ -30,6 +38,8 @@ public enum MessageType {
     RESULT_SET_EOF_RESPONSE('f', ResultSetEofResponse.class),
 
     LARGE_DATA_SAVE_RESPONSE('l', LargeDataSaveResponse.class),
+    
+    SESSION_CLOSE_RESPONSE('c', SessionCloseResponse.class),
 
     ;
     
