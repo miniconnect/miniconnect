@@ -1,9 +1,9 @@
 # TODO
 
-## Open questions
+## Ideas
 
-
-- should `execute()` return with `Future<Result>`?
+Methods of `MiniSessionManager` and `MiniSession` could
+return with `Future` objects.
 
 
 ## TODOs for components
