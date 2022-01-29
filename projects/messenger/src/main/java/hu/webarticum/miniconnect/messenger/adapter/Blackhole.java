@@ -24,6 +24,7 @@ public class Blackhole {
     }
     
     
+    // TODO make this static
     public final void consume(Object obj) {
         int ntlr = (this.tlr = (this.tlr * 1664525 + 1013904223));
         if ((ntlr & tlrMask) == 0) {
