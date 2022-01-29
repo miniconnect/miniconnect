@@ -14,7 +14,7 @@ import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class SimpleServerMain {
     
-    private static final int DEFAULT_PORT = 9999;
+    private static final int DEFAULT_PORT = 54321;
     
     
     public static void main(String[] args) throws IOException {

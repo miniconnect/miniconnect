@@ -14,7 +14,7 @@ public class SimpleClientMain {
     
     private static final String DEFAULT_HOST = "localhost";
     
-    private static final int DEFAULT_PORT = 9999;
+    private static final int DEFAULT_PORT = 54321;
     
 
     public static void main(String[] args) throws IOException {
