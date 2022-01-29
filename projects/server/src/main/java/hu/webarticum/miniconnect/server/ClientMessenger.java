@@ -2,6 +2,7 @@ package hu.webarticum.miniconnect.server;
 
 import java.io.Closeable;
 import java.net.Socket;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
@@ -11,7 +12,9 @@ import hu.webarticum.miniconnect.messenger.Messenger;
 import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 import hu.webarticum.miniconnect.messenger.message.SessionMessage;
 import hu.webarticum.miniconnect.messenger.message.request.Request;
+import hu.webarticum.miniconnect.messenger.message.request.SessionInitRequest;
 import hu.webarticum.miniconnect.messenger.message.response.Response;
+import hu.webarticum.miniconnect.messenger.message.response.SessionInitResponse;
 import hu.webarticum.miniconnect.server.translator.DefaultMessageTranslator;
 import hu.webarticum.miniconnect.transfer.Packet;
 import hu.webarticum.miniconnect.transfer.SocketClient;
@@ -24,8 +27,15 @@ public class ClientMessenger implements Messenger, Closeable {
     
     private final MessageEncoder encoder;
 
-    private final WeakHashMap<Consumer<Response>, ExchangeIdentity> exchangeResponseConsumers =
+    private final Map<Consumer<Response>, ExchangeIdentity> exchangeResponseConsumers =
             new WeakHashMap<>();
+    
+    private final Object exchangeResponseConsumersLock = new Object();
+
+    private final Map<Consumer<Response>, Instant> sessionInitConsumers =
+            new WeakHashMap<>();
+    
+    private final Object sessionInitConsumersLock = new Object();
     
 
     public ClientMessenger(Socket socket) {
@@ -52,7 +62,13 @@ public class ClientMessenger implements Messenger, Closeable {
             ExchangeMessage exchangeMessage = (ExchangeMessage) request;
             ExchangeIdentity exchangeIdentity = 
                     new ExchangeIdentity(exchangeMessage.sessionId(), exchangeMessage.exchangeId());
-            exchangeResponseConsumers.put(responseConsumer, exchangeIdentity);
+            synchronized (exchangeResponseConsumersLock) {
+                exchangeResponseConsumers.put(responseConsumer, exchangeIdentity);
+            }
+        } else if (request instanceof SessionInitRequest) {
+            synchronized (sessionInitConsumersLock) {
+                sessionInitConsumers.put(responseConsumer, Instant.now());
+            }
         }
         socketClient.send(encoder.encode(request));
     }
@@ -60,17 +76,37 @@ public class ClientMessenger implements Messenger, Closeable {
     public void acceptResponsePacket(Packet packet) {
         Response response = (Response) decoder.decode(packet);
         if (response instanceof SessionMessage) {
-            long requestSessionId = ((SessionMessage) response).sessionId();
+            long responseSessionId = ((SessionMessage) response).sessionId();
             if (response instanceof ExchangeMessage) {
                 ExchangeMessage exchangeMessage = (ExchangeMessage) response;
                 int exchangeId = exchangeMessage.exchangeId();
                 ExchangeIdentity exchangeIdentity =
-                        new ExchangeIdentity(requestSessionId, exchangeId);
+                        new ExchangeIdentity(responseSessionId, exchangeId);
                 Consumer<Response> responseConsumer = findResponseConsumer(exchangeIdentity);
                 if (responseConsumer != null) {
                     responseConsumer.accept(response);
                 } else {
                     // TODO unexpected exchange id, what to do?
+                }
+            } else if (response instanceof SessionInitResponse) {
+                Consumer<Response> oldestConsumer = null;
+                synchronized (sessionInitConsumersLock) {
+                    Instant oldestInstant = null;
+                    for (
+                            Map.Entry<Consumer<Response>, Instant> entry :
+                            sessionInitConsumers.entrySet()) {
+                        Instant instant = entry.getValue();
+                        if (oldestInstant == null || instant.isBefore(oldestInstant)) {
+                            oldestInstant = instant;
+                            oldestConsumer = entry.getKey();
+                        }
+                    }
+                    if (oldestConsumer != null) {
+                        sessionInitConsumers.remove(oldestConsumer);
+                    }
+                }
+                if (oldestConsumer != null) {
+                    oldestConsumer.accept(response);
                 }
             } else {
                 // TODO handle open session!
@@ -82,10 +118,12 @@ public class ClientMessenger implements Messenger, Closeable {
     }
     
     private Consumer<Response> findResponseConsumer(ExchangeIdentity exchangeIdentity) {
-        for (Map.Entry<Consumer<Response>, ExchangeIdentity> entry :
-                exchangeResponseConsumers.entrySet()) {
-            if (entry.getValue().equals(exchangeIdentity)) {
-                return entry.getKey();
+        synchronized (exchangeResponseConsumersLock) {
+            for (Map.Entry<Consumer<Response>, ExchangeIdentity> entry :
+                    exchangeResponseConsumers.entrySet()) {
+                if (entry.getValue().equals(exchangeIdentity)) {
+                    return entry.getKey();
+                }
             }
         }
         return null;

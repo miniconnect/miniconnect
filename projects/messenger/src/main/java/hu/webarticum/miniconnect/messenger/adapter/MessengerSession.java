@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,12 +19,17 @@ import hu.webarticum.miniconnect.messenger.Messenger;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataHeadRequest;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataPartRequest;
 import hu.webarticum.miniconnect.messenger.message.request.QueryRequest;
+import hu.webarticum.miniconnect.messenger.message.request.Request;
+import hu.webarticum.miniconnect.messenger.message.request.SessionCloseRequest;
+import hu.webarticum.miniconnect.messenger.message.request.SessionInitRequest;
 import hu.webarticum.miniconnect.messenger.message.response.LargeDataSaveResponse;
 import hu.webarticum.miniconnect.messenger.message.response.Response;
 import hu.webarticum.miniconnect.messenger.message.response.ResultResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetEofResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetValuePartResponse;
+import hu.webarticum.miniconnect.messenger.message.response.SessionCloseResponse;
+import hu.webarticum.miniconnect.messenger.message.response.SessionInitResponse;
 import hu.webarticum.miniconnect.messenger.util.OrderAligningQueue;
 import hu.webarticum.miniconnect.tool.result.StoredError;
 import hu.webarticum.miniconnect.tool.result.StoredLargeDataSaveResult;
@@ -40,23 +45,55 @@ public class MessengerSession implements MiniSession {
     private static final int RESULT_TIMEOUT_VALUE = 60; // TODO: make it configurable
     
     private static final TimeUnit RESULT_TIMEOUT_UNIT = TimeUnit.SECONDS; // TODO: make it conf.
-    
-    
-    private final long sessionId;
+
     
     private final Messenger messenger;
     
-    private final Blackhole blackhole = new Blackhole();
-
+    private final CompletableFuture<Long> sessionIdFuture = new CompletableFuture<>();
+    
     private final AtomicInteger exchangeIdCounter = new AtomicInteger();
 
-
+    
     public MessengerSession(Messenger messenger) {
-        this.sessionId = UUID.randomUUID().getMostSignificantBits(); // FIXME request a session id!!!
         this.messenger = messenger;
+        loadSessionIdAsync(messenger, sessionIdFuture);
+    }
+
+    private static void loadSessionIdAsync(
+            Messenger messenger, CompletableFuture<Long> future) {
+        new Thread(() -> loadSessionId(messenger, future)).start();
+    }
+    
+    private static void loadSessionId(
+            Messenger messenger, CompletableFuture<Long> future) {
+        Consumer<Response> responseConsumer = r -> acceptSessionInitResponse(r, future);
+        messenger.accept(new SessionInitRequest(), responseConsumer);
+        waitForFutureSilently(future);
+        new Blackhole().consume(responseConsumer);
+    }
+    
+    private static void acceptSessionInitResponse(
+            Response response, CompletableFuture<Long> future) {
+        if (!(response instanceof SessionInitResponse)) {
+            return;
+        }
+        SessionInitResponse sessionInitResponse = (SessionInitResponse) response;
+        // FIXME/TODO: store the entire response and handle potential errors
+        future.complete(sessionInitResponse.sessionId());
     }
 
 
+    public long sessionId() {
+        try {
+            return sessionIdFuture.get(RESULT_TIMEOUT_VALUE, RESULT_TIMEOUT_UNIT);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("No session id was obtained", e);
+        } catch (Exception e) {
+            throw new IllegalStateException("No session id was obtained", e);
+        }
+    }
+    
     @Override
     public MiniResult execute(String query) {
         int exchangeId = exchangeIdCounter.incrementAndGet();
@@ -66,6 +103,7 @@ public class MessengerSession implements MiniSession {
 
         CompletableFuture<MessengerResultSetCharger> resultSetFuture = new CompletableFuture<>();
         
+        long sessionId = sessionId();
         QueryRequest queryRequest = new QueryRequest(sessionId, exchangeId, query);
         messenger.accept(queryRequest, response -> {
             if (response instanceof ResultSetValuePartResponse) {
@@ -182,7 +220,8 @@ public class MessengerSession implements MiniSession {
         
         CompletableFuture<Response> responseFuture = new CompletableFuture<>();
         Consumer<Response> responseConsumer = responseFuture::complete;
-        
+
+        long sessionId = sessionId();
         LargeDataHeadRequest largeDataHeadRequest =
                 new LargeDataHeadRequest(sessionId, exchangeId, variableName, length);
         messenger.accept(largeDataHeadRequest, responseConsumer);
@@ -200,7 +239,7 @@ public class MessengerSession implements MiniSession {
         }
         
         // we must be sure that responseConsumer is reachable until this point
-        blackhole.consume(responseConsumer);
+        new Blackhole().consume(responseConsumer);
         
         Response response = null;
         try {
@@ -242,9 +281,32 @@ public class MessengerSession implements MiniSession {
     
     @Override
     public void close() {
-        
-        // TODO
+        long sessionId = sessionId();
+        int exchangeId = exchangeIdCounter.incrementAndGet();
+        Request sessionCloseRequest = new SessionCloseRequest(sessionId, exchangeId);
+        CompletableFuture<SessionCloseResponse> closeFuture = new CompletableFuture<>();
+        messenger.accept(sessionCloseRequest, r -> acceptSessionCloseResponse(r, closeFuture));
+        waitForFutureSilently(closeFuture);
+    }
 
+    private void acceptSessionCloseResponse(
+            Response response, CompletableFuture<SessionCloseResponse> future) {
+        if (!(response instanceof SessionCloseResponse)) {
+            return;
+        }
+        SessionCloseResponse sessionCloseResponse = (SessionCloseResponse) response;
+        future.complete(sessionCloseResponse);
+    }
+    
+    private static void waitForFutureSilently(Future<?> future) {
+        try {
+            future.get(RESULT_TIMEOUT_VALUE, RESULT_TIMEOUT_UNIT);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            // nothing other to do
+        } catch (Exception e) {
+            // nothing to do
+        }
     }
 
 }

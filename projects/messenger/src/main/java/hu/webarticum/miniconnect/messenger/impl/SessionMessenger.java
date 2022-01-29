@@ -10,7 +10,6 @@ import hu.webarticum.miniconnect.messenger.message.request.QueryRequest;
 import hu.webarticum.miniconnect.messenger.message.request.Request;
 import hu.webarticum.miniconnect.messenger.message.response.Response;
 
-// FIXME: should stranger session ids be filtered?
 public class SessionMessenger implements Messenger {
     
     private final QueryPartial queryPartial;
