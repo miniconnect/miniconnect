@@ -9,11 +9,7 @@ configurations {
 }
 
 sourceSets {
-    lab {
-        java {
-            srcDirs = ['src/lab/java']
-        }
-    }
+    lab
 }
 
 dependencies {
