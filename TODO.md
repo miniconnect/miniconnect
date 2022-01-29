@@ -2,8 +2,9 @@
 
 ## Ideas
 
-Methods of `MiniSessionManager` and `MiniSession` could
-return with `Future` objects.
+- Methods of `MiniSessionManager` and `MiniSession` could
+  return with `Future` objects.
+- should session init (and close) responses include potential error info?
 
 
 ## TODOs for components
@@ -31,7 +32,7 @@ return with `Future` objects.
 
 #### Then
 
-- transaction managment
+- transaction management
 - query execution plans
 - reimplement execution of simplified queries
 - add support for a single left join
