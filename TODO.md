@@ -2,9 +2,10 @@
 
 ## Ideas
 
-- Methods of `MiniSessionManager` and `MiniSession` could
+- methods of `MiniSessionManager` and `MiniSession` could
   return with `Future` objects.
 - should session init (and close) responses include potential error info?
+- move ByteString, ImmutableList and ImmutableMap to the new `lang` package
 
 
 ## TODOs for components
