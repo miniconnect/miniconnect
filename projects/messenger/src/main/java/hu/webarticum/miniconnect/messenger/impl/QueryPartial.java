@@ -84,7 +84,7 @@ class QueryPartial {
             sendRows(exchangeId, responseConsumer, responseOffset, responseRowsBuilder);
             sendChunks(responseConsumer, incompleteContents);
             
-            responseConsumer.accept(new ResultSetEofResponse(maxRowCount, exchangeId, offset));
+            responseConsumer.accept(new ResultSetEofResponse(sessionId, exchangeId, offset));
         }
     }
     
