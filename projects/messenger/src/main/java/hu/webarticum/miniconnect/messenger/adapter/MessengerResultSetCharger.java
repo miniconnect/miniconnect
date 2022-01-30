@@ -9,12 +9,14 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Consumer;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
+import hu.webarticum.miniconnect.messenger.message.response.Response;
 import hu.webarticum.miniconnect.messenger.message.response.ResultResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetValuePartResponse;
@@ -35,15 +37,20 @@ public class MessengerResultSetCharger {
 
     private final MessengerResultSet resultSet;
     
+    private final Consumer<Response> consumerReference;
+    
     private final Map<Long, Map<Integer, List<ResultSetValuePartResponse>>> unhandledParts =
             new HashMap<>();
     
     private final Map<CellPosition, ChargeableContentAccess> chargeables = new HashMap<>();
 
     
-    public MessengerResultSetCharger(ResultResponse resultResponse) {
+    public MessengerResultSetCharger(
+            ResultResponse resultResponse,
+            Consumer<Response> consumerReference) {
         this.resultSet = new MessengerResultSet(
                 resultResponse.columnHeaders().map(ColumnHeaderData::toMiniColumnHeader));
+        this.consumerReference = consumerReference;
     }
 
     
@@ -57,6 +64,7 @@ public class MessengerResultSetCharger {
             acceptRow(rowIndex, rowData);
             rowIndex++;
         }
+        new Blackhole().consume(consumerReference);
     }
     
     private void acceptRow(long rowIndex, ImmutableList<CellData> rowData) {

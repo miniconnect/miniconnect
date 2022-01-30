@@ -105,14 +105,10 @@ public class MessengerSession implements MiniSession {
         
         long sessionId = sessionId();
         QueryRequest queryRequest = new QueryRequest(sessionId, exchangeId, query);
-        messenger.accept(queryRequest, response -> {
-            if (response instanceof ResultSetValuePartResponse) {
-                ResultSetValuePartResponse partResponse = (ResultSetValuePartResponse) response;
-                resultSetFuture.thenAcceptAsync(resultSet -> resultSet.acceptPart(partResponse));
-            } else {
-                responseQueue.add(response);
-            }
-        });
+        
+        Consumer<Response> responseConsumer =
+                r -> receiveResponse(r, resultSetFuture, responseQueue);
+        messenger.accept(queryRequest, responseConsumer);
 
         Response firstResponse;
         try {
@@ -143,11 +139,24 @@ public class MessengerSession implements MiniSession {
                     errorData.message()));
         }
         
-        MessengerResultSetCharger resultSet = new MessengerResultSetCharger(resultResponse);
+        MessengerResultSetCharger resultSet =
+                new MessengerResultSetCharger(resultResponse, responseConsumer);
         resultSetFuture.complete(resultSet);
         new Thread(() -> pollResponseQueue(responseQueue, resultSet)).start();
         
         return new MessengerResult(resultResponse, resultSet);
+    }
+    
+    private void receiveResponse(
+            Response response,
+            CompletableFuture<MessengerResultSetCharger> resultSetFuture,
+            OrderAligningQueue<Response> responseQueue) {
+        if (response instanceof ResultSetValuePartResponse) {
+            ResultSetValuePartResponse partResponse = (ResultSetValuePartResponse) response;
+            resultSetFuture.thenAcceptAsync(resultSet -> resultSet.acceptPart(partResponse));
+        } else {
+            responseQueue.add(response);
+        }
     }
     
     // TODO: error handling
