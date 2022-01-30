@@ -2,9 +2,9 @@
 
 ## Ideas
 
-- methods of `MiniSessionManager` and `MiniSession` could
-  return with `Future` objects.
-- should session init (and close) responses include potential error info?
+- introduce `ServerConstants.DEFAULT_SERVER_PORT` instead of constants in demo
+- methods of `MiniSessionManager` and `MiniSession` could return with `Future` objects.
+- add potential error info to session init (and close?) responses?
 - move ByteString, ImmutableList and ImmutableMap to the new `lang` package
 
 

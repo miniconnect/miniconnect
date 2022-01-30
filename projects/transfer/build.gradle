@@ -13,9 +13,9 @@ sourceSets {
 }
 
 dependencies {
-    implementation 'org.apache.commons:commons-lang3:3.0'
     implementation project(':projects:util')
-
+    implementation 'org.apache.commons:commons-lang3:3.0'
+    
     labImplementation sourceSets.main.output
     labImplementation configurations.lab
 	

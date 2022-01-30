@@ -22,16 +22,15 @@ public class PacketReader {
         if (optionalFirstByte == -1) {
             throw new IOException("Unexpected EOF instead of first byte");
         }
-        
+
         byte firstByte = (byte) optionalFirstByte;
         if (firstByte != TransferConstants.MAGIC_BYTE) {
             throw new IOException(String.format("Invalid first byte: 0x%02X", firstByte));
         }
-
+        
         DataInputStream dataIn = new DataInputStream(in);
         ByteString header = readSizedPart(dataIn);
         ByteString payload = readSizedPart(dataIn);
-        
         return Packet.of(header, payload);
     }
     

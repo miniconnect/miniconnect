@@ -1,12 +1,18 @@
 package hu.webarticum.miniconnect.server;
 
 import java.io.Closeable;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.lang.invoke.MethodHandles;
 import java.net.Socket;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import hu.webarticum.miniconnect.messenger.Messenger;
 import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
@@ -18,8 +24,13 @@ import hu.webarticum.miniconnect.messenger.message.response.SessionInitResponse;
 import hu.webarticum.miniconnect.server.translator.DefaultMessageTranslator;
 import hu.webarticum.miniconnect.transfer.Packet;
 import hu.webarticum.miniconnect.transfer.SocketClient;
+import hu.webarticum.miniconnect.util.data.GlobalIdGenerator;
 
 public class ClientMessenger implements Messenger, Closeable {
+
+    private static final Logger logger =
+            LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    
     
     private final SocketClient socketClient;
 
@@ -38,26 +49,46 @@ public class ClientMessenger implements Messenger, Closeable {
     private final Object sessionInitConsumersLock = new Object();
     
 
+    public ClientMessenger(String host, int port) {
+        this(openSocket(host, port));
+    }
+    
     public ClientMessenger(Socket socket) {
         this(socket, new DefaultMessageTranslator());
     }
 
+    public ClientMessenger(String host, int port, MessageTranslator translator) {
+        this(openSocket(host, port), translator);
+    }
+    
     public ClientMessenger(Socket socket, MessageTranslator translator) {
         this(socket, translator, translator);
     }
-    
-    public ClientMessenger(
-            Socket socket,
-            MessageDecoder decoder,
-            MessageEncoder encoder) {
+
+    public ClientMessenger(String host, int port, MessageDecoder decoder, MessageEncoder encoder) {
+        this(openSocket(host, port), decoder, encoder);
+    }
+
+    public ClientMessenger(Socket socket, MessageDecoder decoder, MessageEncoder encoder) {
         this.socketClient = new SocketClient(socket, this::acceptResponsePacket);
         this.decoder = decoder;
         this.encoder = encoder;
     }
-    
+
+    private static Socket openSocket(String host, int port) {
+        logger.debug("Open client socket on {}:{}", host, port);
+        try {
+            return new Socket(host, port);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
 
     @Override
     public void accept(Request request, Consumer<Response> responseConsumer) {
+        logger.trace("Request accepted: {}", request);
+        
         if (request instanceof ExchangeMessage) {
             ExchangeMessage exchangeMessage = (ExchangeMessage) request;
             ExchangeIdentity exchangeIdentity = 
@@ -74,46 +105,60 @@ public class ClientMessenger implements Messenger, Closeable {
     }
     
     public void acceptResponsePacket(Packet packet) {
+        String logId = GlobalIdGenerator.generate(logger.isTraceEnabled());
+        logger.trace("[{}] Response packet accepted", logId);
+        
         Response response = (Response) decoder.decode(packet);
+        logger.trace("[{}] Response parsed: {}", logId, response);
+        
         if (response instanceof SessionMessage) {
-            long responseSessionId = ((SessionMessage) response).sessionId();
             if (response instanceof ExchangeMessage) {
-                ExchangeMessage exchangeMessage = (ExchangeMessage) response;
-                int exchangeId = exchangeMessage.exchangeId();
-                ExchangeIdentity exchangeIdentity =
-                        new ExchangeIdentity(responseSessionId, exchangeId);
-                Consumer<Response> responseConsumer = findResponseConsumer(exchangeIdentity);
-                if (responseConsumer != null) {
-                    responseConsumer.accept(response);
-                } else {
-                    // TODO unexpected exchange id, what to do?
-                }
+                logger.trace("[{}] Response is a ExchangeMessage", logId);
+                acceptExchangeResponse(response);
             } else if (response instanceof SessionInitResponse) {
-                Consumer<Response> oldestConsumer = null;
-                synchronized (sessionInitConsumersLock) {
-                    Instant oldestInstant = null;
-                    for (
-                            Map.Entry<Consumer<Response>, Instant> entry :
-                            sessionInitConsumers.entrySet()) {
-                        Instant instant = entry.getValue();
-                        if (oldestInstant == null || instant.isBefore(oldestInstant)) {
-                            oldestInstant = instant;
-                            oldestConsumer = entry.getKey();
-                        }
-                    }
-                    if (oldestConsumer != null) {
-                        sessionInitConsumers.remove(oldestConsumer);
-                    }
-                }
-                if (oldestConsumer != null) {
-                    oldestConsumer.accept(response);
-                }
+                logger.trace("[{}] Response is a SessionInitResponse", logId);
+                acceptSessionInitResponse(response);
             } else {
-                // TODO handle open session!
-                // TODO handle other non-exchange
+                logger.debug("[{}] Stranger response, skip", logId);
             }
         } else {
-            // TODO non-session response, what to do
+            logger.debug("[{}] Unknown response type, skip", logId);
+        }
+    }
+    
+    private void acceptExchangeResponse(Response response) {
+        long responseSessionId = ((SessionMessage) response).sessionId();
+        ExchangeMessage exchangeMessage = (ExchangeMessage) response;
+        int exchangeId = exchangeMessage.exchangeId();
+        ExchangeIdentity exchangeIdentity =
+                new ExchangeIdentity(responseSessionId, exchangeId);
+        Consumer<Response> responseConsumer = findResponseConsumer(exchangeIdentity);
+        if (responseConsumer != null) {
+            responseConsumer.accept(response);
+        } else {
+            // TODO unexpected exchange id, what to do?
+        }
+    }
+
+    private void acceptSessionInitResponse(Response response) {
+        Consumer<Response> oldestConsumer = null;
+        synchronized (sessionInitConsumersLock) {
+            Instant oldestInstant = null;
+            for (
+                    Map.Entry<Consumer<Response>, Instant> entry :
+                    sessionInitConsumers.entrySet()) {
+                Instant instant = entry.getValue();
+                if (oldestInstant == null || instant.isBefore(oldestInstant)) {
+                    oldestInstant = instant;
+                    oldestConsumer = entry.getKey();
+                }
+            }
+            if (oldestConsumer != null) {
+                sessionInitConsumers.remove(oldestConsumer);
+            }
+        }
+        if (oldestConsumer != null) {
+            oldestConsumer.accept(response);
         }
     }
     
