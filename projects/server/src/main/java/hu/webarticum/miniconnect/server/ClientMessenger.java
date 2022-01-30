@@ -113,7 +113,7 @@ public class ClientMessenger implements Messenger, Closeable {
         
         if (response instanceof SessionMessage) {
             if (response instanceof ExchangeMessage) {
-                logger.trace("[{}] Response is a ExchangeMessage", logId);
+                logger.trace("[{}] Response is an ExchangeMessage", logId);
                 acceptExchangeResponse(response);
             } else if (response instanceof SessionInitResponse) {
                 logger.trace("[{}] Response is a SessionInitResponse", logId);
