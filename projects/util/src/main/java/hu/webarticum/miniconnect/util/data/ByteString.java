@@ -167,7 +167,28 @@ public final class ByteString implements Serializable {
 
     @Override
     public String toString() {
-        return toString(StandardCharsets.UTF_8);
+        StringBuilder resultBuilder = new StringBuilder();
+        for (byte b : bytes) {
+            if (isAsciiPrintable(b)) {
+                resultBuilder.append((char) b);
+            } else {
+                resultBuilder.append('[');
+                resultBuilder.append(toHexadecimalString(b));
+                resultBuilder.append(']');
+            }
+        }
+        return resultBuilder.toString();
+    }
+    
+    private boolean isAsciiPrintable(byte b) {
+        return
+                Byte.compareUnsigned(b, (byte) 32) >= 0 &&
+                Byte.compareUnsigned(b, (byte) 126) <= 0;
+    }
+    
+    private String toHexadecimalString(byte b) {
+        String stringValue = Integer.toString(Byte.toUnsignedInt(b), 16);
+        return stringValue.length() < 2 ? "0" + stringValue : stringValue;
     }
 
     public String toString(Charset charset) {
