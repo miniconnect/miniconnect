@@ -6,7 +6,10 @@
 - methods of `MiniSessionManager` and `MiniSession` could return with `Future` objects.
 - add potential error info to session init (and close?) responses?
 - move ByteString, ImmutableList and ImmutableMap to the new `lang` package
-- rething `ByteString.toString()` (currently very unsafe)
+- make it possible for the server to broadcast non-exchange close response to all open clients
+- support ping request
+- messenger/QueryPartial.sendRows: collect nullables and fixedSizes
+    (make this information available from MiniResultSet)
 
 
 ## TODOs for components

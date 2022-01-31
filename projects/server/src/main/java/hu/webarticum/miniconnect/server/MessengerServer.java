@@ -106,7 +106,11 @@ public class MessengerServer implements Closeable {
 
     public void listen() {
         logger.info("Start listening");
-        socketServer.listen();
+        try {
+            socketServer.listen();
+        } catch (Exception e) {
+            logger.error("Stop listening due error", e);
+        }
     }
     
     private PacketExchanger createExchanger() {

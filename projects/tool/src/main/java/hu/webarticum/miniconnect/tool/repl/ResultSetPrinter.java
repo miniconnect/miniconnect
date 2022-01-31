@@ -2,6 +2,7 @@ package hu.webarticum.miniconnect.tool.repl;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,9 +15,14 @@ import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class ResultSetPrinter {
 
+    // TODO: make these configurable
     private static final String NULL_PLACEHOLDER = "[NULL]";
 
     private static final int ROWS_BUFFER_SIZE = 20;
+
+    private static final int MAXIMUM_STRING_LENGTH = 20;
+    
+    private static final String STRING_OVERFLOW_ELLIPSIS = "...";
 
     
     public void print(MiniResultSet resultSet, Appendable out) throws IOException {
@@ -123,19 +129,32 @@ public class ResultSetPrinter {
     }
     
     private String stringifyValue(MiniValue value, ValueInterpreter encoder) {
-        if (!value.isNull()) {
-            Object decoded = encoder.decode(value);
-            if (
-                    decoded instanceof Float ||
-                    decoded instanceof Double ||
-                    decoded instanceof BigDecimal) {
-                return String.format("%.3f", decoded);
-            } else {
-                return decoded.toString();
-            }
-        } else {
+        Object decoded = encoder.decode(value);
+        if (decoded == null) {
             return NULL_PLACEHOLDER;
+        } else if (
+                decoded instanceof Float ||
+                decoded instanceof Double ||
+                decoded instanceof BigDecimal) {
+            return String.format("%.3f", decoded);
+        } else if (
+                decoded instanceof Number ||
+                decoded instanceof Temporal) {
+            return decoded.toString();
+        } else {
+            return shortenString(decoded.toString());
         }
+    }
+    
+    private String shortenString(String stringValue) {
+        int length = stringValue.length();
+        if (length <= MAXIMUM_STRING_LENGTH) {
+            return stringValue;
+        }
+        
+        int innerLength =
+                Math.max(1, MAXIMUM_STRING_LENGTH - STRING_OVERFLOW_ELLIPSIS.length());
+        return stringValue.substring(0, innerLength) + STRING_OVERFLOW_ELLIPSIS;
     }
 
 }

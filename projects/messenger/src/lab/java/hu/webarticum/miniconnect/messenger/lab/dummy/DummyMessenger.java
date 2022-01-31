@@ -24,6 +24,7 @@ import hu.webarticum.miniconnect.messenger.message.request.LargeDataHeadRequest;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataPartRequest;
 import hu.webarticum.miniconnect.messenger.message.request.QueryRequest;
 import hu.webarticum.miniconnect.messenger.message.request.Request;
+import hu.webarticum.miniconnect.messenger.message.request.SessionCloseRequest;
 import hu.webarticum.miniconnect.messenger.message.response.LargeDataSaveResponse;
 import hu.webarticum.miniconnect.messenger.message.response.Response;
 import hu.webarticum.miniconnect.messenger.message.response.ResultResponse;
@@ -92,6 +93,8 @@ public class DummyMessenger implements Messenger {
             acceptLargeDataHeadRequest((LargeDataHeadRequest) request, responseConsumer);
         } else if (request instanceof LargeDataPartRequest) {
             acceptLargeDataPartRequest((LargeDataPartRequest) request);
+        } else if (request instanceof SessionCloseRequest) {
+            // nothing to do
         } else {
             throw new UnsupportedOperationException(String.format(
                     "Unsupported request type: %s",
@@ -276,7 +279,7 @@ public class DummyMessenger implements Messenger {
         
         if (length == 0) {
             acceptLargeDataPartRequest(new LargeDataPartRequest(
-                    sessionId, exchangeId, 0, ByteString.wrap(new byte[0])));
+                    sessionId, exchangeId, 0, ByteString.empty()));
         }
     }
 

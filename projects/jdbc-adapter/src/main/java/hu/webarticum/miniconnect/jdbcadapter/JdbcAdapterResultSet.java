@@ -8,6 +8,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,14 +24,18 @@ import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.tool.result.DefaultValueInterpreter;
 import hu.webarticum.miniconnect.tool.result.StoredColumnHeader;
+import hu.webarticum.miniconnect.tool.result.StoredValue;
 import hu.webarticum.miniconnect.util.data.ByteString;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class JdbcAdapterResultSet implements MiniResultSet {
     
+    // TODO: use EnumMap with JDBCType instead -> JDBCType.valueOf(int type)
     private static final Map<Integer, Class<?>> TYPE_MAPPING =
             Collections.synchronizedMap(new HashMap<>());
     static {
+        TYPE_MAPPING.put(Types.NULL, Void.class);
+        TYPE_MAPPING.put(Types.BOOLEAN, Boolean.class);
         TYPE_MAPPING.put(Types.BIT, Boolean.class);
         TYPE_MAPPING.put(Types.TINYINT, Integer.class);
         TYPE_MAPPING.put(Types.SMALLINT, Integer.class);
@@ -48,18 +55,37 @@ public class JdbcAdapterResultSet implements MiniResultSet {
         TYPE_MAPPING.put(Types.NVARCHAR, String.class);
         TYPE_MAPPING.put(Types.LONGVARCHAR, String.class);
         TYPE_MAPPING.put(Types.LONGNVARCHAR, String.class);
+
+        TYPE_MAPPING.put(Types.TIME, LocalTime.class);
+        TYPE_MAPPING.put(Types.DATE, LocalDate.class);
+        TYPE_MAPPING.put(Types.TIMESTAMP, Instant.class);
         
         // FIXME
         TYPE_MAPPING.put(Types.BLOB, ByteString.class);
         TYPE_MAPPING.put(Types.CLOB, String.class);
         TYPE_MAPPING.put(Types.NCLOB, String.class);
+
+        // TODO
+        /*
+        TIME_WITH_TIMEZONE
+        TIMESTAMP_WITH_TIMEZONE
+        JAVA_OBJECT
+        SQLXML
+        OTHER
+        ROWID
+        DISTINCT
+        STRUCT
+        ARRAY
+        REF
+        DATALINK
+        REF_CURSOR
+        */
         
         // TODO: more
         // TODO: settings, encodings etc.
         
     }
-    
-    
+
     private final ImmutableList<Class<?>> javaTypes;
     
     private final ImmutableList<DefaultValueInterpreter> interpreters;
@@ -73,6 +99,7 @@ public class JdbcAdapterResultSet implements MiniResultSet {
     private final JdbcResultSetIterator<ImmutableList<MiniValue>> rowIterator;
     
     
+    // FIXME extract nullability information
     public JdbcAdapterResultSet(Statement jdbcStatement, ResultSet jdbcResultSet) {
         this.jdbcStatement = jdbcStatement;
         this.jdbcResultSet = jdbcResultSet;
@@ -110,7 +137,7 @@ public class JdbcAdapterResultSet implements MiniResultSet {
     // FIXME
     private Class<?> getJavaTypeOf(int jdbcType) {
         if (!TYPE_MAPPING.containsKey(jdbcType)) {
-            throw new IllegalArgumentException("Unsupported type flag: " + jdbcType);
+            return ByteString.class;
         }
         
         return TYPE_MAPPING.get(jdbcType);
@@ -157,21 +184,63 @@ public class JdbcAdapterResultSet implements MiniResultSet {
     }
     
     private ImmutableList<MiniValue> extractRowThrowing() throws SQLException {
+        // FIXME: what to do on exception?
         int columnCount = jdbcResultSet.getMetaData().getColumnCount();
         List<MiniValue> resultBuilder = new ArrayList<>(columnCount);
         for (int i = 0; i < columnCount; i++) {
-            int c = i + 1;
-            DefaultValueInterpreter interpreter = interpreters.get(i);
-            Class<?> mappingType = javaTypes.get(i);
-            // XXX
-            if (mappingType == ByteString.class) {
-                mappingType = byte[].class;
-            }
-            Object content = jdbcResultSet.getObject(c, mappingType);
-            MiniValue value = interpreter.encode(content);
+            MiniValue value = extractValue(i);
             resultBuilder.add(value);
         }
         return new ImmutableList<>(resultBuilder);
+    }
+
+    private MiniValue extractValue(int i) {
+        try {
+            return extractValueThrowing(i);
+        } catch (Exception e) {
+            // FIXME: what to do?
+            return new StoredValue();
+        }
+    }
+    
+    private MiniValue extractValueThrowing(int i) throws SQLException {
+        int c = i + 1;
+        DefaultValueInterpreter interpreter = interpreters.get(i);
+        Class<?> mappingType = javaTypes.get(i);
+        Class<?> jdbcMappingType = jdbcMappingTypeOf(mappingType);
+        Object jdbcValue = jdbcResultSet.getObject(c, jdbcMappingType);
+        Object value = convertJdbcValue(mappingType, jdbcValue);
+        return interpreter.encode(value);
+    }
+    
+    private Class<?> jdbcMappingTypeOf(Class<?> mappingType) {
+        if (mappingType == LocalTime.class) {
+            return java.sql.Time.class;
+        } else if (mappingType == LocalDate.class) {
+            return java.sql.Date.class;
+        } else if (mappingType == Instant.class) {
+            return java.sql.Timestamp.class;
+        } else if (mappingType == ByteString.class) {
+            return byte[].class;
+        } else {
+            return mappingType;
+        }
+    }
+    
+    private Object convertJdbcValue(Class<?> mappingType, Object jdbcValue) {
+        if (jdbcValue == null) {
+            return null;
+        } else if (mappingType == LocalTime.class) {
+            return ((java.sql.Time) jdbcValue).toLocalTime();
+        } else if (mappingType == LocalDate.class) {
+            return ((java.sql.Date) jdbcValue).toLocalDate();
+        } else if (mappingType == Instant.class) {
+            return ((java.sql.Timestamp) jdbcValue).toInstant();
+        } else if (mappingType == ByteString.class) {
+            return ByteString.wrap((byte[]) jdbcValue);
+        } else {
+            return jdbcValue;
+        }
     }
 
     @Override

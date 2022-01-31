@@ -10,14 +10,20 @@ public class MessengerValue implements MiniValue, Closeable {
     
     private final MiniValueDefinition definition;
     
+    private final boolean isNull;
+    
     private final MiniContentAccess contentAccess;
     
     
     private boolean wasContentAccessRequested;
     
 
-    public MessengerValue(MiniValueDefinition definition, MiniContentAccess contentAccess) {
+    public MessengerValue(
+            MiniValueDefinition definition,
+            boolean isNull,
+            MiniContentAccess contentAccess) {
         this.definition = definition;
+        this.isNull = isNull;
         this.contentAccess = contentAccess;
     }
     
@@ -29,7 +35,7 @@ public class MessengerValue implements MiniValue, Closeable {
     
     @Override
     public boolean isNull() {
-        return false;
+        return isNull;
     }
 
     @Override

@@ -97,7 +97,7 @@ public class MessengerResultSetCharger {
         MiniValueDefinition valueDefinition =
                 resultSet.columnHeaders.get(columnIndex).valueDefinition();
         
-        return new MessengerValue(valueDefinition, contentAccess);
+        return new MessengerValue(valueDefinition, cellData.isNull(), contentAccess);
     }
     
     private void processUnhandledParts(

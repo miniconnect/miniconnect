@@ -48,6 +48,17 @@ class ResultSetRowsResponseTranslatorDriver implements TranslatorDriver {
         ImmutableList<Integer> nullables = readNullables(reader);
         ImmutableMap<Integer, Integer> fixedSizes = readFixedSizes(reader);
         ImmutableList<ImmutableList<CellData>> rows = readRows(reader, nullables, fixedSizes);
+
+        System.out.println("-----------------");
+        System.out.println(payload);
+        System.out.println(new ResultSetRowsResponse(
+                headerData.sessionId(),
+                headerData.exchangeId(),
+                rowOffset,
+                nullables,
+                fixedSizes,
+                rows));
+        
         return new ResultSetRowsResponse(
                 headerData.sessionId(),
                 headerData.exchangeId(),

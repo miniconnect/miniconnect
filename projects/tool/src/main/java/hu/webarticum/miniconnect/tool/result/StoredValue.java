@@ -41,14 +41,17 @@ public final class StoredValue implements MiniValue, Serializable {
         if (value instanceof StoredValue) {
             return (StoredValue) value;
         }
-        
+
         MiniContentAccess contentAccess = value.contentAccess();
         if (contentAccess.isLarge()) {
             throw new IllegalArgumentException(
                     "Content is too large to store in memory");
         }
         
-        return new StoredValue(value.isNull(), contentAccess.get());
+        return new StoredValue(
+                StoredValueDefinition.of(value.definition()),
+                value.isNull(),
+                contentAccess.get());
     }
 
 

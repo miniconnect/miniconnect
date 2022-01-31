@@ -59,7 +59,8 @@ class QueryPartial {
         responseConsumer.accept(ResultResponse.of(result, sessionId, exchangeId));
 
         try (MiniResultSet resultSet = result.resultSet()) {
-            int maxRowCount = Math.max(1, MAX_CELL_COUNT / resultSet.columnHeaders().size());
+            int columnCount = resultSet.columnHeaders().size();
+            int maxRowCount = Math.max(1, MAX_CELL_COUNT / columnCount);
             long responseOffset = 0;
             List<ImmutableList<CellData>> responseRowsBuilder = new ArrayList<>();
             List<IncompleteContentHolder> incompleteContents = new ArrayList<>();
@@ -74,14 +75,24 @@ class QueryPartial {
                 offset++;
                 
                 if (responseRowsBuilder.size() == maxRowCount) {
-                    sendRows(exchangeId, responseConsumer, responseOffset, responseRowsBuilder);
+                    sendRows(
+                            exchangeId,
+                            responseConsumer,
+                            responseOffset,
+                            responseRowsBuilder,
+                            columnCount);
                     sendChunks(responseConsumer, incompleteContents);
                     responseRowsBuilder.clear();
                     incompleteContents.clear();
                     responseOffset = offset;
                 }
             }
-            sendRows(exchangeId, responseConsumer, responseOffset, responseRowsBuilder);
+            sendRows(
+                    exchangeId,
+                    responseConsumer,
+                    responseOffset,
+                    responseRowsBuilder,
+                    columnCount);
             sendChunks(responseConsumer, incompleteContents);
             
             responseConsumer.accept(new ResultSetEofResponse(sessionId, exchangeId, offset));
@@ -111,13 +122,22 @@ class QueryPartial {
             int exchangeId,
             Consumer<Response> responseConsumer,
             long responseOffset,
-            List<ImmutableList<CellData>> responseRowsBuilder) {
+            List<ImmutableList<CellData>> responseRowsBuilder,
+            int columnCount) {
         ImmutableList<ImmutableList<CellData>> rows = new ImmutableList<>(responseRowsBuilder);
-        ImmutableList<Integer> nullables = ImmutableList.empty(); // FIXME / TODO
+        ImmutableList<Integer> nullables = rangeUntil(columnCount); // FIXME / TODO
         ImmutableMap<Integer, Integer> fixedSizes = ImmutableMap.empty(); // FIXME / TODO
         ResultSetRowsResponse rowsResponse = new ResultSetRowsResponse(
                 sessionId, exchangeId, responseOffset, nullables, fixedSizes, rows);
         responseConsumer.accept(rowsResponse);
+    }
+    
+    private ImmutableList<Integer> rangeUntil(int until) {
+        List<Integer> rangeBuilder = new ArrayList<>();
+        for (int i = 0; i < until; i++) {
+            rangeBuilder.add(i);
+        }
+        return new ImmutableList<>(rangeBuilder);
     }
 
     private void sendChunks(

@@ -3,6 +3,9 @@ package hu.webarticum.miniconnect.tool.result;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
@@ -47,51 +50,73 @@ public class DefaultValueInterpreter implements ValueInterpreter {
     
     @Override
     public MiniValue encode(Object value) {
-        if (value == null) {
-            return new StoredValue();
+        if (value == null || type == Void.class) {
+            return new StoredValue(definition, true, ByteString.empty());
         }
 
         if (!type.isInstance(value)) {
-            throw new IllegalArgumentException(String.format(
+            IllegalArgumentException e = new IllegalArgumentException(String.format(
                     "Invalid value: expected: '%s', but found: '%s'",
                     type.getName(),
                     value.getClass().getName()));
+            e.printStackTrace();
+            throw e;
         }
 
         if (value instanceof Boolean) {
             boolean booleanValue = (boolean) value;
-            return new StoredValue(ByteString.wrap(
+            return valueOf(ByteString.wrap(
                     new byte[] { (byte) (booleanValue ? 1 : 0) }));
         } else if (value instanceof Byte) {
             byte byteValue = (byte) value;
-            return new StoredValue(ByteString.wrap(new byte[] { byteValue }));
+            return valueOf(ByteString.wrap(new byte[] { byteValue }));
         } else if (value instanceof Short) {
-            return new StoredValue(ByteString.ofShort((short) value));
+            return valueOf(ByteString.ofShort((short) value));
         } else if (value instanceof Integer) {
-            return new StoredValue(ByteString.ofInt((int) value));
+            return valueOf(ByteString.ofInt((int) value));
         } else if (value instanceof Long) {
-            return new StoredValue(ByteString.ofLong((long) value));
+            return valueOf(ByteString.ofLong((long) value));
         } else if (value instanceof String) {
             String stringValue = (String) value;
-            return new StoredValue(ByteString.wrap(
+            return valueOf(ByteString.wrap(
                     stringValue.getBytes(StandardCharsets.UTF_8)));
         } else if (value instanceof ByteString) {
             ByteString byteStringValue = (ByteString) value;
-            return new StoredValue(byteStringValue);
+            return valueOf(byteStringValue);
         } else if (value instanceof BigInteger) {
             BigInteger bigIntegerValue = (BigInteger) value;
-            return new StoredValue(ByteString.wrap(bigIntegerValue.toByteArray()));
+            return valueOf(ByteString.wrap(bigIntegerValue.toByteArray()));
         } else if (value instanceof BigDecimal) {
             ByteString.Builder builder = ByteString.builder();
             BigDecimal bigDecimalValue = (BigDecimal) value;
             builder.appendInt(bigDecimalValue.scale());
             BigInteger bigIntegerValue = bigDecimalValue.unscaledValue();
             builder.append(bigIntegerValue.toByteArray());
-            return new StoredValue(builder.build());
+            return valueOf(builder.build());
+        } else if (value instanceof LocalTime) {
+            ByteString.Builder builder = ByteString.builder();
+            builder.appendLong(((LocalTime) value).toNanoOfDay());
+            return valueOf(builder.build());
+        } else if (value instanceof LocalDate) {
+            ByteString.Builder builder = ByteString.builder();
+            builder.appendLong(((LocalDate) value).toEpochDay());
+            return valueOf(builder.build());
+        } else if (value instanceof Instant) {
+            ByteString.Builder builder = ByteString.builder();
+            Instant instantValue = (Instant) value;
+            builder.appendLong(instantValue.getEpochSecond());
+            builder.appendLong(instantValue.getNano());
+            return valueOf(builder.build());
         } else {
-            throw new IllegalArgumentException(
+            IllegalArgumentException e = new IllegalArgumentException(
                     String.format("Unsupported type: %s", value.getClass().getSimpleName()));
+            e.printStackTrace();
+            throw e;
         }
+    }
+    
+    private MiniValue valueOf(ByteString bytes) {
+        return new StoredValue(definition, false, bytes);
     }
 
     @Override
@@ -101,7 +126,9 @@ public class DefaultValueInterpreter implements ValueInterpreter {
         }
 
         ByteString content = value.contentAccess().get();
-        if (type.equals(Boolean.class)) {
+        if (type.equals(Void.class)) {
+            return null;
+        } else if (type.equals(Boolean.class)) {
             return (content.byteAt(0) != ((byte) 0));
         } else if (type.equals(Byte.class)) {
             return content.byteAt(0);
@@ -122,6 +149,14 @@ public class DefaultValueInterpreter implements ValueInterpreter {
             int scale = reader.readInt();
             BigInteger bigIntegerValue = new BigInteger(reader.readRemaining());
             return new BigDecimal(bigIntegerValue, scale);
+        } else if (type.equals(LocalTime.class)) {
+            return LocalTime.ofNanoOfDay(content.reader().readLong());
+        } else if (type.equals(LocalDate.class)) {
+            return LocalDate.ofEpochDay(content.reader().readLong());
+        } else if (type.equals(Instant.class)) {
+            long seconds = content.reader().readLong();
+            long nanos = content.reader().readLong();
+            return Instant.ofEpochSecond(seconds, nanos);
         } else {
             throw new IllegalStateException(
                     String.format("Unsupported type: %s", type.getSimpleName()));
