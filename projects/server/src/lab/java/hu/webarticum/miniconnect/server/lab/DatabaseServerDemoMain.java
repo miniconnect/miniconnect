@@ -13,6 +13,7 @@ import hu.webarticum.miniconnect.messenger.Messenger;
 import hu.webarticum.miniconnect.messenger.impl.SessionManagerMessenger;
 import hu.webarticum.miniconnect.server.MessengerServer;
 
+//TODO: print some basic data (client connections, queries etc.)
 public class DatabaseServerDemoMain {
 
     private static final int DEFAULT_SERVER_PORT = 54321;
