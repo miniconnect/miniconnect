@@ -60,7 +60,7 @@ class QueryPartial {
 
         try (MiniResultSet resultSet = result.resultSet()) {
             int columnCount = resultSet.columnHeaders().size();
-            int maxRowCount = columnCount == 0 ? 0 : Math.max(1, MAX_CELL_COUNT / columnCount);
+            int maxRowCount = columnCount == 0 ? 1 : Math.max(1, MAX_CELL_COUNT / columnCount);
             long responseOffset = 0;
             List<ImmutableList<CellData>> responseRowsBuilder = new ArrayList<>();
             List<IncompleteContentHolder> incompleteContents = new ArrayList<>();
