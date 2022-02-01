@@ -53,14 +53,14 @@ public class DatabaseServerDemoMain {
         System.out.println();
         System.out.println(
                 "Starting server on port " + serverPort + " over database " + jdbcUrl + "...");
+        Thread serverThread;
         try (MessengerServer server = new MessengerServer(messenger, serverPort)) {
-            Thread serverThread = new Thread(server::listen);
+            serverThread = new Thread(server::listen);
             serverThread.start();
             new BufferedReader(new InputStreamReader(System.in)).readLine();
             System.out.println("Stopping server...");
-            server.close();
-            serverThread.join();
         }
+        serverThread.join();
     }
 
     private static Object argOrDefault(String[] args, int argIndex, Object defaultValue) {
