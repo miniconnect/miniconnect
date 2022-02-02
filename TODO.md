@@ -10,6 +10,7 @@
 - support ping request
 - messenger/QueryPartial.sendRows: collect nullables and fixedSizes
     (make this information available from MiniResultSet)
+- add an enum for built-in value types (correlating with jdbc types), associate java types
 
 
 ## TODOs for components
