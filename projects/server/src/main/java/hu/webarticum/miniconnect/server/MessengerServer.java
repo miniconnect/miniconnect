@@ -86,12 +86,7 @@ public class MessengerServer implements Closeable {
     }
 
     private static ServerSocket openServerSocket() {
-        logger.debug("Open dynamic server socket");
-        try {
-            return new ServerSocket();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return openServerSocket(ServerConstants.DEFAULT_PORT);
     }
     
     private static ServerSocket openServerSocket(int serverPort) {

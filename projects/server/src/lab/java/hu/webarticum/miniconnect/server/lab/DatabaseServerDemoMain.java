@@ -12,11 +12,12 @@ import hu.webarticum.miniconnect.jdbcadapter.SimpleJdbcLargeDataPutter;
 import hu.webarticum.miniconnect.messenger.Messenger;
 import hu.webarticum.miniconnect.messenger.impl.SessionManagerMessenger;
 import hu.webarticum.miniconnect.server.MessengerServer;
+import hu.webarticum.miniconnect.server.ServerConstants;
 
 //TODO: print some basic data (client connections, queries etc.)
 public class DatabaseServerDemoMain {
 
-    private static final int DEFAULT_SERVER_PORT = 54321;
+    private static final int DEFAULT_SERVER_PORT = ServerConstants.DEFAULT_PORT;
     
     private static final String DEFAULT_JDBC_URL = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
     

@@ -8,6 +8,7 @@ import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniSessionManager;
 import hu.webarticum.miniconnect.messenger.adapter.MessengerSessionManager;
 import hu.webarticum.miniconnect.server.ClientMessenger;
+import hu.webarticum.miniconnect.server.ServerConstants;
 import hu.webarticum.miniconnect.tool.repl.Repl;
 import hu.webarticum.miniconnect.tool.repl.ReplRunner;
 import hu.webarticum.miniconnect.tool.repl.SqlRepl;
@@ -16,7 +17,7 @@ public class DatabaseClientDemoMain {
 
     private static final String DEFAULT_HOST = "localhost";
 
-    private static final int DEFAULT_PORT = 54321;
+    private static final int DEFAULT_PORT = ServerConstants.DEFAULT_PORT;
     
     
     public static void main(String[] args) throws IOException {
