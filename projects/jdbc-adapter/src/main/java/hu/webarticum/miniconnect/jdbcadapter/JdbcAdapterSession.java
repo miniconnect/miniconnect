@@ -1,6 +1,8 @@
 package hu.webarticum.miniconnect.jdbcadapter;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -69,9 +71,11 @@ public class JdbcAdapterSession implements MiniSession {
 
     @Override
     public void close() {
-        
-        // TODO
-        
+        try {
+            jdbcConnection.close();
+        } catch (SQLException e) {
+            throw new UncheckedIOException(new IOException(e));
+        }
     }
 
 }
