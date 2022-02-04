@@ -5,6 +5,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -27,6 +32,10 @@ public class SocketServer implements Closeable {
     private final ExecutorService executorService;
     
     private final Supplier<PacketExchanger> exchangerFactory;
+    
+    private final Set<Socket> clientSockets = Collections.newSetFromMap(new IdentityHashMap<>());
+    
+    private final Object clientSocketsLock = new Object();
     
     private volatile boolean closed = false;
     
@@ -60,6 +69,7 @@ public class SocketServer implements Closeable {
                 throw new UncheckedIOException(e);
             }
         }
+        registerClientSocket(clientSocket);
         executorService.execute(() -> runClientSocket(clientSocket));
     }
 
@@ -83,25 +93,6 @@ public class SocketServer implements Closeable {
             PacketTarget responseTarget = new SocketPacketTarget(clientSocket);
             exchanger.handle(packet, responseTarget);
         }
-        if (closed) {
-            sendCloseMessage(clientSocket);
-        }
-    }
-    
-    private void sendCloseMessage(Socket clientSocket) {
-        try {
-            clientSocket.getOutputStream().write(TransferConstants.CLOSE_BYTE);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-    
-    private void closeClientSocket(Socket clientSocket) {
-        try {
-            clientSocket.close();
-        } catch (Exception e) {
-            // nothing to do
-        }
     }
 
     @Override
@@ -113,8 +104,9 @@ public class SocketServer implements Closeable {
             closed = true;
         }
 
+        closeAllRegisteredClientSockets();
+
         IOException serverSocketCloseException = null;
-        
         try {
             serverSocket.close();
         } catch (IOException e) {
@@ -122,7 +114,7 @@ public class SocketServer implements Closeable {
         } catch (Exception e) {
             // nothing to do
         }
-
+        
         executorService.shutdownNow();
         try {
             executorService.awaitTermination(CLOSE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
@@ -136,5 +128,32 @@ public class SocketServer implements Closeable {
             throw new UncheckedIOException(serverSocketCloseException);
         }
     }
+
+    private void registerClientSocket(Socket clientSocket) {
+        synchronized (clientSocketsLock) {
+            clientSockets.add(clientSocket);
+        }
+    }
     
+    private void closeAllRegisteredClientSockets() {
+        List<Socket> clientSocketsToClose;
+        synchronized (clientSocketsLock) {
+            clientSocketsToClose = new ArrayList<>(clientSockets);
+        }
+        for (Socket clientSocket : clientSocketsToClose) {
+            closeClientSocket(clientSocket);
+        }
+    }
+
+    private void closeClientSocket(Socket clientSocket) {
+        try {
+            clientSocket.close();
+        } catch (Exception e) {
+            // nothing to do
+        }
+        synchronized (clientSocketsLock) {
+            clientSockets.remove(clientSocket);
+        }
+    }
+
 }
