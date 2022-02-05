@@ -1,11 +1,15 @@
 rootProject.name = 'miniconnect'
 
-include 'projects:api'
-include 'projects:jdbc'
-include 'projects:jdbc-adapter'
-include 'projects:messenger'
-include 'projects:rdbms-framework'
-include 'projects:tool'
-include 'projects:server'
-include 'projects:transfer'
-include 'projects:util'
+include 'api'
+include 'jdbc'
+include 'jdbc-adapter'
+include 'messenger'
+include 'rdbms-framework'
+include 'tool'
+include 'server'
+include 'transfer'
+include 'util'
+
+rootProject.children.each { project ->
+    project.projectDir = new File(settingsDir, "projects/${project.name}")
+}

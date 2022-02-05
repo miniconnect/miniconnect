@@ -4,8 +4,34 @@ defaultTasks "build"
 allprojects {
     group "hu.webarticum"
     version '1.0.0-SNAPSHOT'
-
+    
     repositories {
         jcenter()
+    }
+}
+
+subprojects {
+    afterEvaluate {
+        if (sourceSets.hasProperty("lab")) {
+            task execLab(type: JavaExec) {
+                group = 'Execution'
+                description = 'Run lab demo main class'
+                classpath = sourceSets.lab.runtimeClasspath
+                main = System.getProperty("lab.exec.main.class")
+                standardInput = System.in
+            }
+        }
+        
+        test {
+            useJUnitPlatform()
+            testLogging {
+				events "failed"
+				showExceptions true
+				exceptionFormat "full"
+				showCauses true
+				showStackTraces true
+				showStandardStreams false
+			}
+        }
     }
 }

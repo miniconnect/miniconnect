@@ -7,17 +7,14 @@ sourceCompatibility = 1.8
 dependencies {
     implementation 'commons-io:commons-io:2.11.0'
     implementation 'hu.webarticum:regexbee:0.3.0'
-    implementation project(':projects:api')
-    implementation project(':projects:tool')
+    implementation project(':api')
+    implementation project(':tool')
     
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.7.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.7.1'
     testImplementation 'org.junit.platform:junit-platform-launcher:1.7.1'
     testImplementation 'org.assertj:assertj-core:3.19.0'
-    testImplementation project(':projects:jdbc-adapter')
-}
-
-test {
-    useJUnitPlatform()
+	testImplementation 'com.h2database:h2:1.4.200'
+    testImplementation project(':jdbc-adapter')
 }

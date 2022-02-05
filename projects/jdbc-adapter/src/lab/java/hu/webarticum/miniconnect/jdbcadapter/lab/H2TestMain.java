@@ -11,6 +11,7 @@ import hu.webarticum.miniconnect.jdbcadapter.SimpleJdbcLargeDataPutter;
 import hu.webarticum.miniconnect.tool.repl.Repl;
 import hu.webarticum.miniconnect.tool.repl.ReplRunner;
 import hu.webarticum.miniconnect.tool.repl.SqlRepl;
+import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class H2TestMain {
     
@@ -29,6 +30,7 @@ public class H2TestMain {
     
     private static void runRepl(
             String url, String username, String password, String setStatement) throws SQLException {
+        System.out.println(ByteString.of("Hello!"));
         Supplier<JdbcLargeDataPutter> largeDataPutterFactory =
                 () -> new SimpleJdbcLargeDataPutter(setStatement);
         MiniSessionManager sessionManager =
