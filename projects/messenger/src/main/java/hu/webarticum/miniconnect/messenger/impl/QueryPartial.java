@@ -1,5 +1,6 @@
 package hu.webarticum.miniconnect.messenger.impl;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -22,7 +23,7 @@ import hu.webarticum.miniconnect.util.data.ByteString;
 import hu.webarticum.miniconnect.util.data.ImmutableList;
 import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
-class QueryPartial {
+class QueryPartial implements Closeable {
     
     private static final int MAX_CELL_COUNT = 5_000; // TODO: make configurable
     
@@ -177,6 +178,11 @@ class QueryPartial {
                 offset,
                 contentPart);
         responseConsumer.accept(partResponse);
+    }
+
+    @Override
+    public void close() {
+        fetcherExecutorService.shutdownNow();
     }
 
 

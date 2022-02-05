@@ -1,5 +1,6 @@
 package hu.webarticum.miniconnect.messenger.impl;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
@@ -23,7 +24,7 @@ import hu.webarticum.miniconnect.messenger.message.response.Response;
 import hu.webarticum.miniconnect.messenger.util.OrderAligningQueue;
 import hu.webarticum.miniconnect.util.data.ByteString;
 
-class LargeDataPartial {
+class LargeDataPartial implements Closeable {
 
     private static final String SQLSTATE_CONNECTIONERROR = "08006";
     
@@ -142,6 +143,12 @@ class LargeDataPartial {
                 error.sqlState(),
                 error.message());
         responseConsumer.accept(response);
+    }
+    
+    @Override
+    public void close() {
+        putLargeDataInvokerExecutorService.shutdownNow();
+        largeDataPartExecutorService.shutdownNow();
     }
 
 }

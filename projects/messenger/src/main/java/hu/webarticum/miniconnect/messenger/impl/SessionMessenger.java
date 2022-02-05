@@ -49,6 +49,8 @@ public class SessionMessenger implements Messenger {
     private void handleClose(
             SessionCloseRequest sessionCloseRequest,
             Consumer<Response> responseConsumer) {
+        queryPartial.close();
+        largeDataPartial.close();
         try {
             session.close();
         } catch (Exception e) {

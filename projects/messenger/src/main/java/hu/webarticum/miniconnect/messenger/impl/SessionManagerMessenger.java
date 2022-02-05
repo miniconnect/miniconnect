@@ -4,7 +4,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
@@ -27,7 +29,8 @@ public class SessionManagerMessenger implements Messenger {
     private final Map<Long, SessionMessenger> sessionMessengers =
             Collections.synchronizedMap(new HashMap<>());
     
-    private final ExecutorService sessionInitExecutorService = Executors.newCachedThreadPool();
+    private final ExecutorService sessionInitExecutorService =
+            new ThreadPoolExecutor(0, 10, 1L, TimeUnit.SECONDS, new SynchronousQueue<>());
     
     
     public SessionManagerMessenger(MiniSessionManager sessionManager) {
