@@ -30,7 +30,6 @@ public class H2TestMain {
     
     private static void runRepl(
             String url, String username, String password, String setStatement) throws SQLException {
-        System.out.println(ByteString.of("Hello!"));
         Supplier<JdbcLargeDataPutter> largeDataPutterFactory =
                 () -> new SimpleJdbcLargeDataPutter(setStatement);
         MiniSessionManager sessionManager =
