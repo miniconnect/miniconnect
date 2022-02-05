@@ -11,6 +11,7 @@ include 'repl'
 include 'server'
 include 'transfer'
 include 'util'
+include 'value'
 
 rootProject.children.each { project ->
     project.projectDir = new File(settingsDir, "projects/${project.name}")

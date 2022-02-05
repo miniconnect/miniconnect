@@ -22,4 +22,5 @@ dependencies {
     
     implementation 'hu.webarticum:regexbee:0.3.0'
     implementation project(':impl')
+    implementation project(':value')
 }
