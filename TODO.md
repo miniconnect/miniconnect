@@ -2,7 +2,6 @@
 
 ## Ideas
 
-- introduce `ServerConstants.DEFAULT_SERVER_PORT` instead of constants in demo
 - methods of `MiniSessionManager` and `MiniSession` could return with `Future` objects.
 - add potential error info to session init (and close?) responses?
 - move ByteString, ImmutableList and ImmutableMap to the new `lang` package
@@ -11,6 +10,12 @@
 - messenger/QueryPartial.sendRows: collect nullables and fixedSizes
     (make this information available from MiniResultSet)
 - add an enum for built-in value types (correlating with jdbc types), associate java types
+- extend tests for messages, test single field difference for all fields:
+  - item1
+  - item2 (equal to item1)
+  - different items, includes:
+    - items with a little difference (for each field)
+    - a very different item
 
 
 ## TODOs for components
