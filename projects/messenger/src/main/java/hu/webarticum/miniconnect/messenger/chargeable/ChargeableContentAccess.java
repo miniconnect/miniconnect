@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.tool.contentaccess;
+package hu.webarticum.miniconnect.messenger.chargeable;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.lang.ByteString;

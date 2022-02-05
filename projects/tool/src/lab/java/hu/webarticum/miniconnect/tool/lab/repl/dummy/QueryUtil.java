@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.tool.lab.dummy;
+package hu.webarticum.miniconnect.tool.lab.repl.dummy;
 
 public final class QueryUtil {
     

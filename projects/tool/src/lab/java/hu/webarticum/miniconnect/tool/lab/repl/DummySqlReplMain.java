@@ -3,7 +3,7 @@ package hu.webarticum.miniconnect.tool.lab.repl;
 import java.io.IOException;
 
 import hu.webarticum.miniconnect.api.MiniSession;
-import hu.webarticum.miniconnect.tool.lab.dummy.DummySession;
+import hu.webarticum.miniconnect.tool.lab.repl.dummy.DummySession;
 import hu.webarticum.miniconnect.tool.repl.Repl;
 import hu.webarticum.miniconnect.tool.repl.ReplRunner;
 import hu.webarticum.miniconnect.tool.repl.SqlRepl;

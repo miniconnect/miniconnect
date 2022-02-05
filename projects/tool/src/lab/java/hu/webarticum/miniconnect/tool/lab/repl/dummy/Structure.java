@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.tool.lab.dummy;
+package hu.webarticum.miniconnect.tool.lab.repl.dummy;
 
 import java.util.ArrayList;
 import java.util.List;

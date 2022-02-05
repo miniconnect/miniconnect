@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.tool.contentaccess;
+package hu.webarticum.miniconnect.messenger.chargeable;
 
 import java.io.File;
 import java.io.FileNotFoundException;
