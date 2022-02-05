@@ -21,6 +21,7 @@ dependencies {
     api project(':messenger')
     
     implementation project(':transfer')
+    implementation project(':util')
     implementation 'org.slf4j:slf4j-api:1.7.35'
     
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
