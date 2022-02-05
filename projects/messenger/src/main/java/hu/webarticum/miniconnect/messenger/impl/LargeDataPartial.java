@@ -17,12 +17,12 @@ import java.util.function.Consumer;
 import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataHeadRequest;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataPartRequest;
 import hu.webarticum.miniconnect.messenger.message.response.LargeDataSaveResponse;
 import hu.webarticum.miniconnect.messenger.message.response.Response;
 import hu.webarticum.miniconnect.messenger.util.OrderAligningQueue;
-import hu.webarticum.miniconnect.util.data.ByteString;
 
 class LargeDataPartial implements Closeable {
 

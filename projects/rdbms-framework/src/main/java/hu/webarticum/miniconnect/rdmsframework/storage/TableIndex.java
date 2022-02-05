@@ -1,6 +1,6 @@
 package hu.webarticum.miniconnect.rdmsframework.storage;
 
-import hu.webarticum.miniconnect.util.data.ImmutableList;
+import hu.webarticum.miniconnect.lang.ImmutableList;
 
 public interface TableIndex extends NamedResource {
     

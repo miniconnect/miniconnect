@@ -2,7 +2,7 @@ package hu.webarticum.miniconnect.rdmsframework.query;
 
 import java.util.Objects;
 
-import hu.webarticum.miniconnect.util.data.ImmutableList;
+import hu.webarticum.miniconnect.lang.ImmutableList;
 
 public final class InsertQuery implements Query {
     

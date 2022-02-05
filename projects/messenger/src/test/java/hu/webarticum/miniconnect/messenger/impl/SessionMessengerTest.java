@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.jdbcadapter.JdbcAdapterSession;
 import hu.webarticum.miniconnect.jdbcadapter.SimpleJdbcLargeDataPutter;
+import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataHeadRequest;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataPartRequest;
 import hu.webarticum.miniconnect.messenger.message.request.QueryRequest;
@@ -32,8 +34,6 @@ import hu.webarticum.miniconnect.messenger.message.response.ResultResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetEofResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse.CellData;
-import hu.webarticum.miniconnect.util.data.ByteString;
-import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 class SessionMessengerTest {
     

@@ -1,6 +1,6 @@
 package hu.webarticum.miniconnect.messenger.message.request;
 
-import hu.webarticum.miniconnect.util.data.ToStringBuilder;
+import hu.webarticum.miniconnect.util.ToStringBuilder;
 
 public class SessionInitRequest implements Request {
 

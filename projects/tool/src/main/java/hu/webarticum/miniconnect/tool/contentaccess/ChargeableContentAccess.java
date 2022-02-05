@@ -1,7 +1,7 @@
 package hu.webarticum.miniconnect.tool.contentaccess;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
-import hu.webarticum.miniconnect.util.data.ByteString;
+import hu.webarticum.miniconnect.lang.ByteString;
 
 public interface ChargeableContentAccess extends MiniContentAccess {
 

@@ -3,7 +3,7 @@ package hu.webarticum.miniconnect.messenger.lab.dummy;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import hu.webarticum.miniconnect.util.data.ByteString;
+import hu.webarticum.miniconnect.lang.ByteString;
 
 public class CompletableSmallContent {
 

@@ -19,8 +19,9 @@ configurations {
 
 dependencies {
     api project(':api')
-    api project(':util')
-    api project(':tool')
+    api project(':lang')
+    
+    implementation project(':tool')
     
     antlr 'org.antlr:antlr4:4.9.3'
     

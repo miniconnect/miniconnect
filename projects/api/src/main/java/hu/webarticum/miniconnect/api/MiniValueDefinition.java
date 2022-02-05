@@ -1,7 +1,7 @@
 package hu.webarticum.miniconnect.api;
 
-import hu.webarticum.miniconnect.util.data.ByteString;
-import hu.webarticum.miniconnect.util.data.ImmutableMap;
+import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.lang.ImmutableMap;
 
 public interface MiniValueDefinition {
 

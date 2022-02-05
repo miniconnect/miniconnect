@@ -7,7 +7,7 @@ import java.io.UncheckedIOException;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
-import hu.webarticum.miniconnect.util.data.ByteString;
+import hu.webarticum.miniconnect.lang.ByteString;
 
 public abstract class AbstractChargeableContentAccess implements ChargeableContentAccess {
 

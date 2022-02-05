@@ -2,7 +2,7 @@ package hu.webarticum.miniconnect.rdmsframework.storage;
 
 import java.math.BigInteger;
 
-import hu.webarticum.miniconnect.util.data.ImmutableList;
+import hu.webarticum.miniconnect.lang.ImmutableList;
 
 public interface Table extends NamedResource {
 

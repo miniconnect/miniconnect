@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.util.data;
+package hu.webarticum.miniconnect.lang;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

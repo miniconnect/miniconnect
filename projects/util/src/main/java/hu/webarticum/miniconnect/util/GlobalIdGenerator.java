@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.util.data;
+package hu.webarticum.miniconnect.util;
 
 import java.util.concurrent.atomic.AtomicLong;
 

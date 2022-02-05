@@ -17,10 +17,10 @@ configurations {
 }
 
 dependencies {
-    api project(':util')
+    api project(':lang')
     api project(':messenger')
-    api project(':transfer')
     
+    implementation project(':transfer')
     implementation 'org.slf4j:slf4j-api:1.7.35'
     
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'

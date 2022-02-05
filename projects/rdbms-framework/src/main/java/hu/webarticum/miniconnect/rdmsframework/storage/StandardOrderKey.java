@@ -2,7 +2,7 @@ package hu.webarticum.miniconnect.rdmsframework.storage;
 
 import java.util.Objects;
 
-import hu.webarticum.miniconnect.util.data.ImmutableList;
+import hu.webarticum.miniconnect.lang.ImmutableList;
 
 public final class StandardOrderKey implements OrderKey {
     

@@ -15,6 +15,7 @@ import java.util.function.Consumer;
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.messenger.Messenger;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataHeadRequest;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataPartRequest;
@@ -34,7 +35,6 @@ import hu.webarticum.miniconnect.messenger.util.OrderAligningQueue;
 import hu.webarticum.miniconnect.tool.result.StoredError;
 import hu.webarticum.miniconnect.tool.result.StoredLargeDataSaveResult;
 import hu.webarticum.miniconnect.tool.result.StoredResult;
-import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class MessengerSession implements MiniSession {
 

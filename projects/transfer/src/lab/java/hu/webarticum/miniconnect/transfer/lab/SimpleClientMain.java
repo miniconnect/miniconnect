@@ -6,9 +6,9 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.function.Consumer;
 
+import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.transfer.Packet;
 import hu.webarticum.miniconnect.transfer.SocketClient;
-import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class SimpleClientMain {
     

@@ -16,6 +16,8 @@ import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
+import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.messenger.message.response.Response;
 import hu.webarticum.miniconnect.messenger.message.response.ResultResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse;
@@ -27,8 +29,6 @@ import hu.webarticum.miniconnect.tool.contentaccess.ChargeableContentAccess;
 import hu.webarticum.miniconnect.tool.contentaccess.FileChargeableContentAccess;
 import hu.webarticum.miniconnect.tool.contentaccess.MemoryChargeableContentAccess;
 import hu.webarticum.miniconnect.tool.result.StoredContentAccess;
-import hu.webarticum.miniconnect.util.data.ByteString;
-import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class MessengerResultSetCharger {
     

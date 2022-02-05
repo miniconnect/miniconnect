@@ -3,9 +3,9 @@ package hu.webarticum.miniconnect.messenger.adapter;
 import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniResultSet;
+import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.messenger.message.response.ResultResponse;
 import hu.webarticum.miniconnect.tool.result.StoredError;
-import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class MessengerResult implements MiniResult {
 

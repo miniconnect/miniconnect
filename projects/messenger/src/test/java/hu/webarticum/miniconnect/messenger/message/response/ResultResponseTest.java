@@ -7,10 +7,10 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse.CellData;
-import hu.webarticum.miniconnect.util.data.ByteString;
-import hu.webarticum.miniconnect.util.data.ImmutableList;
-import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
 class ResultResponseTest {
     

@@ -3,7 +3,7 @@ package hu.webarticum.miniconnect.api;
 import java.io.Closeable;
 import java.io.InputStream;
 
-import hu.webarticum.miniconnect.util.data.ByteString;
+import hu.webarticum.miniconnect.lang.ByteString;
 
 public interface MiniContentAccess extends Closeable {
     

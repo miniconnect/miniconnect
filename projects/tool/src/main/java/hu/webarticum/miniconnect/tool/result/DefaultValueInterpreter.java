@@ -9,7 +9,7 @@ import java.time.LocalTime;
 
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
-import hu.webarticum.miniconnect.util.data.ByteString;
+import hu.webarticum.miniconnect.lang.ByteString;
 
 // FIXME: this is a very dummy implementation
 public class DefaultValueInterpreter implements ValueInterpreter {

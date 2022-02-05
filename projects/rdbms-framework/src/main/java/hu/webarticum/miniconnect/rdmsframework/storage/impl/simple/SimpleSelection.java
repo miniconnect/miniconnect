@@ -4,10 +4,10 @@ import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.function.Predicate;
 
+import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.rdmsframework.storage.OrderKey;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelectionEntry;
-import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class SimpleSelection implements TableSelection {
     

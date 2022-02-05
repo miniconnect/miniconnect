@@ -4,8 +4,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.tool.result.DefaultValueInterpreter;
-import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
 

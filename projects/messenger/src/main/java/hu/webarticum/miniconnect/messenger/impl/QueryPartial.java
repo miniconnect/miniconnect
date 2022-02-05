@@ -13,6 +13,9 @@ import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniValue;
+import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.messenger.message.request.QueryRequest;
 import hu.webarticum.miniconnect.messenger.message.response.Response;
 import hu.webarticum.miniconnect.messenger.message.response.ResultResponse;
@@ -20,9 +23,6 @@ import hu.webarticum.miniconnect.messenger.message.response.ResultSetEofResponse
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse.CellData;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetValuePartResponse;
-import hu.webarticum.miniconnect.util.data.ByteString;
-import hu.webarticum.miniconnect.util.data.ImmutableList;
-import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
 class QueryPartial implements Closeable {
     

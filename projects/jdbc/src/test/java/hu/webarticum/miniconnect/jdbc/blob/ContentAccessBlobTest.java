@@ -9,8 +9,8 @@ import java.sql.SQLException;
 import org.junit.jupiter.api.Test;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
+import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.tool.result.StoredContentAccess;
-import hu.webarticum.miniconnect.util.data.ByteString;
 
 class ContentAccessBlobTest {
 

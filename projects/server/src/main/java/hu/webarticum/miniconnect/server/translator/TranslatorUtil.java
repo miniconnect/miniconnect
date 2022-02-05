@@ -3,7 +3,7 @@ package hu.webarticum.miniconnect.server.translator;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-import hu.webarticum.miniconnect.util.data.ByteString;
+import hu.webarticum.miniconnect.lang.ByteString;
 
 final class TranslatorUtil {
 

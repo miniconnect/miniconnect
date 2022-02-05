@@ -3,6 +3,7 @@ package hu.webarticum.miniconnect.rdmsframework.session;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniValue;
+import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.rdmsframework.engine.Engine;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSession;
 import hu.webarticum.miniconnect.rdmsframework.engine.impl.SimpleEngine;
@@ -15,7 +16,6 @@ import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleStorageAccess;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleTable;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleTableManager;
-import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class FrameworkMinimalDemoMain {
 

@@ -17,8 +17,9 @@ configurations {
 }
 
 dependencies {
-    implementation project(':api')
-    implementation project(':util')
+    api project(':api')
+    api project(':lang')
+    
     implementation project(':tool')
     
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'

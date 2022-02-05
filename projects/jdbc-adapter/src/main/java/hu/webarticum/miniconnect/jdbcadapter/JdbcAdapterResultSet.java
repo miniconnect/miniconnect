@@ -22,11 +22,11 @@ import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
+import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.tool.result.DefaultValueInterpreter;
 import hu.webarticum.miniconnect.tool.result.StoredColumnHeader;
 import hu.webarticum.miniconnect.tool.result.StoredValue;
-import hu.webarticum.miniconnect.util.data.ByteString;
-import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class JdbcAdapterResultSet implements MiniResultSet {
     

@@ -3,8 +3,8 @@ package hu.webarticum.miniconnect.tool.result;
 import java.io.Serializable;
 
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
-import hu.webarticum.miniconnect.util.data.ByteString;
-import hu.webarticum.miniconnect.util.data.ImmutableMap;
+import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.lang.ImmutableMap;
 
 public final class StoredValueDefinition implements MiniValueDefinition, Serializable {
     

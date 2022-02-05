@@ -5,15 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.messenger.message.Message;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse.CellData;
 import hu.webarticum.miniconnect.server.HeaderData;
 import hu.webarticum.miniconnect.server.HeaderEncoder;
 import hu.webarticum.miniconnect.transfer.Packet;
-import hu.webarticum.miniconnect.util.data.ByteString;
-import hu.webarticum.miniconnect.util.data.ImmutableList;
-import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
 class ResultSetRowsResponseTranslatorDriver implements TranslatorDriver {
 

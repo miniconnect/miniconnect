@@ -1,8 +1,8 @@
 package hu.webarticum.miniconnect.rdmsframework.storage.impl.simple;
 
+import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResource;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
-import hu.webarticum.miniconnect.util.data.ImmutableList;
 
 public class EmptyNamedResourceStore<T extends NamedResource> implements NamedResourceStore<T> {
 

@@ -24,7 +24,7 @@ import hu.webarticum.miniconnect.messenger.message.response.SessionInitResponse;
 import hu.webarticum.miniconnect.server.translator.DefaultMessageTranslator;
 import hu.webarticum.miniconnect.transfer.Packet;
 import hu.webarticum.miniconnect.transfer.SocketClient;
-import hu.webarticum.miniconnect.util.data.GlobalIdGenerator;
+import hu.webarticum.miniconnect.util.GlobalIdGenerator;
 
 public class ClientMessenger implements Messenger, Closeable {
 

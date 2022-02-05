@@ -19,6 +19,9 @@ import java.util.regex.Pattern;
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.api.MiniValue;
+import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.messenger.Messenger;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataHeadRequest;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataPartRequest;
@@ -37,9 +40,6 @@ import hu.webarticum.miniconnect.tool.result.DefaultValueInterpreter;
 import hu.webarticum.miniconnect.tool.result.StoredColumnHeader;
 import hu.webarticum.miniconnect.tool.result.StoredValueDefinition;
 import hu.webarticum.miniconnect.tool.result.ValueInterpreter;
-import hu.webarticum.miniconnect.util.data.ByteString;
-import hu.webarticum.miniconnect.util.data.ImmutableList;
-import hu.webarticum.miniconnect.util.data.ImmutableMap;
 import hu.webarticum.regexbee.Bee;
 
 public class DummyMessenger implements Messenger {

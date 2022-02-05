@@ -24,13 +24,13 @@ import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.jdbc.provider.h2.H2DatabaseProvider;
 import hu.webarticum.miniconnect.jdbcadapter.JdbcAdapterSession;
+import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.tool.mock.MockSessionManager;
 import hu.webarticum.miniconnect.tool.result.StoredColumnHeader;
 import hu.webarticum.miniconnect.tool.result.StoredResult;
 import hu.webarticum.miniconnect.tool.result.StoredResultSetData;
 import hu.webarticum.miniconnect.tool.result.StoredValue;
 import hu.webarticum.miniconnect.tool.result.StoredValueDefinition;
-import hu.webarticum.miniconnect.util.data.ByteString;
 
 class MiniJdbcConnectionTest {
     

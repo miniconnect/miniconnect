@@ -1,11 +1,11 @@
 package hu.webarticum.miniconnect.server.translator;
 
+import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.messenger.message.Message;
 import hu.webarticum.miniconnect.messenger.message.request.SessionInitRequest;
 import hu.webarticum.miniconnect.server.HeaderData;
 import hu.webarticum.miniconnect.server.HeaderEncoder;
 import hu.webarticum.miniconnect.transfer.Packet;
-import hu.webarticum.miniconnect.util.data.ByteString;
 
 class SessionInitRequestTranslatorDriver implements TranslatorDriver {
 

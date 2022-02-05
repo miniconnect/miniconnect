@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 
-import hu.webarticum.miniconnect.util.data.ImmutableList;
+import hu.webarticum.miniconnect.lang.ImmutableList;
 
 public class MultiComparator implements Comparator<ImmutableList<Object>> {
     

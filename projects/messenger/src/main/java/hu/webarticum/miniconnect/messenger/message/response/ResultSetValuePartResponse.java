@@ -2,9 +2,9 @@ package hu.webarticum.miniconnect.messenger.message.response;
 
 import java.util.Objects;
 
+import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
-import hu.webarticum.miniconnect.util.data.ByteString;
-import hu.webarticum.miniconnect.util.data.ToStringBuilder;
+import hu.webarticum.miniconnect.util.ToStringBuilder;
 
 public final class ResultSetValuePartResponse implements Response, ExchangeMessage {
 

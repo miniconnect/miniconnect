@@ -1,6 +1,6 @@
 package hu.webarticum.miniconnect.tool.contentaccess;
 
-import hu.webarticum.miniconnect.util.data.ByteString;
+import hu.webarticum.miniconnect.lang.ByteString;
 
 public class MemoryChargeableContentAccess extends AbstractChargeableContentAccess {
     

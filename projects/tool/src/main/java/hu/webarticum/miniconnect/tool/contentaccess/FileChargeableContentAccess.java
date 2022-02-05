@@ -7,7 +7,7 @@ import java.io.RandomAccessFile;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 
-import hu.webarticum.miniconnect.util.data.ByteString;
+import hu.webarticum.miniconnect.lang.ByteString;
 
 public class FileChargeableContentAccess extends AbstractChargeableContentAccess {
     

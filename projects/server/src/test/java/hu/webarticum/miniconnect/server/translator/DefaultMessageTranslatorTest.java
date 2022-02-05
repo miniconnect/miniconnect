@@ -10,6 +10,9 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
+import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.messenger.message.Message;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataHeadRequest;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataPartRequest;
@@ -27,9 +30,6 @@ import hu.webarticum.miniconnect.messenger.message.response.SessionCloseResponse
 import hu.webarticum.miniconnect.messenger.message.response.SessionInitResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse.CellData;
 import hu.webarticum.miniconnect.server.MessageType;
-import hu.webarticum.miniconnect.util.data.ByteString;
-import hu.webarticum.miniconnect.util.data.ImmutableList;
-import hu.webarticum.miniconnect.util.data.ImmutableMap;
 
 class DefaultMessageTranslatorTest {
     

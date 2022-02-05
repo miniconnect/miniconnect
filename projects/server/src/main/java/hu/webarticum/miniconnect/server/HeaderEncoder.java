@@ -1,6 +1,6 @@
 package hu.webarticum.miniconnect.server;
 
-import hu.webarticum.miniconnect.util.data.ByteString;
+import hu.webarticum.miniconnect.lang.ByteString;
 
 public class HeaderEncoder {
 

@@ -6,11 +6,11 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.util.function.Supplier;
 
+import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.transfer.Packet;
 import hu.webarticum.miniconnect.transfer.PacketExchanger;
 import hu.webarticum.miniconnect.transfer.PacketTarget;
 import hu.webarticum.miniconnect.transfer.SocketServer;
-import hu.webarticum.miniconnect.util.data.ByteString;
 
 public class SimpleServerMain {
     

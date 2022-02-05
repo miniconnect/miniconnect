@@ -1,7 +1,7 @@
 package hu.webarticum.miniconnect.server;
 
+import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.transfer.Packet;
-import hu.webarticum.miniconnect.util.data.ByteString;
 
 /**
  * Packet header decoder.

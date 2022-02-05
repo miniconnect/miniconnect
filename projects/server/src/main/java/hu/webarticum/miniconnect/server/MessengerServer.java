@@ -17,7 +17,7 @@ import hu.webarticum.miniconnect.transfer.Packet;
 import hu.webarticum.miniconnect.transfer.PacketExchanger;
 import hu.webarticum.miniconnect.transfer.PacketTarget;
 import hu.webarticum.miniconnect.transfer.SocketServer;
-import hu.webarticum.miniconnect.util.data.GlobalIdGenerator;
+import hu.webarticum.miniconnect.util.GlobalIdGenerator;
 
 // TODO: official default port?
 public class MessengerServer implements Closeable {

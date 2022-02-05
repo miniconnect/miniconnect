@@ -4,11 +4,11 @@ import java.util.Objects;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.api.MiniValue;
+import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
-import hu.webarticum.miniconnect.util.data.ByteString;
-import hu.webarticum.miniconnect.util.data.ImmutableList;
-import hu.webarticum.miniconnect.util.data.ImmutableMap;
-import hu.webarticum.miniconnect.util.data.ToStringBuilder;
+import hu.webarticum.miniconnect.util.ToStringBuilder;
 
 public final class ResultSetRowsResponse implements Response, ExchangeMessage {
 

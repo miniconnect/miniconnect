@@ -5,5 +5,5 @@ plugins {
 sourceCompatibility = 1.8
 
 dependencies {
-    api project(':util')
+    api project(':lang')
 }

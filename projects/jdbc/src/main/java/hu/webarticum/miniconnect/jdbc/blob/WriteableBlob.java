@@ -15,7 +15,7 @@ import java.sql.SQLFeatureNotSupportedException;
 
 import org.apache.commons.io.input.BoundedInputStream;
 
-import hu.webarticum.miniconnect.util.data.ByteString;
+import hu.webarticum.miniconnect.lang.ByteString;
 
 public class WriteableBlob implements Blob {
 

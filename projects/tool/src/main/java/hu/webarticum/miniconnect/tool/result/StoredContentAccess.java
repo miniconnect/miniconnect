@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
-import hu.webarticum.miniconnect.util.data.ByteString;
+import hu.webarticum.miniconnect.lang.ByteString;
 
 public final class StoredContentAccess implements MiniContentAccess, Serializable {
 
