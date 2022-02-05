@@ -3,8 +3,8 @@ package hu.webarticum.miniconnect.messenger.lab.dummy;
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniSessionManager;
 import hu.webarticum.miniconnect.messenger.adapter.MessengerSessionManager;
-import hu.webarticum.miniconnect.tool.repl.ReplRunner;
-import hu.webarticum.miniconnect.tool.repl.SqlRepl;
+import hu.webarticum.miniconnect.repl.ReplRunner;
+import hu.webarticum.miniconnect.repl.SqlRepl;
 
 public class DummyMessengerMain {
 

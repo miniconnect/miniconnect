@@ -1,0 +1,25 @@
+plugins {
+    id 'java-library'
+}
+
+sourceCompatibility = 1.8
+
+sourceSets {
+    lab {
+        compileClasspath += sourceSets.main.runtimeClasspath
+        runtimeClasspath += sourceSets.main.runtimeClasspath
+    }
+}
+
+configurations {
+    labImplementation.extendsFrom implementation
+    labRuntimeOnly.extendsFrom runtimeOnly
+}
+
+dependencies {
+    api project(':api')
+    api project(':lang')
+    
+    implementation 'hu.webarticum:regexbee:0.3.0'
+    implementation project(':impl')
+}

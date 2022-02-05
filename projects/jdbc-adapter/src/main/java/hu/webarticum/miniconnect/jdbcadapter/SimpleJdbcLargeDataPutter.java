@@ -6,8 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
-import hu.webarticum.miniconnect.tool.result.StoredError;
-import hu.webarticum.miniconnect.tool.result.StoredLargeDataSaveResult;
+import hu.webarticum.miniconnect.impl.result.StoredError;
+import hu.webarticum.miniconnect.impl.result.StoredLargeDataSaveResult;
 
 public class SimpleJdbcLargeDataPutter implements JdbcLargeDataPutter {
     

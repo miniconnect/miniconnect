@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
+import hu.webarticum.miniconnect.impl.chargeable.FileChargeableContentAccess;
 import hu.webarticum.miniconnect.lang.ByteString;
-import hu.webarticum.miniconnect.messenger.chargeable.FileChargeableContentAccess;
 
 public class MessengerContentAccessMain {
 

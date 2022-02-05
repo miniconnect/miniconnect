@@ -3,7 +3,6 @@ package hu.webarticum.miniconnect.jdbc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -14,25 +13,24 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
-import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniSessionManager;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
+import hu.webarticum.miniconnect.impl.mock.MockSessionManager;
+import hu.webarticum.miniconnect.impl.result.StoredColumnHeader;
+import hu.webarticum.miniconnect.impl.result.StoredResult;
+import hu.webarticum.miniconnect.impl.result.StoredResultSetData;
+import hu.webarticum.miniconnect.impl.result.StoredValue;
+import hu.webarticum.miniconnect.impl.result.StoredValueDefinition;
 import hu.webarticum.miniconnect.jdbc.provider.h2.H2DatabaseProvider;
 import hu.webarticum.miniconnect.jdbcadapter.JdbcAdapterSession;
 import hu.webarticum.miniconnect.lang.ByteString;
-import hu.webarticum.miniconnect.tool.result.StoredColumnHeader;
-import hu.webarticum.miniconnect.tool.result.StoredResult;
-import hu.webarticum.miniconnect.tool.result.StoredResultSetData;
-import hu.webarticum.miniconnect.tool.result.StoredValue;
-import hu.webarticum.miniconnect.tool.result.StoredValueDefinition;
 
 class MiniJdbcConnectionTest {
     
@@ -171,50 +169,4 @@ class MiniJdbcConnectionTest {
         return DriverManager.getConnection("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
     }
 
-    
-    private static class MockSessionManager implements MiniSessionManager {
-    
-        private final Function<String, MiniResult> resultSupplier;
-        
-    
-        public MockSessionManager(Function<String, MiniResult> resultSupplier) {
-            this.resultSupplier = resultSupplier;
-        }
-        
-        
-        @Override
-        public MiniSession openSession() {
-            return new MockSession(resultSupplier);
-        }
-    
-    }
-    
-
-    private static class MockSession implements MiniSession {
-        
-        private final Function<String, MiniResult> resultSupplier;
-        
-    
-        public MockSession(Function<String, MiniResult> resultSupplier) {
-            this.resultSupplier = resultSupplier;
-        }
-        
-        
-        @Override
-        public MiniResult execute(String query) {
-            return resultSupplier.apply(query);
-        }
-    
-        @Override
-        public MiniLargeDataSaveResult putLargeData(
-                String variableName, long length, InputStream dataSource) {
-            throw new UnsupportedOperationException();
-        }
-    
-        @Override
-        public void close() {
-        }
-    
-    }
-    
 }

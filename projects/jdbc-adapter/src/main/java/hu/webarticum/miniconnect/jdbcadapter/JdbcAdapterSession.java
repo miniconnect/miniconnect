@@ -11,8 +11,8 @@ import java.util.Objects;
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
-import hu.webarticum.miniconnect.tool.result.StoredError;
-import hu.webarticum.miniconnect.tool.result.StoredResult;
+import hu.webarticum.miniconnect.impl.result.StoredError;
+import hu.webarticum.miniconnect.impl.result.StoredResult;
 
 public class JdbcAdapterSession implements MiniSession {
     

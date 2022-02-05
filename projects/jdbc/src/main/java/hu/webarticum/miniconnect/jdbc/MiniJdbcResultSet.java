@@ -29,11 +29,11 @@ import java.util.Objects;
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
+import hu.webarticum.miniconnect.impl.result.DefaultValueInterpreter;
 import hu.webarticum.miniconnect.jdbc.blob.BlobClob;
 import hu.webarticum.miniconnect.jdbc.blob.ContentAccessBlob;
 import hu.webarticum.miniconnect.jdbc.converter.GeneralConverter;
 import hu.webarticum.miniconnect.lang.ImmutableList;
-import hu.webarticum.miniconnect.tool.result.DefaultValueInterpreter;
 
 public class MiniJdbcResultSet implements ResultSet {
     

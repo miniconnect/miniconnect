@@ -7,6 +7,8 @@ import java.util.concurrent.Future;
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.impl.result.StoredError;
+import hu.webarticum.miniconnect.impl.result.StoredResult;
 import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
 import hu.webarticum.miniconnect.rdmsframework.DatabaseException;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSession;
@@ -14,8 +16,6 @@ import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.execution.SqlParser;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
-import hu.webarticum.miniconnect.tool.result.StoredError;
-import hu.webarticum.miniconnect.tool.result.StoredResult;
 
 public class FrameworkSession implements MiniSession, CheckableCloseable {
     

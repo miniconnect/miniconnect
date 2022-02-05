@@ -31,6 +31,7 @@ dependencies {
     testImplementation 'org.assertj:assertj-core:3.19.0'
     
     labImplementation project(':jdbc-adapter')
+    labImplementation project(':repl')
 	labImplementation 'com.h2database:h2:1.4.200'
 	labImplementation 'mysql:mysql-connector-java:8.0.28'
     labImplementation 'org.apache.logging.log4j:log4j-core:2.17.1'

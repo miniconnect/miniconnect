@@ -10,9 +10,9 @@ import java.util.List;
 import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniResultSet;
+import hu.webarticum.miniconnect.impl.result.StoredError;
+import hu.webarticum.miniconnect.impl.result.StoredResultSet;
 import hu.webarticum.miniconnect.lang.ImmutableList;
-import hu.webarticum.miniconnect.tool.result.StoredError;
-import hu.webarticum.miniconnect.tool.result.StoredResultSet;
 
 public class JdbcAdapterResult implements MiniResult {
     

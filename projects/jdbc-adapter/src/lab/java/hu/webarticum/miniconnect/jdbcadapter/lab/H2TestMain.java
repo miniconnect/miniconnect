@@ -9,9 +9,9 @@ import hu.webarticum.miniconnect.jdbcadapter.JdbcAdapterSessionManager;
 import hu.webarticum.miniconnect.jdbcadapter.JdbcLargeDataPutter;
 import hu.webarticum.miniconnect.jdbcadapter.SimpleJdbcLargeDataPutter;
 import hu.webarticum.miniconnect.lang.ByteString;
-import hu.webarticum.miniconnect.tool.repl.Repl;
-import hu.webarticum.miniconnect.tool.repl.ReplRunner;
-import hu.webarticum.miniconnect.tool.repl.SqlRepl;
+import hu.webarticum.miniconnect.repl.Repl;
+import hu.webarticum.miniconnect.repl.ReplRunner;
+import hu.webarticum.miniconnect.repl.SqlRepl;
 
 public class H2TestMain {
     

@@ -7,11 +7,11 @@ import java.io.InputStreamReader;
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniSessionManager;
 import hu.webarticum.miniconnect.messenger.adapter.MessengerSessionManager;
+import hu.webarticum.miniconnect.repl.Repl;
+import hu.webarticum.miniconnect.repl.ReplRunner;
+import hu.webarticum.miniconnect.repl.SqlRepl;
 import hu.webarticum.miniconnect.server.ClientMessenger;
 import hu.webarticum.miniconnect.server.ServerConstants;
-import hu.webarticum.miniconnect.tool.repl.Repl;
-import hu.webarticum.miniconnect.tool.repl.ReplRunner;
-import hu.webarticum.miniconnect.tool.repl.SqlRepl;
 
 public class DatabaseClientDemoMain {
 

@@ -20,7 +20,7 @@ dependencies {
     api project(':api')
     api project(':lang')
     
-    implementation project(':tool')
+    implementation project(':impl')
     
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.7.1'
@@ -29,5 +29,6 @@ dependencies {
     testImplementation 'org.assertj:assertj-core:3.19.0'
 	testImplementation 'com.h2database:h2:1.4.200'
     
+    labImplementation project(':repl')
 	labImplementation 'com.h2database:h2:1.4.200'
 }

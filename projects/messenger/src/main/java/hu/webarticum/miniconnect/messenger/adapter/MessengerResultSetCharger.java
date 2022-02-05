@@ -16,11 +16,12 @@ import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
+import hu.webarticum.miniconnect.impl.chargeable.ChargeableContentAccess;
+import hu.webarticum.miniconnect.impl.chargeable.FileChargeableContentAccess;
+import hu.webarticum.miniconnect.impl.chargeable.MemoryChargeableContentAccess;
+import hu.webarticum.miniconnect.impl.result.StoredContentAccess;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableList;
-import hu.webarticum.miniconnect.messenger.chargeable.ChargeableContentAccess;
-import hu.webarticum.miniconnect.messenger.chargeable.FileChargeableContentAccess;
-import hu.webarticum.miniconnect.messenger.chargeable.MemoryChargeableContentAccess;
 import hu.webarticum.miniconnect.messenger.message.response.Response;
 import hu.webarticum.miniconnect.messenger.message.response.ResultResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse;
@@ -28,7 +29,6 @@ import hu.webarticum.miniconnect.messenger.message.response.ResultSetValuePartRe
 import hu.webarticum.miniconnect.messenger.message.response.ResultResponse.ColumnHeaderData;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse.CellData;
 import hu.webarticum.miniconnect.messenger.util.ExceptionUtil;
-import hu.webarticum.miniconnect.tool.result.StoredContentAccess;
 
 public class MessengerResultSetCharger {
     
