@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.impl.result;
+package hu.webarticum.miniconnect.value;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -9,6 +9,8 @@ import java.time.LocalTime;
 
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
+import hu.webarticum.miniconnect.impl.result.StoredValue;
+import hu.webarticum.miniconnect.impl.result.StoredValueDefinition;
 import hu.webarticum.miniconnect.lang.ByteString;
 
 // FIXME: this is a very dummy implementation

@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.impl.result;
+package hu.webarticum.miniconnect.value;
 
 import hu.webarticum.miniconnect.api.MiniValue;
 

@@ -9,9 +9,9 @@ import java.util.List;
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
-import hu.webarticum.miniconnect.impl.result.DefaultValueInterpreter;
-import hu.webarticum.miniconnect.impl.result.ValueInterpreter;
 import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.value.DefaultValueInterpreter;
+import hu.webarticum.miniconnect.value.ValueInterpreter;
 
 public class ResultSetPrinter {
 

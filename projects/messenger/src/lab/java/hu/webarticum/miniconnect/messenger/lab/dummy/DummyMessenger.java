@@ -19,10 +19,8 @@ import java.util.regex.Pattern;
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.api.MiniValue;
-import hu.webarticum.miniconnect.impl.result.DefaultValueInterpreter;
 import hu.webarticum.miniconnect.impl.result.StoredColumnHeader;
 import hu.webarticum.miniconnect.impl.result.StoredValueDefinition;
-import hu.webarticum.miniconnect.impl.result.ValueInterpreter;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
@@ -40,6 +38,8 @@ import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsRespons
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetValuePartResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultResponse.ColumnHeaderData;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse.CellData;
+import hu.webarticum.miniconnect.value.DefaultValueInterpreter;
+import hu.webarticum.miniconnect.value.ValueInterpreter;
 import hu.webarticum.regexbee.Bee;
 
 public class DummyMessenger implements Messenger {

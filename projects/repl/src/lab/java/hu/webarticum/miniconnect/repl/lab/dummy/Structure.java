@@ -5,9 +5,9 @@ import java.util.List;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniValue;
-import hu.webarticum.miniconnect.impl.result.DefaultValueInterpreter;
 import hu.webarticum.miniconnect.impl.result.StoredColumnHeader;
 import hu.webarticum.miniconnect.impl.result.StoredValueDefinition;
+import hu.webarticum.miniconnect.value.DefaultValueInterpreter;
 
 
 public final class Structure {
