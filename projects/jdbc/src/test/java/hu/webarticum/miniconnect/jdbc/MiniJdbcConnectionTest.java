@@ -85,9 +85,9 @@ class MiniJdbcConnectionTest {
         MiniValueDefinition intDefinition = new StoredValueDefinition(Integer.class.getName());
         MiniValueDefinition stringDefinition = new StoredValueDefinition(String.class.getName());
         List<MiniColumnHeader> columnHeaders = new ArrayList<>();
-        columnHeaders.add(new StoredColumnHeader("id", intDefinition));
-        columnHeaders.add(new StoredColumnHeader("label", stringDefinition));
-        columnHeaders.add(new StoredColumnHeader("description", stringDefinition));
+        columnHeaders.add(new StoredColumnHeader("id", false, intDefinition));
+        columnHeaders.add(new StoredColumnHeader("label", false, stringDefinition));
+        columnHeaders.add(new StoredColumnHeader("description", false, stringDefinition));
         List<List<MiniValue>> rows = new ArrayList<>();
         rows.add(Arrays.asList(
                 asMiniValue(1),
@@ -127,7 +127,7 @@ class MiniJdbcConnectionTest {
                         miniSession, new H2DatabaseProvider());
                 ) {
             try (Statement createStatement = connection.createStatement()) {
-                createStatement.execute("CREATE TABLE data (id INTEGER, label TEXT)");
+                createStatement.execute("CREATE TABLE data (id INT NOT NULL, label TEXT)");
             }
             try (PreparedStatement insertPreparedStatement = connection.prepareStatement(
                     "INSERT INTO data (id, label) VALUES (?, ?)")) {

@@ -63,9 +63,10 @@ class ResultResponseTranslatorDriver implements TranslatorDriver {
 
     private ColumnHeaderData readColumnHeaderData(ByteString.Reader reader) {
         String name = TranslatorUtil.readString(reader);
+        boolean isNullable = TranslatorUtil.readBoolean(reader);
         String type = TranslatorUtil.readString(reader);
         ImmutableMap<String, ByteString> properties = readProperties(reader);
-        return new ColumnHeaderData(name, type, properties);
+        return new ColumnHeaderData(name, isNullable, type, properties);
     }
 
     private ImmutableMap<String, ByteString> readProperties(ByteString.Reader reader) {
@@ -121,6 +122,7 @@ class ResultResponseTranslatorDriver implements TranslatorDriver {
             ByteString.Builder payloadBuilder,
             ColumnHeaderData header) {
         payloadBuilder.append(TranslatorUtil.encodeString(header.name()));
+        payloadBuilder.append(TranslatorUtil.encodeBoolean(header.isNullable()));
         payloadBuilder.append(TranslatorUtil.encodeString(header.type()));
         appendProperties(payloadBuilder, header.properties());
     }

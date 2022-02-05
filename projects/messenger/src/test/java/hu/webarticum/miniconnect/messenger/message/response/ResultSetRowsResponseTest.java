@@ -39,10 +39,11 @@ class ResultSetRowsResponseTest {
         propertiesBuilder.put("key1", ByteString.of("item1"));
         propertiesBuilder.put("key2", ByteString.of("item2"));
         propertiesBuilder.put("key3", ByteString.of("item3"));
+        ImmutableMap<String, ByteString> properties = new ImmutableMap<>(propertiesBuilder);
         ImmutableList<ColumnHeaderData> columnHeaders = ImmutableList.of(
-                new ColumnHeaderData("id", "INT", ImmutableMap.empty()),
-                new ColumnHeaderData("label", "VARCHAR(50)", ImmutableMap.empty()),
-                new ColumnHeaderData("description", "TEXT", new ImmutableMap<>(propertiesBuilder)));
+                new ColumnHeaderData("id", false, "INT", ImmutableMap.empty()),
+                new ColumnHeaderData("label", true, "VARCHAR(50)", ImmutableMap.empty()),
+                new ColumnHeaderData("description", false, "TEXT", properties));
         return new ResultResponse(3L, 2, false, error, warnings, true, columnHeaders);
     }
 

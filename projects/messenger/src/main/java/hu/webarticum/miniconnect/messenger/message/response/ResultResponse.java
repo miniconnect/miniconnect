@@ -135,6 +135,8 @@ public final class ResultResponse implements Response, ExchangeMessage {
 
         private final String name;
 
+        private final boolean isNullable;
+
         private final String type;
 
         private final ImmutableMap<String, ByteString> properties;
@@ -142,9 +144,11 @@ public final class ResultResponse implements Response, ExchangeMessage {
 
         public ColumnHeaderData(
                 String name,
+                boolean isNullable,
                 String type,
                 ImmutableMap<String, ByteString> properties) {
             this.name = Objects.requireNonNull(name);
+            this.isNullable = isNullable;
             this.type = Objects.requireNonNull(type);
             this.properties = Objects.requireNonNull(properties);
         }
@@ -152,6 +156,7 @@ public final class ResultResponse implements Response, ExchangeMessage {
         public static ColumnHeaderData of(MiniColumnHeader header) {
             return new ColumnHeaderData(
                     header.name(),
+                    header.isNullable(),
                     header.valueDefinition().type(),
                     header.valueDefinition().properties());
         }
@@ -159,6 +164,10 @@ public final class ResultResponse implements Response, ExchangeMessage {
 
         public String name() {
             return name;
+        }
+
+        public boolean isNullable() {
+            return isNullable;
         }
 
         public String type() {
@@ -170,12 +179,13 @@ public final class ResultResponse implements Response, ExchangeMessage {
         }
         
         public MiniColumnHeader toMiniColumnHeader() {
-            return new StoredColumnHeader(name, new StoredValueDefinition(type, properties));
+            return new StoredColumnHeader(
+                    name, isNullable, new StoredValueDefinition(type, properties));
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(name, type, properties);
+            return Objects.hash(name, isNullable, type, properties);
         }
 
         @Override
@@ -191,6 +201,7 @@ public final class ResultResponse implements Response, ExchangeMessage {
             ColumnHeaderData otherColumnHeaderData = (ColumnHeaderData) other;
             return
                     name.equals(otherColumnHeaderData.name) &&
+                    isNullable == otherColumnHeaderData.isNullable &&
                     type.equals(otherColumnHeaderData.type) &&
                     properties.equals(otherColumnHeaderData.properties);
         }
@@ -199,6 +210,7 @@ public final class ResultResponse implements Response, ExchangeMessage {
         public String toString() {
             return new ToStringBuilder(this)
                     .add("name", name)
+                    .add("isNullable", isNullable)
                     .add("type", type)
                     .add("properties", properties)
                     .build();

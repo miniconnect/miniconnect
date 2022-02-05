@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
+import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniResultSet;
@@ -60,9 +61,14 @@ class QueryPartial implements Closeable {
         responseConsumer.accept(ResultResponse.of(result, sessionId, exchangeId));
 
         try (MiniResultSet resultSet = result.resultSet()) {
-            int columnCount = resultSet.columnHeaders().size();
+            ImmutableList<MiniColumnHeader> columnHeaders = resultSet.columnHeaders();
+            int columnCount = columnHeaders.size();
             int maxRowCount = columnCount == 0 ? 1 : Math.max(1, MAX_CELL_COUNT / columnCount);
             long responseOffset = 0;
+            ImmutableList<Integer> nullables = columnHeaders
+                    .filter(MiniColumnHeader::isNullable)
+                    .mapIndex((i, j) -> i);
+            ImmutableMap<Integer, Integer> fixedSizes = ImmutableMap.empty(); // TODO
             List<ImmutableList<CellData>> responseRowsBuilder = new ArrayList<>();
             List<IncompleteContentHolder> incompleteContents = new ArrayList<>();
             long offset = 0;
@@ -81,7 +87,8 @@ class QueryPartial implements Closeable {
                             responseConsumer,
                             responseOffset,
                             responseRowsBuilder,
-                            columnCount);
+                            nullables,
+                            fixedSizes);
                     sendChunks(responseConsumer, incompleteContents);
                     responseRowsBuilder.clear();
                     incompleteContents.clear();
@@ -93,7 +100,8 @@ class QueryPartial implements Closeable {
                     responseConsumer,
                     responseOffset,
                     responseRowsBuilder,
-                    columnCount);
+                    nullables,
+                    fixedSizes);
             sendChunks(responseConsumer, incompleteContents);
             
             responseConsumer.accept(new ResultSetEofResponse(sessionId, exchangeId, offset));
@@ -127,23 +135,14 @@ class QueryPartial implements Closeable {
             Consumer<Response> responseConsumer,
             long responseOffset,
             List<ImmutableList<CellData>> responseRowsBuilder,
-            int columnCount) {
+            ImmutableList<Integer> nullables,
+            ImmutableMap<Integer, Integer> fixedSizes) {
         ImmutableList<ImmutableList<CellData>> rows = new ImmutableList<>(responseRowsBuilder);
-        ImmutableList<Integer> nullables = rangeUntil(columnCount); // FIXME / TODO
-        ImmutableMap<Integer, Integer> fixedSizes = ImmutableMap.empty(); // FIXME / TODO
         ResultSetRowsResponse rowsResponse = new ResultSetRowsResponse(
                 sessionId, exchangeId, responseOffset, nullables, fixedSizes, rows);
         responseConsumer.accept(rowsResponse);
     }
     
-    private ImmutableList<Integer> rangeUntil(int until) {
-        List<Integer> rangeBuilder = new ArrayList<>();
-        for (int i = 0; i < until; i++) {
-            rangeBuilder.add(i);
-        }
-        return new ImmutableList<>(rangeBuilder);
-    }
-
     private void sendChunks(
             Consumer<Response> responseConsumer,
             List<IncompleteContentHolder> incompleteContents) {

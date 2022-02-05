@@ -64,11 +64,11 @@ public class DummyMessenger implements Messenger {
             .toPattern(Pattern.CASE_INSENSITIVE);
     
     private static final ImmutableList<MiniColumnHeader> columnHeaders = ImmutableList.of(
-            new StoredColumnHeader("id", new StoredValueDefinition(Long.class.getName())),
-            new StoredColumnHeader("created_at", new StoredValueDefinition(String.class.getName())),
-            new StoredColumnHeader("name", new StoredValueDefinition(String.class.getName())),
-            new StoredColumnHeader("length", new StoredValueDefinition(Integer.class.getName())),
-            new StoredColumnHeader("content", new StoredValueDefinition(String.class.getName())));
+            headerOf("id", false, Long.class),
+            headerOf("created_at", false, String.class),
+            headerOf("name", false, String.class),
+            headerOf("length", false, Integer.class),
+            headerOf("content", false, String.class));
 
 
     private final AtomicLong rowCounter = new AtomicLong(0);
@@ -84,6 +84,13 @@ public class DummyMessenger implements Messenger {
     private final ImmutableList<ValueInterpreter> interpreters = columnHeaders.map(
             h -> new DefaultValueInterpreter(h.valueDefinition()));
     
+
+    private static final MiniColumnHeader headerOf(
+            String name,
+            boolean isNullable,
+            Class<?> clazz) {
+        return new StoredColumnHeader(name, isNullable, new StoredValueDefinition(clazz.getName()));
+    }
     
     @Override
     public void accept(Request request, Consumer<Response> responseConsumer) {

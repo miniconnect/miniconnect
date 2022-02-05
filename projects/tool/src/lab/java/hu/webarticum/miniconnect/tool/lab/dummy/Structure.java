@@ -26,20 +26,20 @@ public final class Structure {
 
     public static List<MiniColumnHeader> getMetaColumnHeaders() {
         List<MiniColumnHeader> result = new ArrayList<>();
-        result.add(new StoredColumnHeader("Field", STRING_DEFINITION));
-        result.add(new StoredColumnHeader("Type", STRING_DEFINITION));
-        result.add(new StoredColumnHeader("Null", STRING_DEFINITION));
-        result.add(new StoredColumnHeader("Key", STRING_DEFINITION));
-        result.add(new StoredColumnHeader("Default", STRING_DEFINITION));
-        result.add(new StoredColumnHeader("Extra", STRING_DEFINITION));
+        result.add(new StoredColumnHeader("Field", false, STRING_DEFINITION));
+        result.add(new StoredColumnHeader("Type", false, STRING_DEFINITION));
+        result.add(new StoredColumnHeader("Null", false, STRING_DEFINITION));
+        result.add(new StoredColumnHeader("Key", false, STRING_DEFINITION));
+        result.add(new StoredColumnHeader("Default", false, STRING_DEFINITION));
+        result.add(new StoredColumnHeader("Extra", false, STRING_DEFINITION));
         return result;
     }
 
     public static List<MiniColumnHeader> getColumnHeaders() {
         List<MiniColumnHeader> result = new ArrayList<>();
-        result.add(new StoredColumnHeader("id", INTEGER_DEFINITION));
-        result.add(new StoredColumnHeader("label", STRING_DEFINITION));
-        result.add(new StoredColumnHeader("description", STRING_DEFINITION));
+        result.add(new StoredColumnHeader("id", false, INTEGER_DEFINITION));
+        result.add(new StoredColumnHeader("label", false, STRING_DEFINITION));
+        result.add(new StoredColumnHeader("description", false, STRING_DEFINITION));
         return result;
     }
 

@@ -95,10 +95,11 @@ class DefaultMessageTranslatorTest {
         propertiesBuilder.put("key1", ByteString.of("value1"));
         propertiesBuilder.put("key2", ByteString.of("value2"));
         propertiesBuilder.put("key3", ByteString.of("value3"));
+        ImmutableMap<String, ByteString> properties = new ImmutableMap<>(propertiesBuilder);
         ImmutableList<ColumnHeaderData> columnHeaders = ImmutableList.of(
-                new ColumnHeaderData("id", "INT", ImmutableMap.empty()),
-                new ColumnHeaderData("label", "VARCHAR(30)", ImmutableMap.empty()),
-                new ColumnHeaderData("description", "TEXT", new ImmutableMap<>(propertiesBuilder)));
+                new ColumnHeaderData("id", false, "INT", ImmutableMap.empty()),
+                new ColumnHeaderData("label", true, "VARCHAR(30)", ImmutableMap.empty()),
+                new ColumnHeaderData("description", false, "TEXT", properties));
         return new ResultResponse(4L, 3, false, error, warnings, true, columnHeaders);
     }
     
