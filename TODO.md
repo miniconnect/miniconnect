@@ -2,20 +2,17 @@
 
 ## Ideas
 
-- methods of `MiniSessionManager` and `MiniSession` could return with `Future` objects.
-- add potential error info to session init (and close?) responses?
-- move ByteString, ImmutableList and ImmutableMap to the new `lang` package
-- make it possible for the server to broadcast non-exchange close response to all open clients
-- support ping request
-- messenger/QueryPartial.sendRows: collect nullables and fixedSizes
-    (make this information available from MiniResultSet)
-- add an enum for built-in value types (correlating with jdbc types), associate java types
+- rethink value interpreters, declare built-in types, handle fixed sizes
+- add error info to session init (and close?) responses?
 - extend tests for messages, test single field difference for all fields:
   - item1
   - item2 (equal to item1)
   - different items, includes:
     - items with a little difference (for each field)
     - a very different item
+- (?) add support for ping request and broadcast response
+- add TLS support
+- add authentication/authorization support
 
 
 ## TODOs for components
