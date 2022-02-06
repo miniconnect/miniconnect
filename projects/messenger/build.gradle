@@ -21,8 +21,8 @@ dependencies {
     api project(':lang')
     
     implementation project(':impl')
+    implementation project(':record')
     implementation project(':util')
-    implementation project(':value')
     implementation 'hu.webarticum:regexbee:0.3.0'
 
     testImplementation project(':jdbc-adapter')

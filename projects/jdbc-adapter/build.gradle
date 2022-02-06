@@ -21,7 +21,7 @@ dependencies {
     api project(':lang')
     
     implementation project(':impl')
-    implementation project(':value')
+    implementation project(':record')
     
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.7.1'

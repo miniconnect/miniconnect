@@ -10,8 +10,8 @@ import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.lang.ImmutableList;
-import hu.webarticum.miniconnect.value.DefaultValueInterpreter;
-import hu.webarticum.miniconnect.value.ValueInterpreter;
+import hu.webarticum.miniconnect.record.interpreter.old.DefaultValueInterpreter;
+import hu.webarticum.miniconnect.record.interpreter.old.ValueInterpreter;
 
 public class ResultSetPrinter {
 

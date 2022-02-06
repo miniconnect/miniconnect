@@ -7,7 +7,7 @@ import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.impl.result.StoredColumnHeader;
 import hu.webarticum.miniconnect.impl.result.StoredValueDefinition;
-import hu.webarticum.miniconnect.value.DefaultValueInterpreter;
+import hu.webarticum.miniconnect.record.interpreter.old.DefaultValueInterpreter;
 
 
 public final class Structure {

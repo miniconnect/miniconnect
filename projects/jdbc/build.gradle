@@ -9,7 +9,7 @@ dependencies {
     api project(':lang')
     
     implementation project(':impl')
-    implementation project(':value')
+    implementation project(':record')
     implementation 'commons-io:commons-io:2.11.0'
     implementation 'hu.webarticum:regexbee:0.3.0'
     

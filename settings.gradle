@@ -7,11 +7,11 @@ include 'jdbc-adapter'
 include 'lang'
 include 'messenger'
 include 'rdbms-framework'
+include 'record'
 include 'repl'
 include 'server'
 include 'transfer'
 include 'util'
-include 'value'
 
 rootProject.children.each { project ->
     project.projectDir = new File(settingsDir, "projects/${project.name}")
