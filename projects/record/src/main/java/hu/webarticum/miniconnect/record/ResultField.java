@@ -6,16 +6,16 @@ import hu.webarticum.miniconnect.api.MiniValue;
 public class ResultField {
     
     private final MiniValue value;
+
+    // TODO
+    private final Object valueInterpreter;
     
 
-    private ResultField(MiniValue value) {
+    public ResultField(MiniValue value, Object valueInterpreter) {
         this.value = value;
+        this.valueInterpreter = valueInterpreter;
     }
 
-    public static ResultField of(MiniValue value) {
-        return new ResultField(value);
-    }
-    
     
     public MiniValue value() {
         return value;

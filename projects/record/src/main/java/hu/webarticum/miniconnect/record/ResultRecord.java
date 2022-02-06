@@ -1,27 +1,42 @@
 package hu.webarticum.miniconnect.record;
 
+import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 
 public class ResultRecord {
+    
+    private final ImmutableList<MiniColumnHeader> columnHeaders;
 
     private final ImmutableList<MiniValue> row;
+
+    // TODO
+    private final Object valueInterpreter;
     
 
-    // TODO: value interpreter
-    private ResultRecord(ImmutableList<MiniValue> row) {
+    public ResultRecord(
+            ImmutableList<MiniColumnHeader> columnHeaders,
+            ImmutableList<MiniValue> row,
+            Object valueInterpreter) {
+        this.columnHeaders = columnHeaders;
         this.row = row;
-    }
-    
-    public static ResultRecord of(ImmutableList<MiniValue> row) {
-        return new ResultRecord(row);
+        this.valueInterpreter = valueInterpreter;
     }
     
     
     public ResultField get(int zeroBasedIndex) {
-        return ResultField.of(row.get(zeroBasedIndex));
+        return new ResultField(row.get(zeroBasedIndex), valueInterpreter);
     }
 
-    // TODO: by label (headers?)
-    
+    public ResultField get(String columnLabel) {
+        int i = 0;
+        for (MiniColumnHeader columnHeader : columnHeaders) {
+            if (columnHeader.name().equals(columnLabel)) {
+                return get(i);
+            }
+            i++;
+        }
+        throw new IllegalArgumentException("No such column: " + columnLabel);
+    }
+
 }
