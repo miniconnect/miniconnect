@@ -10,22 +10,31 @@ public class ResultRecord {
 
     private final ImmutableList<MiniValue> row;
 
-    // TODO
-    private final Object valueInterpreter;
+    private final ValueInterpreterSupplier valueInterpreterSupplier;
     
 
     public ResultRecord(
             ImmutableList<MiniColumnHeader> columnHeaders,
             ImmutableList<MiniValue> row,
             Object valueInterpreter) {
+        this(columnHeaders, row, (i, h) -> valueInterpreter);
+    }
+
+    public ResultRecord(
+            ImmutableList<MiniColumnHeader> columnHeaders,
+            ImmutableList<MiniValue> row,
+            ValueInterpreterSupplier valueInterpreterSupplier) {
         this.columnHeaders = columnHeaders;
         this.row = row;
-        this.valueInterpreter = valueInterpreter;
+        this.valueInterpreterSupplier = valueInterpreterSupplier;
     }
     
     
     public ResultField get(int zeroBasedIndex) {
-        return new ResultField(row.get(zeroBasedIndex), valueInterpreter);
+        MiniValue value = row.get(zeroBasedIndex);
+        MiniColumnHeader columnHeader = columnHeaders.get(zeroBasedIndex);
+        Object valueInterpreter = valueInterpreterSupplier.get(zeroBasedIndex, columnHeader);
+        return new ResultField(value, valueInterpreter);
     }
 
     public ResultField get(String columnLabel) {
@@ -39,4 +48,12 @@ public class ResultRecord {
         throw new IllegalArgumentException("No such column: " + columnLabel);
     }
 
+    
+    @FunctionalInterface
+    public interface ValueInterpreterSupplier {
+        
+        public Object get(int columnIndex, MiniColumnHeader columnHeader);
+        
+    }
+    
 }
