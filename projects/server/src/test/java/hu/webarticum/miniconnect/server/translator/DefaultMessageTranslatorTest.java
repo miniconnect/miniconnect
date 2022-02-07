@@ -100,7 +100,7 @@ class DefaultMessageTranslatorTest {
         int dynamicSize = MiniValueDefinition.DYNAMIC_SIZE;
         ImmutableList<ColumnHeaderData> columnHeaders = ImmutableList.of(
                 new ColumnHeaderData(
-                        "id", false, dynamicSize, "INT", ImmutableMap.empty()),
+                        "id", false, Integer.BYTES, "INT", ImmutableMap.empty()),
                 new ColumnHeaderData(
                         "label", true, dynamicSize, "VARCHAR(30)", ImmutableMap.empty()),
                 new ColumnHeaderData(
