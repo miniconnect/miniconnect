@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
+import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
@@ -96,10 +97,14 @@ class DefaultMessageTranslatorTest {
         propertiesBuilder.put("key2", ByteString.of("value2"));
         propertiesBuilder.put("key3", ByteString.of("value3"));
         ImmutableMap<String, ByteString> properties = new ImmutableMap<>(propertiesBuilder);
+        int dynamicSize = MiniValueDefinition.DYNAMIC_SIZE;
         ImmutableList<ColumnHeaderData> columnHeaders = ImmutableList.of(
-                new ColumnHeaderData("id", false, "INT", ImmutableMap.empty()),
-                new ColumnHeaderData("label", true, "VARCHAR(30)", ImmutableMap.empty()),
-                new ColumnHeaderData("description", false, "TEXT", properties));
+                new ColumnHeaderData(
+                        "id", false, dynamicSize, "INT", ImmutableMap.empty()),
+                new ColumnHeaderData(
+                        "label", true, dynamicSize, "VARCHAR(30)", ImmutableMap.empty()),
+                new ColumnHeaderData(
+                        "description", false, dynamicSize, "TEXT", properties));
         return new ResultResponse(4L, 3, false, error, warnings, true, columnHeaders);
     }
     

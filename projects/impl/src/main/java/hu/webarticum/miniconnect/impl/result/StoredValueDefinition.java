@@ -13,15 +13,25 @@ public final class StoredValueDefinition implements MiniValueDefinition, Seriali
 
     private final String type;
 
+    private final int size;
+
     private final ImmutableMap<String, ByteString> properties;
 
 
     public StoredValueDefinition(String type) {
-        this(type, new ImmutableMap<>());
+        this(type, MiniValueDefinition.DYNAMIC_SIZE);
     }
 
-    public StoredValueDefinition(String type, ImmutableMap<String, ByteString> properties) {
+    public StoredValueDefinition(String type, int size) {
+        this(type, size, new ImmutableMap<>());
+    }
+
+    public StoredValueDefinition(
+            String type,
+            int size,
+            ImmutableMap<String, ByteString> properties) {
         this.type = type;
+        this.size = size;
         this.properties = properties;
     }
 
@@ -32,6 +42,7 @@ public final class StoredValueDefinition implements MiniValueDefinition, Seriali
         
         return new StoredValueDefinition(
                 valueDefinition.type(),
+                valueDefinition.size(),
                 valueDefinition.properties());
     }
 
@@ -39,6 +50,11 @@ public final class StoredValueDefinition implements MiniValueDefinition, Seriali
     @Override
     public String type() {
         return type;
+    }
+
+    @Override
+    public int size() {
+        return size;
     }
 
     @Override

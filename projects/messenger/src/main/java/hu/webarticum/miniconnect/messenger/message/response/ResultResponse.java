@@ -137,6 +137,8 @@ public final class ResultResponse implements Response, ExchangeMessage {
 
         private final boolean isNullable;
 
+        private final int size;
+
         private final String type;
 
         private final ImmutableMap<String, ByteString> properties;
@@ -145,10 +147,12 @@ public final class ResultResponse implements Response, ExchangeMessage {
         public ColumnHeaderData(
                 String name,
                 boolean isNullable,
+                int size,
                 String type,
                 ImmutableMap<String, ByteString> properties) {
             this.name = Objects.requireNonNull(name);
             this.isNullable = isNullable;
+            this.size = size;
             this.type = Objects.requireNonNull(type);
             this.properties = Objects.requireNonNull(properties);
         }
@@ -157,6 +161,7 @@ public final class ResultResponse implements Response, ExchangeMessage {
             return new ColumnHeaderData(
                     header.name(),
                     header.isNullable(),
+                    header.valueDefinition().size(),
                     header.valueDefinition().type(),
                     header.valueDefinition().properties());
         }
@@ -170,6 +175,10 @@ public final class ResultResponse implements Response, ExchangeMessage {
             return isNullable;
         }
 
+        public int size() {
+            return size;
+        }
+
         public String type() {
             return type;
         }
@@ -180,7 +189,7 @@ public final class ResultResponse implements Response, ExchangeMessage {
         
         public MiniColumnHeader toMiniColumnHeader() {
             return new StoredColumnHeader(
-                    name, isNullable, new StoredValueDefinition(type, properties));
+                    name, isNullable, new StoredValueDefinition(type, size, properties));
         }
 
         @Override

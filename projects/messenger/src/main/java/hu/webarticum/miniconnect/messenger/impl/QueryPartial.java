@@ -2,7 +2,9 @@ package hu.webarticum.miniconnect.messenger.impl;
 
 import java.io.Closeable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -13,6 +15,7 @@ import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniValue;
+import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
@@ -68,7 +71,7 @@ class QueryPartial implements Closeable {
             ImmutableList<Integer> nullables = columnHeaders
                     .filter(MiniColumnHeader::isNullable)
                     .mapIndex((i, j) -> i);
-            ImmutableMap<Integer, Integer> fixedSizes = ImmutableMap.empty(); // TODO
+            ImmutableMap<Integer, Integer> fixedSizes = collectFixedSizes(columnHeaders);
             List<ImmutableList<CellData>> responseRowsBuilder = new ArrayList<>();
             List<IncompleteContentHolder> incompleteContents = new ArrayList<>();
             long offset = 0;
@@ -111,6 +114,22 @@ class QueryPartial implements Closeable {
         }
     }
     
+    private ImmutableMap<Integer, Integer> collectFixedSizes(
+            ImmutableList<MiniColumnHeader> columnHeaders) {
+        Map<Integer, Integer> resultBuilder = new HashMap<>();
+        int i = 0;
+        for (MiniColumnHeader columnHeader : columnHeaders) {
+            MiniValueDefinition valueDefinition = columnHeader.valueDefinition();
+            int size = valueDefinition.size();
+            if (size != MiniValueDefinition.DYNAMIC_SIZE) {
+                resultBuilder.put(i, size);
+            }
+            i++;
+        }
+        return new ImmutableMap<>(resultBuilder);
+    }
+
+
     private CellData extractCell(
             int exchangeId,
             long rowIndex,
