@@ -1,8 +1,7 @@
 package hu.webarticum.miniconnect.record;
 
-import java.util.function.BiFunction;
-
 import hu.webarticum.miniconnect.api.MiniValue;
+import hu.webarticum.miniconnect.record.converter.Converter;
 
 public class ResultField {
     
@@ -12,14 +11,11 @@ public class ResultField {
 
     private final Object interpretedValue;
 
-    private final BiFunction<Object, Class<?>, Object> converter;
+    private final Converter converter;
     
 
     public ResultField(
-            MiniValue value,
-            Class<?> clazz,
-            Object interpretedValue,
-            BiFunction<Object, Class<?>, Object> converter) {
+            MiniValue value, Class<?> clazz, Object interpretedValue, Converter converter) {
         this.value = value;
         this.clazz = clazz;
         this.interpretedValue = interpretedValue;
@@ -45,7 +41,7 @@ public class ResultField {
             return (T) interpretedValue;
         }
         
-        return (T) converter.apply(interpretedValue, clazz);
+        return (T) converter.convert(interpretedValue, clazz);
     }
     
 }
