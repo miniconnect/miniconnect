@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
-import hu.webarticum.miniconnect.record.interpreter.old.DefaultValueInterpreter;
+import hu.webarticum.miniconnect.record.decoder.old.DefaultValueInterpreter;
 
 public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
 

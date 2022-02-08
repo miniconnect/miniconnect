@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.record.interpreter;
+package hu.webarticum.miniconnect.record.decoder;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -9,8 +9,13 @@ import java.time.LocalTime;
 
 import hu.webarticum.miniconnect.lang.ByteString;
 
-public enum StandardValueType {
+public enum StandardValueType implements ValueType {
 
+    // TODO:
+    // MMM(Ccc.class, TttInterpreter.INSTANCE)
+    // MMM(Ccc.class, TttInterpreter::new)
+    // MMM(Ccc.class, TttInterpreter::of)    -->  of(Map<String, ByteString> properties)
+    
     NULL(Void.class),
     
     BOOL(Boolean.class),
@@ -60,8 +65,17 @@ public enum StandardValueType {
     }
     
     
+    @Override
     public Class<?> clazz() {
         return clazz;
+    }
+
+    @Override
+    public ValueDecoder valueDecoder() {
+        
+        // TODO
+        return null;
+        
     }
     
 }

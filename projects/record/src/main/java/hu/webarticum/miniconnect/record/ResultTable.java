@@ -6,23 +6,23 @@ import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.record.converter.Converter;
-import hu.webarticum.miniconnect.record.interpreter.ValueInterpreter;
+import hu.webarticum.miniconnect.record.decoder.ValueDecoder;
 
 public class ResultTable implements Iterable<ResultRecord> {
     
     private final MiniResultSet resultSet;
     
-    private final ImmutableList<ValueInterpreter> valueInterpreters;
+    private final ImmutableList<ValueDecoder> valueDecoders;
     
     private final Converter converter;
     
 
     public ResultTable(
             MiniResultSet resultSet,
-            ImmutableList<ValueInterpreter> valueInterpreters,
+            ImmutableList<ValueDecoder> valueDecoders,
             Converter converter) {
         this.resultSet = resultSet;
-        this.valueInterpreters = valueInterpreters;
+        this.valueDecoders = valueDecoders;
         this.converter = converter;
     }
     
@@ -52,7 +52,7 @@ public class ResultTable implements Iterable<ResultRecord> {
             return new ResultRecord(
                     resultSet.columnHeaders(),
                     rowIterator.next(),
-                    valueInterpreters,
+                    valueDecoders,
                     converter);
         }
         

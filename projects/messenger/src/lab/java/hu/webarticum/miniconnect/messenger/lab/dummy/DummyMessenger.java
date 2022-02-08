@@ -38,8 +38,8 @@ import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsRespons
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetValuePartResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultResponse.ColumnHeaderData;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse.CellData;
-import hu.webarticum.miniconnect.record.interpreter.old.DefaultValueInterpreter;
-import hu.webarticum.miniconnect.record.interpreter.old.ValueInterpreter;
+import hu.webarticum.miniconnect.record.decoder.old.DefaultValueInterpreter;
+import hu.webarticum.miniconnect.record.decoder.old.ValueInterpreter;
 import hu.webarticum.regexbee.Bee;
 
 public class DummyMessenger implements Messenger {

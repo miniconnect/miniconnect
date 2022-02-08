@@ -26,7 +26,7 @@ import hu.webarticum.miniconnect.impl.result.StoredColumnHeader;
 import hu.webarticum.miniconnect.impl.result.StoredValue;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableList;
-import hu.webarticum.miniconnect.record.interpreter.old.DefaultValueInterpreter;
+import hu.webarticum.miniconnect.record.decoder.old.DefaultValueInterpreter;
 
 public class JdbcAdapterResultSet implements MiniResultSet {
     

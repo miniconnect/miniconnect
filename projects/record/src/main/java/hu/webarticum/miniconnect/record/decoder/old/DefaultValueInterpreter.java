@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.record.interpreter.old;
+package hu.webarticum.miniconnect.record.decoder.old;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
