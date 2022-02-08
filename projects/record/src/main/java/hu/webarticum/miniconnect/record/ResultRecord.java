@@ -1,5 +1,7 @@
 package hu.webarticum.miniconnect.record;
 
+import java.util.function.BiFunction;
+
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.lang.ImmutableList;
@@ -33,8 +35,19 @@ public class ResultRecord {
     public ResultField get(int zeroBasedIndex) {
         MiniValue value = row.get(zeroBasedIndex);
         MiniColumnHeader columnHeader = columnHeaders.get(zeroBasedIndex);
+        
+        // FIXME
         Object valueInterpreter = valueInterpreterSupplier.get(zeroBasedIndex, columnHeader);
-        return new ResultField(value, valueInterpreter);
+
+        // FIXME
+        BiFunction<Object, Class<?>, Object> converter =
+                (v, c) -> {
+                    throw new UnsupportedOperationException("Conversion is not implemented yet");
+                };
+        
+        // FIXME
+        return new ResultField(
+                value, String.class, value.contentAccess().get().toString(), converter);
     }
 
     public ResultField get(String columnLabel) {
