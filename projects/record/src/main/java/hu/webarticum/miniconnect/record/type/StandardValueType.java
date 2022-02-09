@@ -63,9 +63,11 @@ public enum StandardValueType implements ValueType {
     TIMESTAMP(Instant.class, TimestampTranslator.instance()),
     
     // TODO
-    // COMPLEX(ComplexValue.class, ComplexTranslator::of), // of? schema?
+    // FIXME: of? schema?
+    // COMPLEX(ComplexValue.class, ComplexTranslator::of),
     
     // TODO
+    // FIXME: of? optionally restrict type?
     // JAVA(Serializable.class, JavaTranslator.instance()),
     
     // TODO: blob, clob
