@@ -307,6 +307,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
         setParameter(parameterIndex, new ParameterValue(Reader.class, value, length));
     }
 
+    @Deprecated
     @Override
     public void setUnicodeStream(
             int parameterIndex, InputStream x, int length) throws SQLException {

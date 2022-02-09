@@ -328,6 +328,7 @@ public class MiniJdbcResultSet implements ResultSet {
         return getBigDecimal(findColumn(columnLabel));
     }
 
+    @Deprecated
     @Override
     public BigDecimal getBigDecimal(String columnLabel, int scale) throws SQLException {
         return getBigDecimal(findColumn(columnLabel), scale);
@@ -338,6 +339,7 @@ public class MiniJdbcResultSet implements ResultSet {
         return getObject(columnIndex, BigDecimal.class);
     }
 
+    @Deprecated
     @Override
     public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
         return getObject(columnIndex, BigDecimal.class, scale);
@@ -483,11 +485,13 @@ public class MiniJdbcResultSet implements ResultSet {
         return getObject(columnIndex, Reader.class);
     }
 
+    @Deprecated
     @Override
     public InputStream getUnicodeStream(String columnLabel) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
+    @Deprecated
     @Override
     public InputStream getUnicodeStream(int columnIndex) throws SQLException {
         throw new SQLFeatureNotSupportedException();

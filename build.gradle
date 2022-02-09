@@ -25,13 +25,18 @@ subprojects {
         test {
             useJUnitPlatform()
             testLogging {
-				events "failed"
-				showExceptions true
-				exceptionFormat "full"
-				showCauses true
-				showStackTraces true
-				showStandardStreams false
-			}
+                events "failed"
+                showExceptions true
+                exceptionFormat "full"
+                showCauses true
+                showStackTraces true
+                showStandardStreams false
+            }
+        }
+        
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << '-Xlint:unchecked'
+            options.deprecation = true
         }
     }
 }
