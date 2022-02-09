@@ -4,7 +4,7 @@ import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.record.converter.Converter;
-import hu.webarticum.miniconnect.record.decoder.ValueDecoder;
+import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 
 public class ResultRecord {
     
@@ -12,7 +12,7 @@ public class ResultRecord {
 
     private final ImmutableList<MiniValue> row;
     
-    private final ImmutableList<ValueDecoder> valueDecoders;
+    private final ImmutableList<ValueTranslator> valueTranslators;
     
     private final Converter converter;
     
@@ -20,21 +20,20 @@ public class ResultRecord {
     public ResultRecord(
             ImmutableList<MiniColumnHeader> columnHeaders,
             ImmutableList<MiniValue> row,
-            ImmutableList<ValueDecoder> valueDecoders,
+            ImmutableList<ValueTranslator> valueTranslators,
             Converter converter) {
         this.columnHeaders = columnHeaders;
         this.row = row;
-        this.valueDecoders = valueDecoders;
+        this.valueTranslators = valueTranslators;
         this.converter = converter;
     }
     
     
     public ResultField get(int zeroBasedIndex) {
         MiniValue value = row.get(zeroBasedIndex);
-        
-        // TODO
-        return new ResultField(
-                value, String.class, value.contentAccess().get().toString(), converter);
+        ValueTranslator translator = valueTranslators.get(zeroBasedIndex);
+        Object interpretedValue = value.isNull() ? null : translator.decode(value.contentAccess());
+        return new ResultField(value, interpretedValue, converter);
     }
 
     public ResultField get(String columnLabel) {

@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.record.decoder;
+package hu.webarticum.miniconnect.record.type;
 
 public class ComplexValue {
     

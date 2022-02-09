@@ -7,17 +7,14 @@ public class ResultField {
     
     private final MiniValue value;
 
-    private final Class<?> clazz;
-
     private final Object interpretedValue;
 
     private final Converter converter;
     
 
     public ResultField(
-            MiniValue value, Class<?> clazz, Object interpretedValue, Converter converter) {
+            MiniValue value, Object interpretedValue, Converter converter) {
         this.value = value;
-        this.clazz = clazz;
         this.interpretedValue = interpretedValue;
         this.converter = converter;
     }
@@ -27,8 +24,8 @@ public class ResultField {
         return value;
     }
     
-    public Class<?> clazz() {
-        return clazz;
+    public boolean isNull() {
+        return interpretedValue == null;
     }
     
     public Object get() {
@@ -37,10 +34,6 @@ public class ResultField {
     
     @SuppressWarnings("unchecked")
     public <T> T as(Class<T> clazz) {
-        if (clazz == this.clazz || clazz == Object.class) {
-            return (T) interpretedValue;
-        }
-        
         return (T) converter.convert(interpretedValue, clazz);
     }
     

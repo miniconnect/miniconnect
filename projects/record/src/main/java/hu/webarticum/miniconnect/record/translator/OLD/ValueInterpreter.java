@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.record.decoder.old;
+package hu.webarticum.miniconnect.record.translator.OLD;
 
 import hu.webarticum.miniconnect.api.MiniValue;
 

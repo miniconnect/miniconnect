@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.record.decoder.old;
+package hu.webarticum.miniconnect.record.translator.OLD;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -152,8 +152,9 @@ public class DefaultValueInterpreter implements ValueInterpreter {
         } else if (type.equals(LocalDate.class)) {
             return LocalDate.ofEpochDay(content.reader().readLong());
         } else if (type.equals(Instant.class)) {
-            long seconds = content.reader().readLong();
-            long nanos = content.reader().readLong();
+            ByteString.Reader reader = content.reader();
+            long seconds = reader.readLong();
+            long nanos = reader.readLong();
             return Instant.ofEpochSecond(seconds, nanos);
         } else {
             throw new IllegalStateException(

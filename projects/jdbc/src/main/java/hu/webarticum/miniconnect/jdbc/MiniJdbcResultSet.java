@@ -33,7 +33,7 @@ import hu.webarticum.miniconnect.jdbc.blob.BlobClob;
 import hu.webarticum.miniconnect.jdbc.blob.ContentAccessBlob;
 import hu.webarticum.miniconnect.jdbc.converter.GeneralConverter;
 import hu.webarticum.miniconnect.lang.ImmutableList;
-import hu.webarticum.miniconnect.record.decoder.old.DefaultValueInterpreter;
+import hu.webarticum.miniconnect.record.translator.OLD.DefaultValueInterpreter;
 
 public class MiniJdbcResultSet implements ResultSet {
     

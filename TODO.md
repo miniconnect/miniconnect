@@ -3,6 +3,7 @@
 ## Ideas
 
 - rethink value interpreters, declare built-in types, handle fixed sizes
+- replace all isNull() with isPresent()?
 - add error info to session init (and close?) responses?
 - extend tests for messages, test single field difference for all fields:
   - item1
