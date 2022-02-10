@@ -1,11 +1,11 @@
-package hu.webarticum.miniconnect.record.type;
+package hu.webarticum.miniconnect.record.customvalue;
 
-public class ComplexValue {
+public class CustomValue {
     
     private final Object value;
     
     
-    public ComplexValue(Object value) {
+    public CustomValue(Object value) {
         this.value = value;
     }
     

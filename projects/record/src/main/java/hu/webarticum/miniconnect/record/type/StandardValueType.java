@@ -10,11 +10,13 @@ import java.util.function.Function;
 
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
+import hu.webarticum.miniconnect.record.customvalue.CustomValue;
 import hu.webarticum.miniconnect.record.translator.BigintTranslator;
 import hu.webarticum.miniconnect.record.translator.BinaryTranslator;
 import hu.webarticum.miniconnect.record.translator.BoolTranslator;
 import hu.webarticum.miniconnect.record.translator.ByteTranslator;
 import hu.webarticum.miniconnect.record.translator.CharTranslator;
+import hu.webarticum.miniconnect.record.translator.CustomTranslator;
 import hu.webarticum.miniconnect.record.translator.DateTranslator;
 import hu.webarticum.miniconnect.record.translator.DecimalTranslator;
 import hu.webarticum.miniconnect.record.translator.DoubleTranslator;
@@ -63,9 +65,7 @@ public enum StandardValueType implements ValueType {
     
     TIMESTAMP(Instant.class, TimestampTranslator.instance()),
     
-    // TODO
-    // FIXME: of? schema?
-    // COMPLEX(ComplexValue.class, ComplexTranslator::of),
+    CUSTOM(CustomValue.class, CustomTranslator::of),
     
     JAVA(Serializable.class, JavaTranslator.instance()),
     

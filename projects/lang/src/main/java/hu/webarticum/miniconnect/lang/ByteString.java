@@ -20,6 +20,9 @@ public final class ByteString implements Serializable {
     private static final long serialVersionUID = 2392643209772967829L;
     
     
+    private static final ByteString EMPTY = new ByteString(new byte[0]);
+    
+    
     private final byte[] bytes;
 
 
@@ -29,7 +32,7 @@ public final class ByteString implements Serializable {
     }
 
     public static ByteString empty() {
-        return new ByteString(new byte[0]);
+        return EMPTY;
     }
 
     public static ByteString of(byte[] bytes) {
