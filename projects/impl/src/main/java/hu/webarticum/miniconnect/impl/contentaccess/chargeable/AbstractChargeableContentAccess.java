@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.impl.chargeable;
+package hu.webarticum.miniconnect.impl.contentaccess.chargeable;
 
 import java.io.IOException;
 import java.io.InputStream;

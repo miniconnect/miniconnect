@@ -20,6 +20,7 @@ import hu.webarticum.miniconnect.record.translator.DecimalTranslator;
 import hu.webarticum.miniconnect.record.translator.DoubleTranslator;
 import hu.webarticum.miniconnect.record.translator.FloatTranslator;
 import hu.webarticum.miniconnect.record.translator.IntTranslator;
+import hu.webarticum.miniconnect.record.translator.JavaTranslator;
 import hu.webarticum.miniconnect.record.translator.LongTranslator;
 import hu.webarticum.miniconnect.record.translator.NullTranslator;
 import hu.webarticum.miniconnect.record.translator.ShortTranslator;
@@ -66,9 +67,7 @@ public enum StandardValueType implements ValueType {
     // FIXME: of? schema?
     // COMPLEX(ComplexValue.class, ComplexTranslator::of),
     
-    // TODO
-    // FIXME: of? optionally restrict type?
-    // JAVA(Serializable.class, JavaTranslator.instance()),
+    JAVA(Serializable.class, JavaTranslator.instance()),
     
     // TODO: blob, clob
     

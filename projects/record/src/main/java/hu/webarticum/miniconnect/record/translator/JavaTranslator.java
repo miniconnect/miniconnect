@@ -1,0 +1,43 @@
+package hu.webarticum.miniconnect.record.translator;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.UncheckedIOException;
+
+import hu.webarticum.miniconnect.api.MiniContentAccess;
+import hu.webarticum.miniconnect.impl.contentaccess.dynamic.DynamicContentAccessBuilder;
+
+public class JavaTranslator implements ValueTranslator {
+
+    private static final JavaTranslator INSTANCE = new JavaTranslator();
+    
+    
+    private JavaTranslator() {
+        // singleton
+    }
+    
+    public static JavaTranslator instance() {
+        return INSTANCE;
+    }
+    
+
+    @Override
+    public Object decode(MiniContentAccess contentAccess) {
+        try (ObjectInputStream in = new ObjectInputStream(contentAccess.inputStream())) {
+            return in.readObject();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    @Override
+    public MiniContentAccess encode(Object value) {
+        return DynamicContentAccessBuilder.open()
+                .writing(out -> new ObjectOutputStream(out).writeObject(value))
+                .build();
+    }
+    
+}
