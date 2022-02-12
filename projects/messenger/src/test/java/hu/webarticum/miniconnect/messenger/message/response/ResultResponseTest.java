@@ -33,7 +33,7 @@ class ResultResponseTest {
         Map<Integer, Integer> fixedSizesBuilder = new HashMap<>();
         fixedSizesBuilder.put(0, 4);
         fixedSizesBuilder.put(1, 4);
-        ImmutableMap<Integer, Integer> fixedSizes = new ImmutableMap<>(fixedSizesBuilder);
+        ImmutableMap<Integer, Integer> fixedSizes = ImmutableMap.fromMap(fixedSizesBuilder);
         ImmutableList<ImmutableList<CellData>> rows = ImmutableList.of(
                 ImmutableList.of(
                         new CellData(false, 4, ByteString.of("xxxx")),
@@ -46,7 +46,7 @@ class ResultResponseTest {
         ImmutableList<Integer> nullables = ImmutableList.empty();
         Map<Integer, Integer> fixedSizesBuilder = new HashMap<>();
         fixedSizesBuilder.put(0, 5);
-        ImmutableMap<Integer, Integer> fixedSizes = new ImmutableMap<>(fixedSizesBuilder);
+        ImmutableMap<Integer, Integer> fixedSizes = ImmutableMap.fromMap(fixedSizesBuilder);
         ImmutableList<ImmutableList<CellData>> rows = ImmutableList.of(
                 ImmutableList.of(
                         new CellData(false, 5, ByteString.of("lorem")),

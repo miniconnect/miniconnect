@@ -40,7 +40,7 @@ class ResultSetRowsResponseTest {
         propertiesBuilder.put("key1", ByteString.of("item1"));
         propertiesBuilder.put("key2", ByteString.of("item2"));
         propertiesBuilder.put("key3", ByteString.of("item3"));
-        ImmutableMap<String, ByteString> properties = new ImmutableMap<>(propertiesBuilder);
+        ImmutableMap<String, ByteString> properties = ImmutableMap.fromMap(propertiesBuilder);
         int dynamicSize = MiniValueDefinition.DYNAMIC_SIZE;
         ImmutableList<ColumnHeaderData> columnHeaders = ImmutableList.of(
                 new ColumnHeaderData(

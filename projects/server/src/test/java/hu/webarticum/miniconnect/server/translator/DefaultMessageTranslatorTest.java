@@ -96,7 +96,7 @@ class DefaultMessageTranslatorTest {
         propertiesBuilder.put("key1", ByteString.of("value1"));
         propertiesBuilder.put("key2", ByteString.of("value2"));
         propertiesBuilder.put("key3", ByteString.of("value3"));
-        ImmutableMap<String, ByteString> properties = new ImmutableMap<>(propertiesBuilder);
+        ImmutableMap<String, ByteString> properties = ImmutableMap.fromMap(propertiesBuilder);
         int dynamicSize = MiniValueDefinition.DYNAMIC_SIZE;
         ImmutableList<ColumnHeaderData> columnHeaders = ImmutableList.of(
                 new ColumnHeaderData(
@@ -113,7 +113,7 @@ class DefaultMessageTranslatorTest {
         Map<Integer, Integer> fixedSizesBuilder = new HashMap<>();
         fixedSizesBuilder.put(0, 4);
         fixedSizesBuilder.put(1, 4);
-        ImmutableMap<Integer, Integer> fixedSizes = new ImmutableMap<>(fixedSizesBuilder);
+        ImmutableMap<Integer, Integer> fixedSizes = ImmutableMap.fromMap(fixedSizesBuilder);
         ImmutableList<ImmutableList<CellData>> rows = ImmutableList.of(
                 ImmutableList.of(
                         new CellData(false, 4, ByteString.of("abcd")),

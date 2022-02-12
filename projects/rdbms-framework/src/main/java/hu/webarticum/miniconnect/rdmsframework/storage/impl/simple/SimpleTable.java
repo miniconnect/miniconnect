@@ -43,9 +43,9 @@ public class SimpleTable implements Table {
         this.name = builder.name;
         this.writable = builder.writable;
         this.columnNames = ImmutableList.fromCollection(builder.columnDefinitions.keySet());
-        this.columnDefinitions = new ImmutableMap<>(builder.columnDefinitions);
+        this.columnDefinitions = ImmutableMap.fromMap(builder.columnDefinitions);
         this.indexNames = ImmutableList.fromCollection(builder.indexes.keySet());
-        this.indexColumnNames = new ImmutableMap<>(builder.indexes);
+        this.indexColumnNames = ImmutableMap.fromMap(builder.indexes);
         this.rows.addAll(builder.rows);
     }
     

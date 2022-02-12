@@ -23,7 +23,7 @@ public final class StoredValueDefinition implements MiniValueDefinition, Seriali
     }
 
     public StoredValueDefinition(String type, int size) {
-        this(type, size, new ImmutableMap<>());
+        this(type, size, ImmutableMap.empty());
     }
 
     public StoredValueDefinition(

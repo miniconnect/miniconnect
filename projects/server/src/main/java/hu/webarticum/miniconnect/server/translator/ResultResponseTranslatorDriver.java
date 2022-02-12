@@ -78,7 +78,7 @@ class ResultResponseTranslatorDriver implements TranslatorDriver {
             ByteString value = ByteString.wrap(TranslatorUtil.readSized(reader));
             propertiesBuilder.put(key, value);
         }
-        return new ImmutableMap<>(propertiesBuilder);
+        return ImmutableMap.fromMap(propertiesBuilder);
     }
 
     @Override

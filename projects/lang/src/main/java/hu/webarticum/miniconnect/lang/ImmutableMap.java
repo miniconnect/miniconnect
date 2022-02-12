@@ -14,17 +14,17 @@ public final class ImmutableMap<K, V> implements Serializable {
     private final Map<K, V> data; // NOSONAR
 
 
-    public ImmutableMap() {
-        this.data = Collections.emptyMap();
-    }
-
-    public ImmutableMap(Map<K, V> data) {
-        this.data = new HashMap<>(data);
+    private ImmutableMap(Map<K, V> data) {
+        this.data = data;
     }
 
     
     public static <K, V> ImmutableMap<K, V> empty() {
-        return new ImmutableMap<>();
+        return new ImmutableMap<>(Collections.emptyMap());
+    }
+
+    public static <K, V> ImmutableMap<K, V> fromMap(Map<K, V> map) {
+        return new ImmutableMap<>(new HashMap<>(map));
     }
 
 

@@ -126,7 +126,7 @@ class QueryPartial implements Closeable {
             }
             i++;
         }
-        return new ImmutableMap<>(resultBuilder);
+        return ImmutableMap.fromMap(resultBuilder);
     }
 
 

@@ -74,7 +74,7 @@ class ResultSetRowsResponseTranslatorDriver implements TranslatorDriver {
             int value = reader.readInt();
             fixedSizesBuilder.put(key, value);
         }
-        return new ImmutableMap<>(fixedSizesBuilder);
+        return ImmutableMap.fromMap(fixedSizesBuilder);
     }
     
     private ImmutableList<ImmutableList<CellData>> readRows(
