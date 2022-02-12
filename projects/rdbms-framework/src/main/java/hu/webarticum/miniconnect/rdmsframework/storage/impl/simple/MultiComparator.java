@@ -16,7 +16,7 @@ public class MultiComparator implements Comparator<ImmutableList<Object>> {
     }
 
     public MultiComparator(Collection<? extends Comparator<?>> comparators) {
-        this(new ImmutableList<>(comparators));
+        this(ImmutableList.fromCollection(comparators));
     }
 
     @SuppressWarnings("unchecked")

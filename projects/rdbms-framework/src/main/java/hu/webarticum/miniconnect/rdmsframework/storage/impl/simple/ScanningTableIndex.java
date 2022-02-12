@@ -99,7 +99,8 @@ public class ScanningTableIndex implements TableIndex {
             Collections.sort(foundEntries, Comparator.comparing(e -> e.values, multiComparator));
         }
 
-        ImmutableList<BigInteger> rowIndexes = new ImmutableList<>(foundEntries).map(e -> e.index);
+        ImmutableList<BigInteger> rowIndexes =
+                ImmutableList.fromCollection(foundEntries).map(e -> e.index);
         if (sort) {
             // TODO: use StandardOrderKey in this case too
             return new SimpleSelection(rowIndexes);
@@ -156,7 +157,7 @@ public class ScanningTableIndex implements TableIndex {
             Object value = row.get(columnIndex);
             resultBuilder.add(value);
         }
-        return new ImmutableList<>(resultBuilder);
+        return ImmutableList.fromCollection(resultBuilder);
     }
     
     private boolean checkValues(

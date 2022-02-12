@@ -42,9 +42,9 @@ public class SimpleTable implements Table {
     private SimpleTable(SimpleTableBuilder builder) {
         this.name = builder.name;
         this.writable = builder.writable;
-        this.columnNames = new ImmutableList<>(builder.columnDefinitions.keySet());
+        this.columnNames = ImmutableList.fromCollection(builder.columnDefinitions.keySet());
         this.columnDefinitions = new ImmutableMap<>(builder.columnDefinitions);
-        this.indexNames = new ImmutableList<>(builder.indexes.keySet());
+        this.indexNames = ImmutableList.fromCollection(builder.indexes.keySet());
         this.indexColumnNames = new ImmutableMap<>(builder.indexes);
         this.rows.addAll(builder.rows);
     }
@@ -192,7 +192,7 @@ public class SimpleTable implements Table {
 
         public SimpleTableBuilder columnDefinitions(
                 ImmutableMap<String, ColumnDefinition> columnDefinitions) {
-            return columnDefinitions(columnDefinitions.toMap());
+            return columnDefinitions(columnDefinitions.asMap());
         }
         
         public SimpleTableBuilder columnDefinitions(
@@ -208,7 +208,7 @@ public class SimpleTable implements Table {
         }
 
         public SimpleTableBuilder indexes(ImmutableMap<String, ImmutableList<String>> indexes) {
-            return indexes(indexes.toMap());
+            return indexes(indexes.asMap());
         }
         
         public SimpleTableBuilder indexes(Map<String, ImmutableList<String>> indexes) {
@@ -234,7 +234,7 @@ public class SimpleTable implements Table {
         }
 
         public SimpleTableBuilder addRow(Collection<Object> row) {
-            this.rows.add(new ImmutableList<>(row));
+            this.rows.add(ImmutableList.fromCollection(row));
             return this;
         }
 

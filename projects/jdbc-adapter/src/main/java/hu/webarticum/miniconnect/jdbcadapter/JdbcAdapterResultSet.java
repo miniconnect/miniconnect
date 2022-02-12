@@ -125,7 +125,7 @@ public class JdbcAdapterResultSet implements MiniResultSet {
         for (int c = 1; c <= columnCount; c++) {
             resultBuilder.add(extractJavaTypeThrowing(jdbcMetaData, c));
         }
-        return new ImmutableList<>(resultBuilder);
+        return ImmutableList.fromCollection(resultBuilder);
     }
     
     private Class<?> extractJavaTypeThrowing(
@@ -162,7 +162,7 @@ public class JdbcAdapterResultSet implements MiniResultSet {
             MiniValueDefinition valueDefinition = interpreters.get(i).definition();
             resultBuilder.add(new StoredColumnHeader(name, isNullable, valueDefinition));
         }
-        return new ImmutableList<>(resultBuilder);
+        return ImmutableList.fromCollection(resultBuilder);
     }
     
 
@@ -192,7 +192,7 @@ public class JdbcAdapterResultSet implements MiniResultSet {
             MiniValue value = extractValue(i);
             resultBuilder.add(value);
         }
-        return new ImmutableList<>(resultBuilder);
+        return ImmutableList.fromCollection(resultBuilder);
     }
 
     private MiniValue extractValue(int i) {

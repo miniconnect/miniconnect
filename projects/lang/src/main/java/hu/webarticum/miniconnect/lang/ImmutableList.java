@@ -22,30 +22,22 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
     private final List<T> data; // NOSONAR
 
 
-    public ImmutableList() {
-        this.data = Collections.emptyList();
-    }
-
-    public ImmutableList(ImmutableList<? extends T> data) {
-        this(data.data);
-    }
-
-    public ImmutableList(Collection<? extends T> data) {
-        this.data = new ArrayList<>(data);
-    }
-
-    private ImmutableList(List<T> data, Void ignored) { // NOSONAR
+    private ImmutableList(List<T> data) {
         this.data = data;
     }
 
     
     public static <T> ImmutableList<T> empty() {
-        return new ImmutableList<>();
+        return new ImmutableList<>(Collections.emptyList());
     }
 
     @SafeVarargs
     public static <T> ImmutableList<T> of(T... items) {
         return new ImmutableList<>(Arrays.asList(items));
+    }
+
+    public static <T> ImmutableList<T> fromCollection(Collection<T> collection) {
+        return new ImmutableList<>(new ArrayList<>(collection));
     }
 
     public static <T> ImmutableList<T> fromIterable(Iterable<? extends T> iterable) {
@@ -96,7 +88,7 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
         for (T item : data) {
             mappedData.add(mapper.apply(item));
         }
-        return new ImmutableList<>(mappedData, null);
+        return new ImmutableList<>(mappedData);
     }
 
     public <U> ImmutableList<U> mapIndex(BiFunction<Integer, T, U> mapper) {
@@ -106,7 +98,7 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
             T item = data.get(i);
             mappedData.add(mapper.apply(i, item));
         }
-        return new ImmutableList<>(mappedData, null);
+        return new ImmutableList<>(mappedData);
     }
 
     public ImmutableList<T> filter(Predicate<T> filter) {
@@ -116,7 +108,7 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
                 filteredData.add(item);
             }
         }
-        return new ImmutableList<>(filteredData, null);
+        return new ImmutableList<>(filteredData);
     }
     
     public ImmutableList<T> section(int from, int until) {
@@ -127,7 +119,7 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
         List<T> newData = new ArrayList<>(data.size() + other.size());
         newData.addAll(data);
         newData.addAll(other.data);
-        return new ImmutableList<>(newData, null);
+        return new ImmutableList<>(newData);
     }
 
     public ImmutableList<T> concat(Iterable<? extends T> other) {
@@ -135,7 +127,7 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
         for (T item : other) {
             newData.add(item);
         }
-        return new ImmutableList<>(newData, null);
+        return new ImmutableList<>(newData);
     }
     
     public Iterable<T> reverseOrder() {
@@ -159,13 +151,13 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
     public ImmutableList<T> sort() {
         List<T> sortedData = new ArrayList<>(data);
         Collections.sort((List) sortedData);
-        return new ImmutableList<>(sortedData, null);
+        return new ImmutableList<>(sortedData);
     }
 
     public ImmutableList<T> sort(Comparator<T> comparator) {
         List<T> sortedData = new ArrayList<>(data);
         Collections.sort(sortedData, comparator);
-        return new ImmutableList<>(sortedData, null);
+        return new ImmutableList<>(sortedData);
     }
 
     @Override
@@ -212,5 +204,5 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
     public String toString() {
         return data.toString();
     }
-
+    
 }

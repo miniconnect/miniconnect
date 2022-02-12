@@ -156,7 +156,7 @@ class QueryPartial implements Closeable {
             List<ImmutableList<CellData>> responseRowsBuilder,
             ImmutableList<Integer> nullables,
             ImmutableMap<Integer, Integer> fixedSizes) {
-        ImmutableList<ImmutableList<CellData>> rows = new ImmutableList<>(responseRowsBuilder);
+        ImmutableList<ImmutableList<CellData>> rows = ImmutableList.fromCollection(responseRowsBuilder);
         ResultSetRowsResponse rowsResponse = new ResultSetRowsResponse(
                 sessionId, exchangeId, responseOffset, nullables, fixedSizes, rows);
         responseConsumer.accept(rowsResponse);

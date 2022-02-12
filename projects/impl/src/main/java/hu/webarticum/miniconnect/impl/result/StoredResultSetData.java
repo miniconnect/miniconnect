@@ -23,17 +23,17 @@ public final class StoredResultSetData implements Iterable<ImmutableList<MiniVal
 
 
     public StoredResultSetData() {
-        this(new ImmutableList<>(), new ImmutableList<>());
+        this(ImmutableList.empty(), ImmutableList.empty());
     }
 
     public StoredResultSetData(
             List<? extends MiniColumnHeader> columnHeaders,
             List<? extends List<? extends MiniValue>> rows) {
-        this.columnHeaders = new ImmutableList<>(columnHeaders.stream()
+        this.columnHeaders = ImmutableList.fromCollection(columnHeaders.stream()
                 .map(StoredColumnHeader::of)
                 .collect(Collectors.toList()));
-        this.rows = new ImmutableList<>(rows.stream()
-                .map(row -> new ImmutableList<>(row.stream()
+        this.rows = ImmutableList.fromCollection(rows.stream()
+                .map(row -> ImmutableList.fromCollection(row.stream()
                         .map(value -> (MiniValue) StoredValue.of(value))
                         .collect(Collectors.toList())))
                 .collect(Collectors.toList()));
@@ -42,14 +42,9 @@ public final class StoredResultSetData implements Iterable<ImmutableList<MiniVal
     public StoredResultSetData(
             ImmutableList<? extends MiniColumnHeader> columnHeaders,
             ImmutableList<ImmutableList<? extends MiniValue>> rows) {
-        this.columnHeaders = new ImmutableList<>(columnHeaders.stream()
-                .map(StoredColumnHeader::of)
-                .collect(Collectors.toList()));
-        this.rows = new ImmutableList<>(rows.stream()
-                .map(row -> new ImmutableList<>(row.stream()
-                        .map(value -> (MiniValue) StoredValue.of(value))
-                        .collect(Collectors.toList())))
-                .collect(Collectors.toList()));
+        this.columnHeaders = columnHeaders.map(StoredColumnHeader::of);
+        this.rows = rows.map(row -> row.map(
+                value -> (MiniValue) StoredValue.of(value)));
     }
 
     public static StoredResultSetData of(MiniResult result) {

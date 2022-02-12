@@ -113,7 +113,7 @@ public class AntlrSqlParser implements SqlParser {
             String fieldName = parseIdentifierNode(fieldNameNode.identifier());
             resultBuilder.add(fieldName);
         }
-        return new ImmutableList<>(resultBuilder);
+        return ImmutableList.fromCollection(resultBuilder);
     }
 
     private ImmutableList<Object> parseValueListNode(ValueListContext valueListNode) {
@@ -122,7 +122,7 @@ public class AntlrSqlParser implements SqlParser {
             Object value = parseValueNode(valueNode);
             resultBuilder.add(value);
         }
-        return new ImmutableList<>(resultBuilder);
+        return ImmutableList.fromCollection(resultBuilder);
     }
 
     private UpdateQuery parseUpdateNode(UpdateQueryContext updateQueryNode) {

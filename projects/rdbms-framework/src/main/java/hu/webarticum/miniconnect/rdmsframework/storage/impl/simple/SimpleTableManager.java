@@ -16,7 +16,7 @@ public class SimpleTableManager implements NamedResourceStore<Table> {
 
     @Override
     public ImmutableList<String> names() {
-        return new ImmutableList<>(tables.keySet());
+        return ImmutableList.fromCollection(tables.keySet());
     }
 
     @Override

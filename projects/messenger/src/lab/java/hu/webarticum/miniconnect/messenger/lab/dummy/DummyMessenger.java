@@ -132,7 +132,8 @@ public class DummyMessenger implements Messenger {
             headerDatasBuilder.add(ColumnHeaderData.of(header));
         }
         
-        ImmutableList<ColumnHeaderData> headerDatas = new ImmutableList<>(headerDatasBuilder);
+        ImmutableList<ColumnHeaderData> headerDatas =
+                ImmutableList.fromCollection(headerDatasBuilder);
         
         ResultResponse resultResponse = new ResultResponse(
                 sessionId,
@@ -197,9 +198,9 @@ public class DummyMessenger implements Messenger {
                     rowBuilder.add(CellData.of(value));
                 }
             }
-            rowsBuilder.add(new ImmutableList<>(rowBuilder));
+            rowsBuilder.add(ImmutableList.fromCollection(rowBuilder));
         }
-        ImmutableList<ImmutableList<CellData>> rows = new ImmutableList<>(rowsBuilder);
+        ImmutableList<ImmutableList<CellData>> rows = ImmutableList.fromCollection(rowsBuilder);
         
         ResultSetRowsResponse resultSetRowsResponse = new ResultSetRowsResponse(
                 sessionId, exchangeId, offset, ImmutableList.empty(), ImmutableMap.empty(), rows);

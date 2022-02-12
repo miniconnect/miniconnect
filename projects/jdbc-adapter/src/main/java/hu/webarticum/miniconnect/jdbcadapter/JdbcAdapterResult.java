@@ -56,7 +56,7 @@ public class JdbcAdapterResult implements MiniResult {
                 jdbcWarning = jdbcWarning.getNextWarning()) {
             resultBuilder.add(convertWarning(jdbcWarning));
         }
-        return new ImmutableList<>(resultBuilder);
+        return ImmutableList.fromCollection(resultBuilder);
     }
     
     private static MiniError convertWarning(SQLWarning jdbcWarning) {

@@ -42,7 +42,7 @@ class ResultResponseTranslatorDriver implements TranslatorDriver {
         for (int i = 0; i < errorsSize; i++) {
             warningsBuilder.add(readErrorData(reader));
         }
-        return new ImmutableList<>(warningsBuilder);
+        return ImmutableList.fromCollection(warningsBuilder);
     }
 
     private ErrorData readErrorData(ByteString.Reader reader) {
@@ -58,7 +58,7 @@ class ResultResponseTranslatorDriver implements TranslatorDriver {
         for (int i = 0; i < columnsSize; i++) {
             columnHeadersBuilder.add(readColumnHeaderData(reader));
         }
-        return new ImmutableList<>(columnHeadersBuilder);
+        return ImmutableList.fromCollection(columnHeadersBuilder);
     }
 
     private ColumnHeaderData readColumnHeaderData(ByteString.Reader reader) {

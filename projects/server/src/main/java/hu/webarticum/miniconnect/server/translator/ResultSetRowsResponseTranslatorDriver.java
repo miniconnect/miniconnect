@@ -63,7 +63,7 @@ class ResultSetRowsResponseTranslatorDriver implements TranslatorDriver {
         for (int i = 0; i < nullablesSize; i++) {
             nullablesBuilder.add(reader.readInt());
         }
-        return new ImmutableList<>(nullablesBuilder);
+        return ImmutableList.fromCollection(nullablesBuilder);
     }
 
     private ImmutableMap<Integer, Integer> readFixedSizes(ByteString.Reader reader) {
@@ -87,7 +87,7 @@ class ResultSetRowsResponseTranslatorDriver implements TranslatorDriver {
         for (int i = 0; i < rowsSize; i++) {
             rowsBuilder.add(readRow(reader, nullables, fixedSizes, columnsSize));
         }
-        return new ImmutableList<>(rowsBuilder);
+        return ImmutableList.fromCollection(rowsBuilder);
     }
 
     private ImmutableList<CellData> readRow(
@@ -101,7 +101,7 @@ class ResultSetRowsResponseTranslatorDriver implements TranslatorDriver {
             int fixedSize = fixedSizes.getOrDefault(i, -1);
             rowBuilder.add(readCell(reader, nullable, fixedSize));
         }
-        return new ImmutableList<>(rowBuilder);
+        return ImmutableList.fromCollection(rowBuilder);
     }
 
     private CellData readCell(ByteString.Reader reader, boolean nullable, int fixedSize) {
