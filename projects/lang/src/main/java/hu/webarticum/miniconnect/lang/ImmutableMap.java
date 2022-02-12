@@ -52,7 +52,11 @@ public final class ImmutableMap<K, V> implements Serializable {
         return Collections.unmodifiableMap(data).entrySet();
     }
 
-    public Map<K, V> toMap() {
+    public Map<K, V> asMap() {
+        return Collections.unmodifiableMap(data);
+    }
+
+    public HashMap<K, V> toHashMap() { // NOSONAR
         return new HashMap<>(data);
     }
 

@@ -1,35 +1,47 @@
 package hu.webarticum.miniconnect.record.translator;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
-import hu.webarticum.miniconnect.impl.result.StoredContentAccess;
+import hu.webarticum.miniconnect.impl.contentaccess.dynamic.DynamicContentAccessBuilder;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
+import hu.webarticum.miniconnect.record.customvalue.CustomValue;
+import hu.webarticum.miniconnect.record.customvalue.schema.AnySchema;
+import hu.webarticum.miniconnect.record.customvalue.schema.Schema;
 
 public class CustomTranslator implements ValueTranslator {
+    
+    private static final String SCHEMA_KEY = "schema";
+    
+    
+    private final Schema schema;
+    
 
-    private CustomTranslator(/* ... */) {
-        
+    private CustomTranslator(Schema schema) {
+        this.schema = schema;
     }
 
     public static CustomTranslator of(ImmutableMap<String, ByteString> properties) {
-        return new CustomTranslator();
+        Schema schema;
+        if (properties.containsKey(SCHEMA_KEY)) {
+            schema = Schema.readFrom(properties.get(SCHEMA_KEY).inputStream());
+        } else {
+            schema = AnySchema.instance();
+        }
+        return new CustomTranslator(schema);
     }
     
 
     @Override
     public Object decode(MiniContentAccess contentAccess) {
-        
-        // TODO
-        return null;
-        
+        Object dynamicValue = schema.readValueFrom(contentAccess.inputStream());
+        return new CustomValue(dynamicValue);
     }
 
     @Override
     public MiniContentAccess encode(Object value) {
-
-        // TODO
-        return new StoredContentAccess(ByteString.empty());
-        
+        return DynamicContentAccessBuilder.open()
+                .writing(out -> schema.writeValueTo(value, out))
+                .build();
     }
     
 }

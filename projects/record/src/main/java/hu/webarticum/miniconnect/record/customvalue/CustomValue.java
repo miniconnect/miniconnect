@@ -14,4 +14,6 @@ public class CustomValue {
         return value;
     }
     
+    // TODO: toJsonString() etc.
+    
 }

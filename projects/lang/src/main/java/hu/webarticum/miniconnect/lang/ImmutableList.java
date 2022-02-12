@@ -181,7 +181,11 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
         return data.toArray();
     }
 
-    public List<T> toList() {
+    public List<T> asList() {
+        return Collections.unmodifiableList(data);
+    }
+
+    public ArrayList<T> toArrayList() { // NOSONAR
         return new ArrayList<>(data);
     }
 
