@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResult;
@@ -29,14 +28,14 @@ public final class StoredResultSetData implements Iterable<ImmutableList<MiniVal
     public StoredResultSetData(
             List<? extends MiniColumnHeader> columnHeaders,
             List<? extends List<? extends MiniValue>> rows) {
-        this.columnHeaders = ImmutableList.fromCollection(columnHeaders.stream()
+        this.columnHeaders = columnHeaders.stream()
                 .map(StoredColumnHeader::of)
-                .collect(Collectors.toList()));
-        this.rows = ImmutableList.fromCollection(rows.stream()
-                .map(row -> ImmutableList.fromCollection(row.stream()
+                .collect(ImmutableList.createCollector());
+        this.rows = rows.stream()
+                .map(row -> row.stream()
                         .map(value -> (MiniValue) StoredValue.of(value))
-                        .collect(Collectors.toList())))
-                .collect(Collectors.toList()));
+                        .collect(ImmutableList.createCollector()))
+                .collect(ImmutableList.createCollector());
     }
 
     public StoredResultSetData(

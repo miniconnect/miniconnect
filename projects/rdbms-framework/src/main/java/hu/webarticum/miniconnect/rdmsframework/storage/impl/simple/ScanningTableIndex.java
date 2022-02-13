@@ -99,8 +99,9 @@ public class ScanningTableIndex implements TableIndex {
             Collections.sort(foundEntries, Comparator.comparing(e -> e.values, multiComparator));
         }
 
-        ImmutableList<BigInteger> rowIndexes =
-                ImmutableList.fromCollection(foundEntries).map(e -> e.index);
+        ImmutableList<BigInteger> rowIndexes = foundEntries.stream()
+                .map(e -> e.index)
+                .collect(ImmutableList.createCollector());
         if (sort) {
             // TODO: use StandardOrderKey in this case too
             return new SimpleSelection(rowIndexes);

@@ -12,6 +12,8 @@ import java.util.ListIterator;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 public final class ImmutableList<T> implements Iterable<T>, Serializable {
@@ -203,6 +205,18 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
     @Override
     public String toString() {
         return data.toString();
+    }
+    
+    
+    public static <T> Collector<T, ?, ImmutableList<T>> createCollector() {
+        return Collector.of(
+                (Supplier<List<T>>) ArrayList::new,
+                (list, value) -> list.add(value),
+                (leftList, rightList) -> {
+                    leftList.addAll(rightList);
+                    return leftList;
+                },
+                ImmutableList::fromCollection);
     }
     
 }
