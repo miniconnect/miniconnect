@@ -4,13 +4,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class MapSchema implements Schema {
+    
+    public static final byte FLAG = (byte) 'M';
+    
 
     public MapSchema() {
         // singleton
     }
     
 
-    public static MapSchema readFrom(InputStream in) {
+    public static MapSchema readMainFrom(InputStream in) {
         
         // TODO
         return null;

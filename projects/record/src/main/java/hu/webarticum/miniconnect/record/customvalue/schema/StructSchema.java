@@ -4,6 +4,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class StructSchema implements Schema {
+    
+    public static final byte FLAG = (byte) 'S';
+    
 
     public StructSchema() {
         // singleton

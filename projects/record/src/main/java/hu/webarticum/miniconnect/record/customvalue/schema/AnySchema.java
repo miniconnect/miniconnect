@@ -5,6 +5,9 @@ import java.io.OutputStream;
 
 public class AnySchema implements Schema {
     
+    public static final byte FLAG = (byte) 0;
+    
+    
     private static final AnySchema INSTANCE = new AnySchema();
     
     

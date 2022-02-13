@@ -5,15 +5,15 @@ import java.util.function.Function;
 
 public enum MetaType {
 
-    ANY((byte) 0, in -> AnySchema.instance()),
+    ANY(AnySchema.FLAG, in -> AnySchema.instance()),
     
-    STANDARD((byte) 1, StandardSchema::readMainFrom),
+    STANDARD(StandardSchema.FLAG, StandardSchema::readMainFrom),
     
-    LIST((byte) 'L', ListSchema::readMainFrom),
+    LIST(ListSchema.FLAG, ListSchema::readMainFrom),
 
-    TUPLE((byte) 'T', TupleSchema::readMainFrom),
-    
-    STRUCT((byte) 'S', StructSchema::readMainFrom),
+    MAP(MapSchema.FLAG, MapSchema::readMainFrom),
+
+    STRUCT(StructSchema.FLAG, StructSchema::readMainFrom),
     
     ;
     

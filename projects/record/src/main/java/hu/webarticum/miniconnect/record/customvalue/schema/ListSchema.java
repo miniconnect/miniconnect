@@ -4,6 +4,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class ListSchema implements Schema {
+    
+    public static final byte FLAG = (byte) 'L';
+
 
     public ListSchema() {
         // singleton

@@ -4,6 +4,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class StandardSchema implements Schema {
+    
+    public static final byte FLAG = (byte) 1;
+    
 
     public StandardSchema() {
         // singleton
