@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.io.UncheckedIOException;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
+import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.impl.contentaccess.dynamic.DynamicContentAccessBuilder;
 
 public class JavaTranslator implements ValueTranslator {
@@ -22,6 +23,11 @@ public class JavaTranslator implements ValueTranslator {
     }
     
 
+    @Override
+    public int length() {
+        return MiniValueDefinition.DYNAMIC_SIZE;
+    }
+    
     @Override
     public Object decode(MiniContentAccess contentAccess) {
         try (ObjectInputStream in = new ObjectInputStream(contentAccess.inputStream())) {

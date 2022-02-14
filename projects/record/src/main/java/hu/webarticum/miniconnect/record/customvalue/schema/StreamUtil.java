@@ -1,9 +1,12 @@
 package hu.webarticum.miniconnect.record.customvalue.schema;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
@@ -85,6 +88,28 @@ public final class StreamUtil {
 
     public static void writeString(OutputStream out, String stringValue) {
         writeBytes(out, ByteString.of(stringValue));
+    }
+    
+    public static Object readObject(InputStream in) {
+        ByteString bytes = StreamUtil.readBytes(in);
+        try {
+            return new ObjectInputStream(bytes.inputStream()).readObject();
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException(e);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static void writeObject(OutputStream out, Object value) {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        try {
+            new ObjectOutputStream(buffer).writeObject(value);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        ByteString bytes = ByteString.wrap(buffer.toByteArray());
+        writeBytes(out, bytes);
     }
     
 }

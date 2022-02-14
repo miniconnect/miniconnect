@@ -1,6 +1,5 @@
 package hu.webarticum.miniconnect.record.type;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
@@ -22,7 +21,6 @@ import hu.webarticum.miniconnect.record.translator.DecimalTranslator;
 import hu.webarticum.miniconnect.record.translator.DoubleTranslator;
 import hu.webarticum.miniconnect.record.translator.FloatTranslator;
 import hu.webarticum.miniconnect.record.translator.IntTranslator;
-import hu.webarticum.miniconnect.record.translator.JavaTranslator;
 import hu.webarticum.miniconnect.record.translator.LongTranslator;
 import hu.webarticum.miniconnect.record.translator.NullTranslator;
 import hu.webarticum.miniconnect.record.translator.ShortTranslator;
@@ -33,61 +31,75 @@ import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 
 public enum StandardValueType implements ValueType {
 
-    NULL(Void.class, NullTranslator.instance()),
+    NULL(ByteString.of("NUL"), Void.class, NullTranslator.instance()),
     
-    BOOL(Boolean.class, BoolTranslator.instance()),
+    BOOL(ByteString.of("BOL"), Boolean.class, BoolTranslator.instance()),
     
-    BYTE(Byte.class, ByteTranslator.instance()),
+    BYTE(ByteString.of("BYT"), Byte.class, ByteTranslator.instance()),
     
-    CHAR(Character.class, CharTranslator.instance()),
+    CHAR(ByteString.of("CHR"), Character.class, CharTranslator.instance()),
     
-    SHORT(Short.class, ShortTranslator.instance()),
+    SHORT(ByteString.of("SHT"), Short.class, ShortTranslator.instance()),
     
-    INT(Integer.class, IntTranslator.instance()),
+    INT(ByteString.of("INT"), Integer.class, IntTranslator.instance()),
     
-    LONG(Long.class, LongTranslator.instance()),
+    LONG(ByteString.of("LNG"), Long.class, LongTranslator.instance()),
     
-    FLOAT(Float.class, FloatTranslator.instance()),
+    FLOAT(ByteString.of("FLT"), Float.class, FloatTranslator.instance()),
     
-    DOUBLE(Double.class, DoubleTranslator.instance()),
+    DOUBLE(ByteString.of("DBL"), Double.class, DoubleTranslator.instance()),
     
-    BIGINT(BigInteger.class, BigintTranslator.instance()),
+    BIGINT(ByteString.of("BNT"), BigInteger.class, BigintTranslator.instance()),
     
-    DECIMAL(BigDecimal.class, DecimalTranslator.instance()),
+    DECIMAL(ByteString.of("DEC"), BigDecimal.class, DecimalTranslator.instance()),
     
-    BINARY(ByteString.class, BinaryTranslator.instance()),
+    BINARY(ByteString.of("BIN"), ByteString.class, BinaryTranslator.instance()),
     
-    STRING(String.class, StringTranslator::of),
+    STRING(ByteString.of("STR"), String.class, StringTranslator::of),
     
-    TIME(LocalTime.class, TimeTranslator.instance()),
+    TIME(ByteString.of("TIM"), LocalTime.class, TimeTranslator.instance()),
     
-    DATE(LocalDate.class, DateTranslator.instance()),
+    DATE(ByteString.of("DAT"), LocalDate.class, DateTranslator.instance()),
     
-    TIMESTAMP(Instant.class, TimestampTranslator.instance()),
+    TIMESTAMP(ByteString.of("TSP"), Instant.class, TimestampTranslator.instance()),
     
-    CUSTOM(CustomValue.class, CustomTranslator::of),
-    
-    JAVA(Serializable.class, JavaTranslator.instance()),
+    CUSTOM(ByteString.of("CUS"), CustomValue.class, CustomTranslator::of),
     
     // TODO: blob, clob
     
     ;
     
     
+    public static final int FLAG_LENGTH = 3;
+    
+    
+    private final ByteString flag;
+    
     private final Class<?> clazz;
     
     private final Function<ImmutableMap<String, ByteString>, ValueTranslator> translatorProvider;
     
     
-    private StandardValueType(Class<?> clazz, ValueTranslator translator) {
-        this(clazz, p -> translator);
+    private StandardValueType(ByteString flag, Class<?> clazz, ValueTranslator translator) {
+        this(flag, clazz, p -> translator);
     }
     
     private StandardValueType(
+            ByteString flag,
             Class<?> clazz,
             Function<ImmutableMap<String, ByteString>, ValueTranslator> translatorProvider) {
+        this.flag = flag;
         this.clazz = clazz;
         this.translatorProvider = translatorProvider;
+    }
+
+    public static StandardValueType forFlag(ByteString flag) {
+        for (StandardValueType member : values()) {
+            if (member.flag == flag) {
+                return member;
+            }
+        }
+        throw new IllegalArgumentException("Unknown flag: " + flag);
     }
     
     public static StandardValueType forClazz(Class<?> clazz) {
@@ -99,7 +111,11 @@ public enum StandardValueType implements ValueType {
         throw new IllegalArgumentException("Unsupported class: " + clazz);
     }
     
-    
+
+    public ByteString flag() {
+        return flag;
+    }
+
     @Override
     public Class<?> clazz() {
         return clazz;

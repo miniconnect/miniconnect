@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.record.translator;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
+import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.impl.contentaccess.dynamic.DynamicContentAccessBuilder;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
@@ -31,6 +32,11 @@ public class CustomTranslator implements ValueTranslator {
     }
     
 
+    @Override
+    public int length() {
+        return MiniValueDefinition.DYNAMIC_SIZE;
+    }
+    
     @Override
     public Object decode(MiniContentAccess contentAccess) {
         Object dynamicValue = schema.readValueFrom(contentAccess.inputStream());

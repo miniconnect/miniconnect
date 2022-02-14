@@ -19,6 +19,11 @@ public class DoubleTranslator implements ValueTranslator {
     
 
     @Override
+    public int length() {
+        return Double.BYTES;
+    }
+    
+    @Override
     public Object decode(MiniContentAccess contentAccess) {
         if (contentAccess.length() < Double.BYTES) {
             return Double.valueOf(0f);

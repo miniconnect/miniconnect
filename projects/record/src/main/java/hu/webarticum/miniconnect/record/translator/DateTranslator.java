@@ -21,6 +21,11 @@ public class DateTranslator implements ValueTranslator {
     
 
     @Override
+    public int length() {
+        return Long.BYTES;
+    }
+    
+    @Override
     public Object decode(MiniContentAccess contentAccess) {
         ByteString.Reader reader = contentAccess.get().reader();
         long daysSinceEpoch = reader.readLong();

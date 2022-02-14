@@ -3,24 +3,24 @@ package hu.webarticum.miniconnect.record.customvalue.schema;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class AnySchema implements Schema {
+public class JavaSchema implements Schema {
     
-    public static final byte FLAG = (byte) 0;
-    
-    
-    private static final AnySchema INSTANCE = new AnySchema();
+    public static final byte FLAG = (byte) 'J';
     
     
-    private AnySchema() {
+    private static final JavaSchema INSTANCE = new JavaSchema();
+    
+    
+    private JavaSchema() {
         // singleton
     }
     
 
-    public static AnySchema instance() {
+    public static JavaSchema instance() {
         return INSTANCE;
     }
 
-
+    
     @Override
     public void writeTo(OutputStream out) {
         StreamUtil.write(out, FLAG);
@@ -28,15 +28,12 @@ public class AnySchema implements Schema {
 
     @Override
     public Object readValueFrom(InputStream in) {
-        Schema adHocSchema = Schema.readFrom(in);
-        return adHocSchema.readValueFrom(in);
+        return StreamUtil.readObject(in);
     }
-    
+
     @Override
     public void writeValueTo(Object value, OutputStream out) {
-        Schema adHocSchema = Schema.buildAdHocFor(value);
-        adHocSchema.writeTo(out);
-        adHocSchema.writeValueTo(value, out);
+        StreamUtil.writeObject(out, value);
     }
-    
+
 }

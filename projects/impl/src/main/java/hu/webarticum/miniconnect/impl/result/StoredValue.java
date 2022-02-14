@@ -71,7 +71,7 @@ public final class StoredValue implements MiniValue, Serializable {
     }
 
     @Override
-    public MiniContentAccess contentAccess() {
+    public MiniContentAccess contentAccess(boolean keep) {
         return contentAccess;
     }
 

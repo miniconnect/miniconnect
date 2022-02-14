@@ -19,6 +19,11 @@ public class NullTranslator implements ValueTranslator {
     
 
     @Override
+    public int length() {
+        return 0;
+    }
+    
+    @Override
     public Object decode(MiniContentAccess contentAccess) {
         return null;
     }

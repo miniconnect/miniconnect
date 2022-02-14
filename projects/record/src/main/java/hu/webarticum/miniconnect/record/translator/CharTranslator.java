@@ -19,6 +19,11 @@ public class CharTranslator implements ValueTranslator {
     
 
     @Override
+    public int length() {
+        return Character.BYTES;
+    }
+    
+    @Override
     public Object decode(MiniContentAccess contentAccess) {
         if (contentAccess.length() < Character.BYTES) {
             return Character.valueOf('\0');

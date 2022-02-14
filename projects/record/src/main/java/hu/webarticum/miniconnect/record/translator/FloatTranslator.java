@@ -19,6 +19,11 @@ public class FloatTranslator implements ValueTranslator {
     
 
     @Override
+    public int length() {
+        return Float.BYTES;
+    }
+    
+    @Override
     public Object decode(MiniContentAccess contentAccess) {
         if (contentAccess.length() < Float.BYTES) {
             return Float.valueOf(0f);

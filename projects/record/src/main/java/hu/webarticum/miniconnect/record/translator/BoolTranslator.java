@@ -19,6 +19,11 @@ public class BoolTranslator implements ValueTranslator {
     
 
     @Override
+    public int length() {
+        return 1;
+    }
+    
+    @Override
     public Object decode(MiniContentAccess contentAccess) {
         return
                 contentAccess.length() >= 1 &&

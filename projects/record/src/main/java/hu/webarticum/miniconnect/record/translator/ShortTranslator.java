@@ -19,6 +19,11 @@ public class ShortTranslator implements ValueTranslator {
     
 
     @Override
+    public int length() {
+        return Short.BYTES;
+    }
+    
+    @Override
     public Object decode(MiniContentAccess contentAccess) {
         if (contentAccess.length() < Short.BYTES) {
             return Short.valueOf((short) 0);

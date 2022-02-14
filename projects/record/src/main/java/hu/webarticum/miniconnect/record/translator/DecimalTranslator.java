@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
+import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.impl.result.StoredContentAccess;
 import hu.webarticum.miniconnect.lang.ByteString;
 
@@ -21,6 +22,11 @@ public class DecimalTranslator implements ValueTranslator {
     }
     
 
+    @Override
+    public int length() {
+        return MiniValueDefinition.DYNAMIC_SIZE;
+    }
+    
     @Override
     public Object decode(MiniContentAccess contentAccess) {
         ByteString.Reader reader = contentAccess.get().reader();

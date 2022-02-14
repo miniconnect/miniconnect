@@ -4,6 +4,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
+import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.impl.result.StoredContentAccess;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
@@ -38,6 +39,11 @@ public class StringTranslator implements ValueTranslator {
         }
     }
 
+
+    @Override
+    public int length() {
+        return MiniValueDefinition.DYNAMIC_SIZE;
+    }
     
     @Override
     public Object decode(MiniContentAccess contentAccess) {

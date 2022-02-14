@@ -21,6 +21,11 @@ public class TimestampTranslator implements ValueTranslator {
     
 
     @Override
+    public int length() {
+        return Long.BYTES * 2;
+    }
+    
+    @Override
     public Object decode(MiniContentAccess contentAccess) {
         ByteString.Reader reader = contentAccess.get().reader();
         long secondsSinceEpoch = reader.readLong();

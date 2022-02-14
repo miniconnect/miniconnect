@@ -3,7 +3,12 @@ package hu.webarticum.miniconnect.record.customvalue.schema;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.io.UncheckedIOException;
+
+import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.lang.ImmutableMap;
+import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public interface Schema {
 
@@ -21,6 +26,27 @@ public interface Schema {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+    
+    public static Schema buildAdHocFor(Object value) {
+        if (value instanceof ImmutableList) {
+            return new ListSchema(AnySchema.instance());
+        } else if (value instanceof ImmutableMap) {
+            return new MapSchema(AnySchema.instance(), AnySchema.instance());
+        }
+        
+        for (StandardValueType valueType : StandardValueType.values()) {
+            if (valueType.clazz().isAssignableFrom(value.getClass())) {
+                return new StandardSchema(valueType);
+            }
+        }
+        
+        if (value instanceof Serializable) {
+            return JavaSchema.instance();
+        }
+        
+        throw new IllegalArgumentException(
+                "Unencodable type given: " + value.getClass().getCanonicalName());
     }
     
 }

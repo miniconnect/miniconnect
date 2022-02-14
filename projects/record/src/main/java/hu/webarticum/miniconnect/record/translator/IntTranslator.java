@@ -19,6 +19,11 @@ public class IntTranslator implements ValueTranslator {
     
 
     @Override
+    public int length() {
+        return Integer.BYTES;
+    }
+    
+    @Override
     public Object decode(MiniContentAccess contentAccess) {
         if (contentAccess.length() < Integer.BYTES) {
             return Integer.valueOf(0);

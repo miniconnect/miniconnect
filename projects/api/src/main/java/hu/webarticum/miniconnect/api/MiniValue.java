@@ -6,6 +6,10 @@ public interface MiniValue {
 
     public boolean isNull();
     
-    public MiniContentAccess contentAccess();
+    public MiniContentAccess contentAccess(boolean keep);
+
+    public default MiniContentAccess contentAccess() {
+        return contentAccess(false);
+    }
 
 }

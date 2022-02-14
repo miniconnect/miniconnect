@@ -14,6 +14,8 @@ public enum MetaType {
     MAP(MapSchema.FLAG, MapSchema::readMainFrom),
 
     STRUCT(StructSchema.FLAG, StructSchema::readMainFrom),
+
+    JAVA(JavaSchema.FLAG, in -> JavaSchema.instance()),
     
     ;
     

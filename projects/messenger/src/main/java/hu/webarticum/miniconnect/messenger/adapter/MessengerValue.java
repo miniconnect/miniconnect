@@ -15,7 +15,7 @@ public class MessengerValue implements MiniValue, Closeable {
     private final MiniContentAccess contentAccess;
     
     
-    private boolean wasContentAccessRequested;
+    private boolean wasContentAccessKeepRequested;
     
 
     public MessengerValue(
@@ -39,14 +39,14 @@ public class MessengerValue implements MiniValue, Closeable {
     }
 
     @Override
-    public MiniContentAccess contentAccess() {
-        wasContentAccessRequested = true;
+    public MiniContentAccess contentAccess(boolean keep) {
+        wasContentAccessKeepRequested |= keep;
         return contentAccess;
     }
     
     @Override
     public void close() {
-        if (!wasContentAccessRequested) {
+        if (!wasContentAccessKeepRequested) {
             contentAccess.close();
         }
     }
