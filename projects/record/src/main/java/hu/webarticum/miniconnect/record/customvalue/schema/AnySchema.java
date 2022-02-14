@@ -23,24 +23,23 @@ public class AnySchema implements Schema {
 
     @Override
     public void writeTo(OutputStream out) {
-
-        // TODO
-        
+        StreamUtil.write(out, FLAG);
     }
 
     @Override
     public Object readValueFrom(InputStream in) {
-        
-        // TODO
-        return null;
-        
+        Schema adHocSchema = Schema.readFrom(in);
+        return adHocSchema.readValueFrom(in);
     }
     
     @Override
     public void writeValueTo(Object value, OutputStream out) {
-
+        
         // TODO
         
+        Schema adHocSchema = null; // TODO
+        adHocSchema.writeTo(out);
+        adHocSchema.writeValueTo(value, out);
     }
     
 }
