@@ -9,12 +9,16 @@ import java.util.function.Function;
 
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
-import hu.webarticum.miniconnect.record.customvalue.CustomValue;
+import hu.webarticum.miniconnect.record.custom.CustomValue;
+import hu.webarticum.miniconnect.record.lob.BlobValue;
+import hu.webarticum.miniconnect.record.lob.ClobValue;
 import hu.webarticum.miniconnect.record.translator.BigintTranslator;
 import hu.webarticum.miniconnect.record.translator.BinaryTranslator;
+import hu.webarticum.miniconnect.record.translator.BlobTranslator;
 import hu.webarticum.miniconnect.record.translator.BoolTranslator;
 import hu.webarticum.miniconnect.record.translator.ByteTranslator;
 import hu.webarticum.miniconnect.record.translator.CharTranslator;
+import hu.webarticum.miniconnect.record.translator.ClobTranslator;
 import hu.webarticum.miniconnect.record.translator.CustomTranslator;
 import hu.webarticum.miniconnect.record.translator.DateTranslator;
 import hu.webarticum.miniconnect.record.translator.DecimalTranslator;
@@ -64,8 +68,10 @@ public enum StandardValueType implements ValueType {
     TIMESTAMP(ByteString.of("TSP"), Instant.class, TimestampTranslator.instance()),
     
     CUSTOM(ByteString.of("CUS"), CustomValue.class, CustomTranslator::of),
-    
-    // TODO: blob, clob
+
+    BLOB(ByteString.of("BLB"), BlobValue.class, BlobTranslator.instance()),
+
+    CLOB(ByteString.of("CLB"), ClobValue.class, ClobTranslator::of),
     
     ;
     

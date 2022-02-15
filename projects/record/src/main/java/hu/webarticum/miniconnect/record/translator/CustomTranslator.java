@@ -5,9 +5,9 @@ import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.impl.contentaccess.dynamic.DynamicContentAccessBuilder;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
-import hu.webarticum.miniconnect.record.customvalue.CustomValue;
-import hu.webarticum.miniconnect.record.customvalue.schema.AnySchema;
-import hu.webarticum.miniconnect.record.customvalue.schema.Schema;
+import hu.webarticum.miniconnect.record.custom.CustomValue;
+import hu.webarticum.miniconnect.record.custom.schema.AnySchema;
+import hu.webarticum.miniconnect.record.custom.schema.Schema;
 
 public class CustomTranslator implements ValueTranslator {
     

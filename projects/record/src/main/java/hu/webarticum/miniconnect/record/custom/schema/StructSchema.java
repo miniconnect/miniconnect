@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.record.customvalue.schema;
+package hu.webarticum.miniconnect.record.custom.schema;
 
 import java.io.InputStream;
 import java.io.OutputStream;

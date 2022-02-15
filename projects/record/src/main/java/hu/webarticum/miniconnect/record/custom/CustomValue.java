@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.record.customvalue;
+package hu.webarticum.miniconnect.record.custom;
 
 public class CustomValue {
     
