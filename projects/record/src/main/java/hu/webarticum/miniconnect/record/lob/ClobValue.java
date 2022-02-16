@@ -5,42 +5,37 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import hu.webarticum.miniconnect.api.MiniContentAccess;
-
 // TODO: lazily create position index if charset is not fixed-width
 // TODO: functionality like JDBC CLOB
 // TODO: migrate JDBC tests to here
+// TODO: writeable clob?
 public class ClobValue {
     
-    private final MiniContentAccess contentAccess;
+    private final BlobValue blob;
     
     private final Charset charset;
     
 
-    public ClobValue(MiniContentAccess contentAccess) {
-        this(contentAccess, StandardCharsets.UTF_8);
+    public ClobValue(BlobValue blob) {
+        this(blob, StandardCharsets.UTF_8);
     }
     
-    public ClobValue(MiniContentAccess contentAccess, Charset charset) {
-        this.contentAccess = contentAccess;
+    public ClobValue(BlobValue blob, Charset charset) {
+        this.blob = blob;
         this.charset = charset;
     }
     
     
-    public MiniContentAccess contentAccess() {
-        return contentAccess;
+    public BlobValue blob() {
+        return blob;
     }
 
     public Charset charset() {
         return charset;
     }
     
-    public BlobValue toBlob() {
-        return new BlobValue(contentAccess);
-    }
-
     public Reader reader() {
-        return new InputStreamReader(contentAccess.inputStream(), charset);
+        return new InputStreamReader(blob.inputStream(), charset);
     }
     
 }

@@ -7,6 +7,7 @@ import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
+import hu.webarticum.miniconnect.record.lob.BlobValue;
 import hu.webarticum.miniconnect.record.lob.ClobValue;
 
 public class ClobTranslator implements ValueTranslator {
@@ -47,13 +48,13 @@ public class ClobTranslator implements ValueTranslator {
 
     @Override
     public Object decode(MiniContentAccess contentAccess) {
-        return new ClobValue(contentAccess, charset);
+        return new ClobValue(new BlobValue(contentAccess), charset);
     }
 
     @Override
     public MiniContentAccess encode(Object value) {
         ClobValue clobValue = (ClobValue) value;
-        return clobValue.contentAccess();
+        return clobValue.blob().contentAccess();
     }
     
 }
