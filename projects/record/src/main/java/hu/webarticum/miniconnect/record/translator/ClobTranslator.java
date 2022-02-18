@@ -48,13 +48,13 @@ public class ClobTranslator implements ValueTranslator {
 
     @Override
     public Object decode(MiniContentAccess contentAccess) {
-        return new ClobValue(new BlobValue(contentAccess), charset);
+        return new ClobValue(contentAccess, charset);
     }
 
     @Override
     public MiniContentAccess encode(Object value) {
         ClobValue clobValue = (ClobValue) value;
-        return clobValue.blob().contentAccess();
+        return clobValue.contentAccess();
     }
     
 }
