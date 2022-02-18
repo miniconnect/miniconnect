@@ -11,14 +11,14 @@ class BlobValueTest {
 
     @Test
     void testEmpty() {
-        BlobValue blobValue = new BlobValue(new StoredContentAccess(ByteString.empty()));
+        BlobValue blobValue = BlobValue.of(new StoredContentAccess(ByteString.empty()));
         assertThat(blobValue.length()).isZero();
         assertThat(blobValue.inputStream()).isEmpty();
     }
 
     @Test
     void testFullContent() {
-        BlobValue blobValue = new BlobValue(new StoredContentAccess(ByteString.of("abcdefghi")));
+        BlobValue blobValue = BlobValue.of(new StoredContentAccess(ByteString.of("abcdefghi")));
         assertThat(blobValue.length()).isEqualTo(9L);
         assertThat(blobValue.get(0L, 9)).isEqualTo(ByteString.of("abcdefghi"));
         assertThat(blobValue.inputStream()).hasBinaryContent(ByteString.of("abcdefghi").extract());
@@ -26,7 +26,7 @@ class BlobValueTest {
 
     @Test
     void testContentPart() {
-        BlobValue blobValue = new BlobValue(new StoredContentAccess(ByteString.of("12345678")));
+        BlobValue blobValue = BlobValue.of(new StoredContentAccess(ByteString.of("12345678")));
         assertThat(blobValue.get(0L, 3)).isEqualTo(ByteString.of("123"));
         assertThat(blobValue.get(2L, 5)).isEqualTo(ByteString.of("34567"));
         assertThat(blobValue.inputStream(0L, 4L)).hasBinaryContent(ByteString.of("1234").extract());

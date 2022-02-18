@@ -25,7 +25,7 @@ public class BlobTranslator implements ValueTranslator {
     
     @Override
     public Object decode(MiniContentAccess contentAccess) {
-        return new BlobValue(contentAccess);
+        return BlobValue.of(contentAccess);
     }
 
     @Override

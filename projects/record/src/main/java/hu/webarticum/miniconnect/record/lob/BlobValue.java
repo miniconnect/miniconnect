@@ -11,8 +11,12 @@ public class BlobValue {
     private final MiniContentAccess contentAccess;
     
     
-    public BlobValue(MiniContentAccess contentAccess) {
+    private BlobValue(MiniContentAccess contentAccess) {
         this.contentAccess = contentAccess;
+    }
+    
+    public static BlobValue of(MiniContentAccess contentAccess) {
+        return new BlobValue(contentAccess);
     }
     
     
@@ -37,11 +41,11 @@ public class BlobValue {
     }
 
     public ClobValue toClob() {
-        return new ClobValue(contentAccess);
+        return ClobValue.of(contentAccess);
     }
 
     public ClobValue toClob(Charset charset) {
-        return new ClobValue(contentAccess, charset);
+        return ClobValue.of(contentAccess, charset);
     }
     
 }
