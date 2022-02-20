@@ -15,14 +15,16 @@ public class DynamicCharWidthClobValue implements ClobValue {
     public static final int DYNAMIC_CHAR_WIDTH = -1;
     
 
+    private static final int DEFAULT_BUFFER_SIZE = 4096;
+    
     private static final long UNSPECIFIED_LENGTH = -1;
-
-    private static final int BUFFER_SIZE = 4096;
 
     
     private final MiniContentAccess contentAccess;
     
     private final Charset charset;
+    
+    private final int bufferSize;
     
     private volatile long cachedLength = UNSPECIFIED_LENGTH;
     
@@ -30,8 +32,14 @@ public class DynamicCharWidthClobValue implements ClobValue {
     
 
     public DynamicCharWidthClobValue(MiniContentAccess contentAccess, Charset charset) {
+        this(contentAccess, charset, DEFAULT_BUFFER_SIZE);
+    }
+    
+    public DynamicCharWidthClobValue(
+            MiniContentAccess contentAccess, Charset charset, int bufferSize) {
         this.contentAccess = contentAccess;
         this.charset = charset;
+        this.bufferSize = bufferSize;
         this.positionIndex.put(0L, 0L);
     }
 
@@ -77,7 +85,7 @@ public class DynamicCharWidthClobValue implements ClobValue {
     private void generateRemainingIndex(
             Reader remainingReader, long startingCharPos, long startingBytePos)
             throws IOException {
-        char[] buffer = new char[BUFFER_SIZE];
+        char[] buffer = new char[bufferSize];
         long charPos = startingCharPos;
         long bytePos = startingBytePos;
         int readLength;
@@ -101,7 +109,7 @@ public class DynamicCharWidthClobValue implements ClobValue {
     private String getThrowing(long start, int length) throws IOException {
         StringBuilder resultBuilder = new StringBuilder();
         Reader subReader = reader(start, length);
-        char[] buffer = new char[BUFFER_SIZE];
+        char[] buffer = new char[bufferSize];
         int readLength;
         while ((readLength = subReader.read(buffer)) != -1) {
             resultBuilder.append(buffer, 0, readLength);
@@ -144,8 +152,9 @@ public class DynamicCharWidthClobValue implements ClobValue {
             return beforeBytePos;
         }
 
+        long byteLength = afterBytePos - beforeBytePos;
         try (Reader reader = new InputStreamReader(
-                contentAccess.inputStream(beforeBytePos, afterBytePos))) {
+                contentAccess.inputStream(beforeBytePos, byteLength))) {
             return generateIndexTo(reader, beforeCharPos, beforeBytePos, charPos);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -155,10 +164,24 @@ public class DynamicCharWidthClobValue implements ClobValue {
     private long generateIndexTo(
             Reader reader, long startingCharPos, long startingBytePos, long targetCharPos)
             throws IOException {
-        
-        // TODO: like generateRemainingIndex() ...
-        return 0L;
-        
+        char[] buffer = new char[bufferSize];
+        long bytePos = startingBytePos;
+        long remainingCharLength = targetCharPos - startingCharPos;
+        int readLength;
+        while (remainingCharLength > 0) {
+            int maxReadLength = remainingCharLength > bufferSize ?
+                    bufferSize :
+                    (int) remainingCharLength;
+            readLength = reader.read(buffer, 0, maxReadLength);
+            if (readLength == -1) {
+                throw new IllegalArgumentException("Unexpected end of content");
+            }
+            String chunk = new String(buffer, 0, readLength);
+            bytePos += chunk.getBytes(charset).length;
+            remainingCharLength -= readLength;
+        }
+        positionIndex.put(targetCharPos, bytePos);
+        return bytePos;
     }
 
 }
