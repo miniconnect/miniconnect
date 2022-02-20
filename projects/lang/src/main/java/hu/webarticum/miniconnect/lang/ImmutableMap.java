@@ -23,6 +23,179 @@ public final class ImmutableMap<K, V> implements Serializable {
         return new ImmutableMap<>(Collections.emptyMap());
     }
 
+    public static <K, V> ImmutableMap<K, V> of(K key, V value) {
+        Map<K, V> data = new HashMap<>(1);
+        data.put(key, value);
+        return new ImmutableMap<>(data);
+    }
+
+    public static <K, V> ImmutableMap<K, V> of(K key1, V value1, K key2, V value2) {
+        Map<K, V> data = new HashMap<>(1);
+        data.put(key1, value1);
+        data.put(key2, value2);
+        return new ImmutableMap<>(data);
+    }
+
+    public static <K, V> ImmutableMap<K, V> of(
+            K key1, V value1,
+            K key2, V value2,
+            K key3, V value3) {
+        Map<K, V> data = new HashMap<>(1);
+        data.put(key1, value1);
+        data.put(key2, value2);
+        data.put(key3, value3);
+        return new ImmutableMap<>(data);
+    }
+
+    public static <K, V> ImmutableMap<K, V> of( // NOSONAR many parameter is OK
+            K key1, V value1,
+            K key2, V value2,
+            K key3, V value3,
+            K key4, V value4) {
+        Map<K, V> data = new HashMap<>(1);
+        data.put(key1, value1);
+        data.put(key2, value2);
+        data.put(key3, value3);
+        data.put(key4, value4);
+        return new ImmutableMap<>(data);
+    }
+
+    public static <K, V> ImmutableMap<K, V> of( // NOSONAR many parameter is OK
+            K key1, V value1,
+            K key2, V value2,
+            K key3, V value3,
+            K key4, V value4,
+            K key5, V value5) {
+        Map<K, V> data = new HashMap<>(1);
+        data.put(key1, value1);
+        data.put(key2, value2);
+        data.put(key3, value3);
+        data.put(key4, value4);
+        data.put(key5, value5);
+        return new ImmutableMap<>(data);
+    }
+
+    public static <K, V> ImmutableMap<K, V> of( // NOSONAR many parameter is OK
+            K key1, V value1,
+            K key2, V value2,
+            K key3, V value3,
+            K key4, V value4,
+            K key5, V value5,
+            K key6, V value6) {
+        Map<K, V> data = new HashMap<>(1);
+        data.put(key1, value1);
+        data.put(key2, value2);
+        data.put(key3, value3);
+        data.put(key4, value4);
+        data.put(key5, value5);
+        data.put(key6, value6);
+        return new ImmutableMap<>(data);
+    }
+
+    public static <K, V> ImmutableMap<K, V> of( // NOSONAR many parameter is OK
+            K key1, V value1,
+            K key2, V value2,
+            K key3, V value3,
+            K key4, V value4,
+            K key5, V value5,
+            K key6, V value6,
+            K key7, V value7) {
+        Map<K, V> data = new HashMap<>(1);
+        data.put(key1, value1);
+        data.put(key2, value2);
+        data.put(key3, value3);
+        data.put(key4, value4);
+        data.put(key5, value5);
+        data.put(key6, value6);
+        data.put(key7, value7);
+        return new ImmutableMap<>(data);
+    }
+
+    public static <K, V> ImmutableMap<K, V> of( // NOSONAR many parameter is OK
+            K key1, V value1,
+            K key2, V value2,
+            K key3, V value3,
+            K key4, V value4,
+            K key5, V value5,
+            K key6, V value6,
+            K key7, V value7,
+            K key8, V value8) {
+        Map<K, V> data = new HashMap<>(1);
+        data.put(key1, value1);
+        data.put(key2, value2);
+        data.put(key3, value3);
+        data.put(key4, value4);
+        data.put(key5, value5);
+        data.put(key6, value6);
+        data.put(key7, value7);
+        data.put(key8, value8);
+        return new ImmutableMap<>(data);
+    }
+
+    public static <K, V> ImmutableMap<K, V> of( // NOSONAR many parameter is OK
+            K key1, V value1,
+            K key2, V value2,
+            K key3, V value3,
+            K key4, V value4,
+            K key5, V value5,
+            K key6, V value6,
+            K key7, V value7,
+            K key8, V value8,
+            K key9, V value9) {
+        Map<K, V> data = new HashMap<>(1);
+        data.put(key1, value1);
+        data.put(key2, value2);
+        data.put(key3, value3);
+        data.put(key4, value4);
+        data.put(key5, value5);
+        data.put(key6, value6);
+        data.put(key7, value7);
+        data.put(key8, value8);
+        data.put(key9, value9);
+        return new ImmutableMap<>(data);
+    }
+
+    public static <K, V> ImmutableMap<K, V> of( // NOSONAR many parameter is OK
+            K key1, V value1,
+            K key2, V value2,
+            K key3, V value3,
+            K key4, V value4,
+            K key5, V value5,
+            K key6, V value6,
+            K key7, V value7,
+            K key8, V value8,
+            K key9, V value9,
+            K key10, V value10) {
+        Map<K, V> data = new HashMap<>(1);
+        data.put(key1, value1);
+        data.put(key2, value2);
+        data.put(key3, value3);
+        data.put(key4, value4);
+        data.put(key5, value5);
+        data.put(key6, value6);
+        data.put(key7, value7);
+        data.put(key8, value8);
+        data.put(key9, value9);
+        data.put(key10, value10);
+        return new ImmutableMap<>(data);
+    }
+
+    public static <K, V> ImmutableMap<K, V> ofClazzes(
+            Class<K> keyClass, // NOSONAR unused generic parameter is OK
+            Class<V> valueClass,
+            Object... keyValuePairs) {
+        int numberOfKeyValuePairs = keyValuePairs.length / 2;
+        Map<K, V> data = new HashMap<>(numberOfKeyValuePairs);
+        for (int i = 0; i < numberOfKeyValuePairs; i++) {
+            @SuppressWarnings("unchecked")
+            K key = (K) keyValuePairs[i * 2];
+            @SuppressWarnings("unchecked")
+            V value = (V) keyValuePairs[(i * 2) + 1];
+            data.put(key, value);
+        }
+        return new ImmutableMap<>(data);
+    }
+
     public static <K, V> ImmutableMap<K, V> fromMap(Map<K, V> map) {
         return new ImmutableMap<>(new HashMap<>(map));
     }
