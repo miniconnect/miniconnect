@@ -5,7 +5,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
-import java.util.SortedMap;
+import java.util.Map;
 import java.util.TreeMap;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
@@ -26,7 +26,7 @@ public class DynamicCharWidthClobValue implements ClobValue {
     
     private volatile long cachedLength = UNSPECIFIED_LENGTH;
     
-    private final SortedMap<Long, Long> positionIndex = new TreeMap<>();
+    private final TreeMap<Long, Long> positionIndex = new TreeMap<>();
     
 
     public DynamicCharWidthClobValue(MiniContentAccess contentAccess, Charset charset) {
@@ -57,19 +57,36 @@ public class DynamicCharWidthClobValue implements ClobValue {
 
     private long calculateLength() {
         long lastKnownCharPos = positionIndex.lastKey();
-        long lastKnownBytePos = positionIndex.lastKey();
+        long lastKnownBytePos = positionIndex.get(lastKnownCharPos);
         long fullByteLength = contentAccess.length();
         long remainingByteLength = fullByteLength - lastKnownBytePos;
         if (remainingByteLength == 0L) {
             return lastKnownBytePos;
         }
+
+        try (Reader remainingReader = new InputStreamReader(
+                contentAccess.inputStream(lastKnownBytePos, remainingByteLength))) {
+            generateRemainingIndex(remainingReader, lastKnownCharPos, lastKnownBytePos);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
         
-        float charsPerByte = charset.newDecoder().averageCharsPerByte();
-        long expectedRemainingCharLength = (long) (remainingByteLength * charsPerByte);
-        
-        // TODO
-        return 0L;
-        
+        return positionIndex.lastKey();
+    }
+    
+    private void generateRemainingIndex(
+            Reader remainingReader, long startingCharPos, long startingBytePos)
+            throws IOException {
+        char[] buffer = new char[BUFFER_SIZE];
+        long charPos = startingCharPos;
+        long bytePos = startingBytePos;
+        int readLength;
+        while ((readLength = remainingReader.read(buffer)) != -1) {
+            String chunk = new String(buffer, 0, readLength);
+            charPos += chunk.length();
+            bytePos += chunk.getBytes(charset).length;
+            positionIndex.put(charPos, bytePos);
+        }
     }
 
     @Override
@@ -99,8 +116,48 @@ public class DynamicCharWidthClobValue implements ClobValue {
 
     @Override
     public Reader reader(long start, long length) {
-        // TODO
-        return null;
+        Map.Entry<Long, Long> beforeStartEntry = positionIndex.floorEntry(start);
+        long afterStartBytePos = nextKnownBytePos(start);
+        long startBytePos = findBytePos(
+                start, beforeStartEntry.getKey(), beforeStartEntry.getValue(), afterStartBytePos);
+        long end = start + length;
+        Map.Entry<Long, Long> beforeEndEntry = positionIndex.floorEntry(end);
+        long afterEndBytePos = nextKnownBytePos(end);
+        long endBytePos = findBytePos(
+                end, beforeEndEntry.getKey(), beforeEndEntry.getValue(), afterEndBytePos);
+        long byteLength = endBytePos - startBytePos;
+        return new InputStreamReader(contentAccess.inputStream(startBytePos, byteLength));
+    }
+    
+    private long nextKnownBytePos(long charPos) {
+        Map.Entry<Long, Long> afterEntry = positionIndex.ceilingEntry(charPos);
+        if (afterEntry == null) {
+            return contentAccess.length();
+        }
+        
+        return afterEntry.getValue();
+    }
+    
+    private long findBytePos(
+            long charPos, long beforeCharPos, long beforeBytePos, long afterBytePos) {
+        if (beforeCharPos == charPos) {
+            return beforeBytePos;
+        }
+
+        try (Reader reader = new InputStreamReader(
+                contentAccess.inputStream(beforeBytePos, afterBytePos))) {
+            return generateIndexTo(reader, beforeCharPos, beforeBytePos, charPos);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private long generateIndexTo(
+            Reader reader, long startingCharPos, long startingBytePos, long targetCharPos)
+            throws IOException {
+        
+        // TODO: like generateRemainingIndex() ...
+        return 0L;
         
     }
 
