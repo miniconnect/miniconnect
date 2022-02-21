@@ -4,12 +4,25 @@ plugins {
 
 sourceCompatibility = 1.8
 
+sourceSets {
+    lab {
+        compileClasspath += sourceSets.main.runtimeClasspath
+        runtimeClasspath += sourceSets.main.runtimeClasspath
+    }
+}
+
+configurations {
+    labImplementation.extendsFrom implementation
+    labRuntimeOnly.extendsFrom runtimeOnly
+}
+
 dependencies {
     api project(':api')
     api project(':lang')
     
     implementation project(':impl')
     implementation project(':util')
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.13.1'
     
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.7.1'
@@ -17,4 +30,7 @@ dependencies {
     testImplementation 'org.junit.platform:junit-platform-launcher:1.7.1'
     testImplementation 'org.assertj:assertj-core:3.19.0'
     testImplementation 'commons-io:commons-io:2.11.0'
+    testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
+    
+    labImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
 }
