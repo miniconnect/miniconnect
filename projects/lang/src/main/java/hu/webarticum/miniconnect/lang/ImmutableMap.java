@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 public final class ImmutableMap<K, V> implements Serializable {
 
@@ -223,6 +224,17 @@ public final class ImmutableMap<K, V> implements Serializable {
 
     public Set<Map.Entry<K, V>> entrySet() {
         return Collections.unmodifiableMap(data).entrySet();
+    }
+
+    public <K2, V2> ImmutableMap<K2, V2> map(
+            Function<K, K2> keyMapper, Function<V, V2> valueMapper) {
+        Map<K2, V2> mappedData = new HashMap<>();
+        for (Map.Entry<K, V> entry : data.entrySet()) {
+            K2 newKey = keyMapper.apply(entry.getKey());
+            V2 newValue = valueMapper.apply(entry.getValue());
+            mappedData.put(newKey, newValue);
+        }
+        return new ImmutableMap<>(mappedData);
     }
 
     public Map<K, V> asMap() {
