@@ -6,6 +6,7 @@ import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.record.converter.Converter;
 import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 
+// TODO add jackson support here too
 public class ResultRecord {
     
     private final ImmutableList<MiniColumnHeader> columnHeaders;
