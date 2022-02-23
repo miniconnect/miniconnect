@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
+import hu.webarticum.miniconnect.util.ToStringBuilder;
 
 public class CustomValue {
     
@@ -38,6 +39,13 @@ public class CustomValue {
         
         CustomValue otherCustomValue = (CustomValue) other;
         return Objects.equals(value, otherCustomValue.value);
+    }
+    
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .add("value", value)
+                .build();
     }
     
     @JsonValue
