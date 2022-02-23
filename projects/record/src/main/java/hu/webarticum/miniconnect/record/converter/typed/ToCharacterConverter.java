@@ -1,5 +1,7 @@
 package hu.webarticum.miniconnect.record.converter.typed;
 
+import hu.webarticum.miniconnect.record.custom.CustomValue;
+
 public class ToCharacterConverter implements TypedConverter<Character> {
     
     @Override
@@ -9,10 +11,12 @@ public class ToCharacterConverter implements TypedConverter<Character> {
 
     @Override
     public Character convert(Object source) {
-        if (source instanceof Number) {
-            return (char) ((Number) source).shortValue();
-        } else if (source instanceof Character) {
+        if (source instanceof Character) {
             return ((Character) source);
+        } else if (source instanceof Number) {
+            return (char) ((Number) source).shortValue();
+        } else if (source instanceof CustomValue) {
+            return convert(((CustomValue) source).get());
         } else {
             String stringValue = source.toString();
             return stringValue.isEmpty() ? '\0' : stringValue.charAt(0);

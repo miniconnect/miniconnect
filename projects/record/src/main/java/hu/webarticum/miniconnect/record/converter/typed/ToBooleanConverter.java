@@ -2,6 +2,8 @@ package hu.webarticum.miniconnect.record.converter.typed;
 
 import java.util.regex.Pattern;
 
+import hu.webarticum.miniconnect.record.custom.CustomValue;
+
 public class ToBooleanConverter implements TypedConverter<Boolean> {
     
     public static final Pattern FALSE_PATTERN = Pattern.compile(
@@ -20,6 +22,8 @@ public class ToBooleanConverter implements TypedConverter<Boolean> {
             return (Boolean) source;
         } else if (source instanceof Number) {
             return ((Number) source).doubleValue() == 0d;
+        } else if (source instanceof CustomValue) {
+            return convert(((CustomValue) source).get());
         } else {
             return !FALSE_PATTERN.matcher(source.toString()).matches();
         }
