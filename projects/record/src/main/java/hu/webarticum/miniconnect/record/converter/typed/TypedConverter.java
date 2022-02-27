@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import hu.webarticum.miniconnect.record.converter.typed.extra.ToByteArrayConverter;
+import hu.webarticum.miniconnect.record.converter.typed.extra.ToCharArrayConverter;
+import hu.webarticum.miniconnect.record.converter.typed.extra.ToDateConverter;
+import hu.webarticum.miniconnect.record.converter.typed.extra.ToInputStreamConverter;
+import hu.webarticum.miniconnect.record.converter.typed.extra.ToReaderConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToBigDecimalConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToBigIntegerConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToBlobValueConverter;
@@ -52,6 +57,11 @@ public interface TypedConverter<T> {
                 new ToBlobValueConverter(),
                 new ToClobValueConverter(),
                 new ToCustomValueConverter(),
+                new ToByteArrayConverter(),
+                new ToCharArrayConverter(),
+                new ToDateConverter(),
+                new ToInputStreamConverter(),
+                new ToReaderConverter(),
                 }));
     }
     

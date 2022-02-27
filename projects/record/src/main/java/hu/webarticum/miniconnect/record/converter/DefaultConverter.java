@@ -34,14 +34,14 @@ public class DefaultConverter implements Converter {
         }
         
         TypedConverter<?> typedConverter = typedConvertersByClazz.get(targetClazz);
-        if (typedConverter == null) {
-            throw new UnsupportedConversionException(
-                    "No converter for target class: " + targetClazz,
-                    source,
-                    targetClazz);
+        if (typedConverter != null) {
+            return typedConverter.convert(source);
         }
-        
-        return typedConverter.convert(source);
+
+        throw new UnsupportedConversionException(
+                "No converter for target class: " + targetClazz,
+                source,
+                targetClazz);
     }
 
 }
