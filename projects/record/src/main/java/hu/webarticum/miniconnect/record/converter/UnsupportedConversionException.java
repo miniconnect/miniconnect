@@ -23,6 +23,13 @@ public class UnsupportedConversionException extends IllegalArgumentException {
         this.source = source;
         this.targetClazz = targetClazz;
     }
+
+    public UnsupportedConversionException(
+            String message, Object source, Class<?> targetClazz, Exception cause) {
+        super(message, cause);
+        this.source = source;
+        this.targetClazz = targetClazz;
+    }
     
 
     public Object source() {
