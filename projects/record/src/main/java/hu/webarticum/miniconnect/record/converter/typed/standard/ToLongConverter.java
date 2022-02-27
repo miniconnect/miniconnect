@@ -28,7 +28,7 @@ public class ToLongConverter implements TypedConverter<Long> {
         } else if (source instanceof LocalDate) {
             return ((LocalDate) source).toEpochDay();
         } else if (source instanceof LocalTime) {
-            return (long) ((LocalTime) source).getSecond();
+            return (long) ((LocalTime) source).toSecondOfDay();
         } else if (source instanceof Instant) {
             return ((Instant) source).getEpochSecond();
         } else if (source instanceof CustomValue) {
