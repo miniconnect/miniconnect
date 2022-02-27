@@ -4,7 +4,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
@@ -32,6 +34,8 @@ public class ToBigIntegerConverter implements TypedConverter<BigInteger> {
             return BigInteger.valueOf(((LocalDate) source).toEpochDay());
         } else if (source instanceof LocalTime) {
             return BigInteger.valueOf(((LocalTime) source).getSecond());
+        } else if (source instanceof LocalDateTime) {
+            return BigInteger.valueOf(((LocalDateTime) source).toEpochSecond(ZoneOffset.UTC));
         } else if (source instanceof Instant) {
             return BigInteger.valueOf(((Instant) source).getEpochSecond());
         } else if (source instanceof CustomValue) {

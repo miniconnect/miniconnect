@@ -3,7 +3,9 @@ package hu.webarticum.miniconnect.record.converter.typed.standard;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
@@ -29,6 +31,10 @@ public class ToFloatConverter implements TypedConverter<Float> {
             return (float) ((LocalDate) source).toEpochDay();
         } else if (source instanceof LocalTime) {
             return ((LocalTime) source).toNanoOfDay() / 1_000_000_000f;
+        } else if (source instanceof LocalDateTime) {
+            long secondsSinceEpoch = ((LocalDateTime) source).toEpochSecond(ZoneOffset.UTC);
+            float fragmentOfSecond = ((LocalDateTime) source).getNano() / 1_000_000_000f;
+            return secondsSinceEpoch + fragmentOfSecond;
         } else if (source instanceof Instant) {
             long secondsSinceEpoch = ((Instant) source).getEpochSecond();
             float fragmentOfSecond = ((Instant) source).getNano() / 1_000_000_000f;

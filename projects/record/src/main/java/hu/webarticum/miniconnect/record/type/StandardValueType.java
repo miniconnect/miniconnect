@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.function.Function;
 
@@ -20,6 +21,7 @@ import hu.webarticum.miniconnect.record.translator.ByteTranslator;
 import hu.webarticum.miniconnect.record.translator.CharTranslator;
 import hu.webarticum.miniconnect.record.translator.ClobTranslator;
 import hu.webarticum.miniconnect.record.translator.CustomTranslator;
+import hu.webarticum.miniconnect.record.translator.DateTimeTranslator;
 import hu.webarticum.miniconnect.record.translator.DateTranslator;
 import hu.webarticum.miniconnect.record.translator.DecimalTranslator;
 import hu.webarticum.miniconnect.record.translator.DoubleTranslator;
@@ -64,6 +66,8 @@ public enum StandardValueType implements ValueType {
     TIME(ByteString.of("TIM"), LocalTime.class, TimeTranslator.instance()),
     
     DATE(ByteString.of("DAT"), LocalDate.class, DateTranslator.instance()),
+
+    DATETIME(ByteString.of("DTM"), LocalDateTime.class, DateTimeTranslator.instance()),
     
     TIMESTAMP(ByteString.of("TSP"), Instant.class, TimestampTranslator.instance()),
     

@@ -20,6 +20,8 @@ public class ToInstantConverter implements TypedConverter<Instant> {
     public Instant convert(Object source) {
         if (source instanceof Instant) {
             return (Instant) source;
+        } else if (source instanceof LocalDateTime) {
+            return ((LocalDateTime) source).toInstant(ZoneOffset.UTC);
         } else if (source instanceof LocalDate) {
             return LocalDateTime.of(
                     (LocalDate) source,

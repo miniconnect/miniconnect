@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.record.converter.typed.standard;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 
@@ -18,6 +19,8 @@ public class ToLocalTimeConverter implements TypedConverter<LocalTime> {
     public LocalTime convert(Object source) {
         if (source instanceof LocalTime) {
             return (LocalTime) source;
+        } else if (source instanceof LocalDateTime) {
+            return ((LocalDateTime) source).toLocalTime();
         } else if (source instanceof Instant) {
             return LocalTime.ofInstant((Instant) source, ZoneOffset.UTC);
         } else if (source instanceof Number) {
