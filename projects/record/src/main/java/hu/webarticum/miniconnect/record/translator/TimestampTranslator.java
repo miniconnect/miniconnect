@@ -29,7 +29,7 @@ public class TimestampTranslator implements ValueTranslator {
     public Object decode(MiniContentAccess contentAccess) {
         ByteString.Reader reader = contentAccess.get().reader();
         long secondsSinceEpoch = reader.readLong();
-        long nanoOfSecond = reader.readLong();
+        int nanoOfSecond = reader.readInt();
         return Instant.ofEpochSecond(secondsSinceEpoch, nanoOfSecond);
     }
 
@@ -38,7 +38,7 @@ public class TimestampTranslator implements ValueTranslator {
         Instant instantValue = (Instant) value;
         ByteString.Builder builder = ByteString.builder();
         builder.appendLong(instantValue.getEpochSecond());
-        builder.appendLong(instantValue.getNano());
+        builder.appendInt(instantValue.getNano());
         ByteString bytes = builder.build();
         return new StoredContentAccess(bytes);
     }
