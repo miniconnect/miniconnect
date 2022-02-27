@@ -1,7 +1,9 @@
-package hu.webarticum.miniconnect.record.converter.typed;
+package hu.webarticum.miniconnect.record.converter.typed.standard;
 
 import java.math.BigDecimal;
+import java.time.LocalTime;
 
+import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 
 public class ToIntegerConverter implements TypedConverter<Integer> {
@@ -21,6 +23,8 @@ public class ToIntegerConverter implements TypedConverter<Integer> {
             return ((boolean) source) ? 1 : 0;
         } else if (source instanceof Character) {
             return ((int) (char) source);
+        } else if (source instanceof LocalTime) {
+            return ((LocalTime) source).getSecond();
         } else if (source instanceof CustomValue) {
             return convert(((CustomValue) source).get());
         } else {

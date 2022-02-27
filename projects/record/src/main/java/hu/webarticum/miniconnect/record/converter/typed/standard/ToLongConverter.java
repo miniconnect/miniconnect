@@ -1,7 +1,11 @@
-package hu.webarticum.miniconnect.record.converter.typed;
+package hu.webarticum.miniconnect.record.converter.typed.standard;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
+import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 
 public class ToLongConverter implements TypedConverter<Long> {
@@ -21,6 +25,12 @@ public class ToLongConverter implements TypedConverter<Long> {
             return ((boolean) source) ? 1L : 0L;
         } else if (source instanceof Character) {
             return ((long) (char) source);
+        } else if (source instanceof LocalDate) {
+            return ((LocalDate) source).toEpochDay();
+        } else if (source instanceof LocalTime) {
+            return (long) ((LocalTime) source).getSecond();
+        } else if (source instanceof Instant) {
+            return ((Instant) source).getEpochSecond();
         } else if (source instanceof CustomValue) {
             return convert(((CustomValue) source).get());
         } else {

@@ -1,7 +1,8 @@
-package hu.webarticum.miniconnect.record.converter.typed;
+package hu.webarticum.miniconnect.record.converter.typed.standard;
 
 import java.math.BigDecimal;
 
+import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 
 public class ToShortConverter implements TypedConverter<Short> {

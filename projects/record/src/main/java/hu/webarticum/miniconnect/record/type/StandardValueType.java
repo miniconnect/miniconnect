@@ -67,12 +67,12 @@ public enum StandardValueType implements ValueType {
     
     TIMESTAMP(ByteString.of("TSP"), Instant.class, TimestampTranslator.instance()),
     
-    CUSTOM(ByteString.of("CUS"), CustomValue.class, CustomTranslator::of),
-
     BLOB(ByteString.of("BLB"), BlobValue.class, BlobTranslator.instance()),
 
     CLOB(ByteString.of("CLB"), ClobValue.class, ClobTranslator::of),
-    
+
+    CUSTOM(ByteString.of("CUS"), CustomValue.class, CustomTranslator::of),
+
     ;
     
     

@@ -1,7 +1,13 @@
-package hu.webarticum.miniconnect.record.converter.typed;
+package hu.webarticum.miniconnect.record.converter.typed.standard;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 import hu.webarticum.miniconnect.record.lob.BlobValue;
 import hu.webarticum.miniconnect.record.lob.ClobValue;
@@ -34,19 +40,15 @@ public class ToByteStringConverter implements TypedConverter<ByteString> {
                 throw new IllegalArgumentException("Too large CLOB");
             }
             return contentAccess.get();
+        } else if (source instanceof LocalDate) {
+            return ByteString.of(((LocalDate) source).format(DateTimeFormatter.ISO_DATE));
+        } else if (source instanceof LocalTime) {
+            return ByteString.of(((LocalTime) source).format(DateTimeFormatter.ISO_DATE));
+        } else if (source instanceof Instant) {
+            return ByteString.of(((Instant) source).toString());
+        } else {
+            return ByteString.of(source.toString());
         }
-        
-        Class<?> sourceClazz = source.getClass();
-        if (sourceClazz.isArray()) {
-            Class<?> sourceComponentClazz = sourceClazz.getComponentType();
-            if (sourceComponentClazz == byte.class) {
-                return ByteString.of((byte[]) source);
-            } else if (sourceComponentClazz == char.class) {
-                return ByteString.of(new String((char[]) source));
-            }
-        }
-        
-        return ByteString.of(source.toString());
     }
 
 }

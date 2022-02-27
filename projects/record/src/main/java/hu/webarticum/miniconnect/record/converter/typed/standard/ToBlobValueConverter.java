@@ -1,7 +1,8 @@
-package hu.webarticum.miniconnect.record.converter.typed;
+package hu.webarticum.miniconnect.record.converter.typed.standard;
 
 import hu.webarticum.miniconnect.impl.result.StoredContentAccess;
 import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 import hu.webarticum.miniconnect.record.lob.BlobValue;
 import hu.webarticum.miniconnect.record.lob.ClobValue;

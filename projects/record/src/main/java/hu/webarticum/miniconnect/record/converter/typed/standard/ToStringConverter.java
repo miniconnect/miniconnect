@@ -1,6 +1,12 @@
-package hu.webarticum.miniconnect.record.converter.typed;
+package hu.webarticum.miniconnect.record.converter.typed.standard;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
+import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 import hu.webarticum.miniconnect.record.lob.BlobValue;
 import hu.webarticum.miniconnect.record.lob.ClobValue;
@@ -29,6 +35,12 @@ public class ToStringConverter implements TypedConverter<String> {
                 throw new IllegalArgumentException("Too large BLOB");
             }
             return contentAccess.get().toString();
+        } else if (source instanceof LocalDate) {
+            return ((LocalDate) source).format(DateTimeFormatter.ISO_DATE);
+        } else if (source instanceof LocalTime) {
+            return ((LocalTime) source).format(DateTimeFormatter.ISO_DATE);
+        } else if (source instanceof Instant) {
+            return ((Instant) source).toString();
         } else {
             return source.toString();
         }

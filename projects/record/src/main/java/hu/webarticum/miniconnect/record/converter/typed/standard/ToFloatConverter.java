@@ -1,7 +1,11 @@
-package hu.webarticum.miniconnect.record.converter.typed;
+package hu.webarticum.miniconnect.record.converter.typed.standard;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
+import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 
 public class ToFloatConverter implements TypedConverter<Float> {
@@ -21,6 +25,12 @@ public class ToFloatConverter implements TypedConverter<Float> {
             return ((boolean) source) ? 1f : 0f;
         } else if (source instanceof Character) {
             return ((float) (char) source);
+        } else if (source instanceof LocalDate) {
+            return (float) ((LocalDate) source).toEpochDay();
+        } else if (source instanceof LocalTime) {
+            return ((LocalTime) source).toNanoOfDay() / 1_000_000_000f;
+        } else if (source instanceof Instant) {
+            return ((Instant) source).toEpochMilli() / 1_000f;
         } else if (source instanceof CustomValue) {
             return convert(((CustomValue) source).get());
         } else {
