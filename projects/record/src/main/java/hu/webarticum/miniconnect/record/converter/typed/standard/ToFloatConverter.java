@@ -30,7 +30,9 @@ public class ToFloatConverter implements TypedConverter<Float> {
         } else if (source instanceof LocalTime) {
             return ((LocalTime) source).toNanoOfDay() / 1_000_000_000f;
         } else if (source instanceof Instant) {
-            return ((Instant) source).toEpochMilli() / 1_000f;
+            long secondsSinceEpoch = ((Instant) source).getEpochSecond();
+            float fragmentOfSecond = ((Instant) source).getNano() / 1_000_000_000f;
+            return secondsSinceEpoch + fragmentOfSecond;
         } else if (source instanceof CustomValue) {
             return convert(((CustomValue) source).get());
         } else {
