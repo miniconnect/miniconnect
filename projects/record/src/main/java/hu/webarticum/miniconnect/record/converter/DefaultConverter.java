@@ -87,7 +87,7 @@ public class DefaultConverter implements Converter {
         return cachedObjectMapper;
     }
 
-    private synchronized Object loadJacksonObjectMapper() throws
+    private synchronized void loadJacksonObjectMapper() throws
             ClassNotFoundException,
             InstantiationException,
             IllegalAccessException,
@@ -96,7 +96,7 @@ public class DefaultConverter implements Converter {
             NoSuchMethodException,
             SecurityException {
         Class<?> clazz = Class.forName("com.fasterxml.jackson.databind.ObjectMapper");
-        return clazz.getDeclaredConstructor().newInstance();
+        cachedObjectMapper = clazz.getDeclaredConstructor().newInstance();
     }
     
     private Object invokeConvertValue(
