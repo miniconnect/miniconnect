@@ -35,7 +35,9 @@ public class ToBigDecimalConverter implements TypedConverter<BigDecimal> {
         } else if (source instanceof LocalTime) {
             return BigDecimal.valueOf(((LocalTime) source).toNanoOfDay() / 1_000_000_000d);
         } else if (source instanceof Instant) {
-            return BigDecimal.valueOf(((Instant) source).toEpochMilli() / 1_000d);
+            long secondsSinceEpoch = ((Instant) source).getEpochSecond();
+            double fragmentOfSecond = ((Instant) source).getNano() / 1_000_000_000d;
+            return BigDecimal.valueOf(secondsSinceEpoch + fragmentOfSecond);
         } else if (source instanceof CustomValue) {
             return convert(((CustomValue) source).get());
         } else {
