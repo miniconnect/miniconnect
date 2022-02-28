@@ -30,8 +30,9 @@ public class ResultSetPrinter {
         ImmutableList<String> columnNames = columnHeaders.map(MiniColumnHeader::name);
         List<ImmutableList<Object>> decodedRowsBuffer = new ArrayList<>();
         boolean foundAny = false;
-        for (ResultRecord record : resultTable) {
-            ImmutableList<Object> decodedRow = record.getAll().map(ResultField::get);
+        for (ResultRecord resultRecord : resultTable) {
+            foundAny = true;
+            ImmutableList<Object> decodedRow = resultRecord.getAll().map(ResultField::get);
             decodedRowsBuffer.add(decodedRow);
             if (decodedRowsBuffer.size() == ROWS_BUFFER_SIZE) {
                 printDecodedRows(decodedRowsBuffer, columnNames, out);
