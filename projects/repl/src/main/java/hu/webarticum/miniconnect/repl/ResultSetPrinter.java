@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
-import hu.webarticum.miniconnect.api.MiniResultSet;
-import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.lang.ImmutableList;
-import hu.webarticum.miniconnect.record.translator.OLD.DefaultValueInterpreter;
+import hu.webarticum.miniconnect.record.ResultField;
+import hu.webarticum.miniconnect.record.ResultRecord;
+import hu.webarticum.miniconnect.record.ResultTable;
 
 public class ResultSetPrinter {
 
@@ -24,18 +24,14 @@ public class ResultSetPrinter {
     private static final String STRING_OVERFLOW_ELLIPSIS = "...";
 
     
-    public void print(MiniResultSet resultSet, Appendable out) throws IOException {
+    public void print(ResultTable resultTable, Appendable out) throws IOException {
         out.append('\n');
-        ImmutableList<MiniColumnHeader> columnHeaders = resultSet.columnHeaders();
+        ImmutableList<MiniColumnHeader> columnHeaders = resultTable.resultSet().columnHeaders();
         ImmutableList<String> columnNames = columnHeaders.map(MiniColumnHeader::name);
-        ImmutableList<DefaultValueInterpreter> valueInterpreters = columnHeaders.map(
-                h -> new DefaultValueInterpreter(h.valueDefinition()));
         List<ImmutableList<Object>> decodedRowsBuffer = new ArrayList<>();
         boolean foundAny = false;
-        for (ImmutableList<MiniValue> row : resultSet) {
-            foundAny = true;
-            ImmutableList<Object> decodedRow = row.mapIndex(
-                    (i, value) -> valueInterpreters.get(i).decode(value));
+        for (ResultRecord record : resultTable) {
+            ImmutableList<Object> decodedRow = record.getAll().map(ResultField::get);
             decodedRowsBuffer.add(decodedRow);
             if (decodedRowsBuffer.size() == ROWS_BUFFER_SIZE) {
                 printDecodedRows(decodedRowsBuffer, columnNames, out);

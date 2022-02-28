@@ -16,6 +16,7 @@ import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.record.ResultTable;
 
 // TODO: better abstraction (context/executor vs output-handling), builder
 public class SqlRepl implements Repl {
@@ -168,7 +169,8 @@ public class SqlRepl implements Repl {
             return;
         }
 
-        new ResultSetPrinter().print(result.resultSet(), out);
+        ResultTable resultTable = new ResultTable(result.resultSet());
+        new ResultSetPrinter().print(resultTable, out);
     }
     
     private void putLargeData(String name, String source) throws IOException {
