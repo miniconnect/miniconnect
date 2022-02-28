@@ -30,7 +30,7 @@ public class TimestampTranslator implements ValueTranslator {
     
     @Override
     public int length() {
-        return Long.BYTES * 2;
+        return Long.BYTES + Integer.BYTES;
     }
     
     @Override
