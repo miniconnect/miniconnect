@@ -23,8 +23,7 @@ public interface ValueTranslator {
         return ImmutableMap.empty();
     }
     
-    // TODO: name?
-    public default MiniValue encodeXXX(Object value) {
+    public default MiniValue encodeFully(Object value) {
         ImmutableMap<String, ByteString> properties = properties();
         MiniContentAccess contentAccess = value == null ?
                 new StoredContentAccess(ByteString.empty()) :
