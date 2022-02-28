@@ -3,8 +3,11 @@ package hu.webarticum.miniconnect.record.translator;
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.record.lob.BlobValue;
+import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class BlobTranslator implements ValueTranslator {
+
+    private static final String NAME = StandardValueType.BLOB.name();
 
     private static final BlobTranslator INSTANCE = new BlobTranslator();
     
@@ -18,6 +21,11 @@ public class BlobTranslator implements ValueTranslator {
     }
     
 
+    @Override
+    public String name() {
+        return NAME;
+    }
+    
     @Override
     public int length() {
         return MiniValueDefinition.DYNAMIC_SIZE;

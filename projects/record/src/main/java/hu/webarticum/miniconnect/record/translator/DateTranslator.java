@@ -5,8 +5,11 @@ import java.time.LocalDate;
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.impl.result.StoredContentAccess;
 import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class DateTranslator implements ValueTranslator {
+
+    private static final String NAME = StandardValueType.DATE.name();
 
     private static final DateTranslator INSTANCE = new DateTranslator();
     
@@ -20,6 +23,11 @@ public class DateTranslator implements ValueTranslator {
     }
     
 
+    @Override
+    public String name() {
+        return NAME;
+    }
+    
     @Override
     public int length() {
         return Long.BYTES;

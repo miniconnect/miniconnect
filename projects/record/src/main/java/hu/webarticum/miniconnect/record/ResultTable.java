@@ -9,6 +9,7 @@ import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.record.converter.Converter;
 import hu.webarticum.miniconnect.record.converter.DefaultConverter;
+import hu.webarticum.miniconnect.record.translator.JavaTranslator;
 import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 import hu.webarticum.miniconnect.record.type.StandardValueType;
 import hu.webarticum.miniconnect.record.type.ValueType;
@@ -41,6 +42,9 @@ public class ResultTable implements Iterable<ResultRecord> {
     private static ValueTranslator defaultTranslatorFor(MiniColumnHeader columnHeader) {
         MiniValueDefinition valueDefinition = columnHeader.valueDefinition();
         String typeName = valueDefinition.type();
+        if (typeName.equals(JavaTranslator.NAME)) {
+            return JavaTranslator.instance();
+        }
         ValueType valueType = StandardValueType.valueOf(typeName);
         return valueType.translatorFor(valueDefinition.properties());
     }

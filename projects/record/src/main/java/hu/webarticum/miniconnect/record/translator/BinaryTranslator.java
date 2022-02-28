@@ -4,8 +4,11 @@ import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.impl.result.StoredContentAccess;
 import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class BinaryTranslator implements ValueTranslator {
+
+    private static final String NAME = StandardValueType.BINARY.name();
 
     private static final BinaryTranslator INSTANCE = new BinaryTranslator();
     
@@ -19,6 +22,11 @@ public class BinaryTranslator implements ValueTranslator {
     }
     
 
+    @Override
+    public String name() {
+        return NAME;
+    }
+    
     @Override
     public int length() {
         return MiniValueDefinition.DYNAMIC_SIZE;

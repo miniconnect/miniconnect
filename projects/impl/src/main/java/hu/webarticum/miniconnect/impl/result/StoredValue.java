@@ -21,7 +21,7 @@ public final class StoredValue implements MiniValue, Serializable {
     
     private final boolean isNull;
 
-    private final StoredContentAccess contentAccess;
+    private final MiniContentAccess contentAccess; // NOSONAR by default its serializable
 
 
     public StoredValue() {
@@ -37,9 +37,14 @@ public final class StoredValue implements MiniValue, Serializable {
     }
     
     public StoredValue(MiniValueDefinition definition, boolean isNull, ByteString content) {
+        this(definition, isNull, new StoredContentAccess(content));
+    }
+
+    public StoredValue(
+            MiniValueDefinition definition, boolean isNull, MiniContentAccess contentAccess) {
         this.definition = StoredValueDefinition.of(definition);
         this.isNull = isNull;
-        this.contentAccess = new StoredContentAccess(content);
+        this.contentAccess = contentAccess;
     }
 
     public static StoredValue of(MiniValue value) {

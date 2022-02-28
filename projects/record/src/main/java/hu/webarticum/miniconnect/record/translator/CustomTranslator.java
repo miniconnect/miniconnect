@@ -8,9 +8,12 @@ import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 import hu.webarticum.miniconnect.record.custom.schema.AnySchema;
 import hu.webarticum.miniconnect.record.custom.schema.Schema;
+import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class CustomTranslator implements ValueTranslator {
-    
+
+    private static final String NAME = StandardValueType.CUSTOM.name();
+
     private static final String SCHEMA_KEY = "schema";
     
     
@@ -21,6 +24,10 @@ public class CustomTranslator implements ValueTranslator {
         this.schema = schema;
     }
 
+    public static CustomTranslator of(Schema schema) {
+        return new CustomTranslator(schema);
+    }
+    
     public static CustomTranslator of(ImmutableMap<String, ByteString> properties) {
         Schema schema;
         if (properties.containsKey(SCHEMA_KEY)) {
@@ -32,6 +39,11 @@ public class CustomTranslator implements ValueTranslator {
     }
     
 
+    @Override
+    public String name() {
+        return NAME;
+    }
+    
     @Override
     public int length() {
         return MiniValueDefinition.DYNAMIC_SIZE;

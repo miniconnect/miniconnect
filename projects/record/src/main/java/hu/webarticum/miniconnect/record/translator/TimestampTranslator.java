@@ -5,8 +5,11 @@ import java.time.Instant;
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.impl.result.StoredContentAccess;
 import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class TimestampTranslator implements ValueTranslator {
+
+    private static final String NAME = StandardValueType.TIMESTAMP.name();
 
     private static final TimestampTranslator INSTANCE = new TimestampTranslator();
     
@@ -20,6 +23,11 @@ public class TimestampTranslator implements ValueTranslator {
     }
     
 
+    @Override
+    public String name() {
+        return NAME;
+    }
+    
     @Override
     public int length() {
         return Long.BYTES * 2;

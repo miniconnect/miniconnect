@@ -3,8 +3,11 @@ package hu.webarticum.miniconnect.record.translator;
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.impl.result.StoredContentAccess;
 import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class ByteTranslator implements ValueTranslator {
+
+    private static final String NAME = StandardValueType.BYTE.name();
 
     private static final ByteTranslator INSTANCE = new ByteTranslator();
     
@@ -18,6 +21,11 @@ public class ByteTranslator implements ValueTranslator {
     }
     
 
+    @Override
+    public String name() {
+        return NAME;
+    }
+    
     @Override
     public int length() {
         return Byte.BYTES;

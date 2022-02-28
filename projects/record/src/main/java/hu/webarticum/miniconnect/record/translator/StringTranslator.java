@@ -8,9 +8,12 @@ import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.impl.result.StoredContentAccess;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
+import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class StringTranslator implements ValueTranslator {
-    
+
+    private static final String NAME = StandardValueType.STRING.name();
+
     private static final String CHARSET_KEY = "charset";
     
     private static final StringTranslator UTF8_INSTANCE =
@@ -24,6 +27,10 @@ public class StringTranslator implements ValueTranslator {
         this.charset = charset;
     }
 
+    public static StringTranslator of(Charset charset) {
+        return new StringTranslator(charset);
+    }
+    
     public static StringTranslator of(ImmutableMap<String, ByteString> properties) {
         ByteString charsetValue = properties.get(CHARSET_KEY);
         Charset charset;
@@ -41,6 +48,11 @@ public class StringTranslator implements ValueTranslator {
 
 
     @Override
+    public String name() {
+        return NAME;
+    }
+    
+    @Override
     public int length() {
         return MiniValueDefinition.DYNAMIC_SIZE;
     }
@@ -54,6 +66,15 @@ public class StringTranslator implements ValueTranslator {
     public MiniContentAccess encode(Object value) {
         ByteString bytes = ByteString.of(value.toString(), charset);
         return new StoredContentAccess(bytes);
+    }
+
+    @Override
+    public ImmutableMap<String, ByteString> properties() {
+        if (charset == StandardCharsets.UTF_8) {
+            return ImmutableMap.empty();
+        } else {
+            return ImmutableMap.of(CHARSET_KEY, ByteString.of(charset.name()));
+        }
     }
     
 }

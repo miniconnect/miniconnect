@@ -11,6 +11,9 @@ import hu.webarticum.miniconnect.impl.contentaccess.dynamic.DynamicContentAccess
 
 public class JavaTranslator implements ValueTranslator {
 
+    public static final String NAME = "JAVA"; // NOSONAR same name is OK
+    
+
     private static final JavaTranslator INSTANCE = new JavaTranslator();
     
     
@@ -23,6 +26,11 @@ public class JavaTranslator implements ValueTranslator {
     }
     
 
+    @Override
+    public String name() {
+        return NAME;
+    }
+    
     @Override
     public int length() {
         return MiniValueDefinition.DYNAMIC_SIZE;
