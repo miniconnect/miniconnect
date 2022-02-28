@@ -30,16 +30,18 @@ import hu.webarticum.miniconnect.messenger.message.request.LargeDataPartRequest;
 import hu.webarticum.miniconnect.messenger.message.request.QueryRequest;
 import hu.webarticum.miniconnect.messenger.message.request.Request;
 import hu.webarticum.miniconnect.messenger.message.request.SessionCloseRequest;
+import hu.webarticum.miniconnect.messenger.message.request.SessionInitRequest;
 import hu.webarticum.miniconnect.messenger.message.response.LargeDataSaveResponse;
 import hu.webarticum.miniconnect.messenger.message.response.Response;
 import hu.webarticum.miniconnect.messenger.message.response.ResultResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetEofResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetValuePartResponse;
+import hu.webarticum.miniconnect.messenger.message.response.SessionInitResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultResponse.ColumnHeaderData;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse.CellData;
-import hu.webarticum.miniconnect.record.translator.OLD.DefaultValueInterpreter;
-import hu.webarticum.miniconnect.record.translator.OLD.ValueInterpreter;
+import hu.webarticum.miniconnect.record.translator.ValueTranslator;
+import hu.webarticum.miniconnect.record.type.StandardValueType;
 import hu.webarticum.regexbee.Bee;
 
 public class DummyMessenger implements Messenger {
@@ -64,13 +66,15 @@ public class DummyMessenger implements Messenger {
             .toPattern(Pattern.CASE_INSENSITIVE);
     
     private static final ImmutableList<MiniColumnHeader> columnHeaders = ImmutableList.of(
-            headerOf("id", false, Long.class),
-            headerOf("created_at", false, String.class),
-            headerOf("name", false, String.class),
-            headerOf("length", false, Integer.class),
-            headerOf("content", false, String.class));
+            headerOf("id", false, StandardValueType.LONG),
+            headerOf("created_at", false, StandardValueType.STRING),
+            headerOf("name", false, StandardValueType.STRING),
+            headerOf("length", false, StandardValueType.STRING),
+            headerOf("content", false, StandardValueType.STRING));
 
 
+    private final AtomicLong sessionIdCounter = new AtomicLong(0);
+    
     private final AtomicLong rowCounter = new AtomicLong(0);
     
     private final List<List<Object>> data = new ArrayList<>();
@@ -81,15 +85,14 @@ public class DummyMessenger implements Messenger {
     
     private final Map<Long, Consumer<Response>> dataSaveConsumers = new HashMap<>();
     
-    private final ImmutableList<ValueInterpreter> interpreters = columnHeaders.map(
-            h -> new DefaultValueInterpreter(h.valueDefinition()));
+    private final ImmutableList<ValueTranslator> translators = columnHeaders.map(
+            h -> StandardValueType.valueOf(h.valueDefinition().type()).defaultTranslator());
     
 
     private static final MiniColumnHeader headerOf(
-            String name,
-            boolean isNullable,
-            Class<?> clazz) {
-        return new StoredColumnHeader(name, isNullable, new StoredValueDefinition(clazz.getName()));
+            String name, boolean isNullable, StandardValueType valueType) {
+        return new StoredColumnHeader(
+                name, isNullable, new StoredValueDefinition(valueType.name()));
     }
     
     @Override
@@ -100,6 +103,8 @@ public class DummyMessenger implements Messenger {
             acceptLargeDataHeadRequest((LargeDataHeadRequest) request, responseConsumer);
         } else if (request instanceof LargeDataPartRequest) {
             acceptLargeDataPartRequest((LargeDataPartRequest) request);
+        } else if (request instanceof SessionInitRequest) {
+            acceptSessionInitRequest((SessionInitRequest) request, responseConsumer);
         } else if (request instanceof SessionCloseRequest) {
             // nothing to do
         } else {
@@ -107,6 +112,12 @@ public class DummyMessenger implements Messenger {
                     "Unsupported request type: %s",
                     request.getClass().getSimpleName()));
         }
+    }
+
+    private void acceptSessionInitRequest(
+            SessionInitRequest request, Consumer<Response> responseConsumer) {
+        long sessionId = sessionIdCounter.incrementAndGet();
+        responseConsumer.accept(new SessionInitResponse(sessionId));
     }
 
     private void acceptQueryRequest(QueryRequest request, Consumer<Response> responseConsumer) {
@@ -173,9 +184,9 @@ public class DummyMessenger implements Messenger {
             List<Object> dataRow = dataRows.get(r);
             List<CellData> rowBuilder = new ArrayList<>();
             for (int c = 0; c < columnCount; c++) {
-                ValueInterpreter interpreter = interpreters.get(c);
                 Object content = dataRow.get(c);
-                MiniValue value = interpreter.encode(content);
+                ValueTranslator translator = translators.get(c);
+                MiniValue value = translator.encodeFully(content);
                 MiniContentAccess contentAccess = value.contentAccess();
                 long fullLength = contentAccess.length();
                 
@@ -225,7 +236,8 @@ public class DummyMessenger implements Messenger {
         return ByteString.wrap(result);
     }
     
-    private void sendBadQueryErrorResultResponse(QueryRequest request, Consumer<Response> responseConsumer) {
+    private void sendBadQueryErrorResultResponse(
+            QueryRequest request, Consumer<Response> responseConsumer) {
         ResultResponse resultResponse = new ResultResponse(
                 request.sessionId(),
                 request.exchangeId(),
