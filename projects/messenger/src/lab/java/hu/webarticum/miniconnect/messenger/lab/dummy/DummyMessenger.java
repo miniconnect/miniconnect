@@ -104,7 +104,7 @@ public class DummyMessenger implements Messenger {
         } else if (request instanceof LargeDataPartRequest) {
             acceptLargeDataPartRequest((LargeDataPartRequest) request);
         } else if (request instanceof SessionInitRequest) {
-            acceptSessionInitRequest((SessionInitRequest) request, responseConsumer);
+            responseConsumer.accept(new SessionInitResponse(sessionIdCounter.incrementAndGet()));
         } else if (request instanceof SessionCloseRequest) {
             // nothing to do
         } else {
@@ -112,12 +112,6 @@ public class DummyMessenger implements Messenger {
                     "Unsupported request type: %s",
                     request.getClass().getSimpleName()));
         }
-    }
-
-    private void acceptSessionInitRequest(
-            SessionInitRequest request, Consumer<Response> responseConsumer) {
-        long sessionId = sessionIdCounter.incrementAndGet();
-        responseConsumer.accept(new SessionInitResponse(sessionId));
     }
 
     private void acceptQueryRequest(QueryRequest request, Consumer<Response> responseConsumer) {
