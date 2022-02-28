@@ -7,7 +7,8 @@ import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.impl.result.StoredColumnHeader;
 import hu.webarticum.miniconnect.impl.result.StoredValueDefinition;
-import hu.webarticum.miniconnect.record.translator.OLD.DefaultValueInterpreter;
+import hu.webarticum.miniconnect.record.translator.IntTranslator;
+import hu.webarticum.miniconnect.record.translator.StringTranslator;
 
 
 public final class Structure {
@@ -58,16 +59,16 @@ public final class Structure {
             String key,
             String defaultValue,
             String extra) {
-
-        DefaultValueInterpreter stringEncoder = new DefaultValueInterpreter(String.class);
-
+        
+        StringTranslator stringTranslator = StringTranslator.utf8Instance();
+        
         List<MiniValue> row = new ArrayList<>(6);
-        row.add(stringEncoder.encode(field));
-        row.add(stringEncoder.encode(type));
-        row.add(stringEncoder.encode(isNullable ? "YES" : "NO"));
-        row.add(stringEncoder.encode(key));
-        row.add(stringEncoder.encode(defaultValue));
-        row.add(stringEncoder.encode(extra));
+        row.add(stringTranslator.encodeFully(field));
+        row.add(stringTranslator.encodeFully(type));
+        row.add(stringTranslator.encodeFully(isNullable ? "YES" : "NO"));
+        row.add(stringTranslator.encodeFully(key));
+        row.add(stringTranslator.encodeFully(defaultValue));
+        row.add(stringTranslator.encodeFully(extra));
         return row;
     }
 
@@ -81,13 +82,13 @@ public final class Structure {
     }
 
     private static List<MiniValue> createRow(int id, String label, String desription) {
-        DefaultValueInterpreter intEncoder = new DefaultValueInterpreter(Integer.class);
-        DefaultValueInterpreter stringEncoder = new DefaultValueInterpreter(String.class);
+        IntTranslator intTranslator = IntTranslator.instance();
+        StringTranslator stringTranslator = StringTranslator.utf8Instance();
 
         List<MiniValue> row = new ArrayList<>(3);
-        row.add(intEncoder.encode(id));
-        row.add(stringEncoder.encode(label));
-        row.add(stringEncoder.encode(desription));
+        row.add(intTranslator.encodeFully(id));
+        row.add(stringTranslator.encodeFully(label));
+        row.add(stringTranslator.encodeFully(desription));
         return row;
     }
 
