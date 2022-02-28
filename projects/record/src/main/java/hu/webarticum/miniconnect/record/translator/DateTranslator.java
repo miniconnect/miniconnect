@@ -9,7 +9,8 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class DateTranslator implements ValueTranslator {
 
-    private static final String NAME = StandardValueType.DATE.name();
+    public static final String NAME = StandardValueType.DATE.name(); // NOSONAR same name is OK
+
 
     private static final DateTranslator INSTANCE = new DateTranslator();
     

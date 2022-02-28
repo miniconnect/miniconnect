@@ -8,7 +8,8 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class BinaryTranslator implements ValueTranslator {
 
-    private static final String NAME = StandardValueType.BINARY.name();
+    public static final String NAME = StandardValueType.BINARY.name(); // NOSONAR same name is OK
+    
 
     private static final BinaryTranslator INSTANCE = new BinaryTranslator();
     

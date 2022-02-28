@@ -12,9 +12,10 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class StringTranslator implements ValueTranslator {
 
-    private static final String NAME = StandardValueType.STRING.name();
+    public static final String NAME = StandardValueType.STRING.name(); // NOSONAR same name is OK
 
-    private static final String CHARSET_KEY = "charset";
+    public static final String CHARSET_KEY = "charset";
+    
     
     private static final StringTranslator UTF8_INSTANCE =
             new StringTranslator(StandardCharsets.UTF_8);
@@ -27,8 +28,16 @@ public class StringTranslator implements ValueTranslator {
         this.charset = charset;
     }
 
+    public static StringTranslator utf8Instance() {
+        return UTF8_INSTANCE;
+    }
+    
     public static StringTranslator of(Charset charset) {
-        return new StringTranslator(charset);
+        if (charset == StandardCharsets.UTF_8) {
+            return UTF8_INSTANCE;
+        } else {
+            return new StringTranslator(charset);
+        }
     }
     
     public static StringTranslator of(ImmutableMap<String, ByteString> properties) {

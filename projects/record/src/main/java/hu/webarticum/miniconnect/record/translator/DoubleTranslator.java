@@ -7,7 +7,8 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class DoubleTranslator implements ValueTranslator {
 
-    private static final String NAME = StandardValueType.DOUBLE.name();
+    public static final String NAME = StandardValueType.DOUBLE.name(); // NOSONAR same name is OK
+
 
     private static final DoubleTranslator INSTANCE = new DoubleTranslator();
     

@@ -10,8 +10,9 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class BigintTranslator implements ValueTranslator {
     
-    private static final String NAME = StandardValueType.BIGINT.name();
+    public static final String NAME = StandardValueType.BIGINT.name(); // NOSONAR same name is OK
 
+    
     private static final BigintTranslator INSTANCE = new BigintTranslator();
     
     

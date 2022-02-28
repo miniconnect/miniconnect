@@ -12,9 +12,9 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class CustomTranslator implements ValueTranslator {
 
-    private static final String NAME = StandardValueType.CUSTOM.name();
+    public static final String NAME = StandardValueType.CUSTOM.name(); // NOSONAR same name is OK
 
-    private static final String SCHEMA_KEY = "schema";
+    public static final String SCHEMA_KEY = "schema";
     
     
     private final Schema schema;

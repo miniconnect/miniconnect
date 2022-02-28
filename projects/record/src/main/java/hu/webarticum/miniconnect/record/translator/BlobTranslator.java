@@ -7,7 +7,8 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class BlobTranslator implements ValueTranslator {
 
-    private static final String NAME = StandardValueType.BLOB.name();
+    public static final String NAME = StandardValueType.BLOB.name(); // NOSONAR same name is OK
+    
 
     private static final BlobTranslator INSTANCE = new BlobTranslator();
     

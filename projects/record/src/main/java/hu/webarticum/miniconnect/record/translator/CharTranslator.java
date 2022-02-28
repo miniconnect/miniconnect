@@ -7,7 +7,8 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class CharTranslator implements ValueTranslator {
 
-    private static final String NAME = StandardValueType.CHAR.name();
+    public static final String NAME = StandardValueType.CHAR.name(); // NOSONAR same name is OK
+    
 
     private static final CharTranslator INSTANCE = new CharTranslator();
     

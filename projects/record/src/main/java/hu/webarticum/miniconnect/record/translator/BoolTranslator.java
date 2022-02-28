@@ -7,7 +7,8 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class BoolTranslator implements ValueTranslator {
 
-    private static final String NAME = StandardValueType.BOOL.name();
+    public static final String NAME = StandardValueType.BOOL.name(); // NOSONAR same name is OK
+    
 
     private static final BoolTranslator INSTANCE = new BoolTranslator();
     

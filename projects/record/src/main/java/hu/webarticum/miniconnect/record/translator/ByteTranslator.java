@@ -7,7 +7,8 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class ByteTranslator implements ValueTranslator {
 
-    private static final String NAME = StandardValueType.BYTE.name();
+    public static final String NAME = StandardValueType.BYTE.name(); // NOSONAR same name is OK
+    
 
     private static final ByteTranslator INSTANCE = new ByteTranslator();
     

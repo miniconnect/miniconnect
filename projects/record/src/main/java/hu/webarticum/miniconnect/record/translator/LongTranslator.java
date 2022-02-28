@@ -7,7 +7,8 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class LongTranslator implements ValueTranslator {
 
-    private static final String NAME = StandardValueType.LONG.name();
+    public static final String NAME = StandardValueType.LONG.name(); // NOSONAR same name is OK
+
 
     private static final LongTranslator INSTANCE = new LongTranslator();
     

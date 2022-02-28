@@ -9,7 +9,8 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class TimestampTranslator implements ValueTranslator {
 
-    private static final String NAME = StandardValueType.TIMESTAMP.name();
+    public static final String NAME = StandardValueType.TIMESTAMP.name(); // NOSONAR same name is OK
+
 
     private static final TimestampTranslator INSTANCE = new TimestampTranslator();
     

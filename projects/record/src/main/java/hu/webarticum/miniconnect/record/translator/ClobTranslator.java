@@ -12,9 +12,13 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class ClobTranslator implements ValueTranslator {
 
-    private static final String NAME = StandardValueType.CLOB.name();
+    public static final String NAME = StandardValueType.CLOB.name(); // NOSONAR same name is OK
 
-    private static final String CHARSET_KEY = "charset";
+    public static final String CHARSET_KEY = "charset";
+    
+
+    private static final ClobTranslator UTF16_INSTANCE =
+            new ClobTranslator(StandardCharsets.UTF_16BE);
     
     private static final ClobTranslator UTF8_INSTANCE =
             new ClobTranslator(StandardCharsets.UTF_8);
@@ -27,6 +31,14 @@ public class ClobTranslator implements ValueTranslator {
         this.charset = charset;
     }
 
+    public static ClobTranslator utf16Instance() {
+        return UTF16_INSTANCE;
+    }
+    
+    public static ClobTranslator utf8Instance() {
+        return UTF8_INSTANCE;
+    }
+    
     public static ClobTranslator of(Charset charset) {
         return new ClobTranslator(charset);
     }

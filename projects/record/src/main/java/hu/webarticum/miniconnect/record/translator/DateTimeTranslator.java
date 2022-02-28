@@ -11,7 +11,8 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class DateTimeTranslator implements ValueTranslator {
 
-    private static final String NAME = StandardValueType.DATETIME.name();
+    public static final String NAME = StandardValueType.DATETIME.name(); // NOSONAR same name is OK
+
 
     private static final DateTimeTranslator INSTANCE = new DateTimeTranslator();
     

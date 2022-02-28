@@ -7,7 +7,8 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class FloatTranslator implements ValueTranslator {
 
-    private static final String NAME = StandardValueType.FLOAT.name();
+    public static final String NAME = StandardValueType.FLOAT.name(); // NOSONAR same name is OK
+
 
     private static final FloatTranslator INSTANCE = new FloatTranslator();
     

@@ -11,7 +11,8 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class DecimalTranslator implements ValueTranslator {
 
-    private static final String NAME = StandardValueType.DECIMAL.name();
+    public static final String NAME = StandardValueType.DECIMAL.name(); // NOSONAR same name is OK
+
 
     private static final DecimalTranslator INSTANCE = new DecimalTranslator();
     
