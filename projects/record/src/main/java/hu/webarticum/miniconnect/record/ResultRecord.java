@@ -1,5 +1,8 @@
 package hu.webarticum.miniconnect.record;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.lang.ImmutableList;
@@ -29,6 +32,15 @@ public class ResultRecord {
         this.converter = converter;
     }
     
+
+    public ImmutableList<ResultField> getAll() {
+        int size = row.size();
+        List<ResultField> resultBuilder = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            resultBuilder.add(get(i));
+        }
+        return ImmutableList.fromCollection(resultBuilder);
+    }
     
     public ResultField get(int zeroBasedIndex) {
         MiniValue value = row.get(zeroBasedIndex);
