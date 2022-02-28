@@ -6,11 +6,10 @@ import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.impl.result.StoredContentAccess;
 import hu.webarticum.miniconnect.lang.ByteString;
-import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class BigintTranslator implements ValueTranslator {
     
-    public static final String NAME = StandardValueType.BIGINT.name(); // NOSONAR same name is OK
+    public static final String NAME = "BIGINT"; // NOSONAR same name is OK
 
     
     private static final BigintTranslator INSTANCE = new BigintTranslator();

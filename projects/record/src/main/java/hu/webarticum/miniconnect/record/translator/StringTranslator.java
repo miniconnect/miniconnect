@@ -8,11 +8,10 @@ import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.impl.result.StoredContentAccess;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
-import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class StringTranslator implements ValueTranslator {
 
-    public static final String NAME = StandardValueType.STRING.name(); // NOSONAR same name is OK
+    public static final String NAME = "STRING"; // NOSONAR same name is OK
 
     public static final String CHARSET_KEY = "charset";
     

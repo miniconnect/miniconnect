@@ -8,11 +8,10 @@ import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.record.lob.ClobValue;
-import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class ClobTranslator implements ValueTranslator {
 
-    public static final String NAME = StandardValueType.CLOB.name(); // NOSONAR same name is OK
+    public static final String NAME = "CLOB"; // NOSONAR same name is OK
 
     public static final String CHARSET_KEY = "charset";
     

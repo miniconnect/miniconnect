@@ -3,11 +3,10 @@ package hu.webarticum.miniconnect.record.translator;
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.impl.result.StoredContentAccess;
 import hu.webarticum.miniconnect.lang.ByteString;
-import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class BoolTranslator implements ValueTranslator {
 
-    public static final String NAME = StandardValueType.BOOL.name(); // NOSONAR same name is OK
+    public static final String NAME = "BOOL"; // NOSONAR same name is OK
     
 
     private static final BoolTranslator INSTANCE = new BoolTranslator();

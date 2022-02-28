@@ -8,11 +8,10 @@ import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 import hu.webarticum.miniconnect.record.custom.schema.AnySchema;
 import hu.webarticum.miniconnect.record.custom.schema.Schema;
-import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class CustomTranslator implements ValueTranslator {
 
-    public static final String NAME = StandardValueType.CUSTOM.name(); // NOSONAR same name is OK
+    public static final String NAME = "CUSTOM"; // NOSONAR same name is OK
 
     public static final String SCHEMA_KEY = "schema";
     

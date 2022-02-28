@@ -13,5 +13,11 @@ class StandardValueTypeTest {
                 .doesNotHaveDuplicates()
                 .allMatch(f -> f.length() == StandardValueType.FLAG_LENGTH);
     }
+
+    @Test
+    void testNames() throws Exception {
+        assertThat(StandardValueType.values())
+                .allMatch(t -> t.defaultTranslator().name().equals(t.name()));
+    }
     
 }

@@ -7,11 +7,10 @@ import java.time.LocalTime;
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.impl.result.StoredContentAccess;
 import hu.webarticum.miniconnect.lang.ByteString;
-import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class DateTimeTranslator implements ValueTranslator {
 
-    public static final String NAME = StandardValueType.DATETIME.name(); // NOSONAR same name is OK
+    public static final String NAME = "DATETIME"; // NOSONAR same name is OK
 
 
     private static final DateTimeTranslator INSTANCE = new DateTimeTranslator();
