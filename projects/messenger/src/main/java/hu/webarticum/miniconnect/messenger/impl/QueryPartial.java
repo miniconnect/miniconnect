@@ -120,9 +120,9 @@ class QueryPartial implements Closeable {
         int i = 0;
         for (MiniColumnHeader columnHeader : columnHeaders) {
             MiniValueDefinition valueDefinition = columnHeader.valueDefinition();
-            int size = valueDefinition.size();
-            if (size != MiniValueDefinition.DYNAMIC_SIZE) {
-                resultBuilder.put(i, size);
+            int length = valueDefinition.length();
+            if (length != MiniValueDefinition.DYNAMIC_LENGTH) {
+                resultBuilder.put(i, length);
             }
             i++;
         }

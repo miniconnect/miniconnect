@@ -67,7 +67,7 @@ public class StandardSchema implements Schema {
     @Override
     public Object readValueFrom(InputStream in) {
         int length = translator.length();
-        if (length == MiniValueDefinition.DYNAMIC_SIZE) {
+        if (length == MiniValueDefinition.DYNAMIC_LENGTH) {
             length = StreamUtil.readInt(in);
         }
         ByteString valueBytes = StreamUtil.readFixedBytes(in, length);
@@ -85,7 +85,7 @@ public class StandardSchema implements Schema {
         }
         int expectedLength = translator.length();
         int actualLength = valueBytes.length();
-        if (expectedLength == MiniValueDefinition.DYNAMIC_SIZE) {
+        if (expectedLength == MiniValueDefinition.DYNAMIC_LENGTH) {
             StreamUtil.writeInt(out, actualLength);
         } else if (actualLength != expectedLength) {
             throw new IllegalArgumentException(String.format(

@@ -137,7 +137,7 @@ public final class ResultResponse implements Response, ExchangeMessage {
 
         private final boolean isNullable;
 
-        private final int size;
+        private final int length;
 
         private final String type;
 
@@ -147,12 +147,12 @@ public final class ResultResponse implements Response, ExchangeMessage {
         public ColumnHeaderData(
                 String name,
                 boolean isNullable,
-                int size,
+                int length,
                 String type,
                 ImmutableMap<String, ByteString> properties) {
             this.name = Objects.requireNonNull(name);
             this.isNullable = isNullable;
-            this.size = size;
+            this.length = length;
             this.type = Objects.requireNonNull(type);
             this.properties = Objects.requireNonNull(properties);
         }
@@ -161,7 +161,7 @@ public final class ResultResponse implements Response, ExchangeMessage {
             return new ColumnHeaderData(
                     header.name(),
                     header.isNullable(),
-                    header.valueDefinition().size(),
+                    header.valueDefinition().length(),
                     header.valueDefinition().type(),
                     header.valueDefinition().properties());
         }
@@ -175,8 +175,8 @@ public final class ResultResponse implements Response, ExchangeMessage {
             return isNullable;
         }
 
-        public int size() {
-            return size;
+        public int length() {
+            return length;
         }
 
         public String type() {
@@ -189,7 +189,7 @@ public final class ResultResponse implements Response, ExchangeMessage {
         
         public MiniColumnHeader toMiniColumnHeader() {
             return new StoredColumnHeader(
-                    name, isNullable, new StoredValueDefinition(type, size, properties));
+                    name, isNullable, new StoredValueDefinition(type, length, properties));
         }
 
         @Override

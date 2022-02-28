@@ -62,7 +62,7 @@ public class StringTranslator implements ValueTranslator {
     
     @Override
     public int length() {
-        return MiniValueDefinition.DYNAMIC_SIZE;
+        return MiniValueDefinition.DYNAMIC_LENGTH;
     }
     
     @Override

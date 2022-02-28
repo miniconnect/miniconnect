@@ -124,7 +124,7 @@ class ResultResponseTranslatorDriver implements TranslatorDriver {
             ColumnHeaderData header) {
         payloadBuilder.append(TranslatorUtil.encodeString(header.name()));
         payloadBuilder.append(TranslatorUtil.encodeBoolean(header.isNullable()));
-        payloadBuilder.appendInt(header.size());
+        payloadBuilder.appendInt(header.length());
         payloadBuilder.append(TranslatorUtil.encodeString(header.type()));
         appendProperties(payloadBuilder, header.properties());
     }

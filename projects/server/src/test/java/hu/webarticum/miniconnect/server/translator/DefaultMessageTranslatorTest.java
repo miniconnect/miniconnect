@@ -97,14 +97,14 @@ class DefaultMessageTranslatorTest {
         propertiesBuilder.put("key2", ByteString.of("value2"));
         propertiesBuilder.put("key3", ByteString.of("value3"));
         ImmutableMap<String, ByteString> properties = ImmutableMap.fromMap(propertiesBuilder);
-        int dynamicSize = MiniValueDefinition.DYNAMIC_SIZE;
+        int dynamicLength = MiniValueDefinition.DYNAMIC_LENGTH;
         ImmutableList<ColumnHeaderData> columnHeaders = ImmutableList.of(
                 new ColumnHeaderData(
                         "id", false, Integer.BYTES, "INT", ImmutableMap.empty()),
                 new ColumnHeaderData(
-                        "label", true, dynamicSize, "VARCHAR(30)", ImmutableMap.empty()),
+                        "label", true, dynamicLength, "VARCHAR(30)", ImmutableMap.empty()),
                 new ColumnHeaderData(
-                        "description", false, dynamicSize, "TEXT", properties));
+                        "description", false, dynamicLength, "TEXT", properties));
         return new ResultResponse(4L, 3, false, error, warnings, true, columnHeaders);
     }
     
