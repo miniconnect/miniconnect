@@ -37,6 +37,7 @@ import hu.webarticum.miniconnect.messenger.message.response.ResultResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetEofResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetValuePartResponse;
+import hu.webarticum.miniconnect.messenger.message.response.SessionCloseResponse;
 import hu.webarticum.miniconnect.messenger.message.response.SessionInitResponse;
 import hu.webarticum.miniconnect.messenger.message.response.ResultResponse.ColumnHeaderData;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse.CellData;
@@ -106,7 +107,7 @@ public class DummyMessenger implements Messenger {
         } else if (request instanceof SessionInitRequest) {
             responseConsumer.accept(new SessionInitResponse(sessionIdCounter.incrementAndGet()));
         } else if (request instanceof SessionCloseRequest) {
-            // nothing to do
+            acceptSessionCloseRequest((SessionCloseRequest) request, responseConsumer);
         } else {
             throw new UnsupportedOperationException(String.format(
                     "Unsupported request type: %s",
@@ -420,6 +421,12 @@ public class DummyMessenger implements Messenger {
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
         formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         return formatter.format(new Date());
+    }
+
+    private void acceptSessionCloseRequest(
+            SessionCloseRequest request, Consumer<Response> responseConsumer) {
+        responseConsumer.accept(
+                new SessionCloseResponse(request.sessionId(), request.exchangeId()));
     }
 
 }
