@@ -11,7 +11,6 @@ import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.record.translator.OLD.DefaultValueInterpreter;
-import hu.webarticum.miniconnect.record.translator.OLD.ValueInterpreter;
 
 public class ResultSetPrinter {
 
@@ -31,20 +30,20 @@ public class ResultSetPrinter {
         ImmutableList<String> columnNames = columnHeaders.map(MiniColumnHeader::name);
         ImmutableList<DefaultValueInterpreter> valueInterpreters = columnHeaders.map(
                 h -> new DefaultValueInterpreter(h.valueDefinition()));
-        List<ImmutableList<String>> stringRowsBuffer = new ArrayList<>();
+        List<ImmutableList<Object>> decodedRowsBuffer = new ArrayList<>();
         boolean foundAny = false;
         for (ImmutableList<MiniValue> row : resultSet) {
             foundAny = true;
-            ImmutableList<String> stringRow = row.mapIndex(
-                    (i, value) -> stringifyValue(value, valueInterpreters.get(i)));
-            stringRowsBuffer.add(stringRow);
-            if (stringRowsBuffer.size() == ROWS_BUFFER_SIZE) {
-                printStringRows(stringRowsBuffer, columnNames, valueInterpreters, out);
-                stringRowsBuffer.clear();
+            ImmutableList<Object> decodedRow = row.mapIndex(
+                    (i, value) -> valueInterpreters.get(i).decode(value));
+            decodedRowsBuffer.add(decodedRow);
+            if (decodedRowsBuffer.size() == ROWS_BUFFER_SIZE) {
+                printDecodedRows(decodedRowsBuffer, columnNames, out);
+                decodedRowsBuffer.clear();
             }
         }
-        if (!stringRowsBuffer.isEmpty()) {
-            printStringRows(stringRowsBuffer, columnNames, valueInterpreters, out);
+        if (!decodedRowsBuffer.isEmpty()) {
+            printDecodedRows(decodedRowsBuffer, columnNames, out);
         }
         if (!foundAny) {
             printNoRows(out);
@@ -55,25 +54,31 @@ public class ResultSetPrinter {
         out.append("  Result contains no rows!\n\n");
     }
     
-    private void printStringRows(
-            List<ImmutableList<String>> stringRows,
+    private void printDecodedRows(
+            List<ImmutableList<Object>> decodedRows,
             ImmutableList<String> columnNames,
-            ImmutableList<DefaultValueInterpreter> valueInterpreters,
             Appendable out
             ) throws IOException {
         int columnCount = columnNames.size();
         int[] widths = new int[columnCount];
         boolean[] aligns = new boolean[columnCount];
-        List<DefaultValueInterpreter> encoders = new ArrayList<>();
         for (int i = 0; i < columnCount; i++) {
             String columnName = columnNames.get(i);
-            DefaultValueInterpreter valueInterpreter = valueInterpreters.get(i);
             widths[i] = columnName.length();
-            aligns[i] = Number.class.isAssignableFrom(valueInterpreter.type());
-            encoders.add(valueInterpreter);
+        }
+        if (!decodedRows.isEmpty()) {
+            ImmutableList<Object> firstDecodedRow = decodedRows.get(0);
+            for (int i = 0; i < columnCount; i++) {
+                if (firstDecodedRow.get(i) instanceof Number) {
+                    aligns[i] = true;
+                }
+            }
         }
         
-        for (ImmutableList<String> stringRow : stringRows) {
+        List<ImmutableList<String>> stringRows = new ArrayList<>(decodedRows.size());
+        for (ImmutableList<Object> decodedRow : decodedRows) {
+            ImmutableList<String> stringRow = decodedRow.map(this::stringify);
+            stringRows.add(stringRow);
             for (int i = 0; i < columnCount; i++) {
                 String stringValue = stringRow.get(i);
                 widths[i] = Math.max(widths[i], stringValue.length());
@@ -128,21 +133,20 @@ public class ResultSetPrinter {
         out.append('\n');
     }
     
-    private String stringifyValue(MiniValue value, ValueInterpreter encoder) {
-        Object decoded = encoder.decode(value);
-        if (decoded == null) {
+    private String stringify(Object value) {
+        if (value == null) {
             return NULL_PLACEHOLDER;
         } else if (
-                decoded instanceof Float ||
-                decoded instanceof Double ||
-                decoded instanceof BigDecimal) {
-            return String.format("%.3f", decoded);
+                value instanceof Float ||
+                value instanceof Double ||
+                value instanceof BigDecimal) {
+            return String.format("%.3f", value);
         } else if (
-                decoded instanceof Number ||
-                decoded instanceof Temporal) {
-            return decoded.toString();
+                value instanceof Number ||
+                value instanceof Temporal) {
+            return value.toString();
         } else {
-            return shortenString(decoded.toString());
+            return shortenString(value.toString());
         }
     }
     
