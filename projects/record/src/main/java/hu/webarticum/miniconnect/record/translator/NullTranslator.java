@@ -40,5 +40,10 @@ public class NullTranslator implements ValueTranslator {
     public MiniContentAccess encode(Object value) {
         return new StoredContentAccess(ByteString.empty());
     }
+
+    @Override
+    public String assuredClazzName() {
+        return Void.class.getName();
+    }
     
 }

@@ -44,5 +44,10 @@ public class BoolTranslator implements ValueTranslator {
         ByteString bytes = ByteString.of(new byte[] { b });
         return new StoredContentAccess(bytes);
     }
+
+    @Override
+    public String assuredClazzName() {
+        return Boolean.class.getName();
+    }
     
 }

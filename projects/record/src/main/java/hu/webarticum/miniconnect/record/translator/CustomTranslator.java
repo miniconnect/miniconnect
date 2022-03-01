@@ -60,5 +60,10 @@ public class CustomTranslator implements ValueTranslator {
                 .writing(out -> schema.writeValueTo(value, out))
                 .build();
     }
+
+    @Override
+    public String assuredClazzName() {
+        return CustomValue.class.getName();
+    }
     
 }

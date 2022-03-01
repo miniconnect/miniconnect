@@ -41,5 +41,10 @@ public class BinaryTranslator implements ValueTranslator {
     public MiniContentAccess encode(Object value) {
         return new StoredContentAccess((ByteString) value);
     }
+
+    @Override
+    public String assuredClazzName() {
+        return ByteString.class.getName();
+    }
     
 }

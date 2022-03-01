@@ -45,5 +45,10 @@ public class FloatTranslator implements ValueTranslator {
         ByteString bytes = ByteString.ofFloat((Float) value);
         return new StoredContentAccess(bytes);
     }
+
+    @Override
+    public String assuredClazzName() {
+        return Float.class.getName();
+    }
     
 }

@@ -45,5 +45,10 @@ public class ByteTranslator implements ValueTranslator {
         ByteString bytes = ByteString.ofByte((Byte) value);
         return new StoredContentAccess(bytes);
     }
+
+    @Override
+    public String assuredClazzName() {
+        return Byte.class.getName();
+    }
     
 }

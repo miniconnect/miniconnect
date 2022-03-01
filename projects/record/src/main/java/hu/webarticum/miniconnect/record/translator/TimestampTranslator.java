@@ -50,5 +50,10 @@ public class TimestampTranslator implements ValueTranslator {
         ByteString bytes = builder.build();
         return new StoredContentAccess(bytes);
     }
+
+    @Override
+    public String assuredClazzName() {
+        return Instant.class.getName();
+    }
     
 }

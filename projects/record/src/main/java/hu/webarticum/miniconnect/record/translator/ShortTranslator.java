@@ -45,5 +45,10 @@ public class ShortTranslator implements ValueTranslator {
         ByteString bytes = ByteString.ofShort((Short) value);
         return new StoredContentAccess(bytes);
     }
+
+    @Override
+    public String assuredClazzName() {
+        return Short.class.getName();
+    }
     
 }

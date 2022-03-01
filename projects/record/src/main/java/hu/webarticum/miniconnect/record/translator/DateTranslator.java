@@ -47,5 +47,10 @@ public class DateTranslator implements ValueTranslator {
         ByteString bytes = ByteString.ofLong(daysSinceEpoch);
         return new StoredContentAccess(bytes);
     }
+
+    @Override
+    public String assuredClazzName() {
+        return LocalDate.class.getName();
+    }
     
 }

@@ -45,5 +45,10 @@ public class DoubleTranslator implements ValueTranslator {
         ByteString bytes = ByteString.ofDouble((Double) value);
         return new StoredContentAccess(bytes);
     }
+
+    @Override
+    public String assuredClazzName() {
+        return Double.class.getName();
+    }
     
 }

@@ -53,5 +53,5 @@ public class JavaTranslator implements ValueTranslator {
                 .writing(out -> new ObjectOutputStream(out).writeObject(value))
                 .build();
     }
-    
+
 }

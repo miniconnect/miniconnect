@@ -52,5 +52,10 @@ public class DecimalTranslator implements ValueTranslator {
         ByteString bytes = builder.build();
         return new StoredContentAccess(bytes);
     }
+
+    @Override
+    public String assuredClazzName() {
+        return BigDecimal.class.getName();
+    }
     
 }

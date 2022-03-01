@@ -14,11 +14,15 @@ public interface ValueTranslator {
     public String name();
 
     public int length();
-    
+
     public Object decode(MiniContentAccess contentAccess);
 
     public MiniContentAccess encode(Object value);
 
+    public default String assuredClazzName() {
+        return Object.class.getName();
+    }
+    
     public default ImmutableMap<String, ByteString> properties() {
         return ImmutableMap.empty();
     }

@@ -45,5 +45,10 @@ public class BigintTranslator implements ValueTranslator {
         ByteString bytes = ByteString.wrap(bigIntegerValue.toByteArray());
         return new StoredContentAccess(bytes);
     }
+
+    @Override
+    public String assuredClazzName() {
+        return BigInteger.class.getName();
+    }
     
 }

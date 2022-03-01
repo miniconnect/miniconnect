@@ -6,30 +6,20 @@ import java.sql.Types;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.lang.ImmutableList;
-import hu.webarticum.miniconnect.record.type.StandardValueType;
+import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 
 public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
 
     private final MiniJdbcResultSet resultSet;
 
-    private final ImmutableList<String> columnTypeNames;
+    private final ImmutableList<String> columnClassNames;
     
     
     public MiniJdbcResultSetMetaData(MiniJdbcResultSet resultSet) {
         this.resultSet = resultSet;
-        this.columnTypeNames = resultSet.getMiniColumnHeaders().map(
-                MiniJdbcResultSetMetaData::columnTypeNameOf);
-    }
-    
-    // FIXME
-    private static String columnTypeNameOf(MiniColumnHeader columnHeader) {
-        String typeName = columnHeader.valueDefinition().type();
-        for (StandardValueType valueType : StandardValueType.values()) {
-            if (valueType.name().equals(typeName)) {
-                valueType.clazz().getName();
-            }
-        }
-        return "";
+        ImmutableList<ValueTranslator> valueTranslators = resultSet.getValueTranslators();
+        this.columnClassNames = resultSet.getMiniColumnHeaders().mapIndex(
+                (i, h) -> valueTranslators.get(i).assuredClazzName());
     }
     
     
@@ -76,7 +66,7 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public String getColumnClassName(int column) throws SQLException {
-        return columnTypeNames.get(column - 1);
+        return columnClassNames.get(column - 1);
     }
 
     @Override

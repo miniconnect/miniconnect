@@ -35,6 +35,7 @@ import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.record.ResultField;
 import hu.webarticum.miniconnect.record.ResultRecord;
 import hu.webarticum.miniconnect.record.ResultTable;
+import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 
 public class MiniJdbcResultSet implements ResultSet {
     
@@ -64,7 +65,11 @@ public class MiniJdbcResultSet implements ResultSet {
     
     // --- METADATA ---
     // [start]
-    
+
+    public ImmutableList<ValueTranslator> getValueTranslators() {
+        return resultTable.valueTranslators();
+    }
+
     public ImmutableList<MiniColumnHeader> getMiniColumnHeaders() {
         return resultTable.resultSet().columnHeaders();
     }

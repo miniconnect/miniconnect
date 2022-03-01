@@ -87,5 +87,10 @@ public class ClobTranslator implements ValueTranslator {
             return ImmutableMap.of(CHARSET_KEY, ByteString.of(charset.name()));
         }
     }
+
+    @Override
+    public String assuredClazzName() {
+        return ClobValue.class.getName();
+    }
     
 }

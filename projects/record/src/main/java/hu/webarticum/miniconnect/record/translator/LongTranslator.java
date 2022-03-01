@@ -45,5 +45,10 @@ public class LongTranslator implements ValueTranslator {
         ByteString bytes = ByteString.ofLong((Long) value);
         return new StoredContentAccess(bytes);
     }
+
+    @Override
+    public String assuredClazzName() {
+        return Long.class.getName();
+    }
     
 }

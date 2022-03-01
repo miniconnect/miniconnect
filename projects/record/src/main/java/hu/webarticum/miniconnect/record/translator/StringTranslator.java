@@ -84,5 +84,10 @@ public class StringTranslator implements ValueTranslator {
             return ImmutableMap.of(CHARSET_KEY, ByteString.of(charset.name()));
         }
     }
+
+    @Override
+    public String assuredClazzName() {
+        return String.class.getName();
+    }
     
 }

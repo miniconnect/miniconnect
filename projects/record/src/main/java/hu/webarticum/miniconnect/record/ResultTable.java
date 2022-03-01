@@ -49,7 +49,11 @@ public class ResultTable implements Iterable<ResultRecord> {
         return valueType.translatorFor(valueDefinition.properties());
     }
     
-    
+
+    public ImmutableList<ValueTranslator> valueTranslators() {
+        return valueTranslators;
+    }
+
     public MiniResultSet resultSet() {
         return resultSet;
     }

@@ -41,5 +41,10 @@ public class BlobTranslator implements ValueTranslator {
         BlobValue blobValue = (BlobValue) value;
         return blobValue.contentAccess();
     }
+
+    @Override
+    public String assuredClazzName() {
+        return BlobValue.class.getName();
+    }
     
 }

@@ -45,5 +45,10 @@ public class IntTranslator implements ValueTranslator {
         ByteString bytes = ByteString.ofInt((Integer) value);
         return new StoredContentAccess(bytes);
     }
+
+    @Override
+    public String assuredClazzName() {
+        return Integer.class.getName();
+    }
     
 }

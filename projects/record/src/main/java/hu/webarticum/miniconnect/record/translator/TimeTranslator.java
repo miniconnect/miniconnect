@@ -47,5 +47,10 @@ public class TimeTranslator implements ValueTranslator {
         ByteString bytes = ByteString.ofLong(nanoOfDay);
         return new StoredContentAccess(bytes);
     }
+
+    @Override
+    public String assuredClazzName() {
+        return LocalTime.class.getName();
+    }
     
 }
