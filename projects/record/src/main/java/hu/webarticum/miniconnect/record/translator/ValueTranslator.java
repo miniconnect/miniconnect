@@ -22,6 +22,10 @@ public interface ValueTranslator {
     public default ImmutableMap<String, ByteString> properties() {
         return ImmutableMap.empty();
     }
+
+    public default MiniValueDefinition definition() {
+        return new StoredValueDefinition(name(), length(), properties());
+    }
     
     public default MiniValue encodeFully(Object value) {
         ImmutableMap<String, ByteString> properties = properties();
