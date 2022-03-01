@@ -31,6 +31,7 @@ import hu.webarticum.miniconnect.impl.result.StoredValueDefinition;
 import hu.webarticum.miniconnect.jdbc.provider.h2.H2DatabaseProvider;
 import hu.webarticum.miniconnect.jdbcadapter.JdbcAdapterSession;
 import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 class MiniJdbcConnectionTest {
     
@@ -82,8 +83,10 @@ class MiniJdbcConnectionTest {
     }
     
     private MiniResult mockResult(String sql) {
-        MiniValueDefinition intDefinition = new StoredValueDefinition(Integer.class.getName());
-        MiniValueDefinition stringDefinition = new StoredValueDefinition(String.class.getName());
+        MiniValueDefinition intDefinition = new StoredValueDefinition(
+                StandardValueType.INT.name());
+        MiniValueDefinition stringDefinition = new StoredValueDefinition(
+                StandardValueType.STRING.name());
         List<MiniColumnHeader> columnHeaders = new ArrayList<>();
         columnHeaders.add(new StoredColumnHeader("id", false, intDefinition));
         columnHeaders.add(new StoredColumnHeader("label", false, stringDefinition));

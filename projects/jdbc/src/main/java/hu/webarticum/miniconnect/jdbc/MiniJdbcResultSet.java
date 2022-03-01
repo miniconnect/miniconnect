@@ -31,22 +31,23 @@ import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.jdbc.blob.BlobClob;
 import hu.webarticum.miniconnect.jdbc.blob.ContentAccessBlob;
-import hu.webarticum.miniconnect.jdbc.converter.GeneralConverter;
 import hu.webarticum.miniconnect.lang.ImmutableList;
-import hu.webarticum.miniconnect.record.translator.OLD.DefaultValueInterpreter;
+import hu.webarticum.miniconnect.record.ResultField;
+import hu.webarticum.miniconnect.record.ResultRecord;
+import hu.webarticum.miniconnect.record.ResultTable;
 
 public class MiniJdbcResultSet implements ResultSet {
     
     private final Statement statement;
     
-    private final MiniResultSet miniResultSet;
+    private final ResultTable resultTable;
     
     private final MiniJdbcResultSetMetaData metaData;
     
-    private final GeneralConverter generalConverter = new GeneralConverter();
+    private final int columnCount;
     
     
-    private volatile ImmutableList<MiniValue> currentRow = null; // NOSONAR
+    private volatile ResultRecord currentRecord = null; // NOSONAR
     
     private volatile boolean wasNull = false;
     
@@ -55,16 +56,21 @@ public class MiniJdbcResultSet implements ResultSet {
 
     public MiniJdbcResultSet(Statement statement, MiniResultSet miniResultSet) {
         this.statement = statement;
-        this.miniResultSet = miniResultSet;
+        this.resultTable = new ResultTable(miniResultSet);
         this.metaData = new MiniJdbcResultSetMetaData(this);
+        this.columnCount = miniResultSet.columnHeaders().size();
     }
     
     
     // --- METADATA ---
     // [start]
     
-    public MiniResultSet getMiniResultSet() {
-        return miniResultSet;
+    public ImmutableList<MiniColumnHeader> getMiniColumnHeaders() {
+        return resultTable.resultSet().columnHeaders();
+    }
+
+    public int getColumnCount() {
+        return columnCount;
     }
 
     @Override
@@ -110,8 +116,7 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public int findColumn(String columnLabel) throws SQLException {
-        ImmutableList<MiniColumnHeader> columnHeaders = miniResultSet.columnHeaders();
-        int columnCount = columnHeaders.size();
+        ImmutableList<MiniColumnHeader> columnHeaders = getMiniColumnHeaders();
         for (int i = 0; i < columnCount; i++) {
             String columnName = columnHeaders.get(i).name();
             if (columnName.equals(columnLabel)) {
@@ -232,13 +237,13 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public boolean next() throws SQLException {
-        Iterator<ImmutableList<MiniValue>> iterator = miniResultSet.iterator();
+        Iterator<ResultRecord> iterator = resultTable.iterator();
         if (!iterator.hasNext()) {
-            currentRow = null;
+            currentRecord = null;
             return false;
         }
         
-        currentRow = iterator.next();
+        currentRecord = iterator.next();
         return true;
     }
 
@@ -582,13 +587,15 @@ public class MiniJdbcResultSet implements ResultSet {
         return getObject(columnIndex, type, null);
     }
 
+    // FIXME: modifier?
     public <T> T getObject(int columnIndex, Class<T> type, Object modifier) throws SQLException {
         T streamResult = tryConvertStream(columnIndex, type);
         if (streamResult != null) {
             return streamResult;
         }
         
-        return generalConverter.convert(getObject(columnIndex), type, modifier);
+        ResultField resultField = getResultField(columnIndex);
+        return resultField.as(type);
     }
     
     @SuppressWarnings("unchecked")
@@ -615,19 +622,26 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public Object getObject(int columnIndex) throws SQLException {
-        DefaultValueInterpreter interpreter = metaData.getValueInterpreter(columnIndex);
-        MiniValue miniValue = getMiniValue(columnIndex);
-        Object result = interpreter.decode(miniValue);
+        ResultField resultField = getResultField(columnIndex);
+        Object result = resultField.get();
         wasNull = (result == null);
         return result;
     }
-    
+
     public MiniValue getMiniValue(int columnIndex) throws SQLException {
-        if (columnIndex < 1 || columnIndex > currentRow.size()) {
+        if (columnIndex < 1 || columnIndex > columnCount) {
             throw new SQLException(String.format("Invalid column index: %d", columnIndex));
         }
         
-        return currentRow.get(columnIndex - 1);
+        return currentRecord.row().get(columnIndex - 1);
+    }
+    
+    public ResultField getResultField(int columnIndex) throws SQLException {
+        if (columnIndex < 1 || columnIndex > columnCount) {
+            throw new SQLException(String.format("Invalid column index: %d", columnIndex));
+        }
+        
+        return currentRecord.get(columnIndex - 1);
     }
 
     @Override

@@ -33,6 +33,10 @@ public class ResultRecord {
     }
     
 
+    public ImmutableList<MiniValue> row() {
+        return row;
+    }
+    
     public ImmutableList<ResultField> getAll() {
         int size = row.size();
         List<ResultField> resultBuilder = new ArrayList<>(size);

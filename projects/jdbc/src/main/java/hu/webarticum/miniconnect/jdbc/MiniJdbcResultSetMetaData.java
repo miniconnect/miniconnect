@@ -6,19 +6,30 @@ import java.sql.Types;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.lang.ImmutableList;
-import hu.webarticum.miniconnect.record.translator.OLD.DefaultValueInterpreter;
+import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
 
     private final MiniJdbcResultSet resultSet;
 
-    private final ImmutableList<DefaultValueInterpreter> interpreters; // FIXME
+    private final ImmutableList<String> columnTypeNames;
     
     
     public MiniJdbcResultSetMetaData(MiniJdbcResultSet resultSet) {
         this.resultSet = resultSet;
-        this.interpreters = resultSet.getMiniResultSet().columnHeaders().map(
-                h -> new DefaultValueInterpreter(h.valueDefinition()));
+        this.columnTypeNames = resultSet.getMiniColumnHeaders().map(
+                MiniJdbcResultSetMetaData::columnTypeNameOf);
+    }
+    
+    // FIXME
+    private static String columnTypeNameOf(MiniColumnHeader columnHeader) {
+        String typeName = columnHeader.valueDefinition().type();
+        for (StandardValueType valueType : StandardValueType.values()) {
+            if (valueType.name().equals(typeName)) {
+                valueType.clazz().getName();
+            }
+        }
+        return "";
     }
     
     
@@ -44,7 +55,7 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public int getColumnCount() throws SQLException {
-        return resultSet.getMiniResultSet().columnHeaders().size();
+        return resultSet.getColumnCount();
     }
 
     @Override
@@ -65,12 +76,13 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public String getColumnClassName(int column) throws SQLException {
-        return getValueInterpreter(column).type().getName();
+        return columnTypeNames.get(column - 1);
     }
 
     @Override
     public String getColumnLabel(int column) throws SQLException {
-        return getColumnHeader(column).name();
+        MiniColumnHeader columnHeader = resultSet.getMiniColumnHeaders().get(column - 1);
+        return columnHeader.name();
     }
 
     @Override
@@ -85,7 +97,8 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public int isNullable(int column) throws SQLException {
-        return getColumnHeader(column).isNullable() ?
+        MiniColumnHeader columnHeader = resultSet.getMiniColumnHeaders().get(column - 1);
+        return columnHeader.isNullable() ?
                 ResultSetMetaData.columnNullable :
                 ResultSetMetaData.columnNoNulls;
     }
@@ -153,20 +166,6 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
     @Override
     public int getColumnDisplaySize(int column) throws SQLException {
         return 0; // TODO
-    }
-
-    
-    
-    
-    /////////////////////////////////////////////////////////////////
-    
-    // FIXME: Default...
-    public DefaultValueInterpreter getValueInterpreter(int column) {
-        return interpreters.get(column - 1);
-    }
-
-    private MiniColumnHeader getColumnHeader(int column) {
-        return resultSet.getMiniResultSet().columnHeaders().get(column - 1);
     }
 
 }
