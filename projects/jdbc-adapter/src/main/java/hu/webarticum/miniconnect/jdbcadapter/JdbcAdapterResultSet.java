@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +31,7 @@ import hu.webarticum.miniconnect.record.type.ValueType;
 public class JdbcAdapterResultSet implements MiniResultSet {
     
     private static final Map<JDBCType, ValueType> TYPE_MAPPING =
-            Collections.synchronizedMap(new HashMap<>());
+            Collections.synchronizedMap(new EnumMap<>(JDBCType.class));
     static {
         TYPE_MAPPING.put(JDBCType.NULL, StandardValueType.NULL);
         TYPE_MAPPING.put(JDBCType.BOOLEAN, StandardValueType.BOOL);
