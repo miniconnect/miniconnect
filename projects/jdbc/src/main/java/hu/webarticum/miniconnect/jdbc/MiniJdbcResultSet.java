@@ -600,16 +600,24 @@ public class MiniJdbcResultSet implements ResultSet {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
+        ResultField resultField = getResultField(columnIndex);
+        Object value = resultField.get();
+        
+        if (type.isAssignableFrom(value.getClass())) {
+            return (T) value;
+        }
+        
         T jdbcTypeResult = tryConvertToJdbcType(columnIndex, type);
         if (jdbcTypeResult != null) {
             return jdbcTypeResult;
         }
         
-        ResultField resultField = getResultField(columnIndex);
         return resultField.as(type);
     }
 
+    // TODO: inject converters instead...
     @SuppressWarnings("unchecked")
     private <T> T tryConvertToJdbcType(int columnIndex, Class<T> type) throws SQLException {
         if (type == Date.class) {

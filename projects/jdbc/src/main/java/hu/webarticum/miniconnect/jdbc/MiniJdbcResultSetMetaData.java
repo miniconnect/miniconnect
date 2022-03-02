@@ -12,6 +12,9 @@ import java.sql.Types;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,6 +53,9 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
         TYPE_MAPPING.put(java.util.Date.class.getName(), JDBCType.DATE);
         TYPE_MAPPING.put(Instant.class.getName(), JDBCType.TIMESTAMP);
         TYPE_MAPPING.put(Timestamp.class.getName(), JDBCType.TIMESTAMP);
+        TYPE_MAPPING.put(OffsetTime.class.getName(), JDBCType.TIME_WITH_TIMEZONE);
+        TYPE_MAPPING.put(OffsetDateTime.class.getName(), JDBCType.TIMESTAMP_WITH_TIMEZONE);
+        TYPE_MAPPING.put(ZonedDateTime.class.getName(), JDBCType.TIMESTAMP_WITH_TIMEZONE);
         TYPE_MAPPING.put(BlobValue.class.getName(), JDBCType.BLOB);
         TYPE_MAPPING.put(ClobValue.class.getName(), JDBCType.CLOB);
     }
