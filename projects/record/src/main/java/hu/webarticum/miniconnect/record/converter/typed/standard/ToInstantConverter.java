@@ -1,5 +1,6 @@
 package hu.webarticum.miniconnect.record.converter.typed.standard;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -8,6 +9,7 @@ import java.time.ZoneOffset;
 
 import hu.webarticum.miniconnect.record.converter.UnsupportedConversionException;
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
+import hu.webarticum.miniconnect.record.util.Numbers;
 
 public class ToInstantConverter implements TypedConverter<Instant> {
 
@@ -27,7 +29,10 @@ public class ToInstantConverter implements TypedConverter<Instant> {
         } else if (source instanceof LocalDate) {
             return ((LocalDate) source).atStartOfDay().toInstant(ZoneOffset.UTC);
         } else if (source instanceof Number) {
-            return Instant.ofEpochSecond(((Number) source).longValue());
+            BigDecimal bigDecimalValue = Numbers.toBigDecimal((Number) source, 9);
+            long secondsSinceEpoch = bigDecimalValue.toBigInteger().longValueExact();
+            int nanoOfSecond = bigDecimalValue.remainder(BigDecimal.ONE).unscaledValue().intValue();
+            return Instant.ofEpochSecond(secondsSinceEpoch, nanoOfSecond);
         } else if (source instanceof String) {
             return Instant.parse((String) source);
         } else {
