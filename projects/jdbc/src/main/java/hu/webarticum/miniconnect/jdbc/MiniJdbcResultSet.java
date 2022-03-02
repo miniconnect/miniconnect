@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.sql.Array;
@@ -21,6 +22,9 @@ import java.sql.SQLXML;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Map;
@@ -106,12 +110,12 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public SQLWarning getWarnings() throws SQLException {
-        return null; // TODO
+        return null;
     }
 
     @Override
     public void clearWarnings() throws SQLException {
-        // TODO
+        // nothing to do
     }
 
     @Override
@@ -340,7 +344,8 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Deprecated
     @Override
-    public BigDecimal getBigDecimal(String columnLabel, int scale) throws SQLException {
+    public BigDecimal getBigDecimal( // NOSONAR: deprecated by JDBC
+            String columnLabel, int scale) throws SQLException {
         return getBigDecimal(findColumn(columnLabel), scale);
     }
 
@@ -351,8 +356,9 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Deprecated
     @Override
-    public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
-        return getObject(columnIndex, BigDecimal.class, scale);
+    public BigDecimal getBigDecimal( // NOSONAR: deprecated by JDBC
+            int columnIndex, int scale) throws SQLException {
+        return getBigDecimal(columnIndex).setScale(scale, RoundingMode.HALF_UP);
     }
 
     @Override
@@ -391,8 +397,8 @@ public class MiniJdbcResultSet implements ResultSet {
     }
 
     @Override
-    public Date getDate(String columnLabel, Calendar cal) throws SQLException {
-        return getDate(findColumn(columnLabel), cal);
+    public Date getDate(String columnLabel, Calendar calendar) throws SQLException {
+        return getDate(findColumn(columnLabel), calendar);
     }
 
     @Override
@@ -401,8 +407,10 @@ public class MiniJdbcResultSet implements ResultSet {
     }
 
     @Override
-    public Date getDate(int columnIndex, Calendar cal) throws SQLException {
-        return getObject(columnIndex, Date.class, cal);
+    public Date getDate(int columnIndex, Calendar calendar) throws SQLException {
+        Instant instant = getDate(columnIndex).toInstant();
+        ZoneId zoneId = calendar.getTimeZone().toZoneId();
+        return Date.valueOf(LocalDate.ofInstant(instant, zoneId));
     }
 
     @Override
@@ -411,8 +419,8 @@ public class MiniJdbcResultSet implements ResultSet {
     }
 
     @Override
-    public Time getTime(String columnLabel, Calendar cal) throws SQLException {
-        return getTime(findColumn(columnLabel), cal);
+    public Time getTime(String columnLabel, Calendar calendar) throws SQLException {
+        return getTime(findColumn(columnLabel), calendar);
     }
 
     @Override
@@ -421,8 +429,9 @@ public class MiniJdbcResultSet implements ResultSet {
     }
 
     @Override
-    public Time getTime(int columnIndex, Calendar cal) throws SQLException {
-        return getObject(columnIndex, Time.class, cal);
+    public Time getTime(int columnIndex, Calendar calendar) throws SQLException {
+        // FIXME: calendar?
+        return getTime(columnIndex);
     }
 
     @Override
@@ -441,8 +450,9 @@ public class MiniJdbcResultSet implements ResultSet {
     }
 
     @Override
-    public Timestamp getTimestamp(int columnIndex, Calendar cal) throws SQLException {
-        return getObject(columnIndex, Timestamp.class, cal);
+    public Timestamp getTimestamp(int columnIndex, Calendar calendar) throws SQLException {
+        // FIXME: calendar?
+        return getTimestamp(columnIndex);
     }
 
     @Override
@@ -497,13 +507,15 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Deprecated
     @Override
-    public InputStream getUnicodeStream(String columnLabel) throws SQLException {
+    public InputStream getUnicodeStream( // NOSONAR: deprecated by JDBC
+            String columnLabel) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
     @Deprecated
     @Override
-    public InputStream getUnicodeStream(int columnIndex) throws SQLException {
+    public InputStream getUnicodeStream( // NOSONAR: deprecated by JDBC
+            int columnIndex) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
@@ -589,11 +601,6 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
-        return getObject(columnIndex, type, null);
-    }
-
-    // FIXME: modifier?
-    public <T> T getObject(int columnIndex, Class<T> type, Object modifier) throws SQLException {
         T streamResult = tryConvertStream(columnIndex, type);
         if (streamResult != null) {
             return streamResult;

@@ -17,9 +17,8 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
     
     public MiniJdbcResultSetMetaData(MiniJdbcResultSet resultSet) {
         this.resultSet = resultSet;
-        ImmutableList<ValueTranslator> valueTranslators = resultSet.getValueTranslators();
-        this.columnClassNames = resultSet.getMiniColumnHeaders().mapIndex(
-                (i, h) -> valueTranslators.get(i).assuredClazzName());
+        this.columnClassNames = resultSet.getValueTranslators()
+                .map(ValueTranslator::assuredClazzName);
     }
     
     
@@ -50,7 +49,7 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public int getColumnType(int column) throws SQLException {
-        
+        //JDBCType.BIGINT.
         // FIXME / TODO
         return Types.JAVA_OBJECT;
         
