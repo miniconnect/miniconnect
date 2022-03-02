@@ -14,15 +14,26 @@ public class JavaTranslator implements ValueTranslator {
     public static final String NAME = "JAVA"; // NOSONAR same name is OK
     
 
-    private static final JavaTranslator INSTANCE = new JavaTranslator();
+    private static final JavaTranslator UNBOUND_INSTANCE = new JavaTranslator(null);
     
     
-    private JavaTranslator() {
-        // singleton
+    private final String assuredClazzName;
+    
+
+    private JavaTranslator(String assuredClazzName) {
+        this.assuredClazzName = assuredClazzName;
     }
     
-    public static JavaTranslator instance() {
-        return INSTANCE;
+    public static JavaTranslator unboundInstance() {
+        return UNBOUND_INSTANCE;
+    }
+
+    public static JavaTranslator of(String assuredClazzName) {
+        return new JavaTranslator(assuredClazzName);
+    }
+
+    public static JavaTranslator of(Class<?> assuredClazz) {
+        return new JavaTranslator(assuredClazz.getName());
     }
     
 
@@ -38,20 +49,50 @@ public class JavaTranslator implements ValueTranslator {
     
     @Override
     public Object decode(MiniContentAccess contentAccess) {
+        Object value;
         try (ObjectInputStream in = new ObjectInputStream(contentAccess.inputStream())) {
-            return in.readObject();
+            value = in.readObject();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException(e);
         }
+        checkAssuredType(value);
+        return value;
     }
 
     @Override
     public MiniContentAccess encode(Object value) {
+        checkAssuredType(value);
         return DynamicContentAccessBuilder.open()
                 .writing(out -> new ObjectOutputStream(out).writeObject(value))
                 .build();
     }
+    
+    private void checkAssuredType(Object value) {
+        if (assuredClazzName == null && value == null) {
+            return;
+        }
 
+        Class<?> expectedClazz;
+        try {
+            expectedClazz = Class.forName(assuredClazzName);
+        } catch (ClassNotFoundException e) {
+            throw new UncheckedIOException("Unknown type: " + assuredClazzName, new IOException(e));
+        }
+        
+        Class<?> actualClazz = value.getClass();
+        if (expectedClazz.isAssignableFrom(actualClazz)) {
+            throw new IllegalArgumentException(String.format(
+                    "Unexpected type: %s (expected superclass: %s)",
+                    actualClazz.getName(),
+                    assuredClazzName));
+        }
+    }
+
+    @Override
+    public String assuredClazzName() {
+        return assuredClazzName == null ? Object.class.getName() : assuredClazzName;
+    }
+    
 }

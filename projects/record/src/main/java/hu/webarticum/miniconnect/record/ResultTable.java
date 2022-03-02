@@ -43,7 +43,7 @@ public class ResultTable implements Iterable<ResultRecord> {
         MiniValueDefinition valueDefinition = columnHeader.valueDefinition();
         String typeName = valueDefinition.type();
         if (typeName.equals(JavaTranslator.NAME)) {
-            return JavaTranslator.instance();
+            return JavaTranslator.unboundInstance();
         }
         ValueType valueType = StandardValueType.valueOf(typeName);
         return valueType.translatorFor(valueDefinition.properties());
