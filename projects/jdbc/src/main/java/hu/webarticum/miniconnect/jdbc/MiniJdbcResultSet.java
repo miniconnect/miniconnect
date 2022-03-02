@@ -1,7 +1,6 @@
 package hu.webarticum.miniconnect.jdbc;
 
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -24,6 +23,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -601,24 +601,23 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
-        T streamResult = tryConvertStream(columnIndex, type);
-        if (streamResult != null) {
-            return streamResult;
+        T jdbcTypeResult = tryConvertToJdbcType(columnIndex, type);
+        if (jdbcTypeResult != null) {
+            return jdbcTypeResult;
         }
         
         ResultField resultField = getResultField(columnIndex);
         return resultField.as(type);
     }
-    
+
     @SuppressWarnings("unchecked")
-    private <T> T tryConvertStream(int columnIndex, Class<T> type) throws SQLException {
-        // FIXME: character sets?
-        if (type == InputStream.class) {
-            return (T) getMiniValue(columnIndex).contentAccess().inputStream();
-        } else if (type == Reader.class) {
-            return (T) new InputStreamReader(
-                    getMiniValue(columnIndex).contentAccess().inputStream(),
-                    StandardCharsets.UTF_8);
+    private <T> T tryConvertToJdbcType(int columnIndex, Class<T> type) throws SQLException {
+        if (type == Date.class) {
+            return (T) Date.valueOf(getResultField(columnIndex).as(LocalDate.class));
+        } else if (type == Time.class) {
+            return (T) Time.valueOf(getResultField(columnIndex).as(LocalTime.class));
+        } else if (type == Timestamp.class) {
+            return (T) Timestamp.from(getResultField(columnIndex).as(Instant.class));
         } else if (type == Blob.class) {
             return (T) new ContentAccessBlob(getMiniValue(columnIndex).contentAccess());
         } else if (type == Clob.class || type == NClob.class) {
