@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetTime;
 import java.util.function.Function;
 
 import hu.webarticum.miniconnect.lang.ByteString;
@@ -29,6 +30,8 @@ import hu.webarticum.miniconnect.record.translator.FloatTranslator;
 import hu.webarticum.miniconnect.record.translator.IntTranslator;
 import hu.webarticum.miniconnect.record.translator.LongTranslator;
 import hu.webarticum.miniconnect.record.translator.NullTranslator;
+import hu.webarticum.miniconnect.record.translator.OffsetDateTimeTranslator;
+import hu.webarticum.miniconnect.record.translator.OffsetTimeTranslator;
 import hu.webarticum.miniconnect.record.translator.ShortTranslator;
 import hu.webarticum.miniconnect.record.translator.StringTranslator;
 import hu.webarticum.miniconnect.record.translator.TimeTranslator;
@@ -65,9 +68,13 @@ public enum StandardValueType implements ValueType {
     
     TIME(ByteString.of("TIM"), LocalTime.class, TimeTranslator.instance()),
     
+    OFFSETTIME(ByteString.of("OTM"), OffsetTime.class, OffsetTimeTranslator.instance()),
+    
     DATE(ByteString.of("DAT"), LocalDate.class, DateTranslator.instance()),
 
     DATETIME(ByteString.of("DTM"), LocalDateTime.class, DateTimeTranslator.instance()),
+    
+    OFFSETDATETIME(ByteString.of("ODT"), OffsetTime.class, OffsetDateTimeTranslator.instance()),
     
     TIMESTAMP(ByteString.of("TSP"), Instant.class, TimestampTranslator.instance()),
     

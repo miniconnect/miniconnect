@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.format.DateTimeFormatter;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
@@ -38,10 +40,14 @@ public class ToStringConverter implements TypedConverter<String> {
             return contentAccess.get().toString();
         } else if (source instanceof LocalDate) {
             return ((LocalDate) source).format(DateTimeFormatter.ISO_DATE);
+        } else if (source instanceof OffsetTime) {
+            return ((OffsetTime) source).format(DateTimeFormatter.ISO_DATE);
         } else if (source instanceof LocalTime) {
             return ((LocalTime) source).format(DateTimeFormatter.ISO_DATE);
         } else if (source instanceof LocalDateTime) {
             return ((LocalDateTime) source).format(DateTimeFormatter.ISO_DATE);
+        } else if (source instanceof OffsetDateTime) {
+            return ((OffsetDateTime) source).format(DateTimeFormatter.ISO_DATE);
         } else if (source instanceof Instant) {
             return ((Instant) source).toString();
         } else {

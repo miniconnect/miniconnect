@@ -5,6 +5,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZoneOffset;
 
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
@@ -31,8 +33,12 @@ public class ToLongConverter implements TypedConverter<Long> {
             return ((LocalDate) source).toEpochDay();
         } else if (source instanceof LocalTime) {
             return (long) ((LocalTime) source).toSecondOfDay();
+        } else if (source instanceof OffsetTime) {
+            return convert(((OffsetTime) source).toLocalTime());
         } else if (source instanceof LocalDateTime) {
             return ((LocalDateTime) source).toEpochSecond(ZoneOffset.UTC);
+        } else if (source instanceof OffsetDateTime) {
+            return convert(((OffsetDateTime) source).toInstant());
         } else if (source instanceof Instant) {
             return ((Instant) source).getEpochSecond();
         } else if (source instanceof CustomValue) {

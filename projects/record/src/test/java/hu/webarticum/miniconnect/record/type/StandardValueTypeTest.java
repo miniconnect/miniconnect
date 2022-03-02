@@ -11,13 +11,17 @@ class StandardValueTypeTest {
         assertThat(StandardValueType.values())
                 .extracting(t -> t.flag())
                 .doesNotHaveDuplicates()
-                .allMatch(f -> f.length() == StandardValueType.FLAG_LENGTH);
+                .allMatch(
+                        f -> f.length() == StandardValueType.FLAG_LENGTH,
+                        "Flag length must be equal to " + StandardValueType.FLAG_LENGTH);
     }
 
     @Test
     void testNames() throws Exception {
         assertThat(StandardValueType.values())
-                .allMatch(t -> t.defaultTranslator().name().equals(t.name()));
+                .allMatch(
+                        t -> t.defaultTranslator().name().equals(t.name()),
+                        "Standard value type name must match with associated enum contant name");
     }
     
 }

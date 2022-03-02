@@ -6,6 +6,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZoneOffset;
 
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
@@ -34,8 +36,12 @@ public class ToBigIntegerConverter implements TypedConverter<BigInteger> {
             return BigInteger.valueOf(((LocalDate) source).toEpochDay());
         } else if (source instanceof LocalTime) {
             return BigInteger.valueOf(((LocalTime) source).getSecond());
+        } else if (source instanceof OffsetTime) {
+            return convert(((OffsetTime) source).toLocalTime());
         } else if (source instanceof LocalDateTime) {
             return BigInteger.valueOf(((LocalDateTime) source).toEpochSecond(ZoneOffset.UTC));
+        } else if (source instanceof OffsetDateTime) {
+            return convert(((OffsetDateTime) source).toInstant());
         } else if (source instanceof Instant) {
             return BigInteger.valueOf(((Instant) source).getEpochSecond());
         } else if (source instanceof CustomValue) {

@@ -3,6 +3,7 @@ package hu.webarticum.miniconnect.record.converter.typed.standard;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 import hu.webarticum.miniconnect.record.converter.UnsupportedConversionException;
@@ -21,6 +22,8 @@ public class ToLocalDateConverter implements TypedConverter<LocalDate> {
             return (LocalDate) source;
         } else if (source instanceof LocalDateTime) {
             return ((LocalDateTime) source).toLocalDate();
+        } else if (source instanceof OffsetDateTime) {
+            return ((OffsetDateTime) source).toLocalDate();
         } else if (source instanceof Instant) {
             return LocalDate.ofInstant((Instant) source, ZoneOffset.UTC);
         } else if (source instanceof Number) {
