@@ -22,6 +22,7 @@ dependencies {
     api project(':lang')
     
     implementation project(':impl')
+    implementation project(':record')
     
     antlr 'org.antlr:antlr4:4.9.3'
     
