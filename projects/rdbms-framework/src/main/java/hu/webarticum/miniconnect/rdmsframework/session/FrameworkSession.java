@@ -2,7 +2,6 @@ package hu.webarticum.miniconnect.rdmsframework.session;
 
 import java.io.InputStream;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
@@ -58,12 +57,7 @@ public class FrameworkSession implements MiniSession, CheckableCloseable {
     public MiniResult executeThrowing(Query query) throws InterruptedException, ExecutionException {
         QueryExecutor queryExecutor = engineSession.queryExecutor();
         StorageAccess storageAccess = engineSession.storageAccess();
-        Future<Object> future = queryExecutor.execute(storageAccess, query); // TODO
-        Object executionResult = future.get(); // TODO
-        
-        // TODO
-        
-        return new StoredResult(new StoredError(99, "00099", "No error occured"));
+        return queryExecutor.execute(storageAccess, query);
     }
 
     @Override

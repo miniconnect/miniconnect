@@ -40,7 +40,7 @@ public final class StoredResultSetData implements Iterable<ImmutableList<MiniVal
 
     public StoredResultSetData(
             ImmutableList<? extends MiniColumnHeader> columnHeaders,
-            ImmutableList<ImmutableList<? extends MiniValue>> rows) {
+            ImmutableList<? extends ImmutableList<? extends MiniValue>> rows) {
         this.columnHeaders = columnHeaders.map(StoredColumnHeader::of);
         this.rows = rows.map(row -> row.map(
                 value -> (MiniValue) StoredValue.of(value)));
