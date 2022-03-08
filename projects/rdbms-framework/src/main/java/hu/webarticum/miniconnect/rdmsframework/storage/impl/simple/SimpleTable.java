@@ -217,7 +217,7 @@ public class SimpleTable implements Table {
             return this;
         }
 
-        public SimpleTableBuilder addColumn(String name, ImmutableList<String> columnNames) {
+        public SimpleTableBuilder addIndex(String name, ImmutableList<String> columnNames) {
             this.indexes.put(name, columnNames);
             return this;
         }
