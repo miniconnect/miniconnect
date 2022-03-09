@@ -12,6 +12,11 @@ public class EmptyNamedResourceStore<T extends NamedResource> implements NamedRe
     }
 
     @Override
+    public boolean contains(String name) {
+        return false;
+    }
+
+    @Override
     public T get(String name) {
         return null;
     }

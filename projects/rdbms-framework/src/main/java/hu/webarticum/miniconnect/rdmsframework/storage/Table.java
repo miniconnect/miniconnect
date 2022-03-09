@@ -6,8 +6,6 @@ import hu.webarticum.miniconnect.lang.ImmutableList;
 
 public interface Table extends NamedResource {
 
-    // TODO: lock management
-    
     public NamedResourceStore<Column> columns();
 
     public NamedResourceStore<TableIndex> indexes();

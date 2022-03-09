@@ -103,6 +103,11 @@ public class SimpleTable implements Table {
         }
 
         @Override
+        public boolean contains(String name) {
+            return columnNames.contains(name);
+        }
+        
+        @Override
         public Column get(String name) {
             return new SimpleColumn(name);
         }
@@ -156,6 +161,11 @@ public class SimpleTable implements Table {
         }
 
         @Override
+        public boolean contains(String name) {
+            return indexNames.contains(name);
+        }
+        
+        @Override
         public TableIndex get(String name) {
             return cache.computeIfAbsent(name, this::createIndex);
         }
@@ -204,6 +214,13 @@ public class SimpleTable implements Table {
 
         public SimpleTableBuilder addColumn(String name, ColumnDefinition columnDefinition) {
             this.columnDefinitions.put(name, columnDefinition);
+            return this;
+        }
+
+        public SimpleTableBuilder addColumnWithIndex(
+                String name, ColumnDefinition columnDefinition) {
+            addColumn(name, columnDefinition);
+            addIndex(name, ImmutableList.of(name));
             return this;
         }
 

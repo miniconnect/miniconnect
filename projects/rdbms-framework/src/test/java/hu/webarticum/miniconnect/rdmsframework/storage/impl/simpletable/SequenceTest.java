@@ -1,11 +1,11 @@
 package hu.webarticum.miniconnect.rdmsframework.storage.impl.simpletable;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import org.junit.jupiter.api.Test;
 
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.Sequence;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigInteger;
 

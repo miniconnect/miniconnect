@@ -13,4 +13,5 @@ public interface MiniValueDefinition {
     public int length();
 
     public ImmutableMap<String, ByteString> properties();
+    
 }

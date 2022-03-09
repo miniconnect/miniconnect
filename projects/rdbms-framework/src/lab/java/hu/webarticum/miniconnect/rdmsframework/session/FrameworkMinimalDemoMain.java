@@ -1,9 +1,9 @@
 package hu.webarticum.miniconnect.rdmsframework.session;
 
-import hu.webarticum.miniconnect.api.MiniColumnHeader;
+import java.io.IOException;
+
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
-import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.rdmsframework.engine.Engine;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSession;
@@ -14,13 +14,16 @@ import hu.webarticum.miniconnect.rdmsframework.execution.simple.SimpleSelectExec
 import hu.webarticum.miniconnect.rdmsframework.query.AntlrSqlParser;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
+import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleColumnDefinition;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleStorageAccess;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleTable;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleTableManager;
+import hu.webarticum.miniconnect.record.ResultTable;
+import hu.webarticum.miniconnect.repl.ResultSetPrinter;
 
 public class FrameworkMinimalDemoMain {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         SqlParser sqlParser = new AntlrSqlParser();
         QueryExecutor queryExecutor = new SimpleSelectExecutor();
         StorageAccess storageAccess = createStorageAccess();
@@ -29,8 +32,9 @@ public class FrameworkMinimalDemoMain {
                 EngineSession engineSession = engine.openSession();
                 MiniSession session = new FrameworkSession(engineSession)) {
             MiniResult result = session.execute(
-                    "SELECT lorem, ipsum AS dolor FROM data " +
-                            "WHERE x=1 AND y='apple' ORDER BY a ASC, b DESC");
+                    "SELECT id, label AS apple, description banana FROM data " +
+                            "WHERE label='Lorem' AND description='Hello' " +
+                            "ORDER BY id DESC");
                     //"DELETE FROM data WHERE a=1 AND b='banana'");
                     //"UPDATE data SET col1=NULL, col2=99, col3='str' WHERE a=1 AND b='banana'");
                     //"INSERT INTO data (id, label, description) VALUES (1, 'banana', NULL)");
@@ -39,19 +43,7 @@ public class FrameworkMinimalDemoMain {
                 System.out.println(result.error().message());
             } else {
                 System.out.println("OK");
-                for (MiniColumnHeader columnHeader : result.resultSet().columnHeaders()) {
-                    System.out.print(columnHeader.name());
-                    System.out.print(" | ");
-                }
-                System.out.println();
-                System.out.println("=============");
-                for (ImmutableList<MiniValue> row : result.resultSet()) {
-                    for (MiniValue value : row) {
-                        System.out.print(value.contentAccess().get().toString());
-                        System.out.print(" | ");
-                    }
-                    System.out.println();
-                }
+                new ResultSetPrinter().print(new ResultTable(result.resultSet()), System.out);
             }
         }
     }
@@ -59,7 +51,17 @@ public class FrameworkMinimalDemoMain {
     public static StorageAccess createStorageAccess() {
         SimpleStorageAccess storageAccess =  new SimpleStorageAccess();
         SimpleTableManager tableManager = storageAccess.tables();
-        Table table = SimpleTable.builder().name("data").build(); // TODO
+        Table table = SimpleTable.builder()
+                .name("data")
+                .addColumnWithIndex("id", new SimpleColumnDefinition())
+                .addColumnWithIndex("label", new SimpleColumnDefinition())
+                .addColumnWithIndex("description", new SimpleColumnDefinition())
+                .addRow(ImmutableList.of(1, "Lorem", "Hello"))
+                .addRow(ImmutableList.of(2, "Lorem", "World"))
+                .addRow(ImmutableList.of(3, "Lorem", "Hello"))
+                .addRow(ImmutableList.of(4, "Ipsum", "Hello"))
+                .addRow(ImmutableList.of(5, "Ipsum", "World"))
+                .build();
         tableManager.registerTable(table);
         return storageAccess;
     }

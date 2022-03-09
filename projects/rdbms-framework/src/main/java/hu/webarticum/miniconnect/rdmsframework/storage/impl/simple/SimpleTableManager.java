@@ -20,6 +20,11 @@ public class SimpleTableManager implements NamedResourceStore<Table> {
     }
 
     @Override
+    public boolean contains(String name) {
+        return tables.containsKey(name);
+    }
+    
+    @Override
     public Table get(String name) {
         return tables.get(name);
     }
