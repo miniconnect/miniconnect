@@ -7,7 +7,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetTime;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
@@ -110,22 +112,22 @@ public enum StandardValueType implements ValueType {
         this.translatorProvider = translatorProvider;
     }
 
-    public static StandardValueType forFlag(ByteString flag) {
+    public static StandardValueType ofFlag(ByteString flag) {
         for (StandardValueType member : values()) {
             if (member.flag == flag) {
                 return member;
             }
         }
-        throw new IllegalArgumentException("Unknown flag: " + flag);
+        throw new IllegalArgumentException("No value type with flag: " + flag);
     }
-    
-    public static StandardValueType forClazz(Class<?> clazz) {
+
+    public static Optional<StandardValueType> forClazz(Class<?> clazz) {
         for (StandardValueType member : values()) {
             if (member.clazz == clazz) {
-                return member;
+                return Optional.of(member);
             }
         }
-        throw new IllegalArgumentException("Unsupported class: " + clazz);
+        return Optional.empty();
     }
     
 

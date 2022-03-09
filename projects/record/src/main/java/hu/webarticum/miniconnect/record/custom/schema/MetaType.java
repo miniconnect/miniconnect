@@ -29,7 +29,7 @@ public enum MetaType {
         this.flag = flag;
         this.schemaSubReader = schemaSubReader;
     }
-    
+
     public static MetaType ofFlag(byte flag) {
         for (MetaType metaType : MetaType.values()) {
             if (metaType.flag == flag) {

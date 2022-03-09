@@ -4,27 +4,48 @@ import java.util.Comparator;
 
 import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
 
-// FIXME: create a proper column definition class
 public class SimpleColumnDefinition implements ColumnDefinition {
+    
+    private final boolean nullable;
+    
+    private final Class<?> clazz;
+    
+    private final Comparator<?> comparator;
+    
 
-    @Override
-    public boolean isNullable() {
-        return true;
+    public SimpleColumnDefinition() {
+        this(Object.class);
     }
-
-    @Override
-    public String sqlType() {
-        return "ANY";
+    
+    public SimpleColumnDefinition(Class<?> clazz) {
+        this(clazz, true);
     }
+    
+    public SimpleColumnDefinition(Class<?> clazz, boolean nullable) {
+        this(clazz, nullable, Comparator.naturalOrder());
+    }
+    
+    public SimpleColumnDefinition(Class<?> clazz, boolean nullable, Comparator<?> comparator) {
+        this.clazz = clazz;
+        this.nullable = nullable;
+        this.comparator = comparator;
+    }
+    
+    
 
     @Override
-    public Class<?> javaType() {
-        return Object.class;
+    public Class<?> clazz() {
+        return clazz;
     }
     
     @Override
+    public boolean isNullable() {
+        return nullable;
+    }
+
+    @Override
     public Comparator<?> comparator() {
-        return Comparator.naturalOrder();
+        return comparator;
     }
 
 }

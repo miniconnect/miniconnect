@@ -40,7 +40,7 @@ public class StandardSchema implements Schema {
 
     public static StandardSchema readMainFrom(InputStream in) {
         ByteString standardFlag = StreamUtil.readFixedBytes(in, StandardValueType.FLAG_LENGTH);
-        StandardValueType valueType = StandardValueType.forFlag(standardFlag);
+        StandardValueType valueType = StandardValueType.ofFlag(standardFlag);
         int propertiesSize = StreamUtil.readInt(in);
         Map<String, ByteString> propertiesBuilder = new HashMap<>();
         for (int i = 0; i < propertiesSize; i++) {

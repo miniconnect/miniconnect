@@ -53,9 +53,9 @@ public class FrameworkMinimalDemoMain {
         SimpleTableManager tableManager = storageAccess.tables();
         Table table = SimpleTable.builder()
                 .name("data")
-                .addColumnWithIndex("id", new SimpleColumnDefinition())
-                .addColumnWithIndex("label", new SimpleColumnDefinition())
-                .addColumnWithIndex("description", new SimpleColumnDefinition())
+                .addColumnWithIndex("id", new SimpleColumnDefinition(Integer.class))
+                .addColumnWithIndex("label", new SimpleColumnDefinition(String.class))
+                .addColumnWithIndex("description", new SimpleColumnDefinition(String.class))
                 .addRow(ImmutableList.of(1, "Lorem", "Hello"))
                 .addRow(ImmutableList.of(2, "Lorem", "World"))
                 .addRow(ImmutableList.of(3, "Lorem", "Hello"))

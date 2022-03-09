@@ -2,16 +2,13 @@ package hu.webarticum.miniconnect.rdmsframework.storage;
 
 import java.util.Comparator;
 
+// TODO: more functionality
 public interface ColumnDefinition {
 
+    public Class<?> clazz();
+    
     public boolean isNullable();
     
-    public String sqlType(); // FIXME
-    
-    public Class<?> javaType();
-    
     public Comparator<?> comparator(); // NOSONAR
-    
-    // TODO: default value/generator, value restrictions
     
 }

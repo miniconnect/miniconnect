@@ -9,6 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -23,6 +24,7 @@ import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery;
+import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
 import hu.webarticum.miniconnect.rdmsframework.storage.RangeSelection;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
@@ -31,6 +33,7 @@ import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelectionEntry;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.MultiComparator;
+import hu.webarticum.miniconnect.record.translator.JavaTranslator;
 import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 import hu.webarticum.miniconnect.record.type.StandardValueType;
 
@@ -234,13 +237,18 @@ public class SimpleSelectExecutor implements QueryExecutor {
 
     private ImmutableList<ValueTranslator> collectValueTranslators(
             Table table, Map<String, String> queryFields) {
-        
-        // FIXME / TODO
-        return ImmutableList.of(
-                StandardValueType.INT.defaultTranslator(),
-                StandardValueType.STRING.defaultTranslator(),
-                StandardValueType.STRING.defaultTranslator());
-        
+        return ImmutableList.fromCollection(queryFields.values())
+                .map(n -> table.columns().get(n).definition())
+                .map(this::createValueTranslator);
+    }
+    
+    private ValueTranslator createValueTranslator(ColumnDefinition columnDefinition) {
+        Class<?> clazz = columnDefinition.clazz();
+        Optional<StandardValueType> optional = StandardValueType.forClazz(clazz);
+        if (optional.isPresent()) {
+            return optional.get().defaultTranslator();
+        }
+        return JavaTranslator.of(clazz);
     }
 
     private ImmutableList<MiniColumnHeader> createColumnHeaders(
