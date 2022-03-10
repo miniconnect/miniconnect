@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-sourceCompatibility = 1.8
+description "MiniConnect API definition"
 
 dependencies {
     api project(':lang')

@@ -1,4 +1,5 @@
-description = "MiniConnect"
+description = "MiniConnect - sane database API for Java"
+
 defaultTasks "build"
 
 allprojects {
@@ -12,6 +13,9 @@ allprojects {
 
 subprojects {
     afterEvaluate {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+        
         if (sourceSets.hasProperty("lab")) {
             task execLab(type: JavaExec) {
                 group = 'Execution'

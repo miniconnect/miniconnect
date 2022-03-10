@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-sourceCompatibility = 1.8
+description "Essential value types"
 
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'

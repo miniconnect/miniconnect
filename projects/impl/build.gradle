@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-sourceCompatibility = 1.8
+description "Obvious implementations of some api pieces"
 
 dependencies {
     api project(':api')

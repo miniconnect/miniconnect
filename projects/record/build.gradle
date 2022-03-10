@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-sourceCompatibility = 1.8
+description "Easy-to-use wrapper for result sets"
 
 sourceSets {
     lab {
