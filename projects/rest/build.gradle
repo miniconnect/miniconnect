@@ -18,7 +18,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.example.Application")
+    mainClass.set("hu.webarticum.miniconnect.rest.Application")
 }
 
 java {

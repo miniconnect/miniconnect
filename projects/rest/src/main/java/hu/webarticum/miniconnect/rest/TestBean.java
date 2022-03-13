@@ -1,4 +1,4 @@
-package com.example;
+package hu.webarticum.miniconnect.rest;
 
 public class TestBean {
     

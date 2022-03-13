@@ -1,4 +1,4 @@
-package com.example;
+package hu.webarticum.miniconnect.rest;
 
 import io.micronaut.context.annotation.Factory;
 import jakarta.inject.Singleton;
