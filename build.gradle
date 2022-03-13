@@ -3,7 +3,7 @@ description = "MiniConnect - sane database API for Java"
 defaultTasks "build"
 
 allprojects {
-    group "hu.webarticum"
+    group "hu.webarticum.miniconnect"
     version '0.1.0-SNAPSHOT'
     
     repositories {
