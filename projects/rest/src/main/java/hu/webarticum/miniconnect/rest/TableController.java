@@ -18,6 +18,9 @@ import io.micronaut.http.annotation.QueryValue;
 import io.micronaut.http.exceptions.HttpStatusException;
 
 // TODO: make queries configurable
+// TODO: add support for name singularization
+// TODO: add support for single-row selection by primary key
+// TODO: add support for sub-entities by foreign key
 @Controller("/tables")
 public class TableController {
     
@@ -59,6 +62,7 @@ public class TableController {
         throw new HttpStatusException(HttpStatus.NOT_FOUND, "Table not found: " + tableName);
     }
 
+    //TODO: add support for search, order and limit
     @Get("/{tableName}/rows")
     public List<Map<String, Object>> handleTableData(
             @QueryValue("tableName") String tableName) {
