@@ -31,7 +31,7 @@ public final class ImmutableMap<K, V> implements Serializable {
     }
 
     public static <K, V> ImmutableMap<K, V> of(K key1, V value1, K key2, V value2) {
-        Map<K, V> data = new HashMap<>(1);
+        Map<K, V> data = new HashMap<>(2);
         data.put(key1, value1);
         data.put(key2, value2);
         return new ImmutableMap<>(data);
@@ -41,7 +41,7 @@ public final class ImmutableMap<K, V> implements Serializable {
             K key1, V value1,
             K key2, V value2,
             K key3, V value3) {
-        Map<K, V> data = new HashMap<>(1);
+        Map<K, V> data = new HashMap<>(3);
         data.put(key1, value1);
         data.put(key2, value2);
         data.put(key3, value3);
@@ -53,7 +53,7 @@ public final class ImmutableMap<K, V> implements Serializable {
             K key2, V value2,
             K key3, V value3,
             K key4, V value4) {
-        Map<K, V> data = new HashMap<>(1);
+        Map<K, V> data = new HashMap<>(4);
         data.put(key1, value1);
         data.put(key2, value2);
         data.put(key3, value3);
@@ -67,7 +67,7 @@ public final class ImmutableMap<K, V> implements Serializable {
             K key3, V value3,
             K key4, V value4,
             K key5, V value5) {
-        Map<K, V> data = new HashMap<>(1);
+        Map<K, V> data = new HashMap<>(5);
         data.put(key1, value1);
         data.put(key2, value2);
         data.put(key3, value3);
@@ -83,7 +83,7 @@ public final class ImmutableMap<K, V> implements Serializable {
             K key4, V value4,
             K key5, V value5,
             K key6, V value6) {
-        Map<K, V> data = new HashMap<>(1);
+        Map<K, V> data = new HashMap<>(6);
         data.put(key1, value1);
         data.put(key2, value2);
         data.put(key3, value3);
@@ -101,7 +101,7 @@ public final class ImmutableMap<K, V> implements Serializable {
             K key5, V value5,
             K key6, V value6,
             K key7, V value7) {
-        Map<K, V> data = new HashMap<>(1);
+        Map<K, V> data = new HashMap<>(7);
         data.put(key1, value1);
         data.put(key2, value2);
         data.put(key3, value3);
@@ -121,7 +121,7 @@ public final class ImmutableMap<K, V> implements Serializable {
             K key6, V value6,
             K key7, V value7,
             K key8, V value8) {
-        Map<K, V> data = new HashMap<>(1);
+        Map<K, V> data = new HashMap<>(8);
         data.put(key1, value1);
         data.put(key2, value2);
         data.put(key3, value3);
@@ -143,7 +143,7 @@ public final class ImmutableMap<K, V> implements Serializable {
             K key7, V value7,
             K key8, V value8,
             K key9, V value9) {
-        Map<K, V> data = new HashMap<>(1);
+        Map<K, V> data = new HashMap<>(9);
         data.put(key1, value1);
         data.put(key2, value2);
         data.put(key3, value3);
@@ -167,7 +167,7 @@ public final class ImmutableMap<K, V> implements Serializable {
             K key8, V value8,
             K key9, V value9,
             K key10, V value10) {
-        Map<K, V> data = new HashMap<>(1);
+        Map<K, V> data = new HashMap<>(10);
         data.put(key1, value1);
         data.put(key2, value2);
         data.put(key3, value3);
