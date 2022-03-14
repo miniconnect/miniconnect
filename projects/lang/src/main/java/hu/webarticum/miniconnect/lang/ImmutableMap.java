@@ -201,6 +201,15 @@ public final class ImmutableMap<K, V> implements Serializable {
         return new ImmutableMap<>(new HashMap<>(map));
     }
 
+    public static <K, V> ImmutableMap<K, V> assignFrom(
+            Iterable<K> source, int size, Function<K, V> mapper) {
+        Map<K, V> data = new HashMap<>(size);
+        for (K key : source) {
+            data.put(key, mapper.apply(key));
+        }
+        return new ImmutableMap<>(data);
+    }
+
 
     public boolean isEmpty() {
         return data.isEmpty();

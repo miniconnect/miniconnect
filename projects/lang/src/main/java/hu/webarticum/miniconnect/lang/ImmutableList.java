@@ -183,6 +183,10 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
         return new ArrayList<>(data);
     }
 
+    public <U> ImmutableMap<T, U> assign(Function<T, U> valueMapper) {
+        return ImmutableMap.assignFrom(data, data.size(), valueMapper);
+    }
+
     @Override
     public int hashCode() {
         return data.hashCode();
