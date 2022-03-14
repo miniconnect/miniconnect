@@ -1,29 +1,32 @@
 plugins {
-    id("com.github.johnrengelman.shadow") version "7.1.1"
-    id("io.micronaut.application") version "3.2.2"
+    id 'com.github.johnrengelman.shadow' version '7.1.1'
+    id 'io.micronaut.application' version '3.2.2'
 }
 
 description "Simple REST API for MiniConnect"
 
 dependencies {
-    annotationProcessor("io.micronaut:micronaut-http-validation")
-    implementation("io.micronaut:micronaut-http-client")
-    implementation("io.micronaut:micronaut-jackson-databind")
-    implementation("io.micronaut:micronaut-runtime")
-    implementation("jakarta.annotation:jakarta.annotation-api")
-    runtimeOnly("ch.qos.logback:logback-classic")
-    testImplementation("org.assertj:assertj-core")
-    implementation("io.micronaut:micronaut-validation")
+    annotationProcessor 'io.micronaut:micronaut-http-validation'
+    
+    implementation project(':api')
+    implementation project(':record')
+    implementation 'jakarta.annotation:jakarta.annotation-api'
+    implementation 'io.micronaut:micronaut-http-client'
+    implementation 'io.micronaut:micronaut-jackson-databind'
+    implementation 'io.micronaut:micronaut-runtime'
+    implementation 'io.micronaut:micronaut-validation'
+    
+    // FIXME
+    implementation project(':jdbc-adapter')
+	implementation 'com.h2database:h2:1.4.200'
+    
+    runtimeOnly 'ch.qos.logback:logback-classic'
 
+    testImplementation 'org.assertj:assertj-core'
 }
 
 application {
-    mainClass.set("hu.webarticum.miniconnect.rest.Application")
-}
-
-java {
-    sourceCompatibility = JavaVersion.toVersion("11")
-    targetCompatibility = JavaVersion.toVersion("11")
+    mainClass = "hu.webarticum.miniconnect.rest.Application"
 }
 
 graalvmNative.toolchainDetection = false
