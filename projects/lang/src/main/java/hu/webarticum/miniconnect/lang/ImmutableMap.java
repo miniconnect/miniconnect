@@ -225,6 +225,18 @@ public final class ImmutableMap<K, V> implements Serializable {
     public boolean containsKey(K key) {
         return data.containsKey(key);
     }
+    
+    public Set<K> keySet() {
+        return Collections.unmodifiableSet(data.keySet());
+    }
+
+    public ImmutableList<K> keys() {
+        return ImmutableList.fromCollection(data.keySet());
+    }
+
+    public ImmutableList<V> values() {
+        return ImmutableList.fromCollection(data.values());
+    }
 
     public V get(K key) {
         return data.get(key);
