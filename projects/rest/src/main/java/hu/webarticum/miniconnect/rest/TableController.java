@@ -11,6 +11,10 @@ import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.record.ResultRecord;
 import hu.webarticum.miniconnect.record.ResultTable;
+import hu.webarticum.miniconnect.rest.crud.EntityCrudStrategy;
+import hu.webarticum.miniconnect.rest.query.EntityListQueryExecutor;
+import hu.webarticum.miniconnect.rest.query.EntityListQueryExecutorStrategy;
+import hu.webarticum.miniconnect.rest.schema.RestSchema;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
@@ -25,12 +29,31 @@ import io.micronaut.http.exceptions.HttpStatusException;
 public class TableController {
     
     private final MiniSession session;
+
+    private final RestSchema schema;
+    
+    private final EntityListQueryExecutorStrategy queryExecutorStrategy;
+    
+    private final EntityCrudStrategy crudStrategy;
     
     
-    public TableController(MiniSession session) {
+    public TableController(
+            MiniSession session,
+            RestSchema schema,
+            EntityListQueryExecutorStrategy queryExecutorStrategy,
+            EntityCrudStrategy crudStrategy) {
         this.session = session;
+        this.schema = schema;
+        this.queryExecutorStrategy = queryExecutorStrategy;
+        this.crudStrategy = crudStrategy;
+    }
+
+    @Get("/")
+    public RestSchema handle() {
+        return schema;
     }
     
+    /*
     // TODO: make it unified
     // FIXME: describe?
     @Get("/")
@@ -78,5 +101,5 @@ public class TableController {
         }
         return result;
     }
-    
+    */
 }
