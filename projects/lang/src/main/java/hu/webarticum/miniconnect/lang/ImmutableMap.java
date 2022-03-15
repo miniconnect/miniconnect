@@ -6,7 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public final class ImmutableMap<K, V> implements Serializable {
 
@@ -257,6 +259,22 @@ public final class ImmutableMap<K, V> implements Serializable {
     
     public void forEach(BiConsumer<K, V> action) {
         asMap().forEach(action);
+    }
+
+    public ImmutableMap<K, V> filter(Predicate<K> filter) {
+        return filter((k, v) -> filter.test(k));
+    }
+
+    public ImmutableMap<K, V> filter(BiPredicate<K, V> filter) {
+        Map<K, V> filteredData = new HashMap<>();
+        for (Map.Entry<K, V> entry : data.entrySet()) {
+            K key = entry.getKey();
+            V value = entry.getValue();
+            if (filter.test(key, value)) {
+                filteredData.put(key, value);
+            }
+        }
+        return new ImmutableMap<>(filteredData);
     }
 
     @Override
