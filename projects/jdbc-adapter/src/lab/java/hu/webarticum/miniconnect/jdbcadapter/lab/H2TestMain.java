@@ -1,6 +1,5 @@
 package hu.webarticum.miniconnect.jdbcadapter.lab;
 
-import java.sql.SQLException;
 import java.util.function.Supplier;
 
 import hu.webarticum.miniconnect.api.MiniSession;
@@ -28,7 +27,7 @@ public class H2TestMain {
     }
     
     private static void runRepl(
-            String url, String username, String password, String setStatement) throws SQLException {
+            String url, String username, String password, String setStatement) {
         Supplier<JdbcLargeDataPutter> largeDataPutterFactory =
                 () -> new SimpleJdbcLargeDataPutter(setStatement);
         MiniSessionManager sessionManager =

@@ -77,8 +77,15 @@ public class JdbcAdapterSessionManager implements MiniSessionManager {
         try {
             connection = connectionFactory.openConnection();
         } catch (SQLException e) {
+            
+            // FIXME
+            e.printStackTrace();
+            
             throw new UncheckedSqlException(e);
         }
+        
+        System.out.println("connection: " + connection);
+        
         JdbcLargeDataPutter largeDataPutter = largeDataPutterFactory.get();
         return new JdbcAdapterSession(connection, largeDataPutter);
     }

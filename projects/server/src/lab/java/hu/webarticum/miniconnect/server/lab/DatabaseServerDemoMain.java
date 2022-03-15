@@ -49,8 +49,8 @@ public class DatabaseServerDemoMain {
             ) throws IOException, InterruptedException {
         Supplier<JdbcLargeDataPutter> largeDataPutterFactory =
                 () -> new SimpleJdbcLargeDataPutter(jdbcSetStatement);
-        MiniSessionManager sessionManager =
-                new JdbcAdapterSessionManager(jdbcUrl, jdbcUsername, jdbcPassword, largeDataPutterFactory);
+        MiniSessionManager sessionManager = new JdbcAdapterSessionManager(
+                jdbcUrl, jdbcUsername, jdbcPassword, largeDataPutterFactory);
         Messenger messenger = new SessionManagerMessenger(sessionManager);
         System.out.println();
         System.out.println(
