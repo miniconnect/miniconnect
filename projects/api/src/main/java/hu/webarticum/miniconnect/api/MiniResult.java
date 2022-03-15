@@ -13,5 +13,12 @@ public interface MiniResult {
     public boolean hasResultSet();
 
     public MiniResultSet resultSet();
+    
+    public default MiniResult requireSuccess() {
+        if (!success()) {
+            throw new MiniErrorException(error());
+        }
+        return this;
+    }
 
 }
