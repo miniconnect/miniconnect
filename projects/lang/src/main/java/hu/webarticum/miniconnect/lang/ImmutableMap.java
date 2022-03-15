@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public final class ImmutableMap<K, V> implements Serializable {
@@ -252,6 +253,10 @@ public final class ImmutableMap<K, V> implements Serializable {
 
     public HashMap<K, V> toHashMap() { // NOSONAR
         return new HashMap<>(data);
+    }
+    
+    public void forEach(BiConsumer<K, V> action) {
+        asMap().forEach(action);
     }
 
     @Override
