@@ -6,6 +6,7 @@ import java.util.List;
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.record.converter.Converter;
 import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 
@@ -35,6 +36,10 @@ public class ResultRecord {
 
     public ImmutableList<MiniValue> row() {
         return row;
+    }
+
+    public ImmutableMap<String, Object> rowMap() {
+        return columnHeaders.map(MiniColumnHeader::name).assign(k -> get(k).get());
     }
     
     public ImmutableList<ResultField> getAll() {

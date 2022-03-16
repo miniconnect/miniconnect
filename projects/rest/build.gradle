@@ -12,6 +12,7 @@ dependencies {
     implementation project(':messenger')
     implementation project(':record')
     implementation project(':server')
+    implementation 'org.apache.commons:commons-lang3:3.0'
     implementation 'jakarta.annotation:jakarta.annotation-api'
     implementation 'io.micronaut:micronaut-http-client'
     implementation 'io.micronaut:micronaut-jackson-databind'

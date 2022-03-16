@@ -29,21 +29,27 @@ public class DefaultEntityCrud implements EntityCrud {
     }
 
     @Override
-    public MiniResult read(ImmutableMap<String, Object> key) {
-        // TODO Auto-generated method stub
-        return null;
+    public MiniResult read(ImmutableList<String> key) {
+        // FIXME
+        // TODO: add support for select specific fields
+        return session.execute("SELECT * FROM " + quoteIdentifier(tableName) + " LIMIT 1");
     }
 
     @Override
-    public MiniResult update(ImmutableMap<String, Object> key, ImmutableMap<String, Object> data) {
+    public MiniResult update(ImmutableList<String> key, ImmutableMap<String, Object> data) {
         // TODO
         throw new UnsupportedOperationException("This API is read-only");
     }
 
     @Override
-    public MiniResult delete(ImmutableMap<String, Object> key) {
+    public MiniResult delete(ImmutableList<String> key) {
         // TODO
         throw new UnsupportedOperationException("This API is read-only");
     }
-    
+
+    // FIXME
+    private String quoteIdentifier(String name) {
+        return "`" + name.replace("`", "``") + "`";
+    }
+
 }

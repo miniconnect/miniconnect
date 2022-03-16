@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 
 import hu.webarticum.miniconnect.lang.ImmutableMap;
 
+//TODO: support for associative tables (many-to-many)?
 public class RestSchema {
 
     private final ImmutableMap<String, RestSchemaResource> resources;
