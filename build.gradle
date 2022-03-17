@@ -8,11 +8,14 @@ allprojects {
     
     repositories {
         mavenCentral()
+        mavenLocal()
     }
 }
 
 subprojects {
-    afterEvaluate {
+    apply plugin: 'maven-publish'
+    
+	afterEvaluate {
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
         
@@ -41,6 +44,14 @@ subprojects {
         tasks.withType(JavaCompile) {
             options.compilerArgs << '-Xlint:unchecked'
             options.deprecation = true
+        }
+        
+        publishing {
+            publications {
+                mavenJava(MavenPublication) {
+                    from components.java
+                }
+            }
         }
     }
 }
