@@ -1,7 +1,6 @@
 package hu.webarticum.miniconnect.rest;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -9,12 +8,10 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.lang.ImmutableList;
-import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.record.ResultRecord;
 import hu.webarticum.miniconnect.record.ResultTable;
 import hu.webarticum.miniconnect.rest.crud.EntityCrud;
@@ -31,7 +28,6 @@ import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.http.annotation.PathVariable;
-import io.micronaut.http.annotation.QueryValue;
 import io.micronaut.http.exceptions.HttpStatusException;
 
 @Controller("/tables")
@@ -64,7 +60,9 @@ public class TableController {
             String listUrl = "/" + name;
             String itemUrl = buildItemUrlTemplate(listUrl, resource.primaryKey());
             resources.add(listUrl);
-            resources.add(itemUrl);
+            if (itemUrl != null) {
+                resources.add(itemUrl);
+            }
             addAssociatedResources(itemUrl, resource, resources);
         });
         Collections.sort(resources);
@@ -83,14 +81,16 @@ public class TableController {
             String subListUrl = prefix + "/" + name;
             String subItemUrl = buildItemUrlTemplate(subListUrl, subResource.primaryKey());
             target.add(subListUrl);
-            target.add(subItemUrl);
+            if (subItemUrl != null) {
+                target.add(subItemUrl);
+            }
             addAssociatedResources(subItemUrl, subResource, target);
         }
     }
     
     private String buildItemUrlTemplate(String prefix, ImmutableList<String> primaryKey) {
         if (primaryKey.isEmpty()) {
-            return prefix + "/*"; // FIXME: exclude tables without primary key? (+ many-to-many...)
+            return null;
         }
         
         StringBuilder resultBuilder = new StringBuilder(prefix);
@@ -119,12 +119,17 @@ public class TableController {
         List<RestSchemaResource> pathResources = resolveEntityPath(pathItems);
         validateEntityPath(pathItems, pathResources);
 
-        RestSchemaResource lastResource = pathResources.get(pathResources.size() - 1);
-        RestSchemaResourceAssociation tailAssociation = lastResource.childResources().get(name);
-        if (tailAssociation == null) {
-            throw new IllegalArgumentException("No such resource");
+        RestSchemaResource resource;
+        if (pathResources.isEmpty()) {
+            resource = schema.resources().get(name);
+        } else {
+            RestSchemaResource lastResource = pathResources.get(pathResources.size() - 1);
+            RestSchemaResourceAssociation tailAssociation = lastResource.childResources().get(name);
+            if (tailAssociation == null) {
+                throw new IllegalArgumentException("No such resource");
+            }
+            resource = tailAssociation.resource();
         }
-        RestSchemaResource resource = tailAssociation.resource();
         String tableName = resource.tableName();
         
         List<Map<String, Object>> result = new ArrayList<>();
@@ -205,6 +210,10 @@ public class TableController {
             List<Pair<String, ImmutableList<String>>> pathItems) {
         int size = pathItems.size();
         List<RestSchemaResource> result = new ArrayList<>();
+        if (size == 0) {
+            return result;
+        }
+        
         String firstName = pathItems.get(0).getLeft();
         RestSchemaResource resource = schema.resources().get(firstName);
         result.add(resource);

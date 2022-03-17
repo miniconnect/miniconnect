@@ -23,11 +23,17 @@ public class DefaultRestSchemaScanner implements RestSchemaScanner {
 
     // FIXME
     private static final String LIST_PRIMARY_KEY_COLUMNS_SQL =
-            "SELECT COLUMN_NAME " +
-            "FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE " +
-            "WHERE TABLE_NAME = %s AND " +
-            "TABLE_SCHEMA = DATABASE() AND " +
-            "CONSTRAINT_NAME = 'PRIMARY'";
+            "SELECT " +
+            " kcu.COLUMN_NAME " +
+            "FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc " +
+            "LEFT JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu ON " +
+            " kcu.TABLE_SCHEMA = tc.TABLE_SCHEMA AND " +
+            " kcu.TABLE_NAME = tc.TABLE_NAME AND " +
+            " kcu.CONSTRAINT_NAME  = tc.CONSTRAINT_NAME " +
+            "WHERE " +
+            " tc.CONSTRAINT_TYPE = 'PRIMARY KEY' AND " +
+            " tc.TABLE_NAME = %s AND " +
+            " tc.TABLE_SCHEMA = SCHEMA()";
 
     // FIXME
     private static final String LIST_FOREIGN_KEYS_SQL =
@@ -38,13 +44,13 @@ public class DefaultRestSchemaScanner implements RestSchemaScanner {
             " REFERENCED_COLUMN_NAME " +
             "FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc " +
             "LEFT JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu ON " +
-            "kcu.TABLE_SCHEMA = tc.TABLE_SCHEMA AND " +
-            "kcu.TABLE_NAME = tc.TABLE_NAME AND " +
-            "kcu.CONSTRAINT_NAME  = tc.CONSTRAINT_NAME " +
+            " kcu.TABLE_SCHEMA = tc.TABLE_SCHEMA AND " +
+            " kcu.TABLE_NAME = tc.TABLE_NAME AND " +
+            " kcu.CONSTRAINT_NAME  = tc.CONSTRAINT_NAME " +
             "WHERE " +
             " tc.CONSTRAINT_TYPE = 'FOREIGN KEY' AND " +
             " tc.TABLE_NAME = %s AND " +
-            " tc.TABLE_SCHEMA = DATABASE()";
+            " tc.TABLE_SCHEMA = SCHEMA()";
 
     
     @Override
@@ -78,8 +84,16 @@ public class DefaultRestSchemaScanner implements RestSchemaScanner {
         }
         return ImmutableList.fromCollection(resultBuilder);
     }
-    
+
     private ImmutableList<String> scanPrimaryKey(MiniSession session, String tableName) {
+        try {
+            return scanPrimaryKeyUnsafe(session, tableName);
+        } catch (Exception e) {
+            return ImmutableList.empty();
+        }
+    }
+    
+    private ImmutableList<String> scanPrimaryKeyUnsafe(MiniSession session, String tableName) {
         List<String> resultBuilder = new ArrayList<>();
         String sql = String.format(LIST_PRIMARY_KEY_COLUMNS_SQL, quoteString(tableName));
         MiniResult result = session.execute(sql).requireSuccess();
@@ -111,8 +125,17 @@ public class DefaultRestSchemaScanner implements RestSchemaScanner {
         }
         return ImmutableMap.fromMap(resultBuilder);
     }
-    
+
     private ImmutableMap<String, ImmutableList<ImmutableList<String>>> scanTableForeignKeys(
+            MiniSession session, String tableName) {
+        try {
+            return scanTableForeignKeysUnsafe(session, tableName);
+        } catch (Exception e) {
+            return ImmutableMap.empty();
+        }
+    }
+    
+    private ImmutableMap<String, ImmutableList<ImmutableList<String>>> scanTableForeignKeysUnsafe(
             MiniSession session, String tableName) {
         String sql = String.format(LIST_FOREIGN_KEYS_SQL, quoteString(tableName));
         MiniResult result = session.execute(sql).requireSuccess();
