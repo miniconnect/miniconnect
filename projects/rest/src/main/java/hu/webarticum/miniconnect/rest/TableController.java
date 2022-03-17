@@ -126,9 +126,12 @@ public class TableController {
             RestSchemaResource lastResource = pathResources.get(pathResources.size() - 1);
             RestSchemaResourceAssociation tailAssociation = lastResource.childResources().get(name);
             if (tailAssociation == null) {
-                throw new IllegalArgumentException("No such resource");
+                throw new HttpStatusException(HttpStatus.NOT_FOUND, "No such resource");
             }
             resource = tailAssociation.resource();
+        }
+        if (resource == null) {
+            throw new HttpStatusException(HttpStatus.NOT_FOUND, "No such resource");
         }
         String tableName = resource.tableName();
         
