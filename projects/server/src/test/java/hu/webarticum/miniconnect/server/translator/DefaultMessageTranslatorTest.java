@@ -109,15 +109,17 @@ class DefaultMessageTranslatorTest {
     }
     
     private Message createResultSetRowsResponse() {
-        ImmutableList<Integer> nullables = ImmutableList.of(2);
+        ImmutableList<Integer> nullables = ImmutableList.of(2, 3);
         Map<Integer, Integer> fixedSizesBuilder = new HashMap<>();
         fixedSizesBuilder.put(0, 4);
         fixedSizesBuilder.put(1, 4);
+        fixedSizesBuilder.put(3, 4);
         ImmutableMap<Integer, Integer> fixedSizes = ImmutableMap.fromMap(fixedSizesBuilder);
         ImmutableList<ImmutableList<CellData>> rows = ImmutableList.of(
                 ImmutableList.of(
                         new CellData(false, 4, ByteString.of("abcd")),
                         new CellData(false, 4, ByteString.of("1234")),
+                        new CellData(true, 0, ByteString.empty()),
                         new CellData(true, 0, ByteString.empty())));
         return new ResultSetRowsResponse(5L, 9, 12L, nullables, fixedSizes, rows);
     }

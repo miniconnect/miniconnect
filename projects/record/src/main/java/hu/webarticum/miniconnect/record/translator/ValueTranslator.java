@@ -33,12 +33,13 @@ public interface ValueTranslator {
     
     public default MiniValue encodeFully(Object value) {
         ImmutableMap<String, ByteString> properties = properties();
-        MiniContentAccess contentAccess = value == null ?
+        boolean isNull = (value == null);
+        MiniContentAccess contentAccess = isNull ?
                 new StoredContentAccess(ByteString.empty()) :
                 encode(value);
         MiniValueDefinition valueDefinition =
                 new StoredValueDefinition(name(), length(), properties);
-        return new StoredValue(valueDefinition, false, contentAccess);
+        return new StoredValue(valueDefinition, isNull, contentAccess);
     }
     
 }
