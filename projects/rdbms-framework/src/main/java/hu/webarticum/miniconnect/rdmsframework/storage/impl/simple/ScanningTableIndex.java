@@ -127,7 +127,7 @@ public class ScanningTableIndex implements TableIndex {
                 BigInteger i = BigInteger.ZERO;
                 i.compareTo(tableSize) < 0;
                 i = i.add(BigInteger.ONE)) {
-            ImmutableList<Object> row = table.row(i);
+            ImmutableList<Object> row = table.row(i).getAll();
             ImmutableList<Object> values = extractValues(row);
             if (checkValues(values, from, fromInclusive, to, toInclusive, fromAndToAreEqual)) {
                 foundRowEntries.add(new SortHelper(i, values));

@@ -14,6 +14,7 @@ import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
 import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
+import hu.webarticum.miniconnect.rdmsframework.storage.Row;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TablePatch;
@@ -75,8 +76,8 @@ public class SimpleTable implements Table {
     }
 
     @Override
-    public synchronized ImmutableList<Object> row(BigInteger rowIndex) {
-        return rows.get(rowIndex.intValue());
+    public synchronized Row row(BigInteger rowIndex) {
+        return new SimpleRow(columnStore.names(), rows.get(rowIndex.intValue()));
     }
 
     @Override
