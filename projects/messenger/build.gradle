@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description "Default solution for messaging"
+description "Default solution for messaging with message definitions"
 
 sourceSets {
     lab {

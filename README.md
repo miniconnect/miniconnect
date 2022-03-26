@@ -2,7 +2,7 @@
 
 Minimalistic database API and JDBC bridge.
 
-> :construction: This project is in an incubating state.
+> :construction: This project is in an incubating state. See [TODOs](./TODO.md).
 
 ## Overview of subprojects
 
@@ -10,17 +10,19 @@ It consists of several separated components:
 
 | Subproject | Description |
 | ---------- | ----------- |
-| :green_circle: `api` | Minimalistic API for database access |
-| :computer: `client` | Lightweight client implementation of `api` (:zzz: planned) |
-| :old_key: `jdbc` | Makes any `api` session available as a JDBC connection |
-| :electric_plug: `jdbc-adapter` | Makes any JDBC connection available as an `api` session |
-| :envelope: `messenger` | Message definitions and messaging implementation of `api` |
-| :repeat: `repl` | REPL client for `api` (:zzz: planned) |
-| :building_construction: `rdbms-framework` | Framework for building database engines or drivers for `api` |
-| :desktop_computer: `server` | Lightweight server implementation of `messenger` (:zzz: planned) |
-| :gear: `tool` | Miscellaneous tools (like REPL etc.) |
-| :truck: `transfer` | Commons for transfering messages (:zzz: planned) |
-| :hammer_and_wrench: `util` | Essential interfaces (like `ImmutableList` or `ByteString`) |
+| :green_circle: `api` | MiniConnect API definition |
+| :minidisc: `impl` | Obvious implementations of some api pieces |
+| :old_key: `jdbc` | JDBC driver backed by MiniConnect |
+| :electric_plug: `jdbc-adapter` | MiniConnect implementation backed by JDBC |
+| :books: `lang` | Essential value types |
+| :envelope: `messenger` | Default solution for messaging with message definitions |
+| :building_construction: `rdbms-framework` | Framework for building database engines |
+| :fast_forward: `record` | Easy-to-use wrapper for result sets |
+| :repeat: `repl` | MiniConnect REPL |
+| :postbox: `rest` | Simple REST service for MiniConnect |
+| :desktop_computer: `server` | Lightweight and transparent MiniConnect server and client |
+| :truck: `transfer` | Simple networking framework |
+| :hammer_and_wrench: `util` | Common utilities |
 
 And there are some related repositories:
 
@@ -67,7 +69,7 @@ to interpret the `PREPARE FROM` query.
 
 ## Database engines
 
-The simple session API make it very easy to make a connector to any custom database.
+The simple session API makes it very easy to make a connector to any custom database.
 
 The `rdbms-framework` subproject provides a framework for implementing
 a MiniConnect driver (or even a complete database engine).

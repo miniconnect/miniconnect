@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description "MiniConnect server and client (transparent)"
+description "Lightweight and transparent MiniConnect server and client"
 
 sourceSets {
     lab {
