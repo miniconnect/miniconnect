@@ -27,6 +27,7 @@ import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery;
 import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
 import hu.webarticum.miniconnect.rdmsframework.storage.RangeSelection;
+import hu.webarticum.miniconnect.rdmsframework.storage.Schema;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
@@ -41,16 +42,13 @@ public class SimpleSelectExecutor implements QueryExecutor {
 
     @Override
     public MiniResult execute(StorageAccess storageAccess, Query query) {
-        if (!(query instanceof SelectQuery)) {
-            return error(1, "00001", "Only SELECT queries are supported");
-        }
-
         SelectQuery selectQuery = (SelectQuery) query;
         String tableName = selectQuery.tableName();
-        Table table = storageAccess.tables().get(tableName);
+        Schema schema = storageAccess.schemas().get("default"); // FIXME
+        Table table = schema.tables().get(tableName);
 
         if (table == null) {
-            return error(2, "00002", "No such table: " + tableName);
+            return new StoredResult(new StoredError(2, "00002", "No such table: " + tableName));
         }
         
         Map<String, String> queryFields = selectQuery.fields();
@@ -62,7 +60,7 @@ public class SimpleSelectExecutor implements QueryExecutor {
             checkFields(table, queryWhere.keySet());
             checkFields(table, queryOrderBy.keySet());
         } catch (Exception e) {
-            return error(3, "00003", e.getMessage());
+            return new StoredResult(new StoredError(3, "00003", e.getMessage()));
         }
         
         List<BigInteger> rowIndexes = filterRows(table, queryWhere);
@@ -155,10 +153,6 @@ public class SimpleSelectExecutor implements QueryExecutor {
         return true;
     }
 
-    private MiniResult error(int code, String sqlState, String message) {
-        return new StoredResult(new StoredError(code, sqlState, message));
-    }
-    
     private Set<String> collectIndexes(
             Table table, Set<String> columnNames, Map<ImmutableList<String>, TableIndex> map) {
         NamedResourceStore<TableIndex> indexStore = table.indexes();

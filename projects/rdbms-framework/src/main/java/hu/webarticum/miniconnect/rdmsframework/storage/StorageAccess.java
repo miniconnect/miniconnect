@@ -2,7 +2,7 @@ package hu.webarticum.miniconnect.rdmsframework.storage;
 
 public interface StorageAccess {
     
-    public NamedResourceStore<Table> tables();
+    public NamedResourceStore<Schema> schemas();
 
     public NamedResourceStore<Constraint> constraints();
     

@@ -20,12 +20,14 @@ import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParse
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.FieldNameContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.IdentifierContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.InsertQueryContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.LikePartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByPartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectItemsContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectPartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectQueryContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ShowTablesQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SqlQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UpdateItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UpdatePartContext;
@@ -66,6 +68,11 @@ public class AntlrSqlParser implements SqlParser {
         DeleteQueryContext deleteQueryNode = rootNode.deleteQuery();
         if (deleteQueryNode != null) {
             return parseDeleteNode(deleteQueryNode);
+        }
+        
+        ShowTablesQueryContext showTablesQueryNode = rootNode.showTablesQuery();
+        if (showTablesQueryNode != null) {
+            return parseShowTablesNode(showTablesQueryNode);
         }
         
         throw new IllegalArgumentException("Query type not supported");
@@ -151,7 +158,23 @@ public class AntlrSqlParser implements SqlParser {
                 .where(where)
                 .build();
     }
+
+    private ShowTablesQuery parseShowTablesNode(ShowTablesQueryContext showTablesNode) {
+        LikePartContext likePartContext = showTablesNode.likePart();
+        String like = parseLikePart(likePartContext);
+        
+        return Queries.showTables()
+                .like(like)
+                .build();
+    }
     
+    private String parseLikePart(LikePartContext likePartContext) {
+        if (likePartContext == null) {
+            return null;
+        }
+        return parseStringNode(likePartContext.LIT_STRING());
+    }
+
     private LinkedHashMap<String, String> parseSelectPartNode(SelectPartContext selectPartNode) {
         LinkedHashMap<String, String> result = new LinkedHashMap<>();
         

@@ -4,7 +4,7 @@ grammar SqlQuery;
 package hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar;
 }
 
-sqlQuery: ( selectQuery | updateQuery | insertQuery | deleteQuery ) EOF ;
+sqlQuery: ( selectQuery | updateQuery | insertQuery | deleteQuery | showTablesQuery ) EOF ;
 
 selectQuery: SELECT selectPart FROM tableName wherePart? orderByPart?;
 selectPart: selectItems | '*';
@@ -21,6 +21,8 @@ valueList: '(' value ( ',' value )* ')';
 
 deleteQuery: DELETE FROM tableName wherePart?;
 
+showTablesQuery: SHOW TABLES likePart?;
+
 wherePart: WHERE whereItem ( AND whereItem )*;
 whereItem: fieldName '=' value | '(' whereItem ')';
 orderByPart: ORDER BY orderByItem ( ',' orderByItem )*;
@@ -29,11 +31,13 @@ fieldName: identifier;
 tableName: identifier;
 identifier: SIMPLENAME | QUOTEDNAME | BACKTICKEDNAME;
 value: LIT_STRING | LIT_INTEGER | NULL;
+likePart: LIKE LIT_STRING;
 
 SELECT: S E L E C T;
 INSERT: I N S E R T;
 UPDATE: U P D A T E;
 DELETE: D E L E T E;
+SHOW: S H O W;
 
 AS: A S;
 FROM: F R O M;
@@ -47,6 +51,8 @@ DESC: D E S C;
 VALUES: V A L U E S;
 SET: S E T;
 NULL: N U L L;
+TABLES: T A B L E S;
+LIKE: L I K E;
 
 SIMPLENAME: [a-zA-Z_] [a-zA-Z_0-9]*;
 QUOTEDNAME: '"' ( '\\' . | '""' | ~[\\"] )* '"';

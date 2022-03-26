@@ -18,8 +18,8 @@ public final class SelectQuery implements Query {
     private SelectQuery(SelectQueryBuilder builder) {
         this.fields = builder.fields;
         this.tableName = Objects.requireNonNull(builder.tableName);
-        this.where = Objects.requireNonNull(builder.where);
-        this.orderBy = Objects.requireNonNull(builder.orderBy);
+        this.where = builder.where;
+        this.orderBy = builder.orderBy;
     }
     
     public static SelectQueryBuilder builder() {

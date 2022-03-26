@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.rdmsframework.session;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
@@ -10,14 +11,16 @@ import hu.webarticum.miniconnect.rdmsframework.engine.EngineSession;
 import hu.webarticum.miniconnect.rdmsframework.engine.impl.SimpleEngine;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.execution.SqlParser;
-import hu.webarticum.miniconnect.rdmsframework.execution.simple.SimpleSelectExecutor;
+import hu.webarticum.miniconnect.rdmsframework.execution.simple.SimpleQueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.AntlrSqlParser;
+import hu.webarticum.miniconnect.rdmsframework.storage.Schema;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleColumnDefinition;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleStorageAccess;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleTable;
-import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleTableManager;
+import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleResourceManager;
+import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleSchema;
 import hu.webarticum.miniconnect.record.ResultTable;
 import hu.webarticum.miniconnect.repl.ResultSetPrinter;
 
@@ -25,19 +28,20 @@ public class FrameworkMinimalDemoMain {
 
     public static void main(String[] args) throws IOException {
         SqlParser sqlParser = new AntlrSqlParser();
-        QueryExecutor queryExecutor = new SimpleSelectExecutor();
+        QueryExecutor queryExecutor = new SimpleQueryExecutor();
         StorageAccess storageAccess = createStorageAccess();
         try (
                 Engine engine = new SimpleEngine(sqlParser, queryExecutor, storageAccess);
                 EngineSession engineSession = engine.openSession();
                 MiniSession session = new FrameworkSession(engineSession)) {
             MiniResult result = session.execute(
-                    "SELECT id, label AS apple, description banana FROM data " +
-                            "WHERE label='Lorem' AND description='Hello' " +
-                            "ORDER BY id DESC");
+                    //"SELECT id, label AS apple, description banana FROM data " +
+                    //        "WHERE label='Lorem' AND description='Hello' " +
+                    //        "ORDER BY id DESC");
                     //"DELETE FROM data WHERE a=1 AND b='banana'");
                     //"UPDATE data SET col1=NULL, col2=99, col3='str' WHERE a=1 AND b='banana'");
                     //"INSERT INTO data (id, label, description) VALUES (1, 'banana', NULL)");
+                    "SHOW TABLES LIKE 'd%'");
             if (!result.success()) {
                 System.out.println("oops");
                 System.out.println(result.error().message());
@@ -50,8 +54,11 @@ public class FrameworkMinimalDemoMain {
     
     public static StorageAccess createStorageAccess() {
         SimpleStorageAccess storageAccess =  new SimpleStorageAccess();
-        SimpleTableManager tableManager = storageAccess.tables();
-        Table table = SimpleTable.builder()
+        SimpleResourceManager<Schema> schemaManager = storageAccess.schemas();
+        SimpleSchema schema = new SimpleSchema("default");
+        schemaManager.register(schema);
+        SimpleResourceManager<Table> tableManager = schema.tables();
+        Table dataTable = SimpleTable.builder()
                 .name("data")
                 .addColumnWithIndex("id", new SimpleColumnDefinition(Integer.class))
                 .addColumnWithIndex("label", new SimpleColumnDefinition(String.class))
@@ -62,7 +69,15 @@ public class FrameworkMinimalDemoMain {
                 .addRow(ImmutableList.of(4, "Ipsum", "Hello"))
                 .addRow(ImmutableList.of(5, "Ipsum", "World"))
                 .build();
-        tableManager.registerTable(table);
+        tableManager.register(dataTable);
+        Table anotherTable = SimpleTable.builder()
+                .name("another")
+                .addColumnWithIndex("id", new SimpleColumnDefinition(Integer.class))
+                .addColumnWithIndex("datetime", new SimpleColumnDefinition(LocalDateTime.class))
+                .addRow(ImmutableList.of(1, LocalDateTime.now()))
+                .addRow(ImmutableList.of(1, LocalDateTime.now().minusDays(5)))
+                .build();
+        tableManager.register(anotherTable);
         return storageAccess;
     }
     

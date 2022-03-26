@@ -18,4 +18,8 @@ public interface Queries {
         return new DeleteQuery.DeleteQueryBuilder();
     }
 
+    public static ShowTablesQuery.ShowTablesQueryBuilder showTables() {
+        return new ShowTablesQuery.ShowTablesQueryBuilder();
+    }
+
 }

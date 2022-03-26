@@ -2,17 +2,18 @@ package hu.webarticum.miniconnect.rdmsframework.storage.impl.simple;
 
 import hu.webarticum.miniconnect.rdmsframework.storage.Constraint;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
+import hu.webarticum.miniconnect.rdmsframework.storage.Schema;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 
 // TODO
 public class SimpleStorageAccess implements StorageAccess {
-    
-    private final SimpleTableManager tableManager = new SimpleTableManager();
+
+    private final SimpleResourceManager<Schema> schemaManager = new SimpleResourceManager<>();
     
 
     @Override
-    public SimpleTableManager tables() {
-        return tableManager;
+    public SimpleResourceManager<Schema> schemas() {
+        return schemaManager;
     }
 
     @Override
