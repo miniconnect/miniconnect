@@ -55,6 +55,10 @@ public class SimpleSelectExecutor implements QueryExecutor {
         Map<String, Object> queryWhere = selectQuery.where();
         Map<String, Boolean> queryOrderBy = selectQuery.orderBy();
         
+        if (queryFields.isEmpty()) {
+            queryFields = table.columns().names().assign(n -> n).toHashMap();
+        }
+        
         try {
             checkFields(table, queryFields.values());
             checkFields(table, queryWhere.keySet());
