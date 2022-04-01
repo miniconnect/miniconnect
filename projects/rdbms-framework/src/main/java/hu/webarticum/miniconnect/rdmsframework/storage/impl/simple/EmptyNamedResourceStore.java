@@ -12,6 +12,11 @@ public class EmptyNamedResourceStore<T extends NamedResource> implements NamedRe
     }
 
     @Override
+    public ImmutableList<T> resources() {
+        return ImmutableList.empty();
+    }
+
+    @Override
     public boolean contains(String name) {
         return false;
     }

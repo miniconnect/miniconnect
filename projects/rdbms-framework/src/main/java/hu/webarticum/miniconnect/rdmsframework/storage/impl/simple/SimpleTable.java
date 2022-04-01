@@ -104,6 +104,11 @@ public class SimpleTable implements Table {
         }
 
         @Override
+        public ImmutableList<Column> resources() {
+            return columnNames.map(this::get);
+        }
+
+        @Override
         public boolean contains(String name) {
             return columnNames.contains(name);
         }
@@ -159,6 +164,11 @@ public class SimpleTable implements Table {
         @Override
         public ImmutableList<String> names() {
             return indexNames;
+        }
+
+        @Override
+        public ImmutableList<TableIndex> resources() {
+            return indexNames.map(this::get);
         }
 
         @Override

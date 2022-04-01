@@ -11,27 +11,32 @@ import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
 
 public class SimpleResourceManager<T extends NamedResource> implements NamedResourceStore<T> {
     
-    private Map<String, T> resources = Collections.synchronizedMap(new TreeMap<>());
+    private Map<String, T> resourcesByName = Collections.synchronizedMap(new TreeMap<>());
     
 
     @Override
     public ImmutableList<String> names() {
-        return ImmutableList.fromCollection(resources.keySet());
+        return ImmutableList.fromCollection(resourcesByName.keySet());
+    }
+
+    @Override
+    public ImmutableList<T> resources() {
+        return ImmutableList.fromCollection(resourcesByName.values());
     }
 
     @Override
     public boolean contains(String name) {
-        return resources.containsKey(name);
+        return resourcesByName.containsKey(name);
     }
     
     @Override
     public T get(String name) {
-        return resources.get(name);
+        return resourcesByName.get(name);
     }
     
     public void register(T resource) {
         String name = resource.name();
-        resources.compute(name, (n, t) -> checkRegister(n, t, resource));
+        resourcesByName.compute(name, (n, t) -> checkRegister(n, t, resource));
     }
     
     private T checkRegister(String name, T existingResource, T resource) {
@@ -42,7 +47,7 @@ public class SimpleResourceManager<T extends NamedResource> implements NamedReso
     }
 
     public void remove(String name) {
-        if (resources.remove(name) == null) {
+        if (resourcesByName.remove(name) == null) {
             throw new NoSuchElementException("No resource named " + name);
         }
     }
