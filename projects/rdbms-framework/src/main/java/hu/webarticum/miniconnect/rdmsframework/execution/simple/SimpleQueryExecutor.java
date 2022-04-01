@@ -16,7 +16,7 @@ public class SimpleQueryExecutor implements QueryExecutor {
         if (query instanceof SelectQuery) {
             return new SimpleSelectExecutor().execute(storageAccess, query);
         } else if (query instanceof ShowTablesQuery) {
-                return new SimpleShowTablesExecutor().execute(storageAccess, query);
+            return new SimpleShowTablesExecutor().execute(storageAccess, query);
         } else {
             return new StoredResult(new StoredError(
                     1,
