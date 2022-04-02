@@ -70,7 +70,7 @@ public class JavaTranslator implements ValueTranslator {
     }
     
     private void checkAssuredType(Object value) {
-        if (assuredClazzName == null && value == null) {
+        if (assuredClazzName == null || value == null) {
             return;
         }
 
@@ -82,7 +82,7 @@ public class JavaTranslator implements ValueTranslator {
         }
         
         Class<?> actualClazz = value.getClass();
-        if (expectedClazz.isAssignableFrom(actualClazz)) {
+        if (!expectedClazz.isAssignableFrom(actualClazz)) {
             throw new IllegalArgumentException(String.format(
                     "Unexpected type: %s (expected superclass: %s)",
                     actualClazz.getName(),
