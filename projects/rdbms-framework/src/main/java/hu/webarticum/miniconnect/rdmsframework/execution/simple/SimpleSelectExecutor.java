@@ -57,7 +57,11 @@ public class SimpleSelectExecutor implements QueryExecutor {
         Map<String, Boolean> queryOrderBy = selectQuery.orderBy();
         
         if (queryFields.isEmpty()) {
-            queryFields = table.columns().names().assign(n -> n).toHashMap();
+            ImmutableList<String> columnNames = table.columns().names();
+            queryFields = new LinkedHashMap<>(columnNames.size());
+            for (String columnName : columnNames) {
+                queryFields.put(columnName, columnName);
+            }
         }
         
         try {
@@ -150,6 +154,7 @@ public class SimpleSelectExecutor implements QueryExecutor {
                 Object expectedValue = queryWhere.get(columnName);
                 Object actualValue = table.columns().get(columnName).get(rowIndex);
                 if (!Objects.equals(actualValue, expectedValue)) {
+                    System.out.println(actualValue.getClass().getSimpleName() + ":" + actualValue + " =?= " + actualValue.getClass().getSimpleName() + ":" + actualValue);
                     return false;
                 }
             }
