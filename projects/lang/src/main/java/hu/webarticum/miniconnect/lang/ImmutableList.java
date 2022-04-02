@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
@@ -49,6 +50,18 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
     public static <T> ImmutableList<T> fromIterator(Iterator<? extends T> iterator) {
         List<T> data = new ArrayList<>();
         iterator.forEachRemaining(data::add);
+        return new ImmutableList<>(data);
+    }
+    
+    public static <T> ImmutableList<T> fill(int size, T item) {
+        return fill(size, i -> item);
+    }
+
+    public static <T> ImmutableList<T> fill(int size, IntFunction<T> supplier) {
+        List<T> data = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            data.add(supplier.apply(i));
+        }
         return new ImmutableList<>(data);
     }
 
@@ -160,6 +173,27 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
         List<T> sortedData = new ArrayList<>(data);
         Collections.sort(sortedData, comparator);
         return new ImmutableList<>(sortedData);
+    }
+
+    public ImmutableList<T> resize(int newSize, T fillItem) {
+        return resize(newSize, i -> fillItem);
+    }
+
+    public ImmutableList<T> resize(int newSize, IntFunction<T> fillSupplier) {
+        int currentSize = data.size();
+        if (newSize == currentSize) {
+            return this;
+        } else if (newSize < currentSize) {
+            return section(0, newSize);
+        }
+        
+        List<T> newData = new ArrayList<>(newSize);
+        newData.addAll(data);
+        int remainingSize = newSize - currentSize;
+        for (int i = 0; i < remainingSize; i++) {
+            newData.add(fillSupplier.apply(i));
+        }
+        return new ImmutableList<>(newData);
     }
 
     @Override
