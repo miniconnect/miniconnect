@@ -154,7 +154,6 @@ public class SimpleSelectExecutor implements QueryExecutor {
                 Object expectedValue = queryWhere.get(columnName);
                 Object actualValue = table.columns().get(columnName).get(rowIndex);
                 if (!Objects.equals(actualValue, expectedValue)) {
-                    System.out.println(actualValue.getClass().getSimpleName() + ":" + actualValue + " =?= " + actualValue.getClass().getSimpleName() + ":" + actualValue);
                     return false;
                 }
             }
