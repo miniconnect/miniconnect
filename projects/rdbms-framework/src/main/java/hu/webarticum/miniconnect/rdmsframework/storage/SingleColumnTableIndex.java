@@ -69,9 +69,4 @@ public interface SingleColumnTableIndex extends TableIndex {
             NullsMode nullsMode,
             SortMode sortMode);
 
-    @Override
-    public default TableSelection find(Object value) {
-        return findMulti(ImmutableList.of(value));
-    }
-    
 }
