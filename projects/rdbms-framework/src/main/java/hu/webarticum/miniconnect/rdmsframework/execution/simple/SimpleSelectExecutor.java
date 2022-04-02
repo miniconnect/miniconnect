@@ -91,7 +91,7 @@ public class SimpleSelectExecutor implements QueryExecutor {
     private void checkField(Table table, String columnName) {
         if (!table.columns().contains(columnName)) {
             throw new IllegalArgumentException(String.format(
-                    "No column '%s' in table '%s'", columnName, table));
+                    "No column '%s' in table '%s'", columnName, table.name()));
         }
     }
 
