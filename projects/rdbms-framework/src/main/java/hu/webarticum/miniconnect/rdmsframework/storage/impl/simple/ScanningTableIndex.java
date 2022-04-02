@@ -8,11 +8,13 @@ import java.util.List;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
+import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
 import hu.webarticum.miniconnect.rdmsframework.storage.StandardOrderKey;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
+import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.MultiComparator.MultiComparatorBuilder;
 
 public class ScanningTableIndex implements TableIndex {
     
@@ -24,15 +26,12 @@ public class ScanningTableIndex implements TableIndex {
     
     private final ImmutableList<Integer> columnIndexes;
     
-    private final MultiComparator multiComparator;
-    
     
     public ScanningTableIndex(Table table, String name, ImmutableList<String> columnNames) {
         this.table = table;
         this.name = name;
         this.columnNames = columnNames;
         this.columnIndexes = collectColumnIndexes(table, columnNames);
-        this.multiComparator = createMultiComparator(table, columnNames);
     }
     
     private static ImmutableList<Integer> collectColumnIndexes(
@@ -53,18 +52,6 @@ public class ScanningTableIndex implements TableIndex {
         return ImmutableList.of(indexes);
     }
 
-    private static MultiComparator createMultiComparator(
-            Table table,
-            ImmutableList<String> columnNames) {
-        NamedResourceStore<Column> columns = table.columns();
-        List<Comparator<?>> comparators = new ArrayList<>(columnNames.size());
-        for (String columnName : columnNames) {
-            Comparator<?> comparator = columns.get(columnName).definition().comparator();
-            comparators.add(comparator);
-        }
-        return new MultiComparator(comparators);
-    }
-    
 
     public Table table() {
         return table;
@@ -86,14 +73,20 @@ public class ScanningTableIndex implements TableIndex {
     }
     
     @Override
-    public TableSelection find(
+    public TableSelection findMulti(
             ImmutableList<?> from,
-            boolean fromInclusive,
+            InclusionMode fromInclusionMode,
             ImmutableList<?> to,
-            boolean toInclusive,
-            boolean sort) {
+            InclusionMode toInclusionMode,
+            ImmutableList<NullsMode> nullsModes,
+            ImmutableList<SortMode> sortModes) {
+        boolean fromInclusive = fromInclusionMode == InclusionMode.INCLUDE;
+        boolean toInclusive = toInclusionMode == InclusionMode.INCLUDE;
+        boolean sort = !sortModes.filter(m -> m != SortMode.UNSORTED).isEmpty();
+        MultiComparator multiComparator = createMultiComparator(table, columnNames, sortModes);
         
-        List<SortHelper> foundEntries = collectEntries(from, fromInclusive, to, toInclusive);
+        List<SortHelper> foundEntries = collectEntries(
+                from, fromInclusive, to, toInclusive, nullsModes, multiComparator);
         
         if (sort) {
             Collections.sort(foundEntries, Comparator.comparing(e -> e.values, multiComparator));
@@ -114,29 +107,66 @@ public class ScanningTableIndex implements TableIndex {
                     rowIndexes);
         }
     }
-    
+
+    private MultiComparator createMultiComparator(
+            Table table,
+            ImmutableList<String> columnNames,
+            ImmutableList<SortMode> sortModes) {
+        int size = columnNames.size();
+        ImmutableList<SortMode> extendedSortModes = sortModes.resize(size, i -> SortMode.UNSORTED);
+        NamedResourceStore<Column> columns = table.columns();
+        MultiComparatorBuilder builder = MultiComparator.builder();
+        for (int i = 0; i < size; i++) {
+            String columnName = columnNames.get(i);
+            SortMode sortMode = extendedSortModes.get(i);
+            ColumnDefinition columnDefinition = columns.get(columnName).definition();
+            Comparator<?> columnComparator = columnDefinition.comparator();
+            boolean nullable = columnDefinition.isNullable();
+            boolean asc =
+                    sortMode != SortMode.DESC_NULLS_LAST &&
+                    sortMode != SortMode.DESC_NULLS_FIRST;
+            boolean nullsFirst =
+                    sortMode != SortMode.ASC_NULLS_LAST &&
+                    sortMode != SortMode.DESC_NULLS_LAST;
+            builder.add(columnComparator, nullable, asc, nullsFirst);
+        }
+        return builder.build();
+    }
+
     private List<SortHelper> collectEntries(
             ImmutableList<?> from,
             boolean fromInclusive,
             ImmutableList<?> to,
-            boolean toInclusive) {
+            boolean toInclusive,
+            ImmutableList<NullsMode> nullsModes,
+            MultiComparator multiComparator) {
         BigInteger tableSize = table.size();
         List<SortHelper> foundRowEntries = new ArrayList<>();
-        boolean fromAndToAreEqual = areEqual(from, to);
+        boolean fromAndToAreEqual = areEqual(from, to, multiComparator);
         for (
                 BigInteger i = BigInteger.ZERO;
                 i.compareTo(tableSize) < 0;
                 i = i.add(BigInteger.ONE)) {
             ImmutableList<Object> row = table.row(i).getAll();
             ImmutableList<Object> values = extractValues(row);
-            if (checkValues(values, from, fromInclusive, to, toInclusive, fromAndToAreEqual)) {
+            boolean isRowSelected = checkValues(
+                    values,
+                    from,
+                    fromInclusive,
+                    to,
+                    toInclusive,
+                    fromAndToAreEqual,
+                    nullsModes,
+                    multiComparator);
+            if (isRowSelected) {
                 foundRowEntries.add(new SortHelper(i, values));
             }
         }
         return foundRowEntries;
     }
     
-    private boolean areEqual(ImmutableList<?> from, ImmutableList<?> to) {
+    private boolean areEqual(
+            ImmutableList<?> from, ImmutableList<?> to, MultiComparator multiComparator) {
         if (from == to) {
             return true;
         }
@@ -167,7 +197,13 @@ public class ScanningTableIndex implements TableIndex {
             boolean fromInclusive,
             ImmutableList<?> to,
             boolean toInclusive,
-            boolean fromAndToAreEqual) {
+            boolean fromAndToAreEqual,
+            ImmutableList<NullsMode> nullsModes,
+            MultiComparator multiComparator) {
+        if (!checkNulls(values, nullsModes)) {
+            return false;
+        }
+        
         if (fromAndToAreEqual) {
             if (from == null) {
                 return true;
@@ -178,32 +214,45 @@ public class ScanningTableIndex implements TableIndex {
             return isPrefixOf(from, values);
         }
         
-        if (!checkFrom(values, from, fromInclusive)) {
+        if (!checkFrom(values, from, fromInclusive, multiComparator)) {
             return false;
         }
 
-        return checkTo(values, to, toInclusive);
+        return checkTo(values, to, toInclusive, multiComparator);
     }
     
+    private boolean checkNulls(ImmutableList<Object> values, ImmutableList<NullsMode> nullsModes) {
+        int size = Math.min(values.size(), nullsModes.size());
+        for (int i = 0; i < size; i++) {
+            if (nullsModes.get(i) == NullsMode.NO_NULLS && values.get(i) == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private boolean checkFrom(
             ImmutableList<Object> values,
             ImmutableList<?> from,
-            boolean fromInclusive) {
-        return checkBound(values, from, fromInclusive, true);
+            boolean fromInclusive,
+            MultiComparator multiComparator) {
+        return checkBound(values, from, fromInclusive, true, multiComparator);
     }
 
     private boolean checkTo(
             ImmutableList<Object> values,
             ImmutableList<?> to,
-            boolean toInclusive) {
-        return checkBound(values, to, toInclusive, false);
+            boolean toInclusive,
+            MultiComparator multiComparator) {
+        return checkBound(values, to, toInclusive, false, multiComparator);
     }
     
     private boolean checkBound(
             ImmutableList<Object> values,
             ImmutableList<?> bound,
             boolean boundInclusive,
-            boolean isFrom) {
+            boolean isFrom,
+            MultiComparator multiComparator) {
         
         if (bound == null) {
             return true;
@@ -213,7 +262,8 @@ public class ScanningTableIndex implements TableIndex {
         int boundSize = bound.size();
         
         if (boundSize > valuesSize) {
-            return checkBound(values, bound.section(0, valuesSize), boundInclusive, isFrom);
+            return checkBound(
+                    values, bound.section(0, valuesSize), boundInclusive, isFrom, multiComparator);
         }
         
         if (boundInclusive && isPrefixOf(bound, values)) {

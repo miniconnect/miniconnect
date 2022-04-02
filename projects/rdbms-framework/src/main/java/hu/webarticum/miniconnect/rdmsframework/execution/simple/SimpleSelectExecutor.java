@@ -34,6 +34,7 @@ import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelectionEntry;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.MultiComparator;
+import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.MultiComparator.MultiComparatorBuilder;
 import hu.webarticum.miniconnect.record.translator.JavaTranslator;
 import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 import hu.webarticum.miniconnect.record.type.StandardValueType;
@@ -101,7 +102,7 @@ public class SimpleSelectExecutor implements QueryExecutor {
             ImmutableList<String> columnNames = entry.getKey();
             TableIndex tableIndex = entry.getValue();
             ImmutableList<Object> values = columnNames.map(queryWhere::get);
-            TableSelection selection = tableIndex.find(values);
+            TableSelection selection = tableIndex.findMulti(values);
             if (firstSelection == null) {
                 firstSelection = selection;
             } else {
@@ -219,20 +220,20 @@ public class SimpleSelectExecutor implements QueryExecutor {
                 (i1, i2) -> multiComparator.compare(rowMapper.apply(i1), rowMapper.apply(i2));
         Collections.sort(rowIndexes, rowIndexComparator);
     }
-    
+
     private MultiComparator createMultiComparator(Table table, Map<String, Boolean> queryOrderBy) {
-        List<Comparator<?>> comparators = new ArrayList<>();
+        MultiComparatorBuilder builder = MultiComparator.builder();
         for (Map.Entry<String, Boolean> entry : queryOrderBy.entrySet()) {
             String columnName = entry.getKey();
             boolean asc = entry.getValue();
-            Comparator<?> columnComparator =
-                    table.columns().get(columnName).definition().comparator();
-            Comparator<?> directedComparator = asc ? columnComparator : columnComparator.reversed();
-            comparators.add(directedComparator);
+            ColumnDefinition columnDefinition = table.columns().get(columnName).definition();
+            Comparator<?> columnComparator = columnDefinition.comparator();
+            boolean nullable = columnDefinition.isNullable();
+            builder.add(columnComparator, nullable, asc, true);
         }
-        return new MultiComparator(comparators);
+        return builder.build();
     }
-
+    
     private ImmutableList<ValueTranslator> collectValueTranslators(
             Table table, Map<String, String> queryFields) {
         return ImmutableList.fromCollection(queryFields.values())

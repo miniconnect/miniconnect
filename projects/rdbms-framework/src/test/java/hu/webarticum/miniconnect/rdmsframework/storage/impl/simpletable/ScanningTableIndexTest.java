@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Test;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
+import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.InclusionMode;
+import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.NullsMode;
+import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.SortMode;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelectionEntry;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleColumnDefinition;
@@ -45,65 +48,66 @@ class ScanningTableIndexTest {
 
     @Test
     void testFindValueNoResult() {
-        assertThat(index("id").findValue(99)).isEmpty();
+        assertThat(index("id").find(99)).isEmpty();
     }
     
     @Test
     void testFindValueSingleResult() {
-        assertThat(index("id").findValue(3))
+        assertThat(index("id").find(3))
                 .map(TableSelectionEntry::tableIndex)
                 .containsExactly(bigs(2));
     }
 
     @Test
     void testFindValueMoreResults() {
-        assertThat(index("lastname").findValue("Smith"))
+        assertThat(index("lastname").find("Smith"))
                 .map(TableSelectionEntry::tableIndex)
                 .containsExactly(bigs(1, 2));
     }
 
     @Test
     void testFindMultiColumnNoResult() {
-        assertThat(index("firstname", "lastname").find(ImmutableList.of("Lorem", "Ipsum")))
+        assertThat(index("firstname", "lastname").findMulti(ImmutableList.of("Lorem", "Ipsum")))
                 .isEmpty();
     }
 
     @Test
     void testFindMultiColumnSingleResult() {
-        assertThat(index("firstname", "lastname").find(ImmutableList.of("Karl", "Marx")))
+        assertThat(index("firstname", "lastname").findMulti(ImmutableList.of("Karl", "Marx")))
                 .map(TableSelectionEntry::tableIndex)
                 .containsExactly(bigs(3));
     }
 
     @Test
     void testFindMultiColumnMoreResults() {
-        assertThat(index("firstname", "lastname").find(ImmutableList.of("Anton", "Bruckner")))
+        assertThat(index("firstname", "lastname").findMulti(ImmutableList.of("Anton", "Bruckner")))
                 .map(TableSelectionEntry::tableIndex)
                 .containsExactly(bigs(4, 6));
     }
 
     @Test
     void testFindMultiColumnPartialMoreResults() {
-        assertThat(index("lastname", "firstname").find(ImmutableList.of("Smith")))
+        assertThat(index("lastname", "firstname").findMulti(ImmutableList.of("Smith")))
                 .map(TableSelectionEntry::tableIndex)
                 .containsExactly(bigs(1, 2));
     }
 
     @Test
     void testFindMultiColumnPartialNoResult() {
-        assertThat(index("lastname", "firstname").find(ImmutableList.of("Lorem")))
+        assertThat(index("lastname", "firstname").findMulti(ImmutableList.of("Lorem")))
                 .map(TableSelectionEntry::tableIndex)
                 .isEmpty();
     }
 
     @Test
     void testFindToInclusive() {
-        TableSelection selection = index("lastname", "firstname").find(
+        TableSelection selection = index("lastname", "firstname").findMulti(
                 null,
-                false,
+                InclusionMode.EXCLUDE,
                 ImmutableList.of("Marx", "Karl"),
-                true,
-                false);
+                InclusionMode.INCLUDE,
+                ImmutableList.fill(2, NullsMode.WITH_NULLS),
+                ImmutableList.fill(2, SortMode.UNSORTED));
         assertThat(selection)
                 .map(TableSelectionEntry::tableIndex)
                 .containsExactly(bigs(3, 4, 5, 6));
@@ -111,12 +115,13 @@ class ScanningTableIndexTest {
 
     @Test
     void testFindToExclusiveSomeResultsNotSorted() {
-        TableSelection selection = index("lastname", "firstname").find(
+        TableSelection selection = index("lastname", "firstname").findMulti(
                 null,
-                false,
+                InclusionMode.EXCLUDE,
                 ImmutableList.of("Marx", "Karl"),
-                false,
-                false);
+                InclusionMode.EXCLUDE,
+                ImmutableList.fill(2, NullsMode.WITH_NULLS),
+                ImmutableList.fill(2, SortMode.UNSORTED));
         assertThat(selection)
                 .map(TableSelectionEntry::tableIndex)
                 .containsExactlyInAnyOrder(bigs(4, 5, 6));
@@ -124,12 +129,13 @@ class ScanningTableIndexTest {
 
     @Test
     void testFindToNonExistingExclusiveSomeResultsNotSorted() {
-        TableSelection selection = index("lastname", "firstname").find(
+        TableSelection selection = index("lastname", "firstname").findMulti(
                 null,
-                false,
+                InclusionMode.EXCLUDE,
                 ImmutableList.of("Nash", "John"),
-                false,
-                false);
+                InclusionMode.EXCLUDE,
+                ImmutableList.fill(2, NullsMode.WITH_NULLS),
+                ImmutableList.fill(2, SortMode.UNSORTED));
         assertThat(selection)
                 .map(TableSelectionEntry::tableIndex)
                 .containsExactlyInAnyOrder(bigs(3, 4, 5, 6));
@@ -137,12 +143,13 @@ class ScanningTableIndexTest {
 
     @Test
     void testFindFromInclusive() {
-        TableSelection selection = index("lastname", "firstname").find(
+        TableSelection selection = index("lastname", "firstname").findMulti(
                 ImmutableList.of("Marx", "Karl"),
-                true,
+                InclusionMode.INCLUDE,
                 null,
-                false,
-                true);
+                InclusionMode.EXCLUDE,
+                ImmutableList.fill(2, NullsMode.WITH_NULLS),
+                ImmutableList.fill(2, SortMode.ASC_NULLS_FIRST));
         assertThat(selection)
                 .map(TableSelectionEntry::tableIndex)
                 .containsExactly(bigs(3, 0, 1, 2));
@@ -150,12 +157,13 @@ class ScanningTableIndexTest {
 
     @Test
     void testFindFromExclusiveSomeResults() {
-        TableSelection selection = index("lastname", "firstname").find(
+        TableSelection selection = index("lastname", "firstname").findMulti(
                 ImmutableList.of("Marx", "Karl"),
-                false,
+                InclusionMode.EXCLUDE,
                 null,
-                false,
-                true);
+                InclusionMode.EXCLUDE,
+                ImmutableList.fill(2, NullsMode.WITH_NULLS),
+                ImmutableList.fill(2, SortMode.ASC_NULLS_FIRST));
         assertThat(selection)
                 .map(TableSelectionEntry::tableIndex)
                 .containsExactly(bigs(0, 1, 2));
@@ -163,12 +171,13 @@ class ScanningTableIndexTest {
 
     @Test
     void testFindFromNonExistingExclusiveSomeResults() {
-        TableSelection selection = index("lastname", "firstname").find(
+        TableSelection selection = index("lastname", "firstname").findMulti(
                 ImmutableList.of("Nash", "John"),
-                false,
+                InclusionMode.EXCLUDE,
                 null,
-                false,
-                true);
+                InclusionMode.EXCLUDE,
+                ImmutableList.fill(2, NullsMode.WITH_NULLS),
+                ImmutableList.fill(2, SortMode.ASC_NULLS_FIRST));
         assertThat(selection)
                 .map(TableSelectionEntry::tableIndex)
                 .containsExactly(bigs(0, 1, 2));
@@ -176,12 +185,13 @@ class ScanningTableIndexTest {
     
     @Test
     void testFindRangeExclusiveSingleResult() {
-        TableSelection selection = index("lastname", "firstname").find(
+        TableSelection selection = index("lastname", "firstname").findMulti(
                 ImmutableList.of("Marx", "Karl"),
-                false,
+                InclusionMode.EXCLUDE,
                 ImmutableList.of("Smith", "Adam"),
-                false,
-                true);
+                InclusionMode.EXCLUDE,
+                ImmutableList.fill(2, NullsMode.WITH_NULLS),
+                ImmutableList.fill(2, SortMode.ASC_NULLS_FIRST));
         assertThat(selection)
                 .map(TableSelectionEntry::tableIndex)
                 .containsExactly(bigs(0));
@@ -189,12 +199,13 @@ class ScanningTableIndexTest {
     
     @Test
     void testFindOddRangeInclusiveSomeResults() {
-        TableSelection selection = index("lastname", "firstname").find(
+        TableSelection selection = index("lastname", "firstname").findMulti(
                 ImmutableList.of("Bruckner"),
-                false,
+                InclusionMode.EXCLUDE,
                 ImmutableList.of("Smith", "Adam"),
-                true,
-                true);
+                InclusionMode.INCLUDE,
+                ImmutableList.fill(2, NullsMode.WITH_NULLS),
+                ImmutableList.fill(2, SortMode.ASC_NULLS_FIRST));
         assertThat(selection)
                 .map(TableSelectionEntry::tableIndex)
                 .containsExactly(bigs(3, 0, 1));
