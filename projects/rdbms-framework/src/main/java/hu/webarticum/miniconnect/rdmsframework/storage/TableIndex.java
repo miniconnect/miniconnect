@@ -14,10 +14,14 @@ public interface TableIndex extends NamedResource {
         
     }
     
-    
-    public ImmutableList<String> columnNames();
 
     public boolean isUnique();
+
+    public ImmutableList<String> columnNames();
+
+    public default int width() {
+        return columnNames().size();
+    }
 
     public TableSelection findMulti(
             ImmutableList<?> from,
