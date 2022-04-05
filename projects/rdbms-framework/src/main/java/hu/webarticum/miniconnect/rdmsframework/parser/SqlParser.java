@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.rdmsframework.execution;
+package hu.webarticum.miniconnect.rdmsframework.parser;
 
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 

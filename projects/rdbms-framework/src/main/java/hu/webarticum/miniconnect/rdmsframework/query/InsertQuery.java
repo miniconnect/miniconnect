@@ -91,6 +91,11 @@ public final class InsertQuery implements Query {
         private ImmutableList<String> fields = null;
         
         private ImmutableList<Object> values = null;
+
+        
+        private InsertQueryBuilder() {
+            // use builder()
+        }
         
         
         public InsertQueryBuilder into(String tableName) {

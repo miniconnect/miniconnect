@@ -96,6 +96,11 @@ public final class UpdateQuery implements Query {
         private LinkedHashMap<String, Object> values = new LinkedHashMap<>();
 
         private LinkedHashMap<String, Object> where = new LinkedHashMap<>();
+
+        
+        private UpdateQueryBuilder() {
+            // use builder()
+        }
         
         
         public UpdateQueryBuilder table(String tableName) {

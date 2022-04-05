@@ -22,6 +22,11 @@ public class ShowTablesQuery implements Query {
     public static final class ShowTablesQueryBuilder {
         
         private String like = null;
+
+        
+        private ShowTablesQueryBuilder() {
+            // use builder()
+        }
         
 
         public ShowTablesQueryBuilder like(String like) {

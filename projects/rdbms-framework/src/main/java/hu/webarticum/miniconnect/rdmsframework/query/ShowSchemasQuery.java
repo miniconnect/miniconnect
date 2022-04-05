@@ -22,6 +22,11 @@ public class ShowSchemasQuery implements Query {
     public static final class ShowSchemasQueryBuilder {
         
         private String like = null;
+
+        
+        private ShowSchemasQueryBuilder() {
+            // use builder()
+        }
         
 
         public ShowSchemasQueryBuilder like(String like) {

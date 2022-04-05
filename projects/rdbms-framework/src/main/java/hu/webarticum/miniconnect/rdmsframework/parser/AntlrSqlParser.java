@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.rdmsframework.query;
+package hu.webarticum.miniconnect.rdmsframework.parser;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -12,7 +12,15 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
-import hu.webarticum.miniconnect.rdmsframework.execution.SqlParser;
+import hu.webarticum.miniconnect.rdmsframework.query.DeleteQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.InsertQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.Queries;
+import hu.webarticum.miniconnect.rdmsframework.query.Query;
+import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.ShowSchemasQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.ShowTablesQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.SqlUtil;
+import hu.webarticum.miniconnect.rdmsframework.query.UpdateQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryLexer;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.DeleteQueryContext;

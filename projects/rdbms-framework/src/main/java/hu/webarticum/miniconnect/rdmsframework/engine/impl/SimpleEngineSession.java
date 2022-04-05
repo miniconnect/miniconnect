@@ -2,7 +2,7 @@ package hu.webarticum.miniconnect.rdmsframework.engine.impl;
 
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSession;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
-import hu.webarticum.miniconnect.rdmsframework.execution.SqlParser;
+import hu.webarticum.miniconnect.rdmsframework.parser.SqlParser;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 
 public class SimpleEngineSession implements EngineSession {

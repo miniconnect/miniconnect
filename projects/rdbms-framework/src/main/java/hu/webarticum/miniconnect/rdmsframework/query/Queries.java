@@ -3,27 +3,27 @@ package hu.webarticum.miniconnect.rdmsframework.query;
 public interface Queries {
 
     public static SelectQuery.SelectQueryBuilder select() {
-        return new SelectQuery.SelectQueryBuilder();
+        return SelectQuery.builder();
     }
 
     public static InsertQuery.InsertQueryBuilder insert() {
-        return new InsertQuery.InsertQueryBuilder();
+        return InsertQuery.builder();
     }
 
     public static UpdateQuery.UpdateQueryBuilder update() {
-        return new UpdateQuery.UpdateQueryBuilder();
+        return UpdateQuery.builder();
     }
 
     public static DeleteQuery.DeleteQueryBuilder delete() {
-        return new DeleteQuery.DeleteQueryBuilder();
+        return DeleteQuery.builder();
     }
 
     public static ShowSchemasQuery.ShowSchemasQueryBuilder showSchemas() {
-        return new ShowSchemasQuery.ShowSchemasQueryBuilder();
+        return ShowSchemasQuery.builder();
     }
 
     public static ShowTablesQuery.ShowTablesQueryBuilder showTables() {
-        return new ShowTablesQuery.ShowTablesQueryBuilder();
+        return ShowTablesQuery.builder();
     }
 
 }

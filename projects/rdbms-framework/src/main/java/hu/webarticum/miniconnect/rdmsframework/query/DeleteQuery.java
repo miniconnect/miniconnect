@@ -67,6 +67,11 @@ public final class DeleteQuery implements Query {
         private String tableName = null;
         
         private LinkedHashMap<String, Object> where = new LinkedHashMap<>();
+
+        
+        private DeleteQueryBuilder() {
+            // use builder()
+        }
         
         
         public DeleteQueryBuilder from(String tableName) {

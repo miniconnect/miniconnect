@@ -135,6 +135,11 @@ public final class SelectQuery implements Query {
         private LinkedHashMap<String, Boolean> orderBy = new LinkedHashMap<>();
         
         
+        private SelectQueryBuilder() {
+            // use builder()
+        }
+        
+        
         public SelectQueryBuilder fields(Map<String, String> fields) {
             this.fields = new LinkedHashMap<>(fields);
             return this;
