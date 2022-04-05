@@ -11,6 +11,7 @@ import hu.webarticum.miniconnect.impl.result.StoredResult;
 import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
 import hu.webarticum.miniconnect.rdmsframework.DatabaseException;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSession;
+import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.parser.SqlParser;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
@@ -57,7 +58,8 @@ public class FrameworkSession implements MiniSession, CheckableCloseable {
     public MiniResult executeThrowing(Query query) throws InterruptedException, ExecutionException {
         QueryExecutor queryExecutor = engineSession.queryExecutor();
         StorageAccess storageAccess = engineSession.storageAccess();
-        return queryExecutor.execute(storageAccess, query);
+        EngineSessionState state = engineSession.state();
+        return queryExecutor.execute(storageAccess, state, query);
     }
 
     @Override

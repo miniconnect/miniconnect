@@ -21,6 +21,7 @@ import hu.webarticum.miniconnect.impl.result.StoredError;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
 import hu.webarticum.miniconnect.impl.result.StoredResultSetData;
 import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery;
@@ -42,10 +43,16 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 public class SimpleSelectExecutor implements QueryExecutor {
 
     @Override
-    public MiniResult execute(StorageAccess storageAccess, Query query) {
+    public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
         SelectQuery selectQuery = (SelectQuery) query;
         String tableName = selectQuery.tableName();
-        Schema schema = storageAccess.schemas().get("default"); // FIXME
+        String currentSchemaName = state.getCurrentSchema();
+        
+        if (currentSchemaName == null) {
+            return new StoredResult(new StoredError(5, "00005", "No schema is selected"));
+        }
+        
+        Schema schema = storageAccess.schemas().get(currentSchemaName);
         Table table = schema.tables().get(tableName);
 
         if (table == null) {

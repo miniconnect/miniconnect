@@ -7,6 +7,7 @@ import hu.webarticum.miniconnect.impl.result.StoredColumnHeader;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
 import hu.webarticum.miniconnect.impl.result.StoredResultSetData;
 import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.ShowSchemasQuery;
@@ -21,7 +22,7 @@ public class SimpleShowSchemasExecutor implements QueryExecutor {
     
     
     @Override
-    public MiniResult execute(StorageAccess storageAccess, Query query) {
+    public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
         ShowSchemasQuery showSchemasQuery = (ShowSchemasQuery) query;
         ImmutableList<String> schemaNames = storageAccess.schemas().names();
         String like = showSchemasQuery.like();

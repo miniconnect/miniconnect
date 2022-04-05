@@ -21,6 +21,7 @@ import hu.webarticum.miniconnect.rdmsframework.query.ShowSchemasQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.ShowTablesQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.SqlUtil;
 import hu.webarticum.miniconnect.rdmsframework.query.UpdateQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.UseQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryLexer;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.DeleteQueryContext;
@@ -41,6 +42,7 @@ import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParse
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UpdateItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UpdatePartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UpdateQueryContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UseQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ValueContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ValueListContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.WhereItemContext;
@@ -83,10 +85,15 @@ public class AntlrSqlParser implements SqlParser {
         if (showSchemasQueryNode != null) {
             return parseShowSchemasNode(showSchemasQueryNode);
         }
-        
+
         ShowTablesQueryContext showTablesQueryNode = rootNode.showTablesQuery();
         if (showTablesQueryNode != null) {
             return parseShowTablesNode(showTablesQueryNode);
+        }
+
+        UseQueryContext useQueryNode = rootNode.useQuery();
+        if (useQueryNode != null) {
+            return parseUseNode(useQueryNode);
         }
         
         throw new IllegalArgumentException("Query type not supported");
@@ -188,6 +195,15 @@ public class AntlrSqlParser implements SqlParser {
         
         return Queries.showTables()
                 .like(like)
+                .build();
+    }
+
+    private UseQuery parseUseNode(UseQueryContext useNode) {
+        IdentifierContext identifierNode = useNode.schemaName().identifier();
+        String schemaName = parseIdentifierNode(identifierNode);
+        
+        return Queries.use()
+                .schema(schemaName)
                 .build();
     }
     

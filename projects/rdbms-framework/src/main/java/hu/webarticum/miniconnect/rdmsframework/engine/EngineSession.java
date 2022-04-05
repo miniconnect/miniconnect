@@ -9,6 +9,8 @@ public interface EngineSession extends CheckableCloseable {
     
     public Engine engine();
 
+    public EngineSessionState state();
+
     public SqlParser sqlParser();
 
     public QueryExecutor queryExecutor();

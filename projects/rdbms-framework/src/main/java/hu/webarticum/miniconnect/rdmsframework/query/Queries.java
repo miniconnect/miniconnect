@@ -26,4 +26,8 @@ public interface Queries {
         return ShowTablesQuery.builder();
     }
 
+    public static UseQuery.UseQueryBuilder use() {
+        return UseQuery.builder();
+    }
+
 }

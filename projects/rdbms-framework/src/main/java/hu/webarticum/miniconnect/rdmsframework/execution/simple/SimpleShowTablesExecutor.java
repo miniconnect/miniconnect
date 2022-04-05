@@ -4,9 +4,11 @@ import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.impl.result.StoredColumnHeader;
+import hu.webarticum.miniconnect.impl.result.StoredError;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
 import hu.webarticum.miniconnect.impl.result.StoredResultSetData;
 import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.ShowTablesQuery;
@@ -19,9 +21,15 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 public class SimpleShowTablesExecutor implements QueryExecutor {
     
     @Override
-    public MiniResult execute(StorageAccess storageAccess, Query query) {
+    public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
         ShowTablesQuery showTablesQuery = (ShowTablesQuery) query;
-        Schema schema = storageAccess.schemas().get("default"); // FIXME
+        String currentSchemaName = state.getCurrentSchema();
+        
+        if (currentSchemaName == null) {
+            return new StoredResult(new StoredError(5, "00005", "No schema is selected"));
+        }
+        
+        Schema schema = storageAccess.schemas().get(currentSchemaName);
         ImmutableList<String> tableNames = schema.tables().names();
         String like = showTablesQuery.like();
         if (like != null) {
@@ -29,7 +37,7 @@ public class SimpleShowTablesExecutor implements QueryExecutor {
         }
         ValueTranslator stringTranslator = StandardValueType.STRING.defaultTranslator();
         MiniColumnHeader columnHeader = new StoredColumnHeader(
-                "Tables_in_default", // FIXME
+                "Tables_in_" + currentSchemaName,
                 false,
                 stringTranslator.definition());
         ImmutableList<MiniColumnHeader> columnHeaders = ImmutableList.of(columnHeader);

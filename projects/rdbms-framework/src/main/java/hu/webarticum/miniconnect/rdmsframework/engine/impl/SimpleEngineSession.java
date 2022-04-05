@@ -9,6 +9,8 @@ public class SimpleEngineSession implements EngineSession {
     
     private final SimpleEngine engine;
     
+    private final SimpleEngineSessionState state = new SimpleEngineSessionState();
+    
     
     public SimpleEngineSession(SimpleEngine engine) {
         this.engine = engine;
@@ -18,6 +20,11 @@ public class SimpleEngineSession implements EngineSession {
     @Override
     public SimpleEngine engine() {
         return engine;
+    }
+
+    @Override
+    public SimpleEngineSessionState state() {
+        return state;
     }
     
     @Override
