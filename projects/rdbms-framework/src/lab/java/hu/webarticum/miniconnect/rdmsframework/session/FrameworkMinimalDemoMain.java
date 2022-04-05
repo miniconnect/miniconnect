@@ -41,7 +41,8 @@ public class FrameworkMinimalDemoMain {
                     //"DELETE FROM data WHERE a=1 AND b='banana'");
                     //"UPDATE data SET col1=NULL, col2=99, col3='str' WHERE a=1 AND b='banana'");
                     //"INSERT INTO data (id, label, description) VALUES (1, 'banana', NULL)");
-                    "SHOW TABLES LIKE 'd%'");
+                    "SHOW SCHEMAS LIKE 'd%'");
+                    //"SHOW TABLES LIKE 'd%'");
             if (!result.success()) {
                 System.out.println("oops");
                 System.out.println(result.error().message());

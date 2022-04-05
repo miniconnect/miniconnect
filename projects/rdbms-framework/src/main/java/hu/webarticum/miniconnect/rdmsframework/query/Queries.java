@@ -18,6 +18,10 @@ public interface Queries {
         return new DeleteQuery.DeleteQueryBuilder();
     }
 
+    public static ShowSchemasQuery.ShowSchemasQueryBuilder showSchemas() {
+        return new ShowSchemasQuery.ShowSchemasQueryBuilder();
+    }
+
     public static ShowTablesQuery.ShowTablesQueryBuilder showTables() {
         return new ShowTablesQuery.ShowTablesQueryBuilder();
     }

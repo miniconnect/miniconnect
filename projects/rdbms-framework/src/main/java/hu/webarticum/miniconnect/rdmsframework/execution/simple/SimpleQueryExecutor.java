@@ -6,6 +6,7 @@ import hu.webarticum.miniconnect.impl.result.StoredResult;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.ShowSchemasQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.ShowTablesQuery;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 
@@ -15,6 +16,8 @@ public class SimpleQueryExecutor implements QueryExecutor {
     public MiniResult execute(StorageAccess storageAccess, Query query) {
         if (query instanceof SelectQuery) {
             return new SimpleSelectExecutor().execute(storageAccess, query);
+        } else if (query instanceof ShowSchemasQuery) {
+            return new SimpleShowSchemasExecutor().execute(storageAccess, query);
         } else if (query instanceof ShowTablesQuery) {
             return new SimpleShowTablesExecutor().execute(storageAccess, query);
         } else {

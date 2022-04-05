@@ -27,6 +27,7 @@ import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParse
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectItemsContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectPartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectQueryContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ShowSchemasQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ShowTablesQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SqlQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UpdateItemContext;
@@ -68,6 +69,11 @@ public class AntlrSqlParser implements SqlParser {
         DeleteQueryContext deleteQueryNode = rootNode.deleteQuery();
         if (deleteQueryNode != null) {
             return parseDeleteNode(deleteQueryNode);
+        }
+        
+        ShowSchemasQueryContext showSchemasQueryNode = rootNode.showSchemasQuery();
+        if (showSchemasQueryNode != null) {
+            return parseShowSchemasNode(showSchemasQueryNode);
         }
         
         ShowTablesQueryContext showTablesQueryNode = rootNode.showTablesQuery();
@@ -156,6 +162,15 @@ public class AntlrSqlParser implements SqlParser {
         return Queries.delete()
                 .from(tableName)
                 .where(where)
+                .build();
+    }
+    
+    private ShowSchemasQuery parseShowSchemasNode(ShowSchemasQueryContext showSchemasNode) {
+        LikePartContext likePartContext = showSchemasNode.likePart();
+        String like = parseLikePart(likePartContext);
+        
+        return Queries.showSchemas()
+                .like(like)
                 .build();
     }
 
