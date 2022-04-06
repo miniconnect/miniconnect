@@ -33,6 +33,10 @@ public class SimpleShowTablesExecutor implements QueryExecutor {
         }
         
         Schema schema = storageAccess.schemas().get(schemaName);
+        if (schema == null) {
+            return new StoredResult(new StoredError(6, "00006", "No such schema: " + schemaName));
+        }
+        
         ImmutableList<String> tableNames = schema.tables().names();
         String like = showTablesQuery.like();
         if (like != null) {

@@ -45,16 +45,22 @@ public class SimpleSelectExecutor implements QueryExecutor {
     @Override
     public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
         SelectQuery selectQuery = (SelectQuery) query;
+        String schemaName = selectQuery.schemaName();
         String tableName = selectQuery.tableName();
-        String currentSchemaName = state.getCurrentSchema();
         
-        if (currentSchemaName == null) {
+        if (schemaName == null) {
+            schemaName = state.getCurrentSchema();
+        }
+        if (schemaName == null) {
             return new StoredResult(new StoredError(5, "00005", "No schema is selected"));
         }
         
-        Schema schema = storageAccess.schemas().get(currentSchemaName);
+        Schema schema = storageAccess.schemas().get(schemaName);
+        if (schema == null) {
+            return new StoredResult(new StoredError(4, "00004", "No such schema: " + schemaName));
+        }
+        
         Table table = schema.tables().get(tableName);
-
         if (table == null) {
             return new StoredResult(new StoredError(2, "00002", "No such table: " + tableName));
         }

@@ -32,6 +32,7 @@ import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParse
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.LikePartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByPartContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SchemaNameContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectItemsContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectPartContext;
@@ -102,6 +103,10 @@ public class AntlrSqlParser implements SqlParser {
     private SelectQuery parseSelectNode(SelectQueryContext selectQueryNode) {
         SelectPartContext selectPartNode = selectQueryNode.selectPart();
         LinkedHashMap<String, String> fields = parseSelectPartNode(selectPartNode);
+        SchemaNameContext schemaNameNode = selectQueryNode.schemaName();
+        String schemaName = schemaNameNode != null ?
+                parseIdentifierNode(schemaNameNode.identifier()) :
+                null;
         IdentifierContext identifierNode = selectQueryNode.tableName().identifier();
         String tableName = parseIdentifierNode(identifierNode);
         WherePartContext wherePartNode = selectQueryNode.wherePart();
@@ -111,6 +116,7 @@ public class AntlrSqlParser implements SqlParser {
         
         return Queries.select()
                 .fields(fields)
+                .fromSchema(schemaName)
                 .from(tableName)
                 .where(where)
                 .orderBy(orderBy)

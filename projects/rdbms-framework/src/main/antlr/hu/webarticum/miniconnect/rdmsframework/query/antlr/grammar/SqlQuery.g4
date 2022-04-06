@@ -14,7 +14,7 @@ sqlQuery: (
     useQuery
 ) EOF ;
 
-selectQuery: SELECT selectPart FROM tableName wherePart? orderByPart?;
+selectQuery: SELECT selectPart FROM ( schemaName '.' )? tableName wherePart? orderByPart?;
 selectPart: selectItems | '*';
 selectItems: selectItem ( ',' selectItem )*;
 selectItem: fieldName ( AS? alias=identifier )?;

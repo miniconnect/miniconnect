@@ -8,6 +8,8 @@ public final class SelectQuery implements Query {
     
     private final LinkedHashMap<String, String> fields;
 
+    private final String schemaName;
+
     private final String tableName;
     
     private final LinkedHashMap<String, Object> where;
@@ -17,6 +19,7 @@ public final class SelectQuery implements Query {
     
     private SelectQuery(SelectQueryBuilder builder) {
         this.fields = builder.fields;
+        this.schemaName = builder.schemaName;
         this.tableName = Objects.requireNonNull(builder.tableName);
         this.where = builder.where;
         this.orderBy = builder.orderBy;
@@ -29,6 +32,10 @@ public final class SelectQuery implements Query {
 
     public Map<String, String> fields() {
         return new LinkedHashMap<>(fields);
+    }
+
+    public String schemaName() {
+        return schemaName;
     }
 
     public String tableName() {
@@ -49,6 +56,10 @@ public final class SelectQuery implements Query {
         StringBuilder resultBuilder = new StringBuilder("SELECT");
         appendFieldsSql(resultBuilder);
         resultBuilder.append(" FROM ");
+        if (schemaName != null) {
+            resultBuilder.append(SqlUtil.quoteIdentifier(schemaName));
+            resultBuilder.append('.');
+        }
         resultBuilder.append(SqlUtil.quoteIdentifier(tableName));
         appendWhereSql(resultBuilder);
         appendOrderBySql(resultBuilder);
@@ -128,6 +139,8 @@ public final class SelectQuery implements Query {
         
         private LinkedHashMap<String, String> fields = new LinkedHashMap<>();
 
+        private String schemaName = null;
+
         private String tableName = null;
         
         private LinkedHashMap<String, Object> where = new LinkedHashMap<>();
@@ -142,6 +155,11 @@ public final class SelectQuery implements Query {
         
         public SelectQueryBuilder fields(Map<String, String> fields) {
             this.fields = new LinkedHashMap<>(fields);
+            return this;
+        }
+
+        public SelectQueryBuilder fromSchema(String schemaName) {
+            this.schemaName = schemaName;
             return this;
         }
 
