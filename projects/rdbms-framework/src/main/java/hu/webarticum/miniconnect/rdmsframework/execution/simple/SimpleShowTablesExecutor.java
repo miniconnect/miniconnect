@@ -23,13 +23,16 @@ public class SimpleShowTablesExecutor implements QueryExecutor {
     @Override
     public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
         ShowTablesQuery showTablesQuery = (ShowTablesQuery) query;
-        String currentSchemaName = state.getCurrentSchema();
+        String schemaName = showTablesQuery.from();
         
-        if (currentSchemaName == null) {
+        if (schemaName == null) {
+            schemaName = state.getCurrentSchema();
+        }
+        if (schemaName == null) {
             return new StoredResult(new StoredError(5, "00005", "No schema is selected"));
         }
         
-        Schema schema = storageAccess.schemas().get(currentSchemaName);
+        Schema schema = storageAccess.schemas().get(schemaName);
         ImmutableList<String> tableNames = schema.tables().names();
         String like = showTablesQuery.like();
         if (like != null) {
@@ -37,7 +40,7 @@ public class SimpleShowTablesExecutor implements QueryExecutor {
         }
         ValueTranslator stringTranslator = StandardValueType.STRING.defaultTranslator();
         MiniColumnHeader columnHeader = new StoredColumnHeader(
-                "Tables_in_" + currentSchemaName,
+                "Tables_in_" + schemaName,
                 false,
                 stringTranslator.definition());
         ImmutableList<MiniColumnHeader> columnHeaders = ImmutableList.of(columnHeader);
