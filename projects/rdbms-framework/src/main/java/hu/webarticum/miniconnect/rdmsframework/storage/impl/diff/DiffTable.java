@@ -41,10 +41,7 @@ public class DiffTable implements Table {
 
     @Override
     public NamedResourceStore<Column> columns() {
-        
-        // TODO
-        return null;
-        
+        return baseTable.columns();
     }
 
     @Override
@@ -108,8 +105,11 @@ public class DiffTable implements Table {
 
     @Override
     public void applyPatch(TablePatch patch) {
+        insertedRows.addAll(patch.insertedRows().asList());
         
-        // TODO
+        // TODO: updates
+        
+        // TODO: deletions
 
         
     }
