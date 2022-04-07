@@ -165,7 +165,7 @@ public class SimpleSelectExecutor implements QueryExecutor {
         if (!unindexedColumnNames.isEmpty()) {
             for (String columnName : unindexedColumnNames) {
                 Object expectedValue = queryWhere.get(columnName);
-                Object actualValue = table.columns().get(columnName).get(rowIndex);
+                Object actualValue = table.row(rowIndex).get(columnName);
                 if (!Objects.equals(actualValue, expectedValue)) {
                     return false;
                 }
@@ -232,7 +232,7 @@ public class SimpleSelectExecutor implements QueryExecutor {
         ImmutableList<String> orderColumnNames =
                 ImmutableList.fromCollection(queryOrderBy.keySet());
         Function<BigInteger, ImmutableList<Object>> rowMapper =
-                i -> orderColumnNames.map(n -> table.columns().get(n).get(i));
+                i -> orderColumnNames.map(n -> table.row(i).get(n));
         Comparator<BigInteger> rowIndexComparator =
                 (i1, i2) -> multiComparator.compare(rowMapper.apply(i1), rowMapper.apply(i2));
         Collections.sort(rowIndexes, rowIndexComparator);
@@ -297,7 +297,7 @@ public class SimpleSelectExecutor implements QueryExecutor {
             Map<String, String> queryFields,
             BigInteger rowIndex) {
         return ImmutableList.fromCollection(queryFields.values())
-                .map(c -> table.columns().get(c).get(rowIndex))
+                .map(c -> table.row(rowIndex).get(c))
                 .mapIndex((i, v) -> valueTranslators.get(i).encodeFully(v));
     }
     

@@ -148,11 +148,6 @@ public class SimpleTable implements Table {
             return columnDefinitions.get(name);
         }
 
-        @Override
-        public Object get(BigInteger rowIndex) {
-            return row(rowIndex).get(columnIndex);
-        }
-        
     }
     
 
