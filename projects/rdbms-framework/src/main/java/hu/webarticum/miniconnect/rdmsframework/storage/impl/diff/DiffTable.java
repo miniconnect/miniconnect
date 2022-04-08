@@ -3,10 +3,13 @@ package hu.webarticum.miniconnect.rdmsframework.storage.impl.diff;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
@@ -17,14 +20,15 @@ import hu.webarticum.miniconnect.rdmsframework.storage.Row;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TablePatch;
+import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleRow;
 
 public class DiffTable implements Table {
     
     private final Table baseTable;
     
-    private final ArrayList<Row> insertedRows = new ArrayList<>();
+    private final List<ImmutableList<Object>> insertedRows = new ArrayList<>();
     
-    private final Map<BigInteger, Map<Integer, Object>> updates = new HashMap<>();
+    private final Map<BigInteger, ImmutableMap<Integer, Object>> updates = new HashMap<>();
     
     private final NavigableSet<BigInteger> deletions = new TreeSet<>();
 
@@ -62,14 +66,16 @@ public class DiffTable implements Table {
     @Override
     public synchronized Row row(BigInteger rowIndex) {
         BigInteger baseTableSize = baseTable.size();
-        BigInteger adjustedRowIndex = adjustByDeletions(rowIndex);
+        BigInteger adjustedRowIndex = adjustByDeletions(BigInteger.ZERO, rowIndex);
         
-        if (adjustedRowIndex.compareTo(baseTableSize) > 0) {
-            return insertedRows.get(adjustedRowIndex.subtract(baseTableSize).intValueExact());
+        if (adjustedRowIndex.compareTo(baseTableSize) >= 0) {
+            ImmutableList<Object> rowData =
+                    insertedRows.get(adjustedRowIndex.subtract(baseTableSize).intValueExact());
+            return new SimpleRow(baseTable.columns().names(), rowData);
         }
         
         Row originalRow = baseTable.row(adjustedRowIndex);
-        Map<Integer, Object> rowUpdates = updates.get(adjustedRowIndex);
+        ImmutableMap<Integer, Object> rowUpdates = updates.get(adjustedRowIndex);
         if (rowUpdates == null) {
             return originalRow;
         }
@@ -77,27 +83,6 @@ public class DiffTable implements Table {
         return new UpdatedRow(originalRow, rowUpdates);
     }
     
-    private BigInteger adjustByDeletions(BigInteger rowIndex) {
-        BigInteger targetPosition;
-        
-        BigInteger position = BigInteger.ZERO;
-        BigInteger remaining = rowIndex;
-        while (true) {
-            targetPosition = position.add(remaining);
-            Set<BigInteger> foundItems = deletions.subSet(position, targetPosition);
-            BigInteger foundCount = BigInteger.valueOf(foundItems.size());
-            if (foundCount.equals(BigInteger.ZERO)) {
-                break;
-            }
-        }
-        
-        while (deletions.contains(targetPosition)) {
-            targetPosition = targetPosition.add(BigInteger.ONE);
-        }
-        
-        return targetPosition;
-    }
-
     @Override
     public boolean isWritable() {
         return true;
@@ -105,13 +90,100 @@ public class DiffTable implements Table {
 
     @Override
     public void applyPatch(TablePatch patch) {
-        insertedRows.addAll(patch.insertedRows().asList());
-        
-        // TODO: updates
-        
-        // TODO: deletions
+        insertedRows.addAll(patch.insertedRows());
+        applyUpdates(patch.updates());
+        applyDeletions(patch.deletions());
+    }
+    
+    private void applyUpdates(
+            NavigableMap<BigInteger, ImmutableMap<Integer, Object>> patchUpdates) {
+        BigInteger baseTableSize = baseTable.size();
+        BigInteger internalPosition = BigInteger.ZERO;
+        BigInteger viewPosition = BigInteger.ZERO;
+        for (Map.Entry<BigInteger, ImmutableMap<Integer, Object>> entry :
+                patchUpdates.entrySet()) {
+            BigInteger rowIndex = entry.getKey();
+            ImmutableMap<Integer, Object> rowUpdates = entry.getValue();
+            BigInteger remainingCount = rowIndex.subtract(viewPosition);
+            BigInteger adjustedRowIndex = adjustByDeletions(internalPosition, remainingCount);
 
+            applyUpdate(adjustedRowIndex, rowUpdates, baseTableSize);
+            
+            internalPosition = adjustedRowIndex.add(BigInteger.ONE);
+            viewPosition = rowIndex.add(BigInteger.ONE);
+        }
+    }
+
+    private void applyUpdate(
+            BigInteger adjustedRowIndex,
+            ImmutableMap<Integer, Object> rowUpdates,
+            BigInteger baseTableSize) {
+        if (adjustedRowIndex.compareTo(baseTableSize) < 0) {
+            ImmutableMap<Integer, Object> currentRowUpdates = updates.get(adjustedRowIndex);
+            ImmutableMap<Integer, Object> newRowUpdates;
+            if (currentRowUpdates == null) {
+                newRowUpdates = rowUpdates;
+            } else {
+                newRowUpdates = currentRowUpdates.merge(rowUpdates);
+            }
+            updates.put(adjustedRowIndex, newRowUpdates);
+        } else {
+            int insertIndex = adjustedRowIndex.subtract(baseTableSize).intValueExact();
+            ImmutableList<Object> currentRow = insertedRows.get(insertIndex);
+            ImmutableList<Object> updatedRow = currentRow.mapIndex(rowUpdates::getOrDefault);
+            insertedRows.set(insertIndex, updatedRow);
+        }
+    }
+    
+    private void applyDeletions(NavigableSet<BigInteger> patchDeletions) {
+        BigInteger baseTableSize = baseTable.size();
+        BigInteger currentDeletionCount = BigInteger.valueOf(deletions.size());
+        BigInteger reducedSize = baseTableSize.subtract(currentDeletionCount);
+        applyInnerDeletions(patchDeletions.headSet(reducedSize));
+        applyOuterDeletions(patchDeletions.tailSet(reducedSize, true), reducedSize);
+    }
+    
+    private void applyInnerDeletions(SortedSet<BigInteger> innerDeletions) {
+        BigInteger internalPosition = BigInteger.ZERO;
+        BigInteger viewPosition = BigInteger.ZERO;
+        for (BigInteger rowIndex : innerDeletions) {
+            BigInteger remainingCount = rowIndex.subtract(viewPosition);
+            BigInteger adjustedRowIndex = adjustByDeletions(internalPosition, remainingCount);
+
+            deletions.add(adjustedRowIndex);
+            
+            internalPosition = adjustedRowIndex.add(BigInteger.ONE);
+            viewPosition = rowIndex.add(BigInteger.ONE);
+        }
+    }
+
+    private void applyOuterDeletions(
+            NavigableSet<BigInteger> outerDeletions, BigInteger reducedSize) {
+        Iterator<BigInteger> descIterator = outerDeletions.descendingIterator();
+        while (descIterator.hasNext()) {
+            BigInteger outerIndex = descIterator.next();
+            int insertionIndex = outerIndex.subtract(reducedSize).intValueExact();
+            insertedRows.remove(insertionIndex);
+        }
+    }
+
+    private BigInteger adjustByDeletions(BigInteger start, BigInteger count) {
+        BigInteger targetPosition;
         
+        BigInteger position = start;
+        BigInteger remaining = count;
+        do {
+            targetPosition = position.add(remaining);
+            Set<BigInteger> foundItems = deletions.subSet(position, targetPosition);
+            remaining = BigInteger.valueOf(foundItems.size());
+            position = targetPosition;
+        } while (!remaining.equals(BigInteger.ZERO));
+        
+        while (deletions.contains(targetPosition)) {
+            targetPosition = targetPosition.add(BigInteger.ONE);
+        }
+        
+        return targetPosition;
     }
     
     
@@ -119,11 +191,10 @@ public class DiffTable implements Table {
         
         private final Row baseRow;
         
-        // FIXME: something more immutable?
-        private final Map<Integer, Object> updates;
+        private final ImmutableMap<Integer, Object> updates;
         
         
-        private UpdatedRow(Row baseRow, Map<Integer, Object> updates) {
+        private UpdatedRow(Row baseRow, ImmutableMap<Integer, Object> updates) {
             this.baseRow = baseRow;
             this.updates = updates;
         }
