@@ -289,6 +289,12 @@ public final class ImmutableMap<K, V> implements Serializable {
         return new ImmutableMap<>(filteredData);
     }
 
+    public ImmutableMap<K, V> merge(ImmutableMap<K, V> otherMap) {
+        Map<K, V> mergedData = new HashMap<>(data);
+        mergedData.putAll(otherMap.data);
+        return new ImmutableMap<>(mergedData);
+    }
+    
     @Override
     public int hashCode() {
         return data.hashCode();
