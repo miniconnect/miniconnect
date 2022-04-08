@@ -6,7 +6,6 @@ import java.io.UncheckedIOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Objects;
 
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
@@ -40,22 +39,23 @@ public class JdbcAdapterSession implements MiniSession {
         } catch (SQLException e) {
             return new JdbcAdapterResult(e);
         } catch (Exception e) {
-            // FIXME
-            return new StoredResult(new StoredError(
-                    1,
-                    "00001",
-                    Objects.requireNonNullElse(e.getMessage(), "Unexpected error")));
+            return errorResult(e);
         }
         
         try {
             return new JdbcAdapterResult(jdbcStatement);
         } catch (Exception e) {
-            // FIXME
-            return new StoredResult(new StoredError(
-                    1,
-                    "00001",
-                    Objects.requireNonNullElse(e.getMessage(), "Unexpected error")));
+            return errorResult(e);
         }
+    }
+    
+    // FIXME
+    private MiniResult errorResult(Exception e) {
+        String message = e.getMessage();
+        if (message == null) {
+            message = "Unexpected error";
+        }
+        return new StoredResult(new StoredError(1, "00001", message));
     }
 
     @Override

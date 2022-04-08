@@ -179,11 +179,7 @@ public class SqlRepl implements Repl {
         if (source.length() > 0 && source.charAt(0) == '@') {
             File file = new File(source.substring(1));
             length = file.length();
-            if (length > 0) {
-                in = new FileInputStream(file);
-            } else {
-                in = InputStream.nullInputStream();
-            }
+            in = new FileInputStream(file);
         } else {
             byte[] bytes = source.getBytes(StandardCharsets.UTF_8);
             length = bytes.length;

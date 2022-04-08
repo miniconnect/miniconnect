@@ -25,7 +25,7 @@ public class ToLocalDateConverter implements TypedConverter<LocalDate> {
         } else if (source instanceof OffsetDateTime) {
             return ((OffsetDateTime) source).toLocalDate();
         } else if (source instanceof Instant) {
-            return LocalDate.ofInstant((Instant) source, ZoneOffset.UTC);
+            return LocalDateTime.ofInstant((Instant) source, ZoneOffset.UTC).toLocalDate();
         } else if (source instanceof Number) {
             return LocalDate.ofEpochDay(((Number) source).longValue());
         } else if (source instanceof String) {

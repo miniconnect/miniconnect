@@ -204,9 +204,8 @@ public final class ByteString implements Serializable {
     }
     
     private boolean isAsciiPrintable(byte b) {
-        return
-                Byte.compareUnsigned(b, (byte) 32) >= 0 &&
-                Byte.compareUnsigned(b, (byte) 126) <= 0;
+        int intValue = Byte.toUnsignedInt(b);
+        return intValue >= 32 && intValue <= 126;
     }
     
     private String toHexadecimalString(byte b) {

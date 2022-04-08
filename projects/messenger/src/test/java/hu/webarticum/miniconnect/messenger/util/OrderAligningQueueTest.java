@@ -2,8 +2,6 @@ package hu.webarticum.miniconnect.messenger.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Objects;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -16,7 +14,7 @@ class OrderAligningQueueTest {
     @BeforeEach
     void init() {
         queue = new OrderAligningQueue<Integer>(
-                (p, i) -> i == Objects.requireNonNullElse(p, 0) + 1);
+                (p, i) -> i == (p != null ? p : 0) + 1);
     }
 
     @Test

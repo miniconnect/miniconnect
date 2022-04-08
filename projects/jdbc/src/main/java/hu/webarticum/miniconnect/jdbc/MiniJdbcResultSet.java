@@ -23,12 +23,12 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Objects;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResultSet;
@@ -274,7 +274,11 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public boolean getBoolean(int columnIndex) throws SQLException {
-        return Objects.requireNonNullElse(getObject(columnIndex, Boolean.class), false);
+        Boolean result = getObject(columnIndex, Boolean.class);
+        if (result == null) {
+            return false;
+        }
+        return result;
     }
 
     @Override
@@ -284,7 +288,11 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public byte getByte(int columnIndex) throws SQLException {
-        return Objects.requireNonNullElse(getObject(columnIndex, Byte.class), (byte) 0);
+        Byte result = getObject(columnIndex, Byte.class);
+        if (result == null) {
+            return (byte) 0;
+        }
+        return result;
     }
 
     @Override
@@ -294,7 +302,11 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public short getShort(int columnIndex) throws SQLException {
-        return Objects.requireNonNullElse(getObject(columnIndex, Short.class), (short) 0);
+        Short result = getObject(columnIndex, Short.class);
+        if (result == null) {
+            return (short) 0;
+        }
+        return result;
     }
 
     @Override
@@ -304,7 +316,11 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public int getInt(int columnIndex) throws SQLException {
-        return Objects.requireNonNullElse(getObject(columnIndex, Integer.class), 0);
+        Integer result = getObject(columnIndex, Integer.class);
+        if (result == null) {
+            return 0;
+        }
+        return result;
     }
 
     @Override
@@ -314,7 +330,11 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public long getLong(int columnIndex) throws SQLException {
-        return Objects.requireNonNullElse(getObject(columnIndex, Long.class), 0L);
+        Long result = getObject(columnIndex, Long.class);
+        if (result == null) {
+            return 0L;
+        }
+        return result;
     }
 
     @Override
@@ -324,7 +344,11 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public float getFloat(int columnIndex) throws SQLException {
-        return Objects.requireNonNullElse(getObject(columnIndex, Float.class), 0f);
+        Float result = getObject(columnIndex, Float.class);
+        if (result == null) {
+            return 0f;
+        }
+        return result;
     }
 
     @Override
@@ -334,7 +358,11 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public double getDouble(int columnIndex) throws SQLException {
-        return Objects.requireNonNullElse(getObject(columnIndex, Double.class), 0.0);
+        Double result = getObject(columnIndex, Double.class);
+        if (result == null) {
+            return 0d;
+        }
+        return result;
     }
 
     @Override
@@ -410,7 +438,8 @@ public class MiniJdbcResultSet implements ResultSet {
     public Date getDate(int columnIndex, Calendar calendar) throws SQLException {
         Instant instant = getDate(columnIndex).toInstant();
         ZoneId zoneId = calendar.getTimeZone().toZoneId();
-        return Date.valueOf(LocalDate.ofInstant(instant, zoneId));
+        LocalDate localDate = LocalDateTime.ofInstant(instant, zoneId).toLocalDate();
+        return Date.valueOf(localDate);
     }
 
     @Override

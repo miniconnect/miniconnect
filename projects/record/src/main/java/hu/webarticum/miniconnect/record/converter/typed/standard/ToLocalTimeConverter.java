@@ -30,7 +30,7 @@ public class ToLocalTimeConverter implements TypedConverter<LocalTime> {
         } else if (source instanceof OffsetDateTime) {
             return ((OffsetDateTime) source).toLocalTime();
         } else if (source instanceof Instant) {
-            return LocalTime.ofInstant((Instant) source, ZoneOffset.UTC);
+            return LocalDateTime.ofInstant((Instant) source, ZoneOffset.UTC).toLocalTime();
         } else if (source instanceof Number) {
             BigDecimal bigDecimalValue = Numbers.toBigDecimal((Number) source, 9);
             long nanosOfDay= bigDecimalValue.unscaledValue().longValue();

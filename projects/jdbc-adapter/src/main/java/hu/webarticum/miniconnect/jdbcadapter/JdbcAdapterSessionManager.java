@@ -60,12 +60,13 @@ public class JdbcAdapterSessionManager implements MiniSessionManager {
             ConnectionFactory connectionFactory,
             Supplier<JdbcLargeDataPutter> largeDataPutterFactory) {
         this.connectionFactory = Objects.requireNonNull(connectionFactory);
-        this.largeDataPutterFactory =
-                Objects.requireNonNullElse(largeDataPutterFactory, () -> null);
+        this.largeDataPutterFactory = largeDataPutterFactory != null ?
+                largeDataPutterFactory :
+                () -> null;
     }
     
     private static ConnectionFactory connectionFactoryOf(String connectionUrl, Map<?, ?> data) {
-        Properties properties = new Properties(data.size());
+        Properties properties = new Properties();
         properties.putAll(data);
         return () -> DriverManager.getConnection(connectionUrl, properties);
     }
