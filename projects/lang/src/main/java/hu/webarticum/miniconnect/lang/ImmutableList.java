@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -144,7 +145,15 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
         }
         return new ImmutableList<>(newData);
     }
-    
+
+    public void forEachIndex(BiConsumer<Integer, T> action) {
+        int length = data.size();
+        for (int i = 0; i < length; i++) {
+            T item = data.get(i);
+            action.accept(i, item);
+        }
+    }
+
     public Iterable<T> reverseOrder() {
         ListIterator<T> listIterator = data.listIterator(data.size());
         return () -> new Iterator<T>() {
