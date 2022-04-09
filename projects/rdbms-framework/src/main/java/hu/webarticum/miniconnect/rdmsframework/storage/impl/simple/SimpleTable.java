@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,8 +92,22 @@ public class SimpleTable implements Table {
             throw new UnsupportedOperationException("This table is read-only");
         }
         
-        // TODO
+        rows.addAll(patch.insertedRows());
         
+        for (Map.Entry<BigInteger, ImmutableMap<Integer, Object>> entry :
+                patch.updates().entrySet()) {
+            int rowIndex = entry.getKey().intValueExact();
+            ImmutableMap<Integer, Object> rowUpdates = entry.getValue();
+            ImmutableList<Object> currentRow = rows.get(rowIndex);
+            ImmutableList<Object> updatedRow = currentRow.mapIndex(rowUpdates::getOrDefault);
+            rows.set(rowIndex, updatedRow);
+        }
+        
+        Iterator<BigInteger> deletionsIterator = patch.deletions().descendingIterator();
+        while (deletionsIterator.hasNext()) {
+            int deletedRowIndex = deletionsIterator.next().intValueExact();
+            rows.remove(deletedRowIndex);
+        }
     }
 
     

@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.rdmsframework.storage.impl.simpletable;
+package hu.webarticum.miniconnect.rdmsframework.storage.impl.simple;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,9 +10,6 @@ import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.NullsMode;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.SortMode;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelectionEntry;
-import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleColumnDefinition;
-import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.ScanningTableIndex;
-import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleTable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
