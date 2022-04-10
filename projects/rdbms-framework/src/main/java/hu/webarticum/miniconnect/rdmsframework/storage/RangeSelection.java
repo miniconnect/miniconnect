@@ -10,10 +10,6 @@ public class RangeSelection implements TableSelection {
     
     private final BigInteger until;
     
-    private final OrderKey ascOrderKey;
-    
-    private final OrderKey descOrderKey;
-    
     private final boolean ascOrder;
 
     public RangeSelection(long from, long until) {
@@ -21,14 +17,12 @@ public class RangeSelection implements TableSelection {
     }
     
     public RangeSelection(BigInteger from, BigInteger until) {
-        this(from, until, OrderKey.adHoc(), OrderKey.adHoc(), true);
+        this(from, until, true);
     }
     
     public RangeSelection(
             BigInteger from,
             BigInteger until,
-            OrderKey ascOrderKey,
-            OrderKey descOrderKey,
             boolean ascOrder) {
         if (from.compareTo(until) > 0) {
             throw new IllegalArgumentException(String.format(
@@ -37,8 +31,6 @@ public class RangeSelection implements TableSelection {
 
         this.from = from;
         this.until = until;
-        this.ascOrderKey = ascOrderKey;
-        this.descOrderKey = descOrderKey;
         this.ascOrder = ascOrder;
     }
     
@@ -49,18 +41,13 @@ public class RangeSelection implements TableSelection {
     }
 
     @Override
-    public OrderKey orderKey() {
-        return ascOrder ? ascOrderKey : descOrderKey;
-    }
-
-    @Override
     public boolean containsRow(BigInteger rowIndex) {
         return (rowIndex.compareTo(from) >= 0 && rowIndex.compareTo(until) < 0);
     }
 
     @Override
     public RangeSelection reversed() {
-        return new RangeSelection(from, until, ascOrderKey, descOrderKey, !ascOrder);
+        return new RangeSelection(from, until, !ascOrder);
     }
 
     public boolean isAscOrder() {

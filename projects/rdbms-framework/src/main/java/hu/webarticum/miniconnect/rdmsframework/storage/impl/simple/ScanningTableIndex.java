@@ -10,7 +10,6 @@ import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
 import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
-import hu.webarticum.miniconnect.rdmsframework.storage.StandardOrderKey;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
@@ -96,15 +95,9 @@ public class ScanningTableIndex implements TableIndex {
                 .map(e -> e.index)
                 .collect(ImmutableList.createCollector());
         if (sort) {
-            // TODO: use StandardOrderKey in this case too
             return new SimpleSelection(rowIndexes);
         } else {
-            return new SimpleSelection(
-                    table.size(),
-                    new StandardOrderKey(table.name(), true),
-                    new StandardOrderKey(table.name(), false),
-                    rowIndexes,
-                    rowIndexes);
+            return new SimpleSelection(table.size(), rowIndexes);
         }
     }
 

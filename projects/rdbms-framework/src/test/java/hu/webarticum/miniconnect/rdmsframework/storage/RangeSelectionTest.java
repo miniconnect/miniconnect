@@ -17,12 +17,9 @@ class RangeSelectionTest {
 
     @Test
     void testAsc() {
-        OrderKey ascOrderKey = OrderKey.adHoc();
         RangeSelection selection = new RangeSelection(
                 BigInteger.valueOf(3L),
                 BigInteger.valueOf(10L),
-                ascOrderKey,
-                OrderKey.adHoc(),
                 true);
         assertThat(selection).containsExactly(bigs(3L, 4L, 5L, 6L, 7L, 8L, 9L));
         assertThat(selection.containsRow(BigInteger.valueOf(0L))).isFalse();
@@ -34,12 +31,9 @@ class RangeSelectionTest {
 
     @Test
     void testDesc() {
-        OrderKey descOrderKey = OrderKey.adHoc();
         RangeSelection selection = new RangeSelection(
                 BigInteger.valueOf(3L),
                 BigInteger.valueOf(10L),
-                OrderKey.adHoc(),
-                descOrderKey,
                 false);
         assertThat(selection).containsExactly(bigs(9L, 8L, 7L, 6L, 5L, 4L, 3L));
         assertThat(selection.containsRow(BigInteger.valueOf(0L))).isFalse();

@@ -5,79 +5,46 @@ import java.util.Iterator;
 import java.util.function.Predicate;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
-import hu.webarticum.miniconnect.rdmsframework.storage.OrderKey;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
 
 public class SimpleSelection implements TableSelection {
     
     private final Predicate<BigInteger> containmentPredicate;
     
-    private final OrderKey orderKey;
-    
-    private final OrderKey reverseOrderKey;
-    
     private final Iterable<BigInteger> rowIndexes;
     
     private final Iterable<BigInteger> reverseRowIndexes;
-    
-    private final Iterable<BigInteger> orderIndexes;
-    
-    private final Iterable<BigInteger> reverseOrderIndexes;
     
 
     public SimpleSelection(ImmutableList<BigInteger> rowIndexes) {
         this(
                 rowIndexes::contains,
-                OrderKey.adHoc(),
-                OrderKey.adHoc(),
                 rowIndexes,
-                rowIndexes.reverseOrder(),
-                new Sequence(BigInteger.valueOf(rowIndexes.size())),
-                new Sequence(BigInteger.valueOf(rowIndexes.size())));
+                rowIndexes.reverseOrder());
     }
 
     public SimpleSelection(
             BigInteger tableSize,
-            OrderKey orderKey,
-            OrderKey reverseOrderKey,
-            ImmutableList<BigInteger> rowIndexes,
-            ImmutableList<BigInteger> orderIndexes) {
+            ImmutableList<BigInteger> rowIndexes) {
         this(
-                rowIndexes::contains,
-                orderKey,
-                reverseOrderKey,
+                i -> i.compareTo(tableSize) < 0,
                 rowIndexes,
-                rowIndexes.reverseOrder(),
-                orderIndexes,
-                orderIndexes.map(tableSize.subtract(BigInteger.ONE)::subtract).reverseOrder());
+                rowIndexes.reverseOrder());
     }
     
     public SimpleSelection(
             Predicate<BigInteger> containmentPredicate,
-            OrderKey orderKey,
-            OrderKey reverseOrderKey,
             Iterable<BigInteger> rowIndexes,
-            Iterable<BigInteger> reverseRowIndexes,
-            Iterable<BigInteger> orderIndexes,
-            Iterable<BigInteger> reverseOrderIndexes) {
-        this.orderKey = orderKey;
-        this.reverseOrderKey = reverseOrderKey;
+            Iterable<BigInteger> reverseRowIndexes) {
         this.containmentPredicate = containmentPredicate;
         this.rowIndexes = rowIndexes;
         this.reverseRowIndexes = reverseRowIndexes;
-        this.orderIndexes = orderIndexes;
-        this.reverseOrderIndexes = reverseOrderIndexes;
     }
     
 
     @Override
     public Iterator<BigInteger> iterator() {
         return rowIndexes.iterator();
-    }
-
-    @Override
-    public OrderKey orderKey() {
-        return orderKey;
     }
 
     @Override
@@ -89,12 +56,8 @@ public class SimpleSelection implements TableSelection {
     public SimpleSelection reversed() {
         return new SimpleSelection(
                 containmentPredicate,
-                reverseOrderKey,
-                orderKey,
                 reverseRowIndexes,
-                rowIndexes,
-                reverseOrderIndexes,
-                orderIndexes);
+                rowIndexes);
     }
     
 }
