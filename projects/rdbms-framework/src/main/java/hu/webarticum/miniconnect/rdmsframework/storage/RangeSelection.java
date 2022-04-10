@@ -44,7 +44,7 @@ public class RangeSelection implements TableSelection {
     
 
     @Override
-    public Iterator<TableSelectionEntry> iterator() {
+    public Iterator<BigInteger> iterator() {
         return ascOrder ? new AscIterator() : new DescIterator();
     }
 
@@ -68,7 +68,7 @@ public class RangeSelection implements TableSelection {
     }
 
     
-    private class AscIterator implements Iterator<TableSelectionEntry> {
+    private class AscIterator implements Iterator<BigInteger> {
 
         private BigInteger next = from;
         
@@ -79,12 +79,11 @@ public class RangeSelection implements TableSelection {
         }
 
         @Override
-        public TableSelectionEntry next() {
+        public BigInteger next() {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            BigInteger orderIndex = next.subtract(from);
-            TableSelectionEntry result = new TableSelectionEntry(ascOrderKey, next, orderIndex);
+            BigInteger result = next;
             next = next.add(BigInteger.ONE);
             return result;
         }
@@ -92,7 +91,7 @@ public class RangeSelection implements TableSelection {
     }
     
     
-    private class DescIterator implements Iterator<TableSelectionEntry> {
+    private class DescIterator implements Iterator<BigInteger> {
 
         private BigInteger next = until.subtract(BigInteger.ONE);
         
@@ -103,12 +102,11 @@ public class RangeSelection implements TableSelection {
         }
 
         @Override
-        public TableSelectionEntry next() {
+        public BigInteger next() {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            BigInteger orderIndex = until.subtract(next).subtract(BigInteger.ONE);
-            TableSelectionEntry result = new TableSelectionEntry(descOrderKey, next, orderIndex);
+            BigInteger result = next;
             next = next.subtract(BigInteger.ONE);
             return result;
         }

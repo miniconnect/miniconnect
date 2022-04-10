@@ -33,7 +33,6 @@ import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
-import hu.webarticum.miniconnect.rdmsframework.storage.TableSelectionEntry;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.MultiComparator;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.MultiComparator.MultiComparatorBuilder;
 import hu.webarticum.miniconnect.record.translator.JavaTranslator;
@@ -140,8 +139,7 @@ public class SimpleSelectExecutor implements QueryExecutor {
             List<TableSelection> moreSelections,
             Set<String> unindexedColumnNames) {
         List<BigInteger> result = new ArrayList<>();
-        for (TableSelectionEntry entry : firstSelection) {
-            BigInteger rowIndex = entry.tableIndex();
+        for (BigInteger rowIndex : firstSelection) {
             if (isRowMatchingWithMore(
                     table, rowIndex, queryWhere, moreSelections, unindexedColumnNames)) {
                 result.add(rowIndex);

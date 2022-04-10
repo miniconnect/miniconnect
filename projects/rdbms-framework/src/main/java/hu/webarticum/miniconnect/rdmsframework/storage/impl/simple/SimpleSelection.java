@@ -7,7 +7,6 @@ import java.util.function.Predicate;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.rdmsframework.storage.OrderKey;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
-import hu.webarticum.miniconnect.rdmsframework.storage.TableSelectionEntry;
 
 public class SimpleSelection implements TableSelection {
     
@@ -72,8 +71,8 @@ public class SimpleSelection implements TableSelection {
     
 
     @Override
-    public Iterator<TableSelectionEntry> iterator() {
-        return new SimpleSelectionIterator();
+    public Iterator<BigInteger> iterator() {
+        return rowIndexes.iterator();
     }
 
     @Override
@@ -96,28 +95,6 @@ public class SimpleSelection implements TableSelection {
                 rowIndexes,
                 reverseOrderIndexes,
                 orderIndexes);
-    }
-    
-    
-    private class SimpleSelectionIterator implements Iterator<TableSelectionEntry> {
-
-        private Iterator<BigInteger> rowIndexIterator = rowIndexes.iterator();
-
-        private Iterator<BigInteger> orderIndexIterator = orderIndexes.iterator();
-        
-        
-        @Override
-        public boolean hasNext() {
-            return rowIndexIterator.hasNext();
-        }
-
-        @Override
-        public TableSelectionEntry next() {
-            BigInteger rowIndex = rowIndexIterator.next();
-            BigInteger orderIndex = orderIndexIterator.next();
-            return new TableSelectionEntry(orderKey, rowIndex, orderIndex);
-        }
-        
     }
     
 }

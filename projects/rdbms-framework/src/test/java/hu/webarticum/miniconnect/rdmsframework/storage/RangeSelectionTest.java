@@ -24,11 +24,7 @@ class RangeSelectionTest {
                 ascOrderKey,
                 OrderKey.adHoc(),
                 true);
-        assertThat(selection).allMatch(e -> e.orderKey().equals(ascOrderKey));
-        assertThat(selection).map(e -> e.tableIndex()).containsExactly(
-                bigs(3L, 4L, 5L, 6L, 7L, 8L, 9L));
-        assertThat(selection).map(e -> e.orderIndex()).containsExactly(
-                bigs(0L, 1L, 2L, 3L, 4L, 5L, 6L));
+        assertThat(selection).containsExactly(bigs(3L, 4L, 5L, 6L, 7L, 8L, 9L));
         assertThat(selection.containsRow(BigInteger.valueOf(0L))).isFalse();
         assertThat(selection.containsRow(BigInteger.valueOf(3L))).isTrue();
         assertThat(selection.containsRow(BigInteger.valueOf(7L))).isTrue();
@@ -45,11 +41,7 @@ class RangeSelectionTest {
                 OrderKey.adHoc(),
                 descOrderKey,
                 false);
-        assertThat(selection).allMatch(e -> e.orderKey().equals(descOrderKey));
-        assertThat(selection).map(e -> e.tableIndex()).containsExactly(
-                bigs(9L, 8L, 7L, 6L, 5L, 4L, 3L));
-        assertThat(selection).map(e -> e.orderIndex()).containsExactly(
-                bigs(0L, 1L, 2L, 3L, 4L, 5L, 6L));
+        assertThat(selection).containsExactly(bigs(9L, 8L, 7L, 6L, 5L, 4L, 3L));
         assertThat(selection.containsRow(BigInteger.valueOf(0L))).isFalse();
         assertThat(selection.containsRow(BigInteger.valueOf(3L))).isTrue();
         assertThat(selection.containsRow(BigInteger.valueOf(7L))).isTrue();

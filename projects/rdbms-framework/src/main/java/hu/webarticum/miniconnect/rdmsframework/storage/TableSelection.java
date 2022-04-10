@@ -15,7 +15,7 @@ import java.math.BigInteger;
  * @see OrderKey
  * @see TableSelection
  */
-public interface TableSelection extends Iterable<TableSelectionEntry> {
+public interface TableSelection extends Iterable<BigInteger> {
 
     public OrderKey orderKey();
     
