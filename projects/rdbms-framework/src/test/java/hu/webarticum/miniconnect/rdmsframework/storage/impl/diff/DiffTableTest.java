@@ -13,7 +13,6 @@ import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TablePatch;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.AbstractWritableTableTest;
 
-// TODO: test indexes after implemented
 class DiffTableTest extends AbstractWritableTableTest {
 
     @Test

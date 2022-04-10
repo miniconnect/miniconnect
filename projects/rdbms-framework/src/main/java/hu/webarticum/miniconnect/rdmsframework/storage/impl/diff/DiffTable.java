@@ -20,11 +20,14 @@ import hu.webarticum.miniconnect.rdmsframework.storage.Row;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TablePatch;
+import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.ScanningTableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleRow;
 
 public class DiffTable implements Table {
     
     private final Table baseTable;
+    
+    private final IndexStore indexStore;
     
     private final List<ImmutableList<Object>> insertedRows = new ArrayList<>();
     
@@ -35,6 +38,7 @@ public class DiffTable implements Table {
     
     public DiffTable(Table baseTable) {
         this.baseTable = baseTable;
+        this.indexStore = new IndexStore();
     }
 
 
@@ -50,10 +54,7 @@ public class DiffTable implements Table {
 
     @Override
     public NamedResourceStore<TableIndex> indexes() {
-        
-        // TODO
-        return null;
-        
+        return indexStore;
     }
 
     @Override
@@ -239,6 +240,43 @@ public class DiffTable implements Table {
                 resultBuilder.put(columnName, get(columnName));
             }
             return ImmutableMap.fromMap(resultBuilder);
+        }
+        
+    }
+    
+    
+    private class IndexStore implements NamedResourceStore<TableIndex> {
+        
+        private final NamedResourceStore<TableIndex> baseStore = baseTable.indexes();
+        
+
+        @Override
+        public ImmutableList<String> names() {
+            return baseStore.names();
+        }
+
+        @Override
+        public ImmutableList<TableIndex> resources() {
+            return names().map(this::get);
+        }
+
+        @Override
+        public boolean contains(String name) {
+            return baseStore.contains(name);
+        }
+
+        @Override
+        public TableIndex get(String name) {
+            
+            // TODO: create a real merging index
+            
+            TableIndex baseIndex = baseStore.get(name);
+            if (insertedRows.isEmpty() && updates.isEmpty() && deletions.isEmpty()) {
+                return baseIndex;
+            } else {
+                return new ScanningTableIndex(DiffTable.this, name, baseIndex.columnNames());
+            }
+            
         }
         
     }

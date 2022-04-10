@@ -11,8 +11,14 @@ import org.junit.jupiter.api.Test;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
+import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
+import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TablePatch;
+import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
+import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.InclusionMode;
+import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.NullsMode;
+import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.SortMode;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleColumnDefinition;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleTable;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleTable.SimpleTableBuilder;
@@ -257,6 +263,69 @@ public abstract class AbstractWritableTableTest {
         assertThat(contentOf(table)).isEmpty();
     }
 
+    @Test
+    protected void testIndexes() {
+        Table table = createSubjectTable();
+        NamedResourceStore<TableIndex> indexes = table.indexes();
+        assertThat(indexes.names()).containsExactlyInAnyOrder(
+                "idx_id", "idx_label", "idx_is_owned");
+        assertThat(indexes.get("idx_id").columnNames()).isEqualTo(
+                ImmutableList.of("id"));
+        assertThat(indexes.get("idx_label").columnNames()).isEqualTo(
+                ImmutableList.of("label"));
+        assertThat(indexes.get("idx_is_owned").columnNames()).isEqualTo(
+                ImmutableList.of("is_owned"));
+    }
+
+    @Test
+    protected void testIndexFind() {
+        Table table = createSubjectTable();
+        TableIndex index = table.indexes().get("idx_label");
+        TableSelection selection = index.find(
+                "kkk",
+                InclusionMode.INCLUDE,
+                "xxx",
+                InclusionMode.INCLUDE,
+                NullsMode.NO_NULLS,
+                SortMode.UNSORTED);
+        
+        assertThat(selection).containsExactlyInAnyOrder(big(0), big(2));
+    }
+
+    @Test
+    protected void testIndexFindAfterModifications() {
+        Table table = createSubjectTable();
+
+        TablePatch complexPatch = TablePatch.builder()
+                .insert(ImmutableList.of(5, "AAA", true))
+                .insert(ImmutableList.of(6, "BBB", false))
+                .insert(ImmutableList.of(7, "CCC", true))
+                .update(BigInteger.valueOf(2L), ImmutableMap.of(1, "UUU"))
+                .update(BigInteger.valueOf(3L), ImmutableMap.of(1, "VVV"))
+                .delete(BigInteger.ZERO)
+                .build();
+        table.applyPatch(complexPatch);
+
+        TablePatch complex2Patch = TablePatch.builder()
+                .insert(ImmutableList.of(8, "XXX", true))
+                .update(BigInteger.ONE, ImmutableMap.of(1, "uuuu", 2, false))
+                .delete(BigInteger.ZERO)
+                .delete(BigInteger.valueOf(3L))
+                .build();
+        table.applyPatch(complex2Patch);
+        
+        TableIndex index = table.indexes().get("idx_label");
+        TableSelection selection = index.find(
+                "uuuu",
+                InclusionMode.EXCLUDE,
+                "ZZZ",
+                InclusionMode.INCLUDE,
+                NullsMode.NO_NULLS,
+                SortMode.UNSORTED);
+        
+        assertThat(selection).containsExactlyInAnyOrder(big(1), big(4));
+    }
+    
     protected Table createSubjectTable() {
         return tableFrom(defaultColumnNames(), defaultColumnDefinitions(), defaultContent());
     }
@@ -305,7 +374,12 @@ public abstract class AbstractWritableTableTest {
         SimpleTableBuilder builder = SimpleTable.builder();
         columnNames.forEachIndex((i, n) -> builder.addColumn(n, columnDefinitions.get(i)));
         content.forEach(builder::addRow);
+        columnNames.forEach(n -> builder.addIndex("idx_" + n, ImmutableList.of(n)));
         return builder.build();
+    }
+    
+    protected BigInteger big(long number) {
+        return BigInteger.valueOf(number);
     }
     
 }
