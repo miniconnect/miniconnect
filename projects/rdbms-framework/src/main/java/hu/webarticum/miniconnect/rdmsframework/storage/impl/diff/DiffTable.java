@@ -152,6 +152,7 @@ public class DiffTable implements Table {
             BigInteger adjustedRowIndex = adjustByDeletions(internalPosition, remainingCount);
 
             deletions.add(adjustedRowIndex);
+            updates.remove(adjustedRowIndex);
             
             internalPosition = adjustedRowIndex.add(BigInteger.ONE);
             viewPosition = rowIndex.add(BigInteger.ONE);
