@@ -22,7 +22,7 @@ public class SimpleColumnDefinition implements ColumnDefinition {
     }
     
     public SimpleColumnDefinition(Class<?> clazz, boolean nullable) {
-        this(clazz, nullable, Comparator.naturalOrder());
+        this(clazz, nullable, createDefaultComparatorFor(clazz));
     }
     
     public SimpleColumnDefinition(Class<?> clazz, boolean nullable, Comparator<?> comparator) {
@@ -31,6 +31,13 @@ public class SimpleColumnDefinition implements ColumnDefinition {
         this.comparator = comparator;
     }
     
+    private static Comparator<?> createDefaultComparatorFor(Class<?> clazz) {
+        if (clazz == String.class) {
+            return (String s1, String s2) -> s1.compareToIgnoreCase(s2);
+        } else {
+            return Comparator.naturalOrder();
+        }
+    }
     
 
     @Override
