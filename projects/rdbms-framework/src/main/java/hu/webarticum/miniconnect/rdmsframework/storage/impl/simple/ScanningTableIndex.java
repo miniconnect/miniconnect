@@ -111,13 +111,7 @@ public class ScanningTableIndex implements TableIndex {
             ColumnDefinition columnDefinition = columns.get(columnName).definition();
             Comparator<?> columnComparator = columnDefinition.comparator();
             boolean nullable = columnDefinition.isNullable();
-            boolean asc =
-                    sortMode != SortMode.DESC_NULLS_LAST &&
-                    sortMode != SortMode.DESC_NULLS_FIRST;
-            boolean nullsFirst =
-                    sortMode != SortMode.ASC_NULLS_LAST &&
-                    sortMode != SortMode.DESC_NULLS_LAST;
-            builder.add(columnComparator, nullable, asc, nullsFirst);
+            builder.add(columnComparator, nullable, sortMode.isAsc(), sortMode.isNullsFirst());
         }
         return builder.build();
     }

@@ -10,7 +10,40 @@ public interface TableIndex extends NamedResource {
     
     public enum SortMode {
         
-        UNSORTED, ASC_NULLS_FIRST, ASC_NULLS_LAST, DESC_NULLS_LAST, DESC_NULLS_FIRST
+        UNSORTED(false, true, true),
+        ASC_NULLS_FIRST(true, true, true),
+        ASC_NULLS_LAST(true, true, false),
+        DESC_NULLS_LAST(true, false, false),
+        DESC_NULLS_FIRST(true, false, true),
+        
+        ;
+        
+        
+        private final boolean sorted;
+
+        private final boolean asc;
+        
+        private final boolean nullsFirst;
+        
+        
+        private SortMode(boolean sorted, boolean asc, boolean nullsFirst) {
+            this.sorted = sorted;
+            this.asc = asc;
+            this.nullsFirst = nullsFirst;
+        }
+
+        
+        public boolean isSorted() {
+            return sorted;
+        }
+
+        public boolean isAsc() {
+            return asc;
+        }
+
+        public boolean isNullsFirst() {
+            return nullsFirst;
+        }
         
     }
     
