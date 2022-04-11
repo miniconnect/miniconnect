@@ -45,7 +45,6 @@ public class RangeSelection implements TableSelection {
         return (rowIndex.compareTo(from) >= 0 && rowIndex.compareTo(until) < 0);
     }
 
-    @Override
     public RangeSelection reversed() {
         return new RangeSelection(from, until, !ascOrder);
     }

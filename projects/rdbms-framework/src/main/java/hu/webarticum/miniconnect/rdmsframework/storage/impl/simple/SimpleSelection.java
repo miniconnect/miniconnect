@@ -43,7 +43,6 @@ public class SimpleSelection implements TableSelection {
         return containmentPredicate.test(rowIndex);
     }
     
-    @Override
     public SimpleSelection reversed() {
         return new SimpleSelection(
                 containmentPredicate,
