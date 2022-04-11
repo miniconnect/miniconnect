@@ -8,12 +8,11 @@ import java.util.List;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
-import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
-import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.MultiComparator.MultiComparatorBuilder;
+import hu.webarticum.miniconnect.rdmsframework.util.IndexUtil;
 
 public class ScanningTableIndex implements TableIndex {
     
@@ -82,7 +81,8 @@ public class ScanningTableIndex implements TableIndex {
         boolean fromInclusive = fromInclusionMode == InclusionMode.INCLUDE;
         boolean toInclusive = toInclusionMode == InclusionMode.INCLUDE;
         boolean sort = !sortModes.filter(m -> m != SortMode.UNSORTED).isEmpty();
-        MultiComparator multiComparator = createMultiComparator(table, columnNames, sortModes);
+        MultiComparator multiComparator =
+                IndexUtil.createMultiComparator(table, columnNames, sortModes);
         
         List<SortHelper> foundEntries = collectEntries(
                 from, fromInclusive, to, toInclusive, nullsModes, multiComparator);
@@ -95,25 +95,6 @@ public class ScanningTableIndex implements TableIndex {
                 .map(e -> e.index)
                 .collect(ImmutableList.createCollector());
         return new SimpleSelection(rowIndexes);
-    }
-
-    private MultiComparator createMultiComparator(
-            Table table,
-            ImmutableList<String> columnNames,
-            ImmutableList<SortMode> sortModes) {
-        int size = columnNames.size();
-        ImmutableList<SortMode> extendedSortModes = sortModes.resize(size, i -> SortMode.UNSORTED);
-        NamedResourceStore<Column> columns = table.columns();
-        MultiComparatorBuilder builder = MultiComparator.builder();
-        for (int i = 0; i < size; i++) {
-            String columnName = columnNames.get(i);
-            SortMode sortMode = extendedSortModes.get(i);
-            ColumnDefinition columnDefinition = columns.get(columnName).definition();
-            Comparator<?> columnComparator = columnDefinition.comparator();
-            boolean nullable = columnDefinition.isNullable();
-            builder.add(columnComparator, nullable, sortMode.isAsc(), sortMode.isNullsFirst());
-        }
-        return builder.build();
     }
 
     private List<SortHelper> collectEntries(
