@@ -12,6 +12,7 @@ import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
+import hu.webarticum.miniconnect.rdmsframework.storage.RangeSelection;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TablePatch;
@@ -290,6 +291,9 @@ public abstract class AbstractWritableTableTest {
                 SortMode.UNSORTED);
         
         assertThat(selection).containsExactlyInAnyOrder(big(0), big(2));
+        assertThat(new RangeSelection(BigInteger.ZERO, table.size()))
+                .filteredOn(selection::containsRow)
+                .containsExactlyInAnyOrder(big(0), big(2));
     }
 
     @Test
@@ -324,6 +328,9 @@ public abstract class AbstractWritableTableTest {
                 SortMode.UNSORTED);
         
         assertThat(selection).containsExactlyInAnyOrder(big(1), big(4));
+        assertThat(new RangeSelection(BigInteger.ZERO, table.size()))
+                .filteredOn(selection::containsRow)
+                .containsExactlyInAnyOrder(big(1), big(4));
     }
     
     protected Table createSubjectTable() {
