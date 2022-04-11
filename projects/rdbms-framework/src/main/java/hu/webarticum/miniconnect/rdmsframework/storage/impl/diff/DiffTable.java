@@ -195,6 +195,12 @@ public class DiffTable implements Table {
         
         return targetPosition;
     }
+
+    private BigInteger deadjustByDeletions(BigInteger baseRowIndex) {
+        Collection<BigInteger> subDeletions = deletions.subSet(BigInteger.ZERO, baseRowIndex);
+        BigInteger deletionCount = BigInteger.valueOf(subDeletions.size());
+        return baseRowIndex.subtract(deletionCount);
+    }
     
     
     private static class UpdatedRow implements Row {
@@ -506,7 +512,12 @@ public class DiffTable implements Table {
             public Iterator<BigInteger> iterator() {
                 return ChainedIterator.of(
                         new FilteringIterator<>(
-                                baseSelection.iterator(), filteredUpdatedRowIndexes::contains),
+                                new IteratorAdapter<>(
+                                        new FilteringIterator<>(
+                                                baseSelection.iterator(),
+                                                v -> !deletions.contains(v)),
+                                        DiffTable.this::deadjustByDeletions),
+                                v -> !updatedRowIndexes.contains(v)),
                         new IteratorAdapter<>(filteredIndexEntries.iterator(), e -> e.rowIndex));
             }
     
