@@ -2,7 +2,9 @@ package hu.webarticum.miniconnect.rdmsframework.storage.impl.diff;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +13,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
@@ -20,14 +23,19 @@ import hu.webarticum.miniconnect.rdmsframework.storage.Row;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TablePatch;
-import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.ScanningTableIndex;
+import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
+import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.MultiComparator;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleRow;
+import hu.webarticum.miniconnect.rdmsframework.util.IndexUtil;
+import hu.webarticum.miniconnect.util.ChainedIterator;
+import hu.webarticum.miniconnect.util.FilteringIterator;
+import hu.webarticum.miniconnect.util.IteratorAdapter;
 
 public class DiffTable implements Table {
     
     private final Table baseTable;
     
-    private final IndexStore indexStore;
+    private final DiffTableIndexStore indexStore;
     
     private final List<ImmutableList<Object>> insertedRows = new ArrayList<>();
     
@@ -38,7 +46,7 @@ public class DiffTable implements Table {
     
     public DiffTable(Table baseTable) {
         this.baseTable = baseTable;
-        this.indexStore = new IndexStore();
+        this.indexStore = new DiffTableIndexStore();
     }
 
 
@@ -246,7 +254,7 @@ public class DiffTable implements Table {
     }
     
     
-    private class IndexStore implements NamedResourceStore<TableIndex> {
+    private class DiffTableIndexStore implements NamedResourceStore<TableIndex> {
         
         private final NamedResourceStore<TableIndex> baseStore = baseTable.indexes();
         
@@ -268,18 +276,257 @@ public class DiffTable implements Table {
 
         @Override
         public TableIndex get(String name) {
-            
-            // TODO: create a real merging index
-            
             TableIndex baseIndex = baseStore.get(name);
             if (insertedRows.isEmpty() && updates.isEmpty() && deletions.isEmpty()) {
                 return baseIndex;
             } else {
-                return new ScanningTableIndex(DiffTable.this, name, baseIndex.columnNames());
+                return new DiffTableIndex(baseIndex);
             }
-            
         }
         
     }
     
+    
+    private class DiffTableIndex implements TableIndex {
+        
+        private final TableIndex baseIndex;
+        
+        private final Set<BigInteger> updatedRowIndexes;
+        
+        private final ArrayList<DiffTableIndexEntry> indexEntries;
+        
+
+        public DiffTableIndex(TableIndex baseIndex) {
+            this.baseIndex = baseIndex;
+            
+            ImmutableList<String> tableColumnNames = baseTable.columns().names();
+            ImmutableList<Integer> columnIndexes =
+                    baseIndex.columnNames().map(tableColumnNames::indexOf);
+            
+            int fullUpdateCount = updates.size() + insertedRows.size();
+            this.updatedRowIndexes = new HashSet<>(fullUpdateCount);
+            this.indexEntries = new ArrayList<>(fullUpdateCount);
+            
+            BigInteger position = BigInteger.ZERO;
+            BigInteger fullDeletionCount = BigInteger.ZERO;
+            for (Map.Entry<BigInteger, ImmutableMap<Integer, Object>> entry : updates.entrySet()) {
+                BigInteger baseRowIndex = entry.getKey();
+                Collection<BigInteger> subDeletions = deletions.subSet(position, baseRowIndex);
+                BigInteger subDeletionCount = BigInteger.valueOf(subDeletions.size());
+                fullDeletionCount = fullDeletionCount.add(subDeletionCount);
+                BigInteger rowIndex = baseRowIndex.subtract(fullDeletionCount);
+
+                ImmutableMap<Integer, Object> rowUpdates = entry.getValue();
+                boolean updated = false;
+                for (Integer columnIndex : columnIndexes) {
+                    if (rowUpdates.containsKey(columnIndex)) {
+                        updated = true;
+                        break;
+                    }
+                }
+                
+                if (updated) {
+                    this.updatedRowIndexes.add(rowIndex);
+                    Row baseRow = baseTable.row(baseRowIndex);
+                    Row updatedRow = new UpdatedRow(baseRow, rowUpdates);
+                    ImmutableList<Object> updatedData = columnIndexes.map(updatedRow::get);
+                    DiffTableIndexEntry indexEntry = new DiffTableIndexEntry(rowIndex, updatedData);
+                    this.indexEntries.add(indexEntry);
+                }
+                
+                position = baseRowIndex.add(BigInteger.ONE);
+            }
+            Collection<BigInteger> tailDeletions = deletions.tailSet(position);
+            BigInteger tailDeletionCount = BigInteger.valueOf(tailDeletions.size());
+            fullDeletionCount = fullDeletionCount.add(tailDeletionCount);
+            BigInteger innerSize = baseTable.size().subtract(fullDeletionCount);
+            
+            int insertionCount = insertedRows.size();
+            for (int i = 0; i < insertionCount; i++) {
+                ImmutableList<Object> insertedRow = insertedRows.get(i);
+                ImmutableList<Object> insertedData = columnIndexes.map(insertedRow::get);
+                BigInteger rowIndex = BigInteger.valueOf(i).add(innerSize);
+                DiffTableIndexEntry indexEntry = new DiffTableIndexEntry(rowIndex, insertedData);
+                this.updatedRowIndexes.add(rowIndex);
+                this.indexEntries.add(indexEntry);
+            }
+            
+            this.indexEntries.trimToSize();
+        }
+        
+        
+        @Override
+        public String name() {
+            return baseIndex.name();
+        }
+
+        @Override
+        public boolean isUnique() {
+            
+            // TODO FIXME
+            return false;
+            
+        }
+
+        @Override
+        public ImmutableList<String> columnNames() {
+            return baseIndex.columnNames();
+        }
+
+        @Override
+        public TableSelection findMulti(
+                ImmutableList<?> from,
+                InclusionMode fromInclusionMode,
+                ImmutableList<?> to,
+                InclusionMode toInclusionMode,
+                ImmutableList<NullsMode> nullsModes,
+                ImmutableList<SortMode> sortModes) {
+            boolean sort = !sortModes.isEmpty() && sortModes.get(0).isSorted();
+            
+            TableSelection baseSelection = baseIndex.findMulti(
+                    from, fromInclusionMode, to, toInclusionMode, nullsModes, sortModes);
+            MultiComparator multiComparator = IndexUtil.createMultiComparator(
+                    baseTable, baseIndex.columnNames(), sortModes);
+            Predicate<ImmutableList<Object>> predicate = IndexUtil.createPredicate(
+                    from, fromInclusionMode, to, toInclusionMode, multiComparator);
+            if (sort) {
+                return new SortedDiffTableSelection(
+                        baseSelection,
+                        predicate,
+                        multiComparator,
+                        from,
+                        fromInclusionMode,
+                        to,
+                        toInclusionMode,
+                        nullsModes,
+                        sortModes);
+            } else {
+                return new UnsortedDiffTableSelection(baseSelection, predicate);
+            }
+        }
+    
+
+        private abstract class AbstractDiffTableSelection implements TableSelection {
+    
+            protected final TableSelection baseSelection;
+    
+            protected final Set<BigInteger> filteredUpdatedRowIndexes;
+    
+            protected final ArrayList<DiffTableIndexEntry> filteredIndexEntries;
+            
+            
+            protected AbstractDiffTableSelection(
+                    TableSelection baseSelection,
+                    Predicate<ImmutableList<Object>> predicate) {
+                this.baseSelection = baseSelection;
+                this.filteredUpdatedRowIndexes = new HashSet<>();
+                this.filteredIndexEntries = new ArrayList<>(indexEntries.size());
+                for (DiffTableIndexEntry indexEntry : indexEntries) {
+                    if (predicate.test(indexEntry.values)) {
+                        this.filteredUpdatedRowIndexes.add(indexEntry.rowIndex);
+                        this.filteredIndexEntries.add(indexEntry);
+                    }
+                }
+                this.filteredIndexEntries.trimToSize();
+            }
+            
+            
+            @Override
+            public boolean containsRow(BigInteger rowIndex) {
+                if (updatedRowIndexes.contains(rowIndex)) {
+                    return filteredUpdatedRowIndexes.contains(rowIndex);
+                } else {
+                    BigInteger adjustedRowIndex = adjustByDeletions(BigInteger.ZERO, rowIndex);
+                    return baseSelection.containsRow(adjustedRowIndex);
+                }
+            }
+            
+        }
+        
+    
+        private class SortedDiffTableSelection extends AbstractDiffTableSelection {
+            
+            private final ImmutableList<?> from;
+            
+            private final InclusionMode fromInclusionMode;
+            
+            private final ImmutableList<?> to;
+            
+            private final InclusionMode toInclusionMode;
+            
+            private final ImmutableList<NullsMode> nullsModes;
+            
+            private final ImmutableList<SortMode> sortModes;
+            
+    
+            public SortedDiffTableSelection( // NOSONAR currently these many parameters are OK
+                    TableSelection baseSelection,
+                    Predicate<ImmutableList<Object>> predicate,
+                    MultiComparator multiComparator,
+                    ImmutableList<?> from,
+                    InclusionMode fromInclusionMode,
+                    ImmutableList<?> to,
+                    InclusionMode toInclusionMode,
+                    ImmutableList<NullsMode> nullsModes,
+                    ImmutableList<SortMode> sortModes) {
+                super(baseSelection, predicate);
+                this.filteredIndexEntries.sort(
+                        (e1, e2) -> multiComparator.compare(e1.values, e2.values));
+
+                this.from = from;
+                this.fromInclusionMode = fromInclusionMode;
+                this.to = to;
+                this.toInclusionMode = toInclusionMode;
+                this.nullsModes = nullsModes;
+                this.sortModes = sortModes;
+            }
+            
+            
+            @Override
+            public Iterator<BigInteger> iterator() {
+                
+                // TODO
+                return null;
+                
+            }
+    
+        }
+        
+        
+        private class UnsortedDiffTableSelection extends AbstractDiffTableSelection {
+    
+            public UnsortedDiffTableSelection(
+                    TableSelection baseSelection,
+                    Predicate<ImmutableList<Object>> predicate) {
+                super(baseSelection, predicate);
+            }
+            
+            
+            @Override
+            public Iterator<BigInteger> iterator() {
+                return new ChainedIterator<>(
+                        new FilteringIterator<>(
+                                baseSelection.iterator(), filteredUpdatedRowIndexes::contains),
+                        new IteratorAdapter<>(filteredIndexEntries.iterator(), e -> e.rowIndex));
+            }
+    
+        }
+        
+    }
+    
+    
+    private static class DiffTableIndexEntry {
+        
+        private final BigInteger rowIndex;
+        
+        private final ImmutableList<Object> values;
+        
+        
+        private DiffTableIndexEntry(BigInteger rowIndex, ImmutableList<Object> values) {
+            this.rowIndex = rowIndex;
+            this.values = values;
+        }
+        
+    }
+
 }
