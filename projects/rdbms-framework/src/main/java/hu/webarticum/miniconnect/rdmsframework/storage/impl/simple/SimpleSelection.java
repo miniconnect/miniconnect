@@ -24,15 +24,6 @@ public class SimpleSelection implements TableSelection {
     }
 
     public SimpleSelection(
-            BigInteger tableSize,
-            ImmutableList<BigInteger> rowIndexes) {
-        this(
-                i -> i.compareTo(tableSize) < 0,
-                rowIndexes,
-                rowIndexes.reverseOrder());
-    }
-    
-    public SimpleSelection(
             Predicate<BigInteger> containmentPredicate,
             Iterable<BigInteger> rowIndexes,
             Iterable<BigInteger> reverseRowIndexes) {

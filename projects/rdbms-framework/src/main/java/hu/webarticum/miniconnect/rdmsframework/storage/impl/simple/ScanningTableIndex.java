@@ -94,11 +94,7 @@ public class ScanningTableIndex implements TableIndex {
         ImmutableList<BigInteger> rowIndexes = foundEntries.stream()
                 .map(e -> e.index)
                 .collect(ImmutableList.createCollector());
-        if (sort) {
-            return new SimpleSelection(rowIndexes);
-        } else {
-            return new SimpleSelection(table.size(), rowIndexes);
-        }
+        return new SimpleSelection(rowIndexes);
     }
 
     private MultiComparator createMultiComparator(
