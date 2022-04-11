@@ -82,9 +82,9 @@ public interface TableIndex extends NamedResource {
             NullsMode nullsMode,
             SortMode sortMode) {
         return findMulti(
-                ImmutableList.of(from),
+                from == null ? null : ImmutableList.of(from),
                 fromInclusionMode,
-                ImmutableList.of(to),
+                to == null ? null : ImmutableList.of(to),
                 toInclusionMode,
                 ImmutableList.of(nullsMode),
                 ImmutableList.of(sortMode));
