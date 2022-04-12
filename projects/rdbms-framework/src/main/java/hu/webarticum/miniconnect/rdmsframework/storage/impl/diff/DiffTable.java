@@ -3,9 +3,11 @@ package hu.webarticum.miniconnect.rdmsframework.storage.impl.diff;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -14,6 +16,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Predicate;
+import java.util.stream.IntStream;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
@@ -446,7 +449,17 @@ public class DiffTable implements Table {
                     return baseSelection.containsRow(adjustedRowIndex);
                 }
             }
-            
+
+            protected Iterator<BigInteger> wrapIterator(Iterator<BigInteger> baseIterator) {
+                return new FilteringIterator<>(
+                        new IteratorAdapter<>(
+                                new FilteringIterator<>(
+                                        baseIterator,
+                                        v -> !deletions.contains(v)),
+                                DiffTable.this::deadjustByDeletions),
+                        v -> !updatedRowIndexes.contains(v));
+            }
+    
         }
         
     
@@ -490,12 +503,61 @@ public class DiffTable implements Table {
             
             @Override
             public Iterator<BigInteger> iterator() {
+                if (filteredIndexEntries.isEmpty()) {
+                    return wrapIterator(baseSelection.iterator());
+                }
+
+                List<Iterator<BigInteger>> iterators = new LinkedList<>();
                 
-                // TODO
-                return null;
+                DiffTableIndexEntry firstEntry = filteredIndexEntries.get(0);
                 
+                TableSelection leadingBaseSelection = baseIndex.findMulti(
+                        from,
+                        fromInclusionMode,
+                        firstEntry.values,
+                        InclusionMode.INCLUDE,
+                        nullsModes,
+                        sortModes);
+                iterators.add(wrapIterator(leadingBaseSelection.iterator()));
+                
+                iterators.add(createMiddleIterator());
+
+                DiffTableIndexEntry lastEntry = filteredIndexEntries.get(
+                        filteredIndexEntries.size() - 1);
+                iterators.add(Collections.singleton(lastEntry.rowIndex).iterator());
+                
+                TableSelection trailingBaseSelection = baseIndex.findMulti(
+                        lastEntry.values,
+                        InclusionMode.EXCLUDE,
+                        to,
+                        toInclusionMode,
+                        nullsModes,
+                        sortModes);
+                iterators.add(wrapIterator(trailingBaseSelection.iterator()));
+                
+                return ChainedIterator.allOf(iterators);
             }
-    
+
+            private Iterator<BigInteger> createMiddleIterator() {
+                int entryCount = filteredIndexEntries.size();
+                return ChainedIterator.over(new IteratorAdapter<>(
+                        IntStream.range(0, entryCount - 1).iterator(),
+                        i -> {
+                            DiffTableIndexEntry beforeEntry = filteredIndexEntries.get(i);
+                            DiffTableIndexEntry afterEntry = filteredIndexEntries.get(i + 1);
+                            TableSelection betweenBaseSelection = baseIndex.findMulti(
+                                    beforeEntry.values,
+                                    InclusionMode.EXCLUDE,
+                                    afterEntry.values,
+                                    InclusionMode.INCLUDE,
+                                    nullsModes,
+                                    sortModes);
+                            return ChainedIterator.of(
+                                    Collections.singleton(beforeEntry.rowIndex).iterator(),
+                                    wrapIterator(betweenBaseSelection.iterator()));
+                        }));
+            }
+            
         }
         
         
@@ -511,13 +573,7 @@ public class DiffTable implements Table {
             @Override
             public Iterator<BigInteger> iterator() {
                 return ChainedIterator.of(
-                        new FilteringIterator<>(
-                                new IteratorAdapter<>(
-                                        new FilteringIterator<>(
-                                                baseSelection.iterator(),
-                                                v -> !deletions.contains(v)),
-                                        DiffTable.this::deadjustByDeletions),
-                                v -> !updatedRowIndexes.contains(v)),
+                        wrapIterator(baseSelection.iterator()),
                         new IteratorAdapter<>(filteredIndexEntries.iterator(), e -> e.rowIndex));
             }
     
