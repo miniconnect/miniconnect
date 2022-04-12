@@ -504,7 +504,7 @@ public class DiffTable implements Table {
             
             @Override
             public Iterator<BigInteger> iterator() {
-                return new ChainedIterator<>(
+                return ChainedIterator.of(
                         new FilteringIterator<>(
                                 baseSelection.iterator(), filteredUpdatedRowIndexes::contains),
                         new IteratorAdapter<>(filteredIndexEntries.iterator(), e -> e.rowIndex));

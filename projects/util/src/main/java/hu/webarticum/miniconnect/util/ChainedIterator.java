@@ -1,33 +1,45 @@
 package hu.webarticum.miniconnect.util;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
 public class ChainedIterator<T> implements Iterator<T> {
     
-    private final LinkedList<Iterator<T>> iterators = new LinkedList<>();
+    private final Iterator<Iterator<T>> iteratorIterator;
+    
+    private Iterator<T> currentIterator;
     
 
-    @SafeVarargs
-    public ChainedIterator(Iterator<T>... iterators) {
-        this(Arrays.asList(iterators));
+    private ChainedIterator(Iterator<Iterator<T>> iteratorIterator) {
+        this.iteratorIterator = iteratorIterator;
+        
+        fetchNextIterator();
     }
 
-    public ChainedIterator(Collection<Iterator<T>> iterators) {
-        this.iterators.addAll(iterators);
+    @SafeVarargs
+    public static <T> ChainedIterator<T> of(Iterator<T>... iterators) {
+        return new ChainedIterator<>(Arrays.asList(iterators).iterator());
     }
+
+    public static <T> ChainedIterator<T> allOf(Iterable<Iterator<T>> iterators) {
+        return new ChainedIterator<>(iterators.iterator());
+    }
+
+    public static <T> ChainedIterator<T> over(Iterator<Iterator<T>> iteratorIterator) {
+        return new ChainedIterator<>(iteratorIterator);
+    }
+    
+    // TODO: iterable, iterator
     
     
     @Override
     public boolean hasNext() {
-        while (!iterators.isEmpty()) {
-            if (iterators.getFirst().hasNext()) {
+        while (currentIterator != null) {
+            if (currentIterator.hasNext()) {
                 return true;
             } else {
-                iterators.removeFirst();
+                fetchNextIterator();
             }
         }
         return false;
@@ -38,7 +50,15 @@ public class ChainedIterator<T> implements Iterator<T> {
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
-        return iterators.getFirst().next();
+        return currentIterator.next();
+    }
+    
+    private void fetchNextIterator() {
+        if (iteratorIterator.hasNext()) {
+            currentIterator = iteratorIterator.next();
+        } else {
+            currentIterator = null;
+        }
     }
 
 }
