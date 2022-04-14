@@ -23,6 +23,7 @@ dependencies {
     
     implementation project(':impl')
     implementation project(':record')
+    implementation project(':util')
     
     antlr 'org.antlr:antlr4:4.9.3'
     

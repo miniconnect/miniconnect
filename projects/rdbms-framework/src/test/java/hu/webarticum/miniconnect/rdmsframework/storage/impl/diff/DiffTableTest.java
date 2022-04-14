@@ -38,15 +38,7 @@ class DiffTableTest extends AbstractWritableTableTest {
                 .build();
         diffTable.applyPatch(patch2);
 
-        ImmutableList<ImmutableList<Object>> expectedContent = ImmutableList.of(
-                ImmutableList.of(3, "uuuu", false),
-                ImmutableList.of(4, "VVV", false),
-                ImmutableList.of(6, "BBB", false),
-                ImmutableList.of(7, "CCC", true),
-                ImmutableList.of(8, "XXX", true));
-        
-        assertThat(contentOf(baseTable)).isEqualTo(contentOf(createSubjectTable()));
-        assertThat(contentOf(diffTable)).isEqualTo(expectedContent);
+        assertThat(contentOf(baseTable)).isEqualTo(defaultContent());
     }
 
     @Override
