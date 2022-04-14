@@ -6,7 +6,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
@@ -405,15 +404,14 @@ public abstract class AbstractWritableTableTest {
 
         TableIndex index = table.indexes().get("idx_label");
         TableSelection selection = index.find(
-                "gg",
-                InclusionMode.INCLUDE,
                 "yyy",
                 InclusionMode.EXCLUDE,
+                "gg",
+                InclusionMode.INCLUDE,
                 NullsMode.NO_NULLS,
-                SortMode.ASC_NULLS_FIRST); // TODO: DESC_NULLS_LAST
+                SortMode.DESC_NULLS_LAST);
 
-        //assertThat(selection).containsExactly(bigs(6, 2, 3, 7, 1, 0));
-        assertThat(selection).containsExactly(bigs(0, 1, 7, 3, 2, 6));
+        assertThat(selection).containsExactly(bigs(6, 2, 3, 7, 1, 0));
         assertThat(new RangeSelection(big(0), table.size()))
                 .filteredOn(selection::containsRow)
                 .containsExactly(bigs(0, 1, 2, 3, 6, 7));
