@@ -31,7 +31,7 @@ deleteQuery: DELETE FROM tableName wherePart?;
 
 showSchemasQuery: SHOW ( SCHEMAS | DATABASES ) likePart?;
 
-showTablesQuery: SHOW TABLES ( FROM schemaName ) likePart?;
+showTablesQuery: SHOW TABLES ( FROM schemaName )? likePart?;
 
 useQuery: USE schemaName;
 

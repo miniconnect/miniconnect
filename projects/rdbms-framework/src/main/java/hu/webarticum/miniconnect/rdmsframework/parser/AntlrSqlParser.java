@@ -196,8 +196,10 @@ public class AntlrSqlParser implements SqlParser {
     }
 
     private ShowTablesQuery parseShowTablesNode(ShowTablesQueryContext showTablesNode) {
-        IdentifierContext identifierNode = showTablesNode.schemaName().identifier();
-        String schemaName = parseIdentifierNode(identifierNode);
+        SchemaNameContext schemaNameNode = showTablesNode.schemaName();
+        String schemaName = schemaNameNode != null ?
+                parseIdentifierNode(schemaNameNode.identifier()):
+                null;
         LikePartContext likePartContext = showTablesNode.likePart();
         String like = parseLikePart(likePartContext);
         
