@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.rdmsframework.session;
+package hu.webarticum.miniconnect.rdmsframework.lab;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -13,6 +13,7 @@ import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.execution.simple.SimpleQueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.parser.AntlrSqlParser;
 import hu.webarticum.miniconnect.rdmsframework.parser.SqlParser;
+import hu.webarticum.miniconnect.rdmsframework.session.FrameworkSession;
 import hu.webarticum.miniconnect.rdmsframework.storage.Schema;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
