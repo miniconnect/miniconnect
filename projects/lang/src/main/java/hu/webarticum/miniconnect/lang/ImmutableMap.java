@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -261,6 +262,30 @@ public final class ImmutableMap<K, V> implements Serializable {
         return new ImmutableMap<>(mappedData);
     }
 
+    public <K2, V2> ImmutableMap<K2, V2> map(
+            BiFunction<K, V, K2> keyMapper, BiFunction<K, V, V2> valueMapper) {
+        Map<K2, V2> mappedData = new HashMap<>();
+        for (Map.Entry<K, V> entry : data.entrySet()) {
+            K key = entry.getKey();
+            V value = entry.getValue();
+            K2 newKey = keyMapper.apply(key, value);
+            V2 newValue = valueMapper.apply(key, value);
+            mappedData.put(newKey, newValue);
+        }
+        return new ImmutableMap<>(mappedData);
+    }
+
+    public <V2> ImmutableMap<K, V2> mapValues(BiFunction<K, V, V2> valueMapper) {
+        Map<K, V2> mappedData = new HashMap<>(data.size());
+        for (Map.Entry<K, V> entry : data.entrySet()) {
+            K key = entry.getKey();
+            V value = entry.getValue();
+            V2 newValue = valueMapper.apply(key, value);
+            mappedData.put(key, newValue);
+        }
+        return new ImmutableMap<>(mappedData);
+    }
+    
     public Map<K, V> asMap() {
         return Collections.unmodifiableMap(data);
     }
