@@ -14,6 +14,7 @@ import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -42,7 +43,7 @@ public class DiffTable implements Table {
     
     private final List<ImmutableList<Object>> insertedRows = new ArrayList<>();
     
-    private final Map<BigInteger, ImmutableMap<Integer, Object>> updates = new HashMap<>();
+    private final NavigableMap<BigInteger, ImmutableMap<Integer, Object>> updates = new TreeMap<>();
     
     private final NavigableSet<BigInteger> deletions = new TreeSet<>();
 
@@ -306,6 +307,11 @@ public class DiffTable implements Table {
         
 
         public DiffTableIndex(TableIndex baseIndex) {
+            
+            System.out.println("insertedRows: " + insertedRows);
+            System.out.println("updates: " + updates);
+            System.out.println("deletions: " + deletions);
+            
             this.baseIndex = baseIndex;
             
             ImmutableList<String> tableColumnNames = baseTable.columns().names();
@@ -320,6 +326,9 @@ public class DiffTable implements Table {
             BigInteger fullDeletionCount = BigInteger.ZERO;
             for (Map.Entry<BigInteger, ImmutableMap<Integer, Object>> entry : updates.entrySet()) {
                 BigInteger baseRowIndex = entry.getKey();
+                
+                System.out.println("position: " + position +  ", baseRowIndex: " + baseRowIndex);
+                
                 Collection<BigInteger> subDeletions = deletions.subSet(position, baseRowIndex);
                 BigInteger subDeletionCount = BigInteger.valueOf(subDeletions.size());
                 fullDeletionCount = fullDeletionCount.add(subDeletionCount);
