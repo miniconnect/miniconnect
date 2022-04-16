@@ -307,11 +307,6 @@ public class DiffTable implements Table {
         
 
         public DiffTableIndex(TableIndex baseIndex) {
-            
-            System.out.println("insertedRows: " + insertedRows);
-            System.out.println("updates: " + updates);
-            System.out.println("deletions: " + deletions);
-            
             this.baseIndex = baseIndex;
             
             ImmutableList<String> tableColumnNames = baseTable.columns().names();
@@ -326,8 +321,6 @@ public class DiffTable implements Table {
             BigInteger fullDeletionCount = BigInteger.ZERO;
             for (Map.Entry<BigInteger, ImmutableMap<Integer, Object>> entry : updates.entrySet()) {
                 BigInteger baseRowIndex = entry.getKey();
-                
-                System.out.println("position: " + position +  ", baseRowIndex: " + baseRowIndex);
                 
                 Collection<BigInteger> subDeletions = deletions.subSet(position, baseRowIndex);
                 BigInteger subDeletionCount = BigInteger.valueOf(subDeletions.size());
