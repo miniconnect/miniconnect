@@ -116,7 +116,7 @@ public class AntlrSqlParser implements SqlParser {
         
         return Queries.select()
                 .fields(fields)
-                .fromSchema(schemaName)
+                .inSchema(schemaName)
                 .from(tableName)
                 .where(where)
                 .orderBy(orderBy)
@@ -124,6 +124,10 @@ public class AntlrSqlParser implements SqlParser {
     }
 
     private InsertQuery parseInsertNode(InsertQueryContext insertQueryNode) {
+        SchemaNameContext schemaNameNode = insertQueryNode.schemaName();
+        String schemaName = schemaNameNode != null ?
+                parseIdentifierNode(schemaNameNode.identifier()) :
+                null;
         IdentifierContext identifierNode = insertQueryNode.tableName().identifier();
         String tableName = parseIdentifierNode(identifierNode);
         FieldListContext fieldListNode = insertQueryNode.fieldList();
@@ -131,6 +135,7 @@ public class AntlrSqlParser implements SqlParser {
         ValueListContext valueListNode = insertQueryNode.valueList();
         ImmutableList<Object> values = parseValueListNode(valueListNode);
         return Queries.insert()
+                .inSchema(schemaName)
                 .into(tableName)
                 .fields(fields)
                 .values(values)
@@ -160,6 +165,10 @@ public class AntlrSqlParser implements SqlParser {
     }
 
     private UpdateQuery parseUpdateNode(UpdateQueryContext updateQueryNode) {
+        SchemaNameContext schemaNameNode = updateQueryNode.schemaName();
+        String schemaName = schemaNameNode != null ?
+                parseIdentifierNode(schemaNameNode.identifier()) :
+                null;
         IdentifierContext identifierNode = updateQueryNode.tableName().identifier();
         String tableName = parseIdentifierNode(identifierNode);
         UpdatePartContext updatePartNode = updateQueryNode.updatePart();
@@ -168,6 +177,7 @@ public class AntlrSqlParser implements SqlParser {
         LinkedHashMap<String, Object> where = parseWherePartNode(wherePartNode);
 
         return Queries.update()
+                .inSchema(schemaName)
                 .table(tableName)
                 .set(values)
                 .where(where)
@@ -175,12 +185,17 @@ public class AntlrSqlParser implements SqlParser {
     }
 
     private DeleteQuery parseDeleteNode(DeleteQueryContext deleteQueryNode) {
+        SchemaNameContext schemaNameNode = deleteQueryNode.schemaName();
+        String schemaName = schemaNameNode != null ?
+                parseIdentifierNode(schemaNameNode.identifier()) :
+                null;
         IdentifierContext identifierNode = deleteQueryNode.tableName().identifier();
         String tableName = parseIdentifierNode(identifierNode);
         WherePartContext wherePartNode = deleteQueryNode.wherePart();
         LinkedHashMap<String, Object> where = parseWherePartNode(wherePartNode);
         
         return Queries.delete()
+                .inSchema(schemaName)
                 .from(tableName)
                 .where(where)
                 .build();

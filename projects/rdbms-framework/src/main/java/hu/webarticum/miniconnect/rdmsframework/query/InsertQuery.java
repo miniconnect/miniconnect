@@ -1,42 +1,56 @@
 package hu.webarticum.miniconnect.rdmsframework.query;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
 
 public final class InsertQuery implements Query {
-    
+
+    private final String schemaName;
+
     private final String tableName;
     
-    private final ImmutableList<String> fields;
-    
-    private final ImmutableList<Object> values;
+    private final LinkedHashMap<String, Object> values;
     
     
     private InsertQuery(InsertQueryBuilder builder) {
-        if (
-                builder.fields != null &&
-                builder.values != null &&
-                builder.fields.size() != builder.values.size()) {
-            throw new IllegalArgumentException("Size of fields and values must be the same");
-        }
+        Objects.requireNonNull(builder.fields);
+        Objects.requireNonNull(builder.values);
         
+        int valueCount = builder.fields.size();
+        if (builder.values.size() != valueCount) {
+            throw new IllegalArgumentException("Count of fields and values must be the same");
+        }
+        this.schemaName = builder.schemaName;
         this.tableName = Objects.requireNonNull(builder.tableName);
-        this.fields = builder.fields;
-        this.values = Objects.requireNonNull(builder.values);
+        
+        values = new LinkedHashMap<>(valueCount);
+        for (int i = 0; i < valueCount; i++) {
+            String fieldName = builder.fields.get(i);
+            Object value = builder.values.get(i);
+            values.put(fieldName, value);
+        }
     }
     
     public static InsertQueryBuilder builder() {
         return new InsertQueryBuilder();
     }
     
-    
+
+    public String schemaName() {
+        return schemaName;
+    }
+
     public String tableName() {
         return tableName;
     }
 
-    // TODO: fields, values
-    
+    public Map<String, Object> values() {
+        return new LinkedHashMap<>(values);
+    }
+
     
     @Override
     public String toString() {
@@ -48,14 +62,10 @@ public final class InsertQuery implements Query {
     }
     
     private void appendFieldsSql(StringBuilder sqlBuilder) {
-        if (fields == null) {
-            return;
-        }
-
         sqlBuilder.append(" (");
         
         boolean first = true;
-        for (String fieldName : fields) {
+        for (String fieldName : values.keySet()) {
             if (first) {
                 first = false;
             } else {
@@ -71,7 +81,7 @@ public final class InsertQuery implements Query {
         sqlBuilder.append(" VALUES (");
         
         boolean first = true;
-        for (Object value : values) {
+        for (Object value : values.values()) {
             if (first) {
                 first = false;
             } else {
@@ -86,6 +96,8 @@ public final class InsertQuery implements Query {
     
     public static final class InsertQueryBuilder {
         
+        private String schemaName = null;
+        
         private String tableName = null;
         
         private ImmutableList<String> fields = null;
@@ -97,7 +109,12 @@ public final class InsertQuery implements Query {
             // use builder()
         }
         
-        
+
+        public InsertQueryBuilder inSchema(String schemaName) {
+            this.schemaName = schemaName;
+            return this;
+        }
+
         public InsertQueryBuilder into(String tableName) {
             this.tableName = tableName;
             return this;
@@ -110,6 +127,12 @@ public final class InsertQuery implements Query {
 
         public InsertQueryBuilder values(ImmutableList<Object> values) {
             this.values = values;
+            return this;
+        }
+
+        public InsertQueryBuilder set(Map<String, Object> values) {
+            this.fields = ImmutableList.fromCollection(values.keySet());
+            this.values = ImmutableList.fromCollection(values.values());
             return this;
         }
         

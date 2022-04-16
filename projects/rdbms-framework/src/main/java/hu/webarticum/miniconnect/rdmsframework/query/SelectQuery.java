@@ -158,7 +158,7 @@ public final class SelectQuery implements Query {
             return this;
         }
 
-        public SelectQueryBuilder fromSchema(String schemaName) {
+        public SelectQueryBuilder inSchema(String schemaName) {
             this.schemaName = schemaName;
             return this;
         }

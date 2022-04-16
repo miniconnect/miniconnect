@@ -19,15 +19,15 @@ selectPart: selectItems | '*';
 selectItems: selectItem ( ',' selectItem )*;
 selectItem: fieldName ( AS? alias=identifier )?;
 
-updateQuery: UPDATE tableName updatePart wherePart?;
+updateQuery: UPDATE ( schemaName '.' )? tableName updatePart wherePart?;
 updatePart: SET updateItem ( ',' updateItem )*;
 updateItem: fieldName '=' value;
 
-insertQuery: INSERT INTO tableName fieldList? VALUES valueList;
+insertQuery: INSERT INTO ( schemaName '.' )? tableName fieldList? VALUES valueList;
 fieldList: '(' fieldName ( ',' fieldName )* ')';
 valueList: '(' value ( ',' value )* ')';
 
-deleteQuery: DELETE FROM tableName wherePart?;
+deleteQuery: DELETE FROM ( schemaName '.' )? tableName wherePart?;
 
 showSchemasQuery: SHOW ( SCHEMAS | DATABASES ) likePart?;
 

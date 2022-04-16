@@ -6,6 +6,8 @@ import java.util.Objects;
 
 public final class UpdateQuery implements Query {
     
+    private final String schemaName;
+    
     private final String tableName;
 
     private final LinkedHashMap<String, Object> values;
@@ -14,6 +16,7 @@ public final class UpdateQuery implements Query {
     
     
     private UpdateQuery(UpdateQueryBuilder builder) {
+        this.schemaName = builder.schemaName;
         this.tableName = Objects.requireNonNull(builder.tableName);
         this.values = Objects.requireNonNull(builder.values);
         this.where = Objects.requireNonNull(builder.where);
@@ -23,6 +26,10 @@ public final class UpdateQuery implements Query {
         return new UpdateQueryBuilder();
     }
     
+
+    public String schemaName() {
+        return schemaName;
+    }
 
     public String tableName() {
         return tableName;
@@ -90,6 +97,8 @@ public final class UpdateQuery implements Query {
     
     
     public static final class UpdateQueryBuilder {
+
+        private String schemaName = null;
         
         private String tableName = null;
 
@@ -102,7 +111,12 @@ public final class UpdateQuery implements Query {
             // use builder()
         }
         
-        
+
+        public UpdateQueryBuilder inSchema(String schemaName) {
+            this.schemaName = schemaName;
+            return this;
+        }
+
         public UpdateQueryBuilder table(String tableName) {
             this.tableName = tableName;
             return this;

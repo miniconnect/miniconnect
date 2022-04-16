@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Objects;
 
 public final class DeleteQuery implements Query {
+
+    private final String schemaName;
     
     private final String tableName;
     
@@ -12,6 +14,7 @@ public final class DeleteQuery implements Query {
     
     
     private DeleteQuery(DeleteQueryBuilder builder) {
+        this.schemaName = builder.schemaName;
         this.tableName = Objects.requireNonNull(builder.tableName);
         this.where = Objects.requireNonNull(builder.where);
     }
@@ -20,7 +23,11 @@ public final class DeleteQuery implements Query {
         return new DeleteQueryBuilder();
     }
     
-    
+
+    public String schemaName() {
+        return schemaName;
+    }
+
     public String tableName() {
         return tableName;
     }
@@ -63,6 +70,8 @@ public final class DeleteQuery implements Query {
 
     
     public static final class DeleteQueryBuilder {
+
+        private String schemaName = null;
         
         private String tableName = null;
         
@@ -74,6 +83,11 @@ public final class DeleteQuery implements Query {
         }
         
         
+        public DeleteQueryBuilder inSchema(String schemaName) {
+            this.schemaName = schemaName;
+            return this;
+        }
+
         public DeleteQueryBuilder from(String tableName) {
             this.tableName = tableName;
             return this;
