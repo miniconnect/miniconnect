@@ -73,7 +73,7 @@ public class SimpleUpdateExecutor implements QueryExecutor {
         Map<String, Object> convertedQueryWhere =
                 TableQueryUtil.convertColumnValues(table, queryWhere);
         
-        List<BigInteger> rowIndexes = TableQueryUtil.filterRows(table, convertedQueryWhere);
+        List<BigInteger> rowIndexes = TableQueryUtil.filterRows(table, convertedQueryWhere, null);
         
         ImmutableMap<Integer, Object> updates =
                 TableQueryUtil.toByColumnPoisitionedImmutableMap(table, convertedQueryUpdates);

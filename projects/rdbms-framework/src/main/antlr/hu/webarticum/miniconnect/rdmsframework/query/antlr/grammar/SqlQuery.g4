@@ -14,10 +14,18 @@ sqlQuery: (
     useQuery
 ) EOF ;
 
-selectQuery: SELECT selectPart FROM ( schemaName '.' )? tableName wherePart? orderByPart?;
+selectQuery: (
+    SELECT selectPart
+    FROM ( schemaName '.' )? tableName
+    wherePart?
+    orderByPart?
+    limitPart?
+);
+
 selectPart: selectItems | '*';
 selectItems: selectItem ( ',' selectItem )*;
 selectItem: fieldName ( AS? alias=identifier )?;
+limitPart: LIMIT LIT_INTEGER;
 
 updateQuery: UPDATE ( schemaName '.' )? tableName updatePart wherePart?;
 updatePart: SET updateItem ( ',' updateItem )*;
@@ -62,6 +70,7 @@ ORDER: O R D E R;
 BY: B Y;
 ASC: A S C;
 DESC: D E S C;
+LIMIT: L I M I T;
 VALUES: V A L U E S;
 SET: S E T;
 NULL: N U L L;

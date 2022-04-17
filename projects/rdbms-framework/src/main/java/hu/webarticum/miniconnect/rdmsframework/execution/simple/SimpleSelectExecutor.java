@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.rdmsframework.execution.simple;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -71,6 +72,7 @@ public class SimpleSelectExecutor implements QueryExecutor {
         Map<String, String> queryFields = selectQuery.fields();
         Map<String, Object> queryWhere = selectQuery.where();
         Map<String, Boolean> queryOrderBy = selectQuery.orderBy();
+        Integer queryLimit = selectQuery.limit();
         
         if (queryFields.isEmpty()) {
             ImmutableList<String> columnNames = table.columns().names();
@@ -91,8 +93,15 @@ public class SimpleSelectExecutor implements QueryExecutor {
         Map<String, Object> convertedQueryWhere =
                 TableQueryUtil.convertColumnValues(table, queryWhere);
         
-        List<BigInteger> rowIndexes = TableQueryUtil.filterRows(table, convertedQueryWhere);
+        Integer unorderedLimit = queryOrderBy.isEmpty() ? queryLimit : null;
+        List<BigInteger> rowIndexes = TableQueryUtil.filterRows(
+                table, convertedQueryWhere, unorderedLimit);
         sortRowIndexes(table, rowIndexes, queryOrderBy);
+        
+        if (queryLimit != null && !queryOrderBy.isEmpty() && rowIndexes.size() > queryLimit) {
+            rowIndexes = new ArrayList<>(rowIndexes.subList(0, queryLimit));
+        }
+        
         ImmutableList<ValueTranslator> valueTranslators =
                 collectValueTranslators(table, queryFields);
         ImmutableList<ImmutableList<MiniValue>> data =

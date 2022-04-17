@@ -30,6 +30,7 @@ import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParse
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.IdentifierContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.InsertQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.LikePartContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.LimitPartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByPartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SchemaNameContext;
@@ -113,6 +114,10 @@ public class AntlrSqlParser implements SqlParser {
         LinkedHashMap<String, Object> where = parseWherePartNode(wherePartNode);
         OrderByPartContext orderByNode = selectQueryNode.orderByPart();
         LinkedHashMap<String, Boolean> orderBy = parseOrderByPartNode(orderByNode);
+        LimitPartContext limitPartNode = selectQueryNode.limitPart();
+        Integer limit = limitPartNode != null ?
+                parseIntegerNode(limitPartNode.LIT_INTEGER()) :
+                null;
         
         return Queries.select()
                 .fields(fields)
@@ -120,6 +125,7 @@ public class AntlrSqlParser implements SqlParser {
                 .from(tableName)
                 .where(where)
                 .orderBy(orderBy)
+                .limit(limit)
                 .build();
     }
 

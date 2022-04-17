@@ -15,14 +15,17 @@ public final class SelectQuery implements Query {
     private final LinkedHashMap<String, Object> where;
     
     private final LinkedHashMap<String, Boolean> orderBy;
+
+    private final Integer limit;
     
     
     private SelectQuery(SelectQueryBuilder builder) {
-        this.fields = builder.fields;
+        this.fields = new LinkedHashMap<>(Objects.requireNonNull(builder.fields));
         this.schemaName = builder.schemaName;
         this.tableName = Objects.requireNonNull(builder.tableName);
-        this.where = builder.where;
-        this.orderBy = builder.orderBy;
+        this.where = new LinkedHashMap<>(Objects.requireNonNull(builder.where));
+        this.orderBy = new LinkedHashMap<>(Objects.requireNonNull(builder.orderBy));
+        this.limit = builder.limit;
     }
     
     public static SelectQueryBuilder builder() {
@@ -48,6 +51,10 @@ public final class SelectQuery implements Query {
     
     public Map<String, Boolean> orderBy() {
         return new LinkedHashMap<>(orderBy);
+    }
+
+    public Integer limit() {
+        return limit;
     }
     
     
@@ -146,6 +153,8 @@ public final class SelectQuery implements Query {
         private LinkedHashMap<String, Object> where = new LinkedHashMap<>();
         
         private LinkedHashMap<String, Boolean> orderBy = new LinkedHashMap<>();
+
+        private Integer limit = null;
         
         
         private SelectQueryBuilder() {
@@ -175,6 +184,11 @@ public final class SelectQuery implements Query {
 
         public SelectQueryBuilder orderBy(Map<String, Boolean> orderBy) {
             this.orderBy = new LinkedHashMap<>(orderBy);
+            return this;
+        }
+
+        public SelectQueryBuilder limit(Integer limit) {
+            this.limit = limit;
             return this;
         }
         
