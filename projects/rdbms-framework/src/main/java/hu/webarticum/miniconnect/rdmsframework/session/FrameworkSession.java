@@ -84,10 +84,6 @@ public class FrameworkSession implements MiniSession, CheckableCloseable {
     
     private MiniResult resultOfException(Throwable exception) {
         if (!(exception instanceof DatabaseException)) {
-            
-            // FIXME
-            exception.printStackTrace();
-            
             String message = "Unexpected error: " + extractMessage(exception);
             return new StoredResult(new StoredError(99999, "99999", message));
         }
