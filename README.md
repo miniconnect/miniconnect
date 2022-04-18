@@ -108,4 +108,4 @@ flexible orchestration, replication like a static content.
 
 HoloDB can be found in its own repository:
 
-https://github.com/davidsusu/holodb
+https://github.com/miniconnect/holodb
