@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.messenger.message;
 
-// FIXME: should it be serializable?
-public interface Message {
+import java.io.Serializable;
+
+public interface Message extends Serializable {
 
 }

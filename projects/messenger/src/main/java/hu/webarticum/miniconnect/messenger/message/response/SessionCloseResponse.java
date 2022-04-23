@@ -7,6 +7,9 @@ import hu.webarticum.miniconnect.util.ToStringBuilder;
 
 public final class SessionCloseResponse implements Response, ExchangeMessage {
 
+    private static final long serialVersionUID = 2580416468973712490L;
+    
+
     private final long sessionId;
 
     private final int exchangeId;

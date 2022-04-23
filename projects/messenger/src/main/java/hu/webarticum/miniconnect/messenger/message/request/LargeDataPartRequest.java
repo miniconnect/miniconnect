@@ -8,6 +8,9 @@ import hu.webarticum.miniconnect.util.ToStringBuilder;
 
 public final class LargeDataPartRequest implements Request, ExchangeMessage {
 
+    private static final long serialVersionUID = 4207615629289430723L;
+    
+
     private final long sessionId;
 
     private final int exchangeId;

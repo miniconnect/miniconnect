@@ -8,6 +8,9 @@ import hu.webarticum.miniconnect.util.ToStringBuilder;
 
 public final class ResultSetValuePartResponse implements Response, ExchangeMessage {
 
+    private static final long serialVersionUID = 2355321848416930316L;
+    
+
     private final long sessionId;
 
     private final int exchangeId;

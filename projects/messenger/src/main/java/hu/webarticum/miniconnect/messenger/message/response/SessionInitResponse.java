@@ -5,6 +5,9 @@ import hu.webarticum.miniconnect.util.ToStringBuilder;
 
 public final class SessionInitResponse implements Response, SessionMessage {
 
+    private static final long serialVersionUID = -3866586038374504295L;
+    
+    
     private final long sessionId;
 
 

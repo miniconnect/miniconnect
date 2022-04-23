@@ -7,6 +7,9 @@ import hu.webarticum.miniconnect.util.ToStringBuilder;
 
 public final class LargeDataSaveResponse implements Response, ExchangeMessage {
 
+    private static final long serialVersionUID = 2835387537304211456L;
+    
+
     private final long sessionId;
 
     private final int exchangeId;

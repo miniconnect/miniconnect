@@ -4,6 +4,9 @@ import hu.webarticum.miniconnect.util.ToStringBuilder;
 
 public class SessionInitRequest implements Request {
 
+    private static final long serialVersionUID = 3228910560308711466L;
+    
+
     @Override
     public int hashCode() {
         return getClass().hashCode();

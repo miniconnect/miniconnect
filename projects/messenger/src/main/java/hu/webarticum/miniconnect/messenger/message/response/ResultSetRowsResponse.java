@@ -1,5 +1,6 @@
 package hu.webarticum.miniconnect.messenger.message.response;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
@@ -11,6 +12,9 @@ import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 import hu.webarticum.miniconnect.util.ToStringBuilder;
 
 public final class ResultSetRowsResponse implements Response, ExchangeMessage {
+
+    private static final long serialVersionUID = -5437671020483220931L;
+    
 
     private final long sessionId;
 
@@ -105,7 +109,10 @@ public final class ResultSetRowsResponse implements Response, ExchangeMessage {
     }
 
 
-    public static final class CellData {
+    public static final class CellData implements Serializable {
+
+        private static final long serialVersionUID = 3638994211688920120L;
+        
 
         private final boolean isNull;
 

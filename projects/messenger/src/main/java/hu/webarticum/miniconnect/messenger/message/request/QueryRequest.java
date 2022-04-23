@@ -7,6 +7,9 @@ import hu.webarticum.miniconnect.util.ToStringBuilder;
 
 public final class QueryRequest implements Request, ExchangeMessage {
 
+    private static final long serialVersionUID = -8103929303900782868L;
+    
+
     private final long sessionId;
 
     private final int exchangeId;
