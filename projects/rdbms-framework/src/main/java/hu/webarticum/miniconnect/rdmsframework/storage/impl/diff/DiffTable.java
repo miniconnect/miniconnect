@@ -21,7 +21,7 @@ import java.util.stream.IntStream;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
-import hu.webarticum.miniconnect.rdmsframework.storage.Column;
+import hu.webarticum.miniconnect.rdmsframework.storage.AbstractTableDecorator;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
 import hu.webarticum.miniconnect.rdmsframework.storage.Row;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
@@ -35,9 +35,7 @@ import hu.webarticum.miniconnect.util.ChainedIterator;
 import hu.webarticum.miniconnect.util.FilteringIterator;
 import hu.webarticum.miniconnect.util.IteratorAdapter;
 
-public class DiffTable implements Table {
-    
-    private final Table baseTable;
+public class DiffTable extends AbstractTableDecorator {
     
     private final DiffTableIndexStore indexStore;
     
@@ -49,20 +47,10 @@ public class DiffTable implements Table {
 
     
     public DiffTable(Table baseTable) {
-        this.baseTable = baseTable;
+        super(baseTable);
         this.indexStore = new DiffTableIndexStore();
     }
 
-
-    @Override
-    public String name() {
-        return baseTable.name();
-    }
-
-    @Override
-    public NamedResourceStore<Column> columns() {
-        return baseTable.columns();
-    }
 
     @Override
     public NamedResourceStore<TableIndex> indexes() {
