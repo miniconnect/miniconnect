@@ -29,13 +29,14 @@ import hu.webarticum.miniconnect.messenger.message.response.ResultSetValuePartRe
 
 class QueryPartial implements Closeable {
     
-    private static final int MAX_CELL_COUNT = 5_000; // TODO: make configurable
+    // TODO: make these configurable
+    private static final int MAX_CELL_COUNT = 5_000;
     
-    private static final int MAX_INTACT_CONTENT_LENGTH = 1_000; // TODO: make configurable
+    private static final int MAX_INTACT_CONTENT_LENGTH = 1_000;
     
-    private static final int CONTENT_HEAD_LENGTH = 200; // TODO: make configurable
+    private static final int CONTENT_HEAD_LENGTH = 200;
     
-    private static final int CONTENT_CHUNK_LENGTH = 5_000; // TODO: make configurable
+    private static final int CONTENT_CHUNK_LENGTH = 5_000;
     
     
     private final long sessionId;
@@ -70,7 +71,7 @@ class QueryPartial implements Closeable {
             long responseOffset = 0;
             ImmutableList<Integer> nullables = columnHeaders
                     .filter(MiniColumnHeader::isNullable)
-                    .mapIndex((i, j) -> i);
+                    .map((i, j) -> i);
             ImmutableMap<Integer, Integer> fixedSizes = collectFixedSizes(columnHeaders);
             List<ImmutableList<CellData>> responseRowsBuilder = new ArrayList<>();
             List<IncompleteContentHolder> incompleteContents = new ArrayList<>();
@@ -78,44 +79,28 @@ class QueryPartial implements Closeable {
             for (ImmutableList<MiniValue> row : resultSet) {
                 long r = offset;
                 ImmutableList<CellData> responseRow =
-                        row.mapIndex((c, v) -> extractCell(
+                        row.map((c, v) -> extractCell(
                                 exchangeId, r, c, v, incompleteContents));
                 responseRowsBuilder.add(responseRow);
                 
                 offset++;
                 
                 if (responseRowsBuilder.size() == maxRowCount) {
-                    sendRows(
-                            exchangeId,
-                            responseConsumer,
-                            responseOffset,
-                            responseRowsBuilder,
-                            nullables,
-                            fixedSizes);
+                    sendRows(exchangeId, responseConsumer, responseOffset, responseRowsBuilder, nullables, fixedSizes);
                     sendChunks(responseConsumer, incompleteContents);
                     responseRowsBuilder.clear();
                     incompleteContents.clear();
                     responseOffset = offset;
                 }
             }
-            sendRows(
-                    exchangeId,
-                    responseConsumer,
-                    responseOffset,
-                    responseRowsBuilder,
-                    nullables,
-                    fixedSizes);
+            sendRows(exchangeId, responseConsumer, responseOffset, responseRowsBuilder, nullables, fixedSizes);
             sendChunks(responseConsumer, incompleteContents);
             
             responseConsumer.accept(new ResultSetEofResponse(sessionId, exchangeId, offset));
-        } catch (Exception e) {
-            // FIXME
-            e.printStackTrace();
         }
     }
     
-    private ImmutableMap<Integer, Integer> collectFixedSizes(
-            ImmutableList<MiniColumnHeader> columnHeaders) {
+    private ImmutableMap<Integer, Integer> collectFixedSizes(ImmutableList<MiniColumnHeader> columnHeaders) {
         Map<Integer, Integer> resultBuilder = new HashMap<>();
         int i = 0;
         for (MiniColumnHeader columnHeader : columnHeaders) {
@@ -162,9 +147,7 @@ class QueryPartial implements Closeable {
         responseConsumer.accept(rowsResponse);
     }
     
-    private void sendChunks(
-            Consumer<Response> responseConsumer,
-            List<IncompleteContentHolder> incompleteContents) {
+    private void sendChunks(Consumer<Response> responseConsumer, List<IncompleteContentHolder> incompleteContents) {
         for (IncompleteContentHolder contentHolder : incompleteContents) {
             long fullLength = contentHolder.contentAccess.length();
             for (
@@ -183,10 +166,7 @@ class QueryPartial implements Closeable {
     }
 
     private void sendChunk(
-            Consumer<Response> responseConsumer,
-            IncompleteContentHolder contentHolder,
-            long offset,
-            int length) {
+            Consumer<Response> responseConsumer, IncompleteContentHolder contentHolder, long offset, int length) {
         ByteString contentPart = contentHolder.contentAccess.get(offset, length);
         ResultSetValuePartResponse partResponse = new ResultSetValuePartResponse(
                 sessionId,

@@ -54,7 +54,7 @@ public class SessionMessenger implements Messenger {
         try {
             session.close();
         } catch (Exception e) {
-            // FIXME: what to do?
+            // FIXME: log?
         }
         if (responseConsumer != null) {
             long sessionId = sessionCloseRequest.sessionId();

@@ -3,6 +3,8 @@ package hu.webarticum.miniconnect.record;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.lang.ImmutableList;
@@ -10,7 +12,6 @@ import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.record.converter.Converter;
 import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 
-// TODO add jackson support here too
 public class ResultRecord {
     
     private final ImmutableList<MiniColumnHeader> columnHeaders;
@@ -38,6 +39,7 @@ public class ResultRecord {
         return row;
     }
 
+    @JsonValue
     public ImmutableMap<String, Object> rowMap() {
         return columnHeaders.map(MiniColumnHeader::name).assign(k -> get(k).get());
     }

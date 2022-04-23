@@ -46,7 +46,6 @@ public class DynamicContentAccessBuilder {
             }
         }
         
-        // TODO: add support for dynamically handling large data (e. g. write out to file)
         public MiniContentAccess buildThrowing() throws IOException {
             if (computedBytes == null) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();

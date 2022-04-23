@@ -99,7 +99,7 @@ public class SimpleTable implements Table {
             int rowIndex = entry.getKey().intValueExact();
             ImmutableMap<Integer, Object> rowUpdates = entry.getValue();
             ImmutableList<Object> currentRow = rows.get(rowIndex);
-            ImmutableList<Object> updatedRow = currentRow.mapIndex(rowUpdates::getOrDefault);
+            ImmutableList<Object> updatedRow = currentRow.map(rowUpdates::getOrDefault);
             rows.set(rowIndex, updatedRow);
         }
         

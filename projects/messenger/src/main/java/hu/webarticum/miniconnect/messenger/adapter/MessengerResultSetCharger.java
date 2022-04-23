@@ -68,7 +68,7 @@ public class MessengerResultSetCharger {
     }
     
     private void acceptRow(long rowIndex, ImmutableList<CellData> rowData) {
-        ImmutableList<MiniValue> row = rowData.mapIndex(
+        ImmutableList<MiniValue> row = rowData.map(
                 (columnIndex, cellData) -> createValue(rowIndex, columnIndex, cellData));
         unhandledParts.remove(rowIndex);
         
@@ -286,7 +286,7 @@ public class MessengerResultSetCharger {
             try {
                 messengerValue.close();
             } catch (Exception e) {
-                // FIXME: what to do?
+                // TODO: log?
             }
         }
 

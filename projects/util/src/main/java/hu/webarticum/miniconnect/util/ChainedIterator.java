@@ -30,8 +30,6 @@ public class ChainedIterator<T> implements Iterator<T> {
         return new ChainedIterator<>(iteratorIterator);
     }
     
-    // TODO: iterable, iterator
-    
     
     @Override
     public boolean hasNext() {

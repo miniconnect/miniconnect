@@ -110,7 +110,6 @@ public final class ByteString implements Serializable {
         return substringLength(beginIndex, endIndex - beginIndex);
     }
 
-    // FIXME: substringByLength ?
     public ByteString substringLength(int beginIndex, int length) {
         if (beginIndex == 0 && length == bytes.length) {
             return this;
@@ -131,7 +130,6 @@ public final class ByteString implements Serializable {
         return extractLength(beginIndex, endIndex - beginIndex);
     }
 
-    // FIXME: extractByLength ?
     public byte[] extractLength(int beginIndex, int length) {
         checkBounds(beginIndex, length);
         byte[] extractedBytes = new byte[length];

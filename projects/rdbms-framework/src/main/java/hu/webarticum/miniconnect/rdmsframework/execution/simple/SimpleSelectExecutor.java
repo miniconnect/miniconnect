@@ -161,7 +161,7 @@ public class SimpleSelectExecutor implements QueryExecutor {
                 ImmutableList.fromCollection(queryFields.values());
         ImmutableList<String> resultColumnNames =
                 ImmutableList.fromCollection(queryFields.keySet());
-        return valueTranslators.mapIndex(
+        return valueTranslators.map(
                 (i, t) -> new StoredColumnHeader(
                         resultColumnNames.get(i),
                         table.columns().get(tableColumnNames.get(i)).definition().isNullable(),
@@ -184,7 +184,7 @@ public class SimpleSelectExecutor implements QueryExecutor {
             BigInteger rowIndex) {
         return ImmutableList.fromCollection(queryFields.values())
                 .map(c -> table.row(rowIndex).get(c))
-                .mapIndex((i, v) -> valueTranslators.get(i).encodeFully(v));
+                .map((i, v) -> valueTranslators.get(i).encodeFully(v));
     }
     
 }

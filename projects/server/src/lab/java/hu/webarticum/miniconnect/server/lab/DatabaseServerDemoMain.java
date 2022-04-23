@@ -14,7 +14,6 @@ import hu.webarticum.miniconnect.messenger.impl.SessionManagerMessenger;
 import hu.webarticum.miniconnect.server.MessengerServer;
 import hu.webarticum.miniconnect.server.ServerConstants;
 
-//TODO: print some basic data (client connections, queries etc.)
 public class DatabaseServerDemoMain {
 
     private static final int DEFAULT_SERVER_PORT = ServerConstants.DEFAULT_PORT;
@@ -53,8 +52,7 @@ public class DatabaseServerDemoMain {
                 jdbcUrl, jdbcUsername, jdbcPassword, largeDataPutterFactory);
         Messenger messenger = new SessionManagerMessenger(sessionManager);
         System.out.println();
-        System.out.println(
-                "Starting server on port " + serverPort + " over database " + jdbcUrl + "...");
+        System.out.println("Starting server on port " + serverPort + " over database " + jdbcUrl + "...");
         Thread serverThread;
         try (MessengerServer server = new MessengerServer(messenger, serverPort)) {
             serverThread = new Thread(server::listen);

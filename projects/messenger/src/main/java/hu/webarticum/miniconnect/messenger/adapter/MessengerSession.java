@@ -38,13 +38,14 @@ import hu.webarticum.miniconnect.messenger.util.OrderAligningQueue;
 
 public class MessengerSession implements MiniSession {
 
+    // TODO: make these configurable
     private static final String SQLSTATE_CONNECTIONERROR = "08006";
     
-    private static final int DATA_SEND_CHUNK_SIZE = 4096; // TODO: make it configurable
+    private static final int DATA_SEND_CHUNK_SIZE = 4096;
     
-    private static final int RESULT_TIMEOUT_VALUE = 60; // TODO: make it configurable
+    private static final int RESULT_TIMEOUT_VALUE = 60;
     
-    private static final TimeUnit RESULT_TIMEOUT_UNIT = TimeUnit.SECONDS; // TODO: make it conf.
+    private static final TimeUnit RESULT_TIMEOUT_UNIT = TimeUnit.SECONDS;
 
     
     private final Messenger messenger;
@@ -78,7 +79,7 @@ public class MessengerSession implements MiniSession {
             return;
         }
         SessionInitResponse sessionInitResponse = (SessionInitResponse) response;
-        // FIXME/TODO: store the entire response and handle potential errors
+        // TODO: store the entire response and handle potential errors
         future.complete(sessionInitResponse.sessionId());
     }
 
@@ -160,16 +161,13 @@ public class MessengerSession implements MiniSession {
     }
     
     // TODO: error handling
-    private void pollResponseQueue(
-            OrderAligningQueue<Response> responseQueue, MessengerResultSetCharger resultSet) {
-        
+    private void pollResponseQueue(OrderAligningQueue<Response> responseQueue, MessengerResultSetCharger resultSet) {
         while (fetchResponseQueue(responseQueue, resultSet)) {
             // nothing to do
         }
     }
         
-    private boolean fetchResponseQueue(
-            OrderAligningQueue<Response> responseQueue, MessengerResultSetCharger resultSet) {
+    private boolean fetchResponseQueue(OrderAligningQueue<Response> responseQueue, MessengerResultSetCharger resultSet) {
         Response response;
         try {
             response = responseQueue.take();
@@ -268,12 +266,10 @@ public class MessengerSession implements MiniSession {
                         largeDataSaveResponse.sqlState(),
                         largeDataSaveResponse.errorMessage()));
         } else if (response == null) {
-            // XXX
             return new StoredLargeDataSaveResult(
                     false,
                     new StoredError(4, SQLSTATE_CONNECTIONERROR, "No response"));
         } else {
-            // XXX
             return new StoredLargeDataSaveResult(
                     false,
                     new StoredError(5, SQLSTATE_CONNECTIONERROR, "Bad response"));

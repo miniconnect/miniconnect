@@ -19,7 +19,6 @@ import hu.webarticum.miniconnect.transfer.PacketTarget;
 import hu.webarticum.miniconnect.transfer.SocketServer;
 import hu.webarticum.miniconnect.util.GlobalIdGenerator;
 
-// TODO: official default port?
 public class MessengerServer implements Closeable {
 
     private static final Logger logger =

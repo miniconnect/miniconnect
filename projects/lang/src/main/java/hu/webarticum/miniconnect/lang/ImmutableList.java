@@ -107,7 +107,7 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
         return new ImmutableList<>(mappedData);
     }
 
-    public <U> ImmutableList<U> mapIndex(BiFunction<Integer, T, U> mapper) {
+    public <U> ImmutableList<U> map(BiFunction<Integer, T, U> mapper) {
         List<U> mappedData = new ArrayList<>(data.size());
         int length = data.size();
         for (int i = 0; i < length; i++) {

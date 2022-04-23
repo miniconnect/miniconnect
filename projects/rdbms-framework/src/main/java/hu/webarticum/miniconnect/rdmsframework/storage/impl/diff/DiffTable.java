@@ -131,7 +131,7 @@ public class DiffTable extends AbstractTableDecorator {
         } else {
             int insertIndex = adjustedRowIndex.subtract(baseTableSize).intValueExact();
             ImmutableList<Object> currentRow = insertedRows.get(insertIndex);
-            ImmutableList<Object> updatedRow = currentRow.mapIndex(rowUpdates::getOrDefault);
+            ImmutableList<Object> updatedRow = currentRow.map(rowUpdates::getOrDefault);
             insertedRows.set(insertIndex, updatedRow);
         }
     }

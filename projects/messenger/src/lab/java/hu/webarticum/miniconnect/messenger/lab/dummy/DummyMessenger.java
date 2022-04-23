@@ -51,7 +51,6 @@ public class DummyMessenger implements Messenger {
     
     private static final int MAX_LENGTH = 1000_000;
     
-    // FIXME/TODO: larger value
     private static final int DATA_CHUNK_LENGTH = 20;
     
 
@@ -162,7 +161,7 @@ public class DummyMessenger implements Messenger {
         responseConsumer.accept(resultSetEofResponse);
     }
     
-    private void sendRows(
+    private void sendRows( // NOSONAR
             List<List<Object>> dataRows,
             long sessionId,
             int exchangeId,
@@ -198,7 +197,7 @@ public class DummyMessenger implements Messenger {
                             contentOffset += chunk.length();
                         }
                     } catch (IOException e) {
-                        // FIXME: what to do?
+                        e.printStackTrace();
                     }
                 } else {
                     rowBuilder.add(CellData.of(value));
@@ -259,7 +258,7 @@ public class DummyMessenger implements Messenger {
         
         if (length > MAX_LENGTH) {
             consumer.accept(new LargeDataSaveResponse(
-                    sessionId, exchangeId, false, 2, "XXXXX", "Too large LOB"));
+                    sessionId, exchangeId, false, 2, "00002", "Too large LOB"));
             return;
         }
         
@@ -279,7 +278,7 @@ public class DummyMessenger implements Messenger {
                     exchangeId,
                     false,
                     3,
-                    "XXXXX",
+                    "00003",
                     "Illegal LOB state"));
         } catch (Exception e) {
             incompleteContents.remove(contentId);
@@ -288,7 +287,7 @@ public class DummyMessenger implements Messenger {
                     exchangeId,
                     false,
                     4,
-                    "XXXXX",
+                    "00004",
                     "Unexpected error: " + e.getMessage()));
         }
         
@@ -305,7 +304,6 @@ public class DummyMessenger implements Messenger {
         ByteString content = request.content();
 
         if (offset > MAX_LENGTH) {
-            // XXX
             return;
         }
         
@@ -333,7 +331,7 @@ public class DummyMessenger implements Messenger {
                             exchangeId,
                             false,
                             99,
-                            "XXXXX",
+                            "D0099",
                             "Unexpected error " + e.getMessage()));
             return;
         }
@@ -392,9 +390,7 @@ public class DummyMessenger implements Messenger {
             if (responseConsumer != null) {
                 responseConsumer.accept(errorResponse);
             } else {
-                
-                // TODO
-                
+                System.err.println("Invalid response for contentId: " + contentId); // NOSONAR
             }
         }
         return responseConsumer;

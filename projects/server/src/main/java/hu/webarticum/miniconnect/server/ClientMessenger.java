@@ -114,7 +114,17 @@ public class ClientMessenger implements Messenger, Closeable {
         if (response instanceof SessionMessage) {
             if (response instanceof ExchangeMessage) {
                 logger.trace("[{}] Response is an ExchangeMessage", logId);
-                acceptExchangeResponse(response);
+                long responseSessionId = ((SessionMessage) response).sessionId();
+                ExchangeMessage exchangeMessage = (ExchangeMessage) response;
+                int exchangeId = exchangeMessage.exchangeId();
+                ExchangeIdentity exchangeIdentity =
+                        new ExchangeIdentity(responseSessionId, exchangeId);
+                Consumer<Response> responseConsumer = findResponseConsumer(exchangeIdentity);
+                if (responseConsumer != null) {
+                    responseConsumer.accept(response);
+                } else {
+                    logger.trace("[{}] Unexpected exchange: {}/{}", logId, responseSessionId, exchangeId);
+                }
             } else if (response instanceof SessionInitResponse) {
                 logger.trace("[{}] Response is a SessionInitResponse", logId);
                 acceptSessionInitResponse(response);
@@ -126,20 +136,6 @@ public class ClientMessenger implements Messenger, Closeable {
         }
     }
     
-    private void acceptExchangeResponse(Response response) {
-        long responseSessionId = ((SessionMessage) response).sessionId();
-        ExchangeMessage exchangeMessage = (ExchangeMessage) response;
-        int exchangeId = exchangeMessage.exchangeId();
-        ExchangeIdentity exchangeIdentity =
-                new ExchangeIdentity(responseSessionId, exchangeId);
-        Consumer<Response> responseConsumer = findResponseConsumer(exchangeIdentity);
-        if (responseConsumer != null) {
-            responseConsumer.accept(response);
-        } else {
-            // TODO unexpected exchange id, what to do?
-        }
-    }
-
     private void acceptSessionInitResponse(Response response) {
         Consumer<Response> oldestConsumer = null;
         synchronized (sessionInitConsumersLock) {

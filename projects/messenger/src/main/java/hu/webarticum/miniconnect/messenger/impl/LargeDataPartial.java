@@ -26,6 +26,10 @@ import hu.webarticum.miniconnect.messenger.util.OrderAligningQueue;
 
 class LargeDataPartial implements Closeable {
 
+    private static final long PART_REQUEST_TIMEOUT_SECONDS = 300;
+    
+    private static final long RESULT_TIMEOUT_SECONDS = 300;
+    
     private static final String SQLSTATE_CONNECTIONERROR = "08006";
     
     
@@ -98,6 +102,10 @@ class LargeDataPartial implements Closeable {
                     SQLSTATE_CONNECTIONERROR,
                     e.getMessage());
             responseConsumer.accept(response);
+            
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
         }
         
         synchronized (this) {
@@ -123,15 +131,13 @@ class LargeDataPartial implements Closeable {
             
             long writtenOffset = 0L;
             while (writtenOffset < fullLength) {
-                // FIXME: timeout???
-                LargeDataPartRequest partRequest = partQueue.take(300, TimeUnit.SECONDS);
+                LargeDataPartRequest partRequest = partQueue.take(PART_REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS);
                 ByteString content = partRequest.content();
                 content.writeTo(out);
                 writtenOffset += content.length();
             }
             
-            // FIXME: timeout???
-            result = resultFuture.get(300, TimeUnit.SECONDS);
+            result = resultFuture.get(RESULT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         }
         
         MiniError error = result.error();

@@ -59,13 +59,15 @@ public class JdbcAdapterResultSet implements MiniResultSet {
         TYPE_MAPPING.put(JDBCType.DATE, StandardValueType.DATE);
         TYPE_MAPPING.put(JDBCType.TIMESTAMP, StandardValueType.TIMESTAMP);
         
-        // FIXME
+        // FIXME: use some blob wrapper
         TYPE_MAPPING.put(JDBCType.BLOB, StandardValueType.BINARY);
         TYPE_MAPPING.put(JDBCType.CLOB, StandardValueType.STRING);
         TYPE_MAPPING.put(JDBCType.NCLOB, StandardValueType.STRING);
 
-        // TODO
         /*
+        
+        // TODO: support more types
+        
         TIME_WITH_TIMEZONE
         TIMESTAMP_WITH_TIMEZONE
         JAVA_OBJECT
@@ -78,10 +80,11 @@ public class JdbcAdapterResultSet implements MiniResultSet {
         REF
         DATALINK
         REF_CURSOR
-        */
         
-        // TODO: more
-        // TODO: settings, encodings etc.
+        etc.
+        
+        settings, encodings etc.
+        */
         
     }
 
@@ -182,7 +185,6 @@ public class JdbcAdapterResultSet implements MiniResultSet {
     }
     
     private ImmutableList<MiniValue> extractRowThrowing() throws SQLException {
-        // FIXME: what to do on exception?
         int columnCount = jdbcResultSet.getMetaData().getColumnCount();
         List<MiniValue> resultBuilder = new ArrayList<>(columnCount);
         for (int i = 0; i < columnCount; i++) {
@@ -196,7 +198,7 @@ public class JdbcAdapterResultSet implements MiniResultSet {
         try {
             return extractValueThrowing(i);
         } catch (Exception e) {
-            // FIXME: what to do?
+            // FIXME: log?
             return new StoredValue();
         }
     }

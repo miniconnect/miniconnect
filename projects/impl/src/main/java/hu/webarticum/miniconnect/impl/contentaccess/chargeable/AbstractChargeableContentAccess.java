@@ -10,6 +10,9 @@ import java.util.TreeSet;
 import hu.webarticum.miniconnect.lang.ByteString;
 
 public abstract class AbstractChargeableContentAccess implements ChargeableContentAccess {
+    
+    private static final long INDEX_LOCK_TIMEOUT_MILLIS = 60 * 1000;
+    
 
     private final long fullLength;
     
@@ -35,7 +38,7 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
     public ByteString get(long start, int length) {
         checkClosed();
         checkBounds(start, length);
-        waitAvailable(start, (long) length);
+        waitAvailable(start, length);
         
         return loadPart(start, length);
     }
@@ -54,8 +57,6 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
         return new LobInputStream(offset, length);
     }
     
-    // FIXME: what if close occured during this write?
-    // FIXME: what if other error occured (close with storing the exception? 'closeReason' or something)
     @Override
     public void accept(long start, ByteString part) {
         checkClosed();
@@ -128,8 +129,7 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
         synchronized (indexLock) {
             while (!isAvailable(start, length)) {
                 try {
-                    // TODO: timeout?
-                    indexLock.wait();
+                    indexLock.wait(INDEX_LOCK_TIMEOUT_MILLIS);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     IOException ioException = new InterruptedIOException();
@@ -231,11 +231,11 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
         @Override
         public int read() {
             ByteString part = readPart(1);
-            if (part.isEmpty()) {
+            if (part == null || part.isEmpty()) {
                 return -1;
             }
             
-            return (int) part.byteAt(0);
+            return Byte.toUnsignedInt(part.byteAt(0));
         }
 
         @Override

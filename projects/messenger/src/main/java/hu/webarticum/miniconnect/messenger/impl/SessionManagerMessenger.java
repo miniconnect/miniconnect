@@ -56,10 +56,10 @@ public class SessionManagerMessenger implements Messenger {
                     sessionMessenger.accept(request, responseConsumer);
                 }
             } else {
-                // FIXME: stranger sessionId
+                // FIXME: log?
             }
         } else {
-            // FIXME unknown request
+            // FIXME: log?
         }
     }
     

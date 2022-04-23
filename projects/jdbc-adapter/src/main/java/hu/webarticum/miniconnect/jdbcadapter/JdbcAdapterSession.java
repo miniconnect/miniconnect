@@ -49,11 +49,10 @@ public class JdbcAdapterSession implements MiniSession {
         }
     }
     
-    // FIXME
     private MiniResult errorResult(Exception e) {
         String message = e.getMessage();
         if (message == null) {
-            message = "Unexpected error";
+            message = "Unexpected " + e.getClass().getName();
         }
         return new StoredResult(new StoredError(1, "00001", message));
     }

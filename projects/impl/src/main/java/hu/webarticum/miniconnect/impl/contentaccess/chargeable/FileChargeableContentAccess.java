@@ -38,10 +38,6 @@ public class FileChargeableContentAccess extends AbstractChargeableContentAccess
         this.randomAccessFile = createRandomAccessFile(file);
     }
     
-    // TODO: improve this
-    // - check SystemUtils.IS_OS_UNIX
-    // - use a better directory if possible, e. g. $XDG_CACHE_HOME
-    // - check existing solutions in jdbc implementations
     private static File createTemporaryFile() {
         try {
             return Files.createTempFile("miniconnect-", ".blob").toFile();
