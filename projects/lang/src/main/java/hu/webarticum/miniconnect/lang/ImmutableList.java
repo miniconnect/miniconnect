@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
-public final class ImmutableList<T> implements Iterable<T>, Serializable {
+public final class ImmutableList<T> implements ReversibleIterable<T>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -154,10 +154,10 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
         }
     }
 
-    public Iterable<T> reverseOrder() {
+    public ReversibleIterable<T> reverseOrder() {
         ListIterator<T> listIterator = data.listIterator(data.size());
-        return () -> new Iterator<T>() {
-
+        return ReversibleIterable.of(() -> new Iterator<T>() {
+    
             @Override
             public boolean hasNext() {
                 return listIterator.hasPrevious();
@@ -168,7 +168,7 @@ public final class ImmutableList<T> implements Iterable<T>, Serializable {
                 return listIterator.previous();
             }
             
-        };
+        } , this);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
