@@ -188,7 +188,11 @@ public class ScanningTableIndex implements TableIndex {
     private boolean checkNulls(ImmutableList<Object> values, ImmutableList<NullsMode> nullsModes) {
         int size = Math.min(values.size(), nullsModes.size());
         for (int i = 0; i < size; i++) {
-            if (nullsModes.get(i) == NullsMode.NO_NULLS && values.get(i) == null) {
+            NullsMode nullsMode = nullsModes.get(i);
+            Object value = values.get(i);
+            if (
+                    (nullsMode == NullsMode.NO_NULLS && value == null) ||
+                    (nullsMode == NullsMode.NULLS_ONLY && value != null)) {
                 return false;
             }
         }

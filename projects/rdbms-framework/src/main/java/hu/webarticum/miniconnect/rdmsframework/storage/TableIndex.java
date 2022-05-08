@@ -6,7 +6,7 @@ public interface TableIndex extends NamedResource {
     
     public enum InclusionMode { INCLUDE, EXCLUDE }
     
-    public enum NullsMode { WITH_NULLS, NO_NULLS }
+    public enum NullsMode { WITH_NULLS, NO_NULLS, NULLS_ONLY }
     
     public enum SortMode {
         
@@ -70,7 +70,7 @@ public interface TableIndex extends NamedResource {
                 InclusionMode.INCLUDE,
                 values,
                 InclusionMode.INCLUDE,
-                values.map(v -> NullsMode.WITH_NULLS),
+                values.map(v -> v == null ? NullsMode.NULLS_ONLY : NullsMode.NO_NULLS),
                 values.map(v -> SortMode.UNSORTED));
     }
 

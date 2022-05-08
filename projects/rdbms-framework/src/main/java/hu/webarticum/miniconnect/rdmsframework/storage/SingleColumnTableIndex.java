@@ -50,17 +50,6 @@ public interface SingleColumnTableIndex extends TableIndex {
     }
 
     @Override
-    public default TableSelection findMulti(ImmutableList<?> values) {
-        return findMulti(
-                values,
-                InclusionMode.INCLUDE,
-                values,
-                InclusionMode.INCLUDE,
-                values.map(v -> NullsMode.WITH_NULLS),
-                values.map(v -> SortMode.UNSORTED));
-    }
-
-    @Override
     public TableSelection find(
             Object from,
             InclusionMode fromInclusionMode,
