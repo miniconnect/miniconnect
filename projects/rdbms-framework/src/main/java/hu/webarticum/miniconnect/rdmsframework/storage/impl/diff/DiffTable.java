@@ -285,6 +285,7 @@ public class DiffTable extends AbstractTableDecorator {
     }
     
     
+    // TODO: improve null handling
     private class DiffTableIndex implements TableIndex {
         
         private final TableIndex baseIndex;
