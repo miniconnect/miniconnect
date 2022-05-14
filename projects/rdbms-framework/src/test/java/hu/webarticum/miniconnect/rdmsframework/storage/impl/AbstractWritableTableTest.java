@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -417,6 +418,153 @@ public abstract class AbstractWritableTableTest {
                 .containsExactly(bigs(0, 1, 2, 3, 6, 7));
     }
 
+    @Test
+    protected void testIndexFindExcludeNulls() {
+        Table table = tableFrom(defaultColumnNames(), nullableColumnDefinitions(), contentWithNulls());
+        TableIndex index = table.indexes().get("idx_label");
+        TableSelection selection = index.find(
+                "BBB",
+                InclusionMode.EXCLUDE,
+                null,
+                InclusionMode.INCLUDE,
+                NullsMode.NO_NULLS,
+                SortMode.ASC_NULLS_LAST);
+        
+        assertThatContainsUnstable(selection, new BigInteger[][] { bigs(7, 11), bigs(0, 9) });
+        assertThat(new RangeSelection(BigInteger.ZERO, table.size()))
+                .filteredOn(selection::containsRow)
+                .containsExactly(bigs(0, 7, 9, 11));
+    }
+
+    @Test
+    protected void testIndexFindIncludeNulls() {
+        Table table = tableFrom(defaultColumnNames(), nullableColumnDefinitions(), contentWithNulls());
+        TableIndex index = table.indexes().get("idx_label");
+        TableSelection selection = index.find(
+                null,
+                InclusionMode.INCLUDE,
+                null,
+                InclusionMode.INCLUDE,
+                NullsMode.WITH_NULLS,
+                SortMode.ASC_NULLS_FIRST);
+        
+        assertThatContainsUnstable(selection, new BigInteger[][] {
+                bigs(1, 2, 4, 5, 8, 10), bigs(3), bigs(6), bigs(7, 11), bigs(0, 9) });
+        assertThat(new RangeSelection(BigInteger.ZERO, table.size()))
+                .filteredOn(selection::containsRow)
+                .containsExactly(bigs(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11));
+    }
+
+    @Test
+    protected void testIndexFindNullsOnly() {
+        Table table = tableFrom(defaultColumnNames(), nullableColumnDefinitions(), contentWithNulls());
+        TableIndex index = table.indexes().get("idx_label");
+        TableSelection selection = index.find(
+                null,
+                InclusionMode.INCLUDE,
+                null,
+                InclusionMode.INCLUDE,
+                NullsMode.NULLS_ONLY,
+                SortMode.ASC_NULLS_FIRST);
+        
+        assertThat(selection).containsExactlyInAnyOrder((bigs(1, 2, 4, 5, 8, 10)));
+        assertThat(new RangeSelection(BigInteger.ZERO, table.size()))
+                .filteredOn(selection::containsRow)
+                .containsExactly(bigs(1, 2, 4, 5, 8, 10));
+    }
+
+    @Test
+    protected void testComplexWithNulls() {
+        Table table = tableFrom(defaultColumnNames(), nullableColumnDefinitions(), contentWithNulls());
+        TablePatch patch = createComplexTablePatchWithNulls();
+        table.applyPatch(patch);
+
+        ImmutableList<ImmutableList<Object>> expectedContent = ImmutableList.of(
+                ImmutableList.of(big(1), null, 2),
+                ImmutableList.of(big(2), null, 1),
+                ImmutableList.of(big(5), null, 5),
+                ImmutableList.of(big(6), null, 4),
+                ImmutableList.of(big(7), "BBB", 5),
+                ImmutableList.of(big(9), "NNN", 3),
+                ImmutableList.of(big(10), "DDD", 1),
+                ImmutableList.of(big(12), null, 1),
+                ImmutableList.of(big(101), "XXX", 2),
+                ImmutableList.of(big(102), null, 4),
+                ImmutableList.of(big(103), "YYY", 3),
+                ImmutableList.of(big(104), null, 5),
+                ImmutableList.of(big(105), "ZZZ", 2));
+        
+        assertThat(table.size()).isEqualTo(expectedContent.size());
+        assertThat(contentOf(table)).isEqualTo(expectedContent);
+    }
+    
+    @Test
+    protected void testIndexFindExcludeNullsAfterModifications() {
+        Table table = tableFrom(defaultColumnNames(), nullableColumnDefinitions(), contentWithNulls());
+        
+        TablePatch complexPatchWithNulls = createComplexTablePatchWithNulls();
+        table.applyPatch(complexPatchWithNulls);
+        
+        TableIndex index = table.indexes().get("idx_label");
+        TableSelection selection = index.find(
+                "BBB",
+                InclusionMode.EXCLUDE,
+                null,
+                InclusionMode.INCLUDE,
+                NullsMode.NO_NULLS,
+                SortMode.ASC_NULLS_LAST);
+
+        assertThat(selection).containsExactly((bigs(6, 5, 8, 10, 12)));
+        assertThat(new RangeSelection(BigInteger.ZERO, table.size()))
+                .filteredOn(selection::containsRow)
+                .containsExactly(bigs(5, 6, 8, 10, 12));
+    }
+
+    @Test
+    protected void testIndexFindIncludeNullsAfterModifications() {
+        Table table = tableFrom(defaultColumnNames(), nullableColumnDefinitions(), contentWithNulls());
+        
+        TablePatch complexPatchWithNulls = createComplexTablePatchWithNulls();
+        table.applyPatch(complexPatchWithNulls);
+        
+        TableIndex index = table.indexes().get("idx_label");
+        TableSelection selection = index.find(
+                null,
+                InclusionMode.INCLUDE,
+                null,
+                InclusionMode.INCLUDE,
+                NullsMode.WITH_NULLS,
+                SortMode.ASC_NULLS_FIRST);
+
+        assertThatContainsUnstable(selection, new BigInteger[][] {
+                bigs(0, 1, 2, 3, 7, 9, 11), bigs(4), bigs(6), bigs(5), bigs(8), bigs(10), bigs(12) });
+        assertThat(new RangeSelection(BigInteger.ZERO, table.size()))
+                .filteredOn(selection::containsRow)
+                .containsExactly(bigs(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12));
+    }
+
+    @Test
+    protected void testIndexFindNullsOnlyAfterModifications() {
+        Table table = tableFrom(defaultColumnNames(), nullableColumnDefinitions(), contentWithNulls());
+        
+        TablePatch complexPatchWithNulls = createComplexTablePatchWithNulls();
+        table.applyPatch(complexPatchWithNulls);
+        
+        TableIndex index = table.indexes().get("idx_label");
+        TableSelection selection = index.find(
+                null,
+                InclusionMode.INCLUDE,
+                null,
+                InclusionMode.INCLUDE,
+                NullsMode.NULLS_ONLY,
+                SortMode.ASC_NULLS_FIRST);
+
+        assertThat(selection).containsExactlyInAnyOrder(bigs(0, 1, 2, 3, 7, 9, 11));
+        assertThat(new RangeSelection(BigInteger.ZERO, table.size()))
+                .filteredOn(selection::containsRow)
+                .containsExactly(bigs(0, 1, 2, 3, 7, 9, 11));
+    }
+
     
     protected Table createSubjectTable() {
         return tableFrom(defaultColumnNames(), defaultColumnDefinitions(), defaultContent());
@@ -437,6 +585,13 @@ public abstract class AbstractWritableTableTest {
                 new SimpleColumnDefinition(Integer.class, false));
     }
 
+    protected ImmutableList<ColumnDefinition> nullableColumnDefinitions() {
+        return ImmutableList.of(
+                new SimpleColumnDefinition(BigInteger.class, false),
+                new SimpleColumnDefinition(String.class, true),
+                new SimpleColumnDefinition(Integer.class, true));
+    }
+
     protected ImmutableList<ImmutableList<Object>> defaultContent() {
         return ImmutableList.of(
                 ImmutableList.of(big(1), "eeee", 2),
@@ -449,6 +604,22 @@ public abstract class AbstractWritableTableTest {
                 ImmutableList.of(big(8), "dddd", 2),
                 ImmutableList.of(big(9), "iiii", 3),
                 ImmutableList.of(big(10), "ffff", 1));
+    }
+
+    protected ImmutableList<ImmutableList<Object>> contentWithNulls() {
+        return ImmutableList.of(
+                ImmutableList.of(big(1), "DDD", 1),
+                ImmutableList.of(big(2), null, 1),
+                ImmutableList.of(big(3), null, 3),
+                ImmutableList.of(big(4), "AAA", 3),
+                ImmutableList.of(big(5), null, 5),
+                ImmutableList.of(big(6), null, 4),
+                ImmutableList.of(big(7), "BBB", 5),
+                ImmutableList.of(big(8), "CCC", 2),
+                ImmutableList.of(big(9), null, 3),
+                ImmutableList.of(big(10), "DDD", 1),
+                ImmutableList.of(big(11), null, 1),
+                ImmutableList.of(big(12), "CCC", 1));
     }
     
     protected ImmutableList<ImmutableList<Object>> contentOf(Table table) {
@@ -489,6 +660,23 @@ public abstract class AbstractWritableTableTest {
                 .delete(big(8))
                 .build();
     }
+
+    protected TablePatch createComplexTablePatchWithNulls() {
+        return TablePatch.builder()
+                .insert(ImmutableList.of(big(101), "XXX", 2))
+                .insert(ImmutableList.of(big(102), null, 4))
+                .insert(ImmutableList.of(big(103), "YYY", 3))
+                .insert(ImmutableList.of(big(104), null, 5))
+                .insert(ImmutableList.of(big(105), "ZZZ", 2))
+                .update(big(0), ImmutableMap.of(1, null, 2, 2))
+                .update(big(8), ImmutableMap.of(1, "NNN"))
+                .update(big(11), ImmutableMap.of(1, null))
+                .delete(big(2))
+                .delete(big(3))
+                .delete(big(7))
+                .delete(big(10))
+                .build();
+    }
     
     protected BigInteger big(long number) {
         return BigInteger.valueOf(number);
@@ -496,6 +684,20 @@ public abstract class AbstractWritableTableTest {
 
     protected BigInteger[] bigs(long... numbers) {
         return Arrays.stream(numbers).mapToObj(this::big).toArray(BigInteger[]::new);
+    }
+    
+    protected void assertThatContainsUnstable(Iterable<BigInteger> selection, BigInteger[][] equalGroups) {
+        Iterator<BigInteger> iterator = selection.iterator();
+        for (BigInteger[] equalGroup : equalGroups) {
+            int groupSize = equalGroup.length;
+            List<BigInteger> foundValues = new ArrayList<>(groupSize);
+            for (int i = 0; i < groupSize; i++) {
+                assertThat(iterator).hasNext();
+                foundValues.add(iterator.next());
+            }
+            assertThat(foundValues).containsExactlyInAnyOrder(equalGroup);
+        }
+        assertThat(iterator).isExhausted();
     }
     
 }

@@ -259,14 +259,20 @@ public class ScanningTableIndex implements TableIndex {
                     (Comparator<Object>) columns.get(columnNames.get(i)).definition().comparator();
             Object prefixValue = prefix.get(i);
             Object value = values.get(i);
-            if (
-                    ((value == null || prefixValue == null) && value != prefixValue) ||
-                    comparator.compare(value, prefixValue) != 0) {
+            if (!areEqualByComparing(value, prefixValue, comparator)) {
                 return false;
             }
         }
         
         return true;
+    }
+    
+    private boolean areEqualByComparing(Object value1, Object value2, Comparator<Object> comparator) {
+        if (value1 == null || value2 == null) {
+            return value1 == value2;
+        }
+        
+        return comparator.compare(value1, value2) == 0;
     }
     
     

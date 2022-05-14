@@ -215,8 +215,11 @@ public class DiffTable extends AbstractTableDecorator {
 
         @Override
         public Object get(int columnPosition) {
-            Object updatedValue = updates.get(columnPosition);
-            return updatedValue != null ? updatedValue : baseRow.get(columnPosition);
+            if (updates.containsKey(columnPosition)) {
+                return updates.get(columnPosition);
+            } else {
+                return baseRow.get(columnPosition);
+            }
         }
 
         @Override
@@ -285,7 +288,6 @@ public class DiffTable extends AbstractTableDecorator {
     }
     
     
-    // TODO: improve null handling
     private class DiffTableIndex implements TableIndex {
         
         private final TableIndex baseIndex;
@@ -388,7 +390,7 @@ public class DiffTable extends AbstractTableDecorator {
             MultiComparator multiComparator = IndexUtil.createMultiComparator(
                     baseTable, baseIndex.columnNames(), sortModes);
             Predicate<ImmutableList<Object>> predicate = IndexUtil.createPredicate(
-                    from, fromInclusionMode, to, toInclusionMode, multiComparator);
+                    from, fromInclusionMode, to, toInclusionMode, nullsModes, multiComparator);
             if (sort) {
                 return new SortedDiffTableSelection(
                         baseSelection,
