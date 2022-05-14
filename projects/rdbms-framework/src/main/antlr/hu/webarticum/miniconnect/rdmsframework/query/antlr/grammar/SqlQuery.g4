@@ -31,9 +31,9 @@ updateQuery: UPDATE ( schemaName '.' )? tableName updatePart wherePart?;
 updatePart: SET updateItem ( ',' updateItem )*;
 updateItem: fieldName '=' value;
 
-insertQuery: INSERT INTO ( schemaName '.' )? tableName fieldList? VALUES valueList;
+insertQuery: INSERT INTO ( schemaName '.' )? tableName fieldList VALUES valueList;
 fieldList: '(' fieldName ( ',' fieldName )* ')';
-valueList: '(' value ( ',' value )* ')';
+valueList: '(' nullableValue ( ',' nullableValue )* ')';
 
 deleteQuery: DELETE FROM ( schemaName '.' )? tableName wherePart?;
 
@@ -44,13 +44,17 @@ showTablesQuery: SHOW TABLES ( FROM schemaName )? likePart?;
 useQuery: USE schemaName;
 
 wherePart: WHERE whereItem ( AND whereItem )*;
-whereItem: fieldName '=' value | '(' whereItem ')';
+whereItem: fieldName postfixCondition | '(' whereItem ')';
+postfixCondition: '=' value | isNull | isNotNull;
+isNull: IS NULL;
+isNotNull: IS NOT NULL;
 orderByPart: ORDER BY orderByItem ( ',' orderByItem )*;
 orderByItem: fieldName ( ASC | DESC )?;
 fieldName: identifier;
 tableName: identifier;
 identifier: SIMPLENAME | QUOTEDNAME | BACKTICKEDNAME;
-value: LIT_STRING | LIT_INTEGER | NULL;
+nullableValue: value | NULL;
+value: LIT_STRING | LIT_INTEGER;
 likePart: LIKE LIT_STRING;
 schemaName: identifier;
 
@@ -73,6 +77,8 @@ DESC: D E S C;
 LIMIT: L I M I T;
 VALUES: V A L U E S;
 SET: S E T;
+IS: I S;
+NOT: N O T;
 NULL: N U L L;
 SCHEMAS: S C H E M A S;
 DATABASES: D A T A B A S E S;

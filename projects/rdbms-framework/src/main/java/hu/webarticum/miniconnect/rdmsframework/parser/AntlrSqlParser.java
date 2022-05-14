@@ -19,6 +19,7 @@ import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.ShowSchemasQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.ShowTablesQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.SpecialCondition;
 import hu.webarticum.miniconnect.rdmsframework.query.SqlUtil;
 import hu.webarticum.miniconnect.rdmsframework.query.UpdateQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.UseQuery;
@@ -31,8 +32,10 @@ import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParse
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.InsertQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.LikePartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.LimitPartContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.NullableValueContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByPartContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.PostfixConditionContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SchemaNameContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectItemsContext;
@@ -137,9 +140,10 @@ public class AntlrSqlParser implements SqlParser {
         IdentifierContext identifierNode = insertQueryNode.tableName().identifier();
         String tableName = parseIdentifierNode(identifierNode);
         FieldListContext fieldListNode = insertQueryNode.fieldList();
-        ImmutableList<String> fields = parseFieldListNode(fieldListNode);
+        ImmutableList<String> fields = parseInsertFieldListNode(fieldListNode);
         ValueListContext valueListNode = insertQueryNode.valueList();
-        ImmutableList<Object> values = parseValueListNode(valueListNode);
+        ImmutableList<Object> values = parseInsertValueListNode(valueListNode);
+        
         return Queries.insert()
                 .inSchema(schemaName)
                 .into(tableName)
@@ -148,7 +152,7 @@ public class AntlrSqlParser implements SqlParser {
                 .build();
     }
 
-    private ImmutableList<String> parseFieldListNode(FieldListContext fieldListNode) {
+    private ImmutableList<String> parseInsertFieldListNode(FieldListContext fieldListNode) {
         if (fieldListNode == null) {
             return null;
         }
@@ -161,10 +165,10 @@ public class AntlrSqlParser implements SqlParser {
         return ImmutableList.fromCollection(resultBuilder);
     }
 
-    private ImmutableList<Object> parseValueListNode(ValueListContext valueListNode) {
+    private ImmutableList<Object> parseInsertValueListNode(ValueListContext valueListNode) {
         List<Object> resultBuilder = new ArrayList<>();
-        for (ValueContext valueNode : valueListNode.value()) {
-            Object value = parseValueNode(valueNode);
+        for (NullableValueContext nullableValueNode : valueListNode.nullableValue()) {
+            Object value = parseNullableValueNode(nullableValueNode);
             resultBuilder.add(value);
         }
         return ImmutableList.fromCollection(resultBuilder);
@@ -272,7 +276,7 @@ public class AntlrSqlParser implements SqlParser {
         
         for (WhereItemContext whereItemNode : wherePartNode.whereItem()) {
             String fieldName = parseIdentifierNode(whereItemNode.fieldName().identifier());
-            Object value = parseValueNode(whereItemNode.value());
+            Object value = parsePostfixConditionNode(whereItemNode.postfixCondition());
             result.put(fieldName, value);
         }
         return result;
@@ -321,6 +325,32 @@ public class AntlrSqlParser implements SqlParser {
         
         throw new IllegalArgumentException("Invalid identifier: " + identifierNode.getText());
     }
+
+    private Object parsePostfixConditionNode(PostfixConditionContext postfixConditionNode) {
+        ValueContext valueNode = postfixConditionNode.value();
+        if (valueNode != null) {
+            return parseValueNode(valueNode);
+        } else if (postfixConditionNode.isNull() != null) {
+            return SpecialCondition.IS_NULL;
+        } else if (postfixConditionNode.isNotNull() != null) {
+            return SpecialCondition.IS_NOT_NULL;
+        } else {
+            throw new IllegalArgumentException("Invalid postfix condition: " + postfixConditionNode.getText());
+        }
+    }
+
+    private Object parseNullableValueNode(NullableValueContext nullableValueNode) {
+        ValueContext valueNode = nullableValueNode.value();
+        if (valueNode != null) {
+            return parseValueNode(valueNode);
+        }
+        
+        if (nullableValueNode.NULL() != null) {
+            return null;
+        }
+
+        throw new IllegalArgumentException("Invalid value: " + nullableValueNode.getText());
+    }
     
     private Object parseValueNode(ValueContext valueNode) {
         TerminalNode integerNode = valueNode.LIT_INTEGER();
@@ -333,10 +363,6 @@ public class AntlrSqlParser implements SqlParser {
             return parseStringNode(stringNode);
         }
         
-        if (valueNode.NULL() != null) {
-            return null;
-        }
-
         throw new IllegalArgumentException("Invalid literal: " + valueNode.getText());
     }
     

@@ -16,6 +16,9 @@ import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
 import hu.webarticum.miniconnect.rdmsframework.storage.RangeSelection;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
+import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.InclusionMode;
+import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.NullsMode;
+import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.SortMode;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
 import hu.webarticum.miniconnect.record.converter.DefaultConverter;
 
@@ -35,16 +38,13 @@ public class TableQueryUtil {
 
     public static void checkField(Table table, String columnName) {
         if (!table.columns().contains(columnName)) {
-            throw new IllegalArgumentException(String.format(
-                    "No column '%s' in table '%s'", columnName, table.name()));
+            throw new IllegalArgumentException(String.format("No column '%s' in table '%s'", columnName, table.name()));
         }
     }
 
-    public static List<BigInteger> filterRows(
-            Table table, Map<String, Object> queryWhere, Integer unorderedLimit) {
+    public static List<BigInteger> filterRows(Table table, Map<String, Object> queryWhere, Integer unorderedLimit) {
         Map<ImmutableList<String>, TableIndex> indexesByColumnName = new LinkedHashMap<>();
-        Set<String> unindexedColumnNames =
-                collectIndexes(table, queryWhere.keySet(), indexesByColumnName);
+        Set<String> unindexedColumnNames = collectIndexes(table, queryWhere.keySet(), indexesByColumnName);
 
         TableSelection firstSelection = null;
         List<TableSelection> moreSelections = new ArrayList<>();
@@ -52,7 +52,13 @@ public class TableQueryUtil {
             ImmutableList<String> columnNames = entry.getKey();
             TableIndex tableIndex = entry.getValue();
             ImmutableList<Object> values = columnNames.map(queryWhere::get);
-            TableSelection selection = tableIndex.findMulti(values);
+            TableSelection selection = tableIndex.findMulti(
+                    values.map(v -> v instanceof SpecialCondition ? null : v),
+                    InclusionMode.INCLUDE,
+                    values.map(v -> v instanceof SpecialCondition ? null : v),
+                    InclusionMode.INCLUDE,
+                    values.map(TableQueryUtil::nullsModeForValue),
+                    values.map(v -> SortMode.UNSORTED));
             if (firstSelection == null) {
                 firstSelection = selection;
             } else {
@@ -63,15 +69,19 @@ public class TableQueryUtil {
             firstSelection = new RangeSelection(BigInteger.valueOf(0L), table.size());
         }
         
-        return matchRows(
-                table,
-                queryWhere,
-                firstSelection,
-                moreSelections,
-                unindexedColumnNames,
-                unorderedLimit);
+        return matchRows(table, queryWhere, firstSelection, moreSelections, unindexedColumnNames, unorderedLimit);
     }
-
+    
+    private static NullsMode nullsModeForValue(Object value) {
+        if (value == SpecialCondition.IS_NULL) {
+            return NullsMode.NULLS_ONLY;
+        } else if (value == SpecialCondition.IS_NOT_NULL) {
+            return NullsMode.NO_NULLS;
+        } else {
+            return NullsMode.WITH_NULLS;
+        }
+    }
+    
     private static List<BigInteger> matchRows(
             Table table, 
             Map<String, Object> queryWhere,
@@ -80,16 +90,10 @@ public class TableQueryUtil {
             Set<String> unindexedColumnNames,
             Integer unorderedLimit) {
         if (unorderedLimit == null) {
-            return matchRowsUnlimited(
-                    table, queryWhere, firstSelection, moreSelections, unindexedColumnNames);
+            return matchRowsUnlimited(table, queryWhere, firstSelection, moreSelections, unindexedColumnNames);
         } else {
             return matchRowsLimited(
-                    table,
-                    queryWhere,
-                    firstSelection,
-                    moreSelections,
-                    unindexedColumnNames,
-                    unorderedLimit);
+                    table, queryWhere, firstSelection, moreSelections, unindexedColumnNames, unorderedLimit);
         }
     }
     
@@ -178,10 +182,7 @@ public class TableQueryUtil {
     }
 
     private static boolean areColumnsMatching(
-            ImmutableList<String> indexColumnNames,
-            Set<String> availableColumnNames,
-            int columnCount) {
-        
+            ImmutableList<String> indexColumnNames, Set<String> availableColumnNames, int columnCount) {
         if (indexColumnNames.size() < columnCount) {
             return false;
         }
@@ -207,15 +208,17 @@ public class TableQueryUtil {
         return maxIndexColumnCount;
     }
     
-    public static Map<String, Object> convertColumnValues(
-            Table table, Map<String, Object> columnValues) {
+    public static Map<String, Object> convertColumnValues(Table table, Map<String, Object> columnValues) {
         Map<String, Object> result = new LinkedHashMap<>();
         NamedResourceStore<Column> columns = table.columns();
         for (Map.Entry<String, Object> entry : columnValues.entrySet()) {
             String columnName = entry.getKey();
             Object value = entry.getValue();
-            Class<?> columnClazz = columns.get(columnName).definition().clazz();
-            Object convertedValue = CONVERTER.convert(value, columnClazz);
+            Object convertedValue = value;
+            if (!(value instanceof SpecialCondition)) {
+                Class<?> columnClazz = columns.get(columnName).definition().clazz();
+                convertedValue = CONVERTER.convert(value, columnClazz);
+            }
             result.put(columnName, convertedValue);
         }
         return result;

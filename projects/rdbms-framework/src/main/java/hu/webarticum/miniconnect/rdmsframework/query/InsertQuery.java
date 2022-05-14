@@ -16,7 +16,6 @@ public final class InsertQuery implements Query {
     
     
     private InsertQuery(InsertQueryBuilder builder) {
-        Objects.requireNonNull(builder.fields);
         Objects.requireNonNull(builder.values);
         
         int valueCount = builder.fields.size();

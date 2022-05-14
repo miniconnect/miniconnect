@@ -88,24 +88,19 @@ public class SelectExecutor implements QueryExecutor {
             return new StoredResult(new StoredError(3, "00003", e.getMessage()));
         }
         
-        Map<String, Object> convertedQueryWhere =
-                TableQueryUtil.convertColumnValues(table, queryWhere);
+        Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere);
         
         Integer unorderedLimit = queryOrderBy.isEmpty() ? queryLimit : null;
-        List<BigInteger> rowIndexes = TableQueryUtil.filterRows(
-                table, convertedQueryWhere, unorderedLimit);
+        List<BigInteger> rowIndexes = TableQueryUtil.filterRows(table, convertedQueryWhere, unorderedLimit);
         sortRowIndexes(table, rowIndexes, queryOrderBy);
         
         if (queryLimit != null && !queryOrderBy.isEmpty() && rowIndexes.size() > queryLimit) {
             rowIndexes = new ArrayList<>(rowIndexes.subList(0, queryLimit));
         }
         
-        ImmutableList<ValueTranslator> valueTranslators =
-                collectValueTranslators(table, queryFields);
-        ImmutableList<ImmutableList<MiniValue>> data =
-                selectData(table, valueTranslators, queryFields, rowIndexes);
-        ImmutableList<MiniColumnHeader> columnHeaders =
-                createColumnHeaders(table, valueTranslators, queryFields);
+        ImmutableList<ValueTranslator> valueTranslators = collectValueTranslators(table, queryFields);
+        ImmutableList<ImmutableList<MiniValue>> data = selectData(table, valueTranslators, queryFields, rowIndexes);
+        ImmutableList<MiniColumnHeader> columnHeaders = createColumnHeaders(table, valueTranslators, queryFields);
         
         return new StoredResult(new StoredResultSetData(columnHeaders, data));
     }

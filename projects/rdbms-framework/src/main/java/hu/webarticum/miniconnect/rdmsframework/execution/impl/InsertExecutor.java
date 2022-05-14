@@ -58,14 +58,20 @@ public class InsertExecutor implements QueryExecutor {
 
         Map<String, Object> insertValues = insertQuery.values();
 
+        // FIXME: currently default values are not supported
+        if (insertValues.size() != table.columns().names().size()) {
+            return new StoredResult(new StoredError(
+                    7,
+                    "00007",
+                    table.columns().names().size() + " values expected, but " + insertValues.size() + " found"));
+        }
+        
         try {
             TableQueryUtil.checkFields(table, insertValues.keySet());
         } catch (Exception e) {
             return new StoredResult(new StoredError(3, "00003", e.getMessage()));
         }
 
-        // TODO: check that all values are set
-        
         Map<String, Object> convertedInsertValues =
                 TableQueryUtil.convertColumnValues(table, insertValues);
 
