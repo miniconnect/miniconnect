@@ -39,16 +39,14 @@ public class SelectExecutor implements QueryExecutor {
     @Override
     public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
         try (CheckableCloseable lock = storageAccess.lockManager().lockShared()) {
-            return executeInternal(storageAccess, state, query);
+            return executeInternal(storageAccess, state, (SelectQuery) query);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return new StoredResult(new StoredError(99, "00099", "Query was interrupted"));
         }
     }
     
-    private MiniResult executeInternal(
-            StorageAccess storageAccess, EngineSessionState state, Query query) {
-        SelectQuery selectQuery = (SelectQuery) query;
+    private MiniResult executeInternal(StorageAccess storageAccess, EngineSessionState state, SelectQuery selectQuery) {
         String schemaName = selectQuery.schemaName();
         String tableName = selectQuery.tableName();
         

@@ -15,16 +15,14 @@ public class UseExecutor implements QueryExecutor {
     @Override
     public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
         try (CheckableCloseable lock = storageAccess.lockManager().lockShared()) {
-            return executeInternal(storageAccess, state, query);
+            return executeInternal(storageAccess, state, (UseQuery) query);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return new StoredResult(new StoredError(99, "00099", "Query was interrupted"));
         }
     }
     
-    private MiniResult executeInternal(
-            StorageAccess storageAccess, EngineSessionState state, Query query) {
-        UseQuery useQuery = (UseQuery) query;
+    private MiniResult executeInternal(StorageAccess storageAccess, EngineSessionState state, UseQuery useQuery) {
         String schemaName = useQuery.schema();
         if (!storageAccess.schemas().contains(schemaName)) {
             return new StoredResult(new StoredError(4, "00004", "No such schema: " + schemaName));

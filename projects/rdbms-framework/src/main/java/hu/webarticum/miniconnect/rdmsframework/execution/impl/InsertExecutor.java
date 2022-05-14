@@ -25,16 +25,14 @@ public class InsertExecutor implements QueryExecutor {
     @Override
     public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
         try (CheckableCloseable lock = storageAccess.lockManager().lockExclusively()) {
-            return executeInternal(storageAccess, state, query);
+            return executeInternal(storageAccess, state, (InsertQuery) query);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return new StoredResult(new StoredError(99, "00099", "Query was interrupted"));
         }
     }
     
-    private MiniResult executeInternal(
-            StorageAccess storageAccess, EngineSessionState state, Query query) {
-        InsertQuery insertQuery = (InsertQuery) query;
+    private MiniResult executeInternal(StorageAccess storageAccess, EngineSessionState state, InsertQuery insertQuery) {
         String schemaName = insertQuery.schemaName();
         String tableName = insertQuery.tableName();
         

@@ -26,7 +26,7 @@ public class ShowSchemasExecutor implements QueryExecutor {
     @Override
     public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
         try (CheckableCloseable lock = storageAccess.lockManager().lockShared()) {
-            return executeInternal(storageAccess, state, query);
+            return executeInternal(storageAccess, state, (ShowSchemasQuery) query);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return new StoredResult(new StoredError(99, "00099", "Query was interrupted"));
@@ -34,8 +34,7 @@ public class ShowSchemasExecutor implements QueryExecutor {
     }
     
     private MiniResult executeInternal(
-            StorageAccess storageAccess, EngineSessionState state, Query query) {
-        ShowSchemasQuery showSchemasQuery = (ShowSchemasQuery) query;
+            StorageAccess storageAccess, EngineSessionState state, ShowSchemasQuery showSchemasQuery) {
         ImmutableList<String> schemaNames = storageAccess.schemas().names();
         String like = showSchemasQuery.like();
         if (like != null) {

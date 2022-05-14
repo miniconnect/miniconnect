@@ -24,16 +24,14 @@ public class DeleteExecutor implements QueryExecutor {
     @Override
     public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
         try (CheckableCloseable lock = storageAccess.lockManager().lockExclusively()) {
-            return executeInternal(storageAccess, state, query);
+            return executeInternal(storageAccess, state, (DeleteQuery) query);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return new StoredResult(new StoredError(99, "00099", "Query was interrupted"));
         }
     }
     
-    private MiniResult executeInternal(
-            StorageAccess storageAccess, EngineSessionState state, Query query) {
-        DeleteQuery deleteQuery = (DeleteQuery) query;
+    private MiniResult executeInternal(StorageAccess storageAccess, EngineSessionState state, DeleteQuery deleteQuery) {
         String schemaName = deleteQuery.schemaName();
         String tableName = deleteQuery.tableName();
         

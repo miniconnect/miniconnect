@@ -25,16 +25,14 @@ public class UpdateExecutor implements QueryExecutor {
     @Override
     public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
         try (CheckableCloseable lock = storageAccess.lockManager().lockExclusively()) {
-            return executeInternal(storageAccess, state, query);
+            return executeInternal(storageAccess, state, (UpdateQuery) query);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return new StoredResult(new StoredError(99, "00099", "Query was interrupted"));
         }
     }
     
-    private MiniResult executeInternal(
-            StorageAccess storageAccess, EngineSessionState state, Query query) {
-        UpdateQuery updateQuery = (UpdateQuery) query;
+    private MiniResult executeInternal(StorageAccess storageAccess, EngineSessionState state, UpdateQuery updateQuery) {
         String schemaName = updateQuery.schemaName();
         String tableName = updateQuery.tableName();
         
