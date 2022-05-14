@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.rdmsframework.execution.simple;
+package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.impl.result.StoredError;
@@ -10,7 +10,7 @@ import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.UseQuery;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 
-public class SimpleUseExecutor implements QueryExecutor {
+public class UseExecutor implements QueryExecutor {
     
     @Override
     public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {

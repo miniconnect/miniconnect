@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.rdmsframework.execution.simple;
+package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.impl.result.StoredError;
@@ -15,24 +15,24 @@ import hu.webarticum.miniconnect.rdmsframework.query.UpdateQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.UseQuery;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 
-public class SimpleQueryExecutor implements QueryExecutor {
+public class IntegratedQueryExecutor implements QueryExecutor {
 
     @Override
     public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
         if (query instanceof SelectQuery) {
-            return new SimpleSelectExecutor().execute(storageAccess, state, query);
+            return new SelectExecutor().execute(storageAccess, state, query);
         } else if (query instanceof InsertQuery) {
-            return new SimpleInsertExecutor().execute(storageAccess, state, query);
+            return new InsertExecutor().execute(storageAccess, state, query);
         } else if (query instanceof UpdateQuery) {
-            return new SimpleUpdateExecutor().execute(storageAccess, state, query);
+            return new UpdateExecutor().execute(storageAccess, state, query);
         } else if (query instanceof DeleteQuery) {
-            return new SimpleDeleteExecutor().execute(storageAccess, state, query);
+            return new DeleteExecutor().execute(storageAccess, state, query);
         } else if (query instanceof ShowSchemasQuery) {
-            return new SimpleShowSchemasExecutor().execute(storageAccess, state, query);
+            return new ShowSchemasExecutor().execute(storageAccess, state, query);
         } else if (query instanceof ShowTablesQuery) {
-            return new SimpleShowTablesExecutor().execute(storageAccess, state, query);
+            return new ShowTablesExecutor().execute(storageAccess, state, query);
         } else if (query instanceof UseQuery) {
-            return new SimpleUseExecutor().execute(storageAccess, state, query);
+            return new UseExecutor().execute(storageAccess, state, query);
         } else {
             return new StoredResult(new StoredError(
                     1,

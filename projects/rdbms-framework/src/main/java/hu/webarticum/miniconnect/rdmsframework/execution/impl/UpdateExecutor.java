@@ -1,26 +1,26 @@
-package hu.webarticum.miniconnect.rdmsframework.execution.simple;
+package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 
-import java.util.ArrayList;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.impl.result.StoredError;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
-import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
-import hu.webarticum.miniconnect.rdmsframework.query.InsertQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.TableQueryUtil;
+import hu.webarticum.miniconnect.rdmsframework.query.UpdateQuery;
 import hu.webarticum.miniconnect.rdmsframework.storage.Schema;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TablePatch;
+import hu.webarticum.miniconnect.rdmsframework.storage.TablePatch.TablePatchBuilder;
 
-public class SimpleInsertExecutor implements QueryExecutor {
+public class UpdateExecutor implements QueryExecutor {
 
     @Override
     public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
@@ -34,9 +34,9 @@ public class SimpleInsertExecutor implements QueryExecutor {
     
     private MiniResult executeInternal(
             StorageAccess storageAccess, EngineSessionState state, Query query) {
-        InsertQuery insertQuery = (InsertQuery) query;
-        String schemaName = insertQuery.schemaName();
-        String tableName = insertQuery.tableName();
+        UpdateQuery updateQuery = (UpdateQuery) query;
+        String schemaName = updateQuery.schemaName();
+        String tableName = updateQuery.tableName();
         
         if (schemaName == null) {
             schemaName = state.getCurrentSchema();
@@ -58,33 +58,29 @@ public class SimpleInsertExecutor implements QueryExecutor {
             return new StoredResult(new StoredError(6, "00006", "Table is read-only: " + tableName));
         }
 
-        Map<String, Object> insertValues = insertQuery.values();
+        Map<String, Object> queryUpdates = updateQuery.values();
+        Map<String, Object> queryWhere = updateQuery.where();
 
         try {
-            TableQueryUtil.checkFields(table, insertValues.keySet());
+            TableQueryUtil.checkFields(table, queryUpdates.keySet());
+            TableQueryUtil.checkFields(table, queryWhere.keySet());
         } catch (Exception e) {
             return new StoredResult(new StoredError(3, "00003", e.getMessage()));
         }
 
-        // TODO: check that all values are set
+        Map<String, Object> convertedQueryUpdates =
+                TableQueryUtil.convertColumnValues(table, queryUpdates);
+        Map<String, Object> convertedQueryWhere =
+                TableQueryUtil.convertColumnValues(table, queryWhere);
         
-        Map<String, Object> convertedInsertValues =
-                TableQueryUtil.convertColumnValues(table, insertValues);
+        List<BigInteger> rowIndexes = TableQueryUtil.filterRows(table, convertedQueryWhere, null);
+        
+        ImmutableMap<Integer, Object> updates =
+                TableQueryUtil.toByColumnPoisitionedImmutableMap(table, convertedQueryUpdates);
+        TablePatchBuilder patchBuilder = TablePatch.builder();
+        rowIndexes.forEach(i -> patchBuilder.update(i, updates));
+        TablePatch patch = patchBuilder.build();
 
-        ImmutableMap<Integer, Object> values =
-                TableQueryUtil.toByColumnPoisitionedImmutableMap(table, convertedInsertValues);
-        int columnCount = table.columns().names().size();
-        List<Object> rowDataBuilder = new ArrayList<>(columnCount);
-        for (int i = 0; i < columnCount; i++) {
-            if (!values.containsKey(i)) {
-                return new StoredResult(new StoredError(7, "00007", "Missing column: " + i));
-            }
-            rowDataBuilder.add(values.get(i));
-        }
-        ImmutableList<Object> rowData = ImmutableList.fromCollection(rowDataBuilder);
-        
-        TablePatch patch =  TablePatch.builder().insert(rowData).build();
-        
         table.applyPatch(patch);
         
         return new StoredResult();

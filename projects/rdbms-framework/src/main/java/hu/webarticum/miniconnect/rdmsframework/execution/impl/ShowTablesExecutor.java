@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.rdmsframework.execution.simple;
+package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResult;
@@ -12,16 +12,14 @@ import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
-import hu.webarticum.miniconnect.rdmsframework.query.ShowSchemasQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.ShowTablesQuery;
+import hu.webarticum.miniconnect.rdmsframework.storage.Schema;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 import hu.webarticum.miniconnect.rdmsframework.util.LikeMatcher;
 import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 import hu.webarticum.miniconnect.record.type.StandardValueType;
 
-public class SimpleShowSchemasExecutor implements QueryExecutor {
-    
-    private static final String COLUMN_NAME = "Schemas";
-    
+public class ShowTablesExecutor implements QueryExecutor {
 
     @Override
     public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
@@ -35,19 +33,33 @@ public class SimpleShowSchemasExecutor implements QueryExecutor {
     
     private MiniResult executeInternal(
             StorageAccess storageAccess, EngineSessionState state, Query query) {
-        ShowSchemasQuery showSchemasQuery = (ShowSchemasQuery) query;
-        ImmutableList<String> schemaNames = storageAccess.schemas().names();
-        String like = showSchemasQuery.like();
+        ShowTablesQuery showTablesQuery = (ShowTablesQuery) query;
+        String schemaName = showTablesQuery.from();
+        
+        if (schemaName == null) {
+            schemaName = state.getCurrentSchema();
+        }
+        if (schemaName == null) {
+            return new StoredResult(new StoredError(5, "00005", "No schema is selected"));
+        }
+        
+        Schema schema = storageAccess.schemas().get(schemaName);
+        if (schema == null) {
+            return new StoredResult(new StoredError(6, "00006", "No such schema: " + schemaName));
+        }
+        
+        ImmutableList<String> tableNames = schema.tables().names();
+        String like = showTablesQuery.like();
         if (like != null) {
-            schemaNames = schemaNames.filter(schemaName -> match(like, schemaName));
+            tableNames = tableNames.filter(tableName -> match(like, tableName));
         }
         ValueTranslator stringTranslator = StandardValueType.STRING.defaultTranslator();
         MiniColumnHeader columnHeader = new StoredColumnHeader(
-                COLUMN_NAME,
+                "Tables_in_" + schemaName,
                 false,
                 stringTranslator.definition());
         ImmutableList<MiniColumnHeader> columnHeaders = ImmutableList.of(columnHeader);
-        ImmutableList<ImmutableList<MiniValue>> data = schemaNames.map(
+        ImmutableList<ImmutableList<MiniValue>> data = tableNames.map(
                 tableName -> ImmutableList.of(stringTranslator.encodeFully(tableName)));
         return new StoredResult(new StoredResultSetData(columnHeaders, data));
     }

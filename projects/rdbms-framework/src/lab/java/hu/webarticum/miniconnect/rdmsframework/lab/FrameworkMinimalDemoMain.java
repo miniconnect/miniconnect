@@ -10,7 +10,7 @@ import hu.webarticum.miniconnect.rdmsframework.engine.Engine;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSession;
 import hu.webarticum.miniconnect.rdmsframework.engine.impl.SimpleEngine;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
-import hu.webarticum.miniconnect.rdmsframework.execution.simple.SimpleQueryExecutor;
+import hu.webarticum.miniconnect.rdmsframework.execution.impl.IntegratedQueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.parser.AntlrSqlParser;
 import hu.webarticum.miniconnect.rdmsframework.parser.SqlParser;
 import hu.webarticum.miniconnect.rdmsframework.session.FrameworkSession;
@@ -29,7 +29,7 @@ public class FrameworkMinimalDemoMain {
 
     public static void main(String[] args) throws IOException {
         SqlParser sqlParser = new AntlrSqlParser();
-        QueryExecutor queryExecutor = new SimpleQueryExecutor();
+        QueryExecutor queryExecutor = new IntegratedQueryExecutor();
         StorageAccess storageAccess = createStorageAccess();
         try (
                 Engine engine = new SimpleEngine(sqlParser, queryExecutor, storageAccess);

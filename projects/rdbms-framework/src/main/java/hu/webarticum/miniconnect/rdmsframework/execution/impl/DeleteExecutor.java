@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.rdmsframework.execution.simple;
+package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -19,7 +19,7 @@ import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TablePatch;
 import hu.webarticum.miniconnect.rdmsframework.storage.TablePatch.TablePatchBuilder;
 
-public class SimpleDeleteExecutor implements QueryExecutor {
+public class DeleteExecutor implements QueryExecutor {
 
     @Override
     public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {

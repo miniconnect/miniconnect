@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.rdmsframework.execution.simple;
+package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ import hu.webarticum.miniconnect.record.translator.JavaTranslator;
 import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 import hu.webarticum.miniconnect.record.type.StandardValueType;
 
-public class SimpleSelectExecutor implements QueryExecutor {
+public class SelectExecutor implements QueryExecutor {
 
     @Override
     public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
