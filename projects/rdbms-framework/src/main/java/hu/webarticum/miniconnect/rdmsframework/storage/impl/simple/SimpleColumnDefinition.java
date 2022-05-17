@@ -1,10 +1,9 @@
 package hu.webarticum.miniconnect.rdmsframework.storage.impl.simple;
 
-import java.text.Collator;
 import java.util.Comparator;
-import java.util.Locale;
 
 import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
+import hu.webarticum.miniconnect.rdmsframework.util.ComparatorUtil;
 
 public class SimpleColumnDefinition implements ColumnDefinition {
     
@@ -34,11 +33,7 @@ public class SimpleColumnDefinition implements ColumnDefinition {
     }
     
     private static Comparator<?> createDefaultComparatorFor(Class<?> clazz) {
-        if (clazz == String.class) {
-            return Collator.getInstance(Locale.US);
-        } else {
-            return Comparator.naturalOrder();
-        }
+        return ComparatorUtil.createDefaultComparatorFor(clazz);
     }
     
 

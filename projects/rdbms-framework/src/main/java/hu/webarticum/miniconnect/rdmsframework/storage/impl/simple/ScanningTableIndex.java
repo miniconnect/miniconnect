@@ -12,7 +12,7 @@ import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
-import hu.webarticum.miniconnect.rdmsframework.util.IndexUtil;
+import hu.webarticum.miniconnect.rdmsframework.util.ComparatorUtil;
 
 public class ScanningTableIndex implements TableIndex {
     
@@ -82,7 +82,7 @@ public class ScanningTableIndex implements TableIndex {
         boolean toInclusive = toInclusionMode == InclusionMode.INCLUDE;
         boolean sort = !sortModes.filter(m -> m != SortMode.UNSORTED).isEmpty();
         MultiComparator multiComparator =
-                IndexUtil.createMultiComparator(table, columnNames, sortModes);
+                ComparatorUtil.createMultiComparator(table, columnNames, sortModes);
         
         List<SortHelper> foundEntries = collectEntries(
                 from, fromInclusive, to, toInclusive, nullsModes, multiComparator);

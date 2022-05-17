@@ -1,6 +1,8 @@
 package hu.webarticum.miniconnect.rdmsframework.util;
 
+import java.text.Collator;
 import java.util.Comparator;
+import java.util.Locale;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
@@ -11,13 +13,22 @@ import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.SortMode;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.MultiComparator;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.MultiComparator.MultiComparatorBuilder;
 
-public final class IndexUtil {
+public final class ComparatorUtil {
 
-    private IndexUtil() {
+    private ComparatorUtil() {
         // utility class
     }
     
 
+    @SuppressWarnings("unchecked")
+    public static <T> Comparator<T> createDefaultComparatorFor(Class<T> clazz) {
+        if (clazz == String.class) {
+            return (Comparator<T>) Collator.getInstance(Locale.US);
+        } else {
+            return (Comparator<T>) Comparator.naturalOrder();
+        }
+    }
+    
     public static MultiComparator createMultiComparator(
             Table table,
             ImmutableList<String> columnNames,
