@@ -23,17 +23,13 @@ public class SimpleColumnDefinition implements ColumnDefinition {
     }
     
     public SimpleColumnDefinition(Class<?> clazz, boolean nullable) {
-        this(clazz, nullable, createDefaultComparatorFor(clazz));
+        this(clazz, nullable, null);
     }
     
     public SimpleColumnDefinition(Class<?> clazz, boolean nullable, Comparator<?> comparator) {
         this.clazz = clazz;
         this.nullable = nullable;
-        this.comparator = comparator;
-    }
-    
-    private static Comparator<?> createDefaultComparatorFor(Class<?> clazz) {
-        return ComparatorUtil.createDefaultComparatorFor(clazz);
+        this.comparator = comparator != null ? comparator : ComparatorUtil.createDefaultComparatorFor(clazz);
     }
     
 
