@@ -31,6 +31,7 @@ import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.MultiComparator;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleRow;
 import hu.webarticum.miniconnect.rdmsframework.util.IndexUtil;
+import hu.webarticum.miniconnect.rdmsframework.util.SelectionPredicate;
 import hu.webarticum.miniconnect.util.ChainedIterator;
 import hu.webarticum.miniconnect.util.FilteringIterator;
 import hu.webarticum.miniconnect.util.IteratorAdapter;
@@ -389,7 +390,7 @@ public class DiffTable extends AbstractTableDecorator {
                     from, fromInclusionMode, to, toInclusionMode, nullsModes, sortModes);
             MultiComparator multiComparator = IndexUtil.createMultiComparator(
                     baseTable, baseIndex.columnNames(), sortModes);
-            Predicate<ImmutableList<Object>> predicate = IndexUtil.createPredicate(
+            Predicate<ImmutableList<Object>> predicate = new SelectionPredicate(
                     from, fromInclusionMode, to, toInclusionMode, nullsModes, multiComparator);
             if (sort) {
                 return new SortedDiffTableSelection(
