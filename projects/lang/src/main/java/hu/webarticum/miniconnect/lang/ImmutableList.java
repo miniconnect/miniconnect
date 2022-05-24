@@ -205,6 +205,15 @@ public final class ImmutableList<T> implements ReversibleIterable<T>, Serializab
         return new ImmutableList<>(newData);
     }
 
+    @SuppressWarnings("unchecked")
+    public int binarySearch(T value) {
+        return binarySearch(value, (Comparator<T>) Comparator.naturalOrder());
+    }
+
+    public int binarySearch(T value, Comparator<T> comparator) {
+        return Collections.binarySearch(data, value, comparator);
+    }
+    
     @Override
     public Iterator<T> iterator() {
         return Collections.unmodifiableList(data).iterator();
