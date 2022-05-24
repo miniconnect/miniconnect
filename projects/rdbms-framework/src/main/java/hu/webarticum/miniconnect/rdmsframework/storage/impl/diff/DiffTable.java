@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -21,7 +23,10 @@ import java.util.stream.IntStream;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
+import hu.webarticum.miniconnect.rdmsframework.storage.AbstractNamedResourceStoreDecorator;
 import hu.webarticum.miniconnect.rdmsframework.storage.AbstractTableDecorator;
+import hu.webarticum.miniconnect.rdmsframework.storage.Column;
+import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
 import hu.webarticum.miniconnect.rdmsframework.storage.Row;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
@@ -29,6 +34,7 @@ import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TablePatch;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.MultiComparator;
+import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleColumn;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleRow;
 import hu.webarticum.miniconnect.rdmsframework.util.ComparatorUtil;
 import hu.webarticum.miniconnect.rdmsframework.util.SelectionPredicate;
@@ -37,6 +43,8 @@ import hu.webarticum.miniconnect.util.FilteringIterator;
 import hu.webarticum.miniconnect.util.IteratorAdapter;
 
 public class DiffTable extends AbstractTableDecorator {
+    
+    private final DiffTableColumnStore columnStore;
     
     private final DiffTableIndexStore indexStore;
     
@@ -49,9 +57,15 @@ public class DiffTable extends AbstractTableDecorator {
     
     public DiffTable(Table baseTable) {
         super(baseTable);
+        this.columnStore = new DiffTableColumnStore();
         this.indexStore = new DiffTableIndexStore();
     }
 
+
+    @Override
+    public NamedResourceStore<Column> columns() {
+        return columnStore;
+    }
 
     @Override
     public NamedResourceStore<TableIndex> indexes() {
@@ -256,26 +270,54 @@ public class DiffTable extends AbstractTableDecorator {
     }
     
     
-    private class DiffTableIndexStore implements NamedResourceStore<TableIndex> {
+    private class DiffTableColumnStore extends AbstractNamedResourceStoreDecorator<Column> {
         
-        private final NamedResourceStore<TableIndex> baseStore = baseTable.indexes();
+        private DiffTableColumnStore() {
+            super(baseTable.columns());
+        }
         
 
         @Override
-        public ImmutableList<String> names() {
-            return baseStore.names();
+        public Column get(String name) {
+            Column baseColumn = baseStore.get(name);
+            Optional<ImmutableList<Object>> possibleValuesHolder = baseColumn.possibleValues();
+            if (!possibleValuesHolder.isPresent()) {
+                return baseColumn;
+            } else {
+                int columnPos = baseStore.names().indexOf(name);
+                List<Object> updatedValues = new ArrayList<>(Math.min(1000, updates.size() + insertedRows.size()));
+                for (ImmutableMap<Integer, Object> updateRow : updates.values()) {
+                    Object value = updateRow.get(columnPos);
+                    if (value != null) {
+                        updatedValues.add(value);
+                    }
+                }
+                for (ImmutableList<Object> insertedRow : insertedRows) {
+                    Object value = insertedRow.get(columnPos);
+                    if (value != null) {
+                        updatedValues.add(value);
+                    }
+                }
+                ColumnDefinition columnDefinition = baseColumn.definition();
+                @SuppressWarnings("unchecked")
+                Comparator<Object> comparator = (Comparator<Object>) columnDefinition.comparator();
+                ImmutableList<Object> existingPossibleValues= possibleValuesHolder.get();
+                ImmutableList<Object> mergedPossibleValues = DiffTableUtil.mergeUnique(
+                        existingPossibleValues, updatedValues, comparator);
+                return new SimpleColumn(name, columnDefinition, mergedPossibleValues);
+            }
         }
-
-        @Override
-        public ImmutableList<TableIndex> resources() {
-            return names().map(this::get);
+        
+    }
+    
+    
+    private class DiffTableIndexStore extends AbstractNamedResourceStoreDecorator<TableIndex> {
+        
+        private DiffTableIndexStore() {
+            super(baseTable.indexes());
         }
-
-        @Override
-        public boolean contains(String name) {
-            return baseStore.contains(name);
-        }
-
+        
+        
         @Override
         public TableIndex get(String name) {
             TableIndex baseIndex = baseStore.get(name);

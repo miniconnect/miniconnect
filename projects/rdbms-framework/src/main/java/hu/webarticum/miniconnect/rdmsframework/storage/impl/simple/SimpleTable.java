@@ -130,39 +130,9 @@ public class SimpleTable implements Table {
         
         @Override
         public Column get(String name) {
-            return new SimpleColumn(name);
+            return new SimpleColumn(name, columnDefinitions.get(name));
         }
         
-    }
-    
-    
-    private class SimpleColumn implements Column {
-        
-        private final String name;
-        
-        private final int columnIndex;
-        
-        
-        private SimpleColumn(String name) {
-            this.name = name;
-            this.columnIndex = columnNames.indexOf(name);
-            
-            if (this.columnIndex == -1) {
-                throw new IllegalArgumentException("Unknown column: " + name);
-            }
-        }
-
-
-        @Override
-        public String name() {
-            return name;
-        }
-
-        @Override
-        public ColumnDefinition definition() {
-            return columnDefinitions.get(name);
-        }
-
     }
     
 

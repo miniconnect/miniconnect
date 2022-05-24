@@ -9,6 +9,7 @@ public interface ColumnDefinition {
     
     public boolean isNullable();
     
+    // FIXME: Comparator<Object> ?
     public Comparator<?> comparator(); // NOSONAR
     
 }
