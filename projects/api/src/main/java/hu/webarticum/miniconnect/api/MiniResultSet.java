@@ -4,9 +4,11 @@ import java.io.Closeable;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
 
-public interface MiniResultSet extends Closeable, Iterable<ImmutableList<MiniValue>> {
+public interface MiniResultSet extends Closeable {
 
     public ImmutableList<MiniColumnHeader> columnHeaders();
+    
+    public ImmutableList<MiniValue> fetch();
     
     @Override
     public void close();

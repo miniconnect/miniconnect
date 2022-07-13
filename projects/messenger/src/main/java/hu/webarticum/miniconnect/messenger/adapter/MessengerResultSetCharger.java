@@ -2,10 +2,8 @@ package hu.webarticum.miniconnect.messenger.adapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -213,13 +211,7 @@ public class MessengerResultSetCharger {
         
         private volatile ImmutableList<MiniValue> currentRow = null; // NOSONAR
         
-        private volatile boolean isNextRowFetched = false;
-        
-        private volatile ImmutableList<MiniValue> nextRow = null; // NOSONAR
-        
         private volatile boolean finished = false;
-        
-        private final ResultSetIterator iterator = new ResultSetIterator();
         
         
         public MessengerResultSet(ImmutableList<MiniColumnHeader> columnHeaders) {
@@ -232,39 +224,46 @@ public class MessengerResultSetCharger {
             return columnHeaders;
         }
         
-
         @Override
-        public Iterator<ImmutableList<MiniValue>> iterator() {
-            return iterator;
-        }
-
-        private synchronized boolean hasNextForIterator() { // NOSONAR should be here
+        public synchronized ImmutableList<MiniValue> fetch() {
             if (finished) {
-                return false;
-            }
-            
-            if (!isNextRowFetched) {
-                nextRow = takeRow();
-                isNextRowFetched = true;
-            }
-            
-            if (isEofRow(nextRow)) {
-                finished = true;
-                return false;
-            }
-            
-            return true;
-        }
-        
-        private synchronized ImmutableList<MiniValue> nextForIterator() { // NOSONAR should be here
-            if (!hasNextForIterator()) {
-                throw new NoSuchElementException();
+                return null;
             }
             
             closeCurrentRow();
-            loadRow();
+            fetchNextRow();
+            handleEof();
             
             return currentRow;
+        }
+
+        private void fetchNextRow() {
+            try {
+                currentRow = rowQueue.take();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw closeImplicitly(ExceptionUtil.asUncheckedIOException(e));
+            } catch (Exception e) {
+                throw closeImplicitly(ExceptionUtil.asUncheckedIOException(e));
+            }
+
+            currentRowIndex++; // NOSONAR
+        }
+        
+        private RuntimeException closeImplicitly(RuntimeException existingException) {
+            try {
+                close();
+            } catch (Exception closeException) {
+                existingException.addSuppressed(closeException);
+            }
+            return existingException;
+        }
+        
+        private void handleEof() {
+            if (isEofRow(currentRow)) {
+                currentRow = null;
+                finished = true;
+            }
         }
         
         private void closeCurrentRow() {
@@ -290,39 +289,6 @@ public class MessengerResultSetCharger {
             }
         }
 
-        private void loadRow() {
-            if (isNextRowFetched) {
-                currentRow = nextRow;
-                nextRow = null;
-                isNextRowFetched = false;
-            } else {
-                currentRow = takeRow();
-            }
-            
-            currentRowIndex++; // NOSONAR
-        }
-        
-        private ImmutableList<MiniValue> takeRow() {
-            try {
-                return rowQueue.take();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw closeImplicitly(ExceptionUtil.asUncheckedIOException(e));
-            } catch (Exception e) {
-                throw closeImplicitly(ExceptionUtil.asUncheckedIOException(e));
-            }
-        }
-        
-        private RuntimeException closeImplicitly(RuntimeException existingException) {
-            try {
-                close();
-            } catch (Exception closeException) {
-                existingException.addSuppressed(closeException);
-            }
-            return existingException;
-        }
-        
-        
         private static ImmutableList<MiniValue> eofRow() {
             return ImmutableList.empty();
         }
@@ -334,21 +300,6 @@ public class MessengerResultSetCharger {
         @Override
         public void close() {
             closeCurrentRow();
-        }
-
-        
-        private class ResultSetIterator implements Iterator<ImmutableList<MiniValue>> {
-
-            @Override
-            public boolean hasNext() {
-                return hasNextForIterator();
-            }
-
-            @Override
-            public ImmutableList<MiniValue> next() { // NOSONAR NoSuchElementException is handled
-                return nextForIterator();
-            }
-            
         }
 
     }

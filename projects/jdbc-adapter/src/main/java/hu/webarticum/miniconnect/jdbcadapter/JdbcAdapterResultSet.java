@@ -13,7 +13,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -97,15 +96,12 @@ public class JdbcAdapterResultSet implements MiniResultSet {
     
     private final ResultSet jdbcResultSet;
     
-    private final JdbcResultSetIterator<ImmutableList<MiniValue>> rowIterator;
-    
     
     public JdbcAdapterResultSet(Statement jdbcStatement, ResultSet jdbcResultSet) {
         this.jdbcStatement = jdbcStatement;
         this.jdbcResultSet = jdbcResultSet;
         this.valueTypes = extractValueTypes(jdbcResultSet);
         this.columnHeaders = extractColumnHeaders(jdbcResultSet, valueTypes);
-        this.rowIterator = new JdbcResultSetIterator<>(jdbcResultSet, r -> extractRow());
     }
     
     private static ImmutableList<ValueType> extractValueTypes(ResultSet jdbcResultSet) {
@@ -172,11 +168,7 @@ public class JdbcAdapterResultSet implements MiniResultSet {
     }
 
     @Override
-    public Iterator<ImmutableList<MiniValue>> iterator() {
-        return rowIterator;
-    }
-    
-    private ImmutableList<MiniValue> extractRow()  {
+    public ImmutableList<MiniValue> fetch() {
         try {
             return extractRowThrowing();
         } catch (SQLException e) {

@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.record;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResultSet;
@@ -65,22 +66,44 @@ public class ResultTable implements Iterable<ResultRecord> {
     
     
     private class ResultTableIterator implements Iterator<ResultRecord> {
-        
-        private final Iterator<ImmutableList<MiniValue>> rowIterator = resultSet.iterator();
-        
-        
+
+        private boolean nextRowFetched = false;
+
+        private ImmutableList<MiniValue> nextRow = null;
+
+
         @Override
         public boolean hasNext() {
-            return rowIterator.hasNext();
+            if (!nextRowFetched) {
+                fetchNextRow();
+            }
+            
+            return nextRow != null;
         }
 
         @Override
         public ResultRecord next() {
-            return new ResultRecord(
-                    resultSet.columnHeaders(),
-                    rowIterator.next(),
-                    valueTranslators,
-                    converter);
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            
+            ResultRecord result = buildResultRecord();
+            invalidate();
+            return result;
+        }
+
+        private void fetchNextRow() {
+            nextRow = resultSet.fetch();
+            nextRowFetched = true;
+        }
+        
+        private ResultRecord buildResultRecord() {
+            return new ResultRecord(resultSet.columnHeaders(), nextRow, valueTranslators, converter);
+        }
+        
+        private void invalidate() {
+            nextRow = null;
+            nextRowFetched = false;
         }
         
     }

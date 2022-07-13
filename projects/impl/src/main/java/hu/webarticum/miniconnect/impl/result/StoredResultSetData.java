@@ -50,7 +50,8 @@ public final class StoredResultSetData implements Iterable<ImmutableList<MiniVal
         MiniResultSet resultSet = result.resultSet();
         List<MiniColumnHeader> headers = resultSet.columnHeaders().asList();
         List<List<MiniValue>> rows = new ArrayList<>();
-        for (ImmutableList<MiniValue> row : resultSet) {
+        ImmutableList<MiniValue> row;
+        while ((row = resultSet.fetch()) != null) {
             rows.add(row.asList());
         }
         return new StoredResultSetData(headers, rows);

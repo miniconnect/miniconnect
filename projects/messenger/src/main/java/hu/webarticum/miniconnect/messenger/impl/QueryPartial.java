@@ -75,8 +75,9 @@ class QueryPartial implements Closeable {
             ImmutableMap<Integer, Integer> fixedSizes = collectFixedSizes(columnHeaders);
             List<ImmutableList<CellData>> responseRowsBuilder = new ArrayList<>();
             List<IncompleteContentHolder> incompleteContents = new ArrayList<>();
+            ImmutableList<MiniValue> row;
             long offset = 0;
-            for (ImmutableList<MiniValue> row : resultSet) {
+            while ((row = resultSet.fetch()) != null) {
                 long r = offset;
                 ImmutableList<CellData> responseRow =
                         row.map((c, v) -> extractCell(
