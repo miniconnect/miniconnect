@@ -170,10 +170,18 @@ public class JdbcAdapterResultSet implements MiniResultSet {
     @Override
     public ImmutableList<MiniValue> fetch() {
         try {
-            return extractRowThrowing();
+            return fetchThrowing();
         } catch (SQLException e) {
             throw new UncheckedSqlException(e);
         }
+    }
+
+    private ImmutableList<MiniValue> fetchThrowing() throws SQLException {
+        if (!jdbcResultSet.next()) {
+            return null;
+        }
+        
+        return extractRowThrowing();
     }
     
     private ImmutableList<MiniValue> extractRowThrowing() throws SQLException {
