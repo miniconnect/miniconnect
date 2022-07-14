@@ -104,7 +104,7 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public boolean isReadOnly() throws SQLException {
-        return false; // TODO
+        return connection.isReadOnly(); // FIXME
     }
 
     @Override
@@ -309,12 +309,12 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public boolean supportsNonNullableColumns() throws SQLException {
-        return false; // TODO
+        return true; // TODO
     }
 
     @Override
     public boolean supportsMinimumSQLGrammar() throws SQLException {
-        return false; // TODO
+        return true; // TODO
     }
 
     @Override
@@ -654,27 +654,20 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public ResultSet getProcedures(
-            String catalog,
-            String schemaPattern,
-            String procedureNamePattern
-            ) throws SQLException {
+            String catalog, String schemaPattern, String procedureNamePattern) throws SQLException {
         return null; // TODO
     }
 
     @Override
     public ResultSet getProcedureColumns(
-            String catalog,
-            String schemaPattern,
-            String procedureNamePattern,
-            String columnNamePattern
+            String catalog, String schemaPattern, String procedureNamePattern, String columnNamePattern
             ) throws SQLException {
         return null; // TODO
     }
 
     @Override
     public ResultSet getTables(
-            String catalog, String schemaPattern, String tableNamePattern, String[] types
-            ) throws SQLException {
+            String catalog, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
         return null; // TODO
     }
 
@@ -702,8 +695,7 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public ResultSet getColumnPrivileges(
-            String catalog, String schema, String table, String columnNamePattern
-            ) throws SQLException {
+            String catalog, String schema, String table, String columnNamePattern) throws SQLException {
         return null; // TODO
     }
 
@@ -721,26 +713,22 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
     }
 
     @Override
-    public ResultSet getVersionColumns(
-            String catalog, String schema, String table) throws SQLException {
+    public ResultSet getVersionColumns(String catalog, String schema, String table) throws SQLException {
         return null; // TODO
     }
 
     @Override
-    public ResultSet getPrimaryKeys(
-            String catalog, String schema, String table) throws SQLException {
+    public ResultSet getPrimaryKeys(String catalog, String schema, String table) throws SQLException {
         return null; // TODO
     }
 
     @Override
-    public ResultSet getImportedKeys(
-            String catalog, String schema, String table) throws SQLException {
+    public ResultSet getImportedKeys(String catalog, String schema, String table) throws SQLException {
         return null; // TODO
     }
 
     @Override
-    public ResultSet getExportedKeys(
-            String catalog, String schema, String table) throws SQLException {
+    public ResultSet getExportedKeys(String catalog, String schema, String table) throws SQLException {
         return null; // TODO
     }
 
@@ -763,8 +751,7 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public ResultSet getIndexInfo(
-            String catalog, String schema, String table, boolean unique, boolean approximate
-            ) throws SQLException {
+            String catalog, String schema, String table, boolean unique, boolean approximate) throws SQLException {
         return null; // TODO
     }
 
@@ -830,8 +817,7 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public ResultSet getUDTs(
-            String catalog, String schemaPattern, String typeNamePattern, int[] types
-            ) throws SQLException {
+            String catalog, String schemaPattern, String typeNamePattern, int[] types) throws SQLException {
         return null; // TODO
     }
 
