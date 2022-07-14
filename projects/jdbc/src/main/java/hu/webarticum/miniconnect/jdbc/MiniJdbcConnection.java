@@ -16,6 +16,7 @@ import java.sql.SQLXML;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Struct;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -91,7 +92,7 @@ public class MiniJdbcConnection implements Connection {
 
     @Override
     public Map<String, Class<?>> getTypeMap() throws SQLException {
-        return null;
+        return Collections.emptyMap();
     }
 
     @Override
@@ -145,38 +146,56 @@ public class MiniJdbcConnection implements Connection {
 
     @Override
     public void setReadOnly(boolean readOnly) throws SQLException {
-        // TODO Auto-generated method stub
-        
+        try {
+            databaseProvider.setReadOnly(miniSession, readOnly);
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
     }
 
     @Override
     public boolean isReadOnly() throws SQLException {
-        // TODO Auto-generated method stub
-        return false;
+        try {
+            return databaseProvider.isReadOnly(miniSession);
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
     }
 
     @Override
     public void setCatalog(String catalog) throws SQLException {
-        // TODO Auto-generated method stub
-        
+        try {
+            databaseProvider.setCatalog(miniSession, catalog);
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
     }
 
     @Override
     public String getCatalog() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            return databaseProvider.getCatalog(miniSession);
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
     }
 
     @Override
     public void setSchema(String schema) throws SQLException {
-        // TODO Auto-generated method stub
-        
+        try {
+            databaseProvider.setSchema(miniSession, schema);
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
     }
 
     @Override
     public String getSchema() throws SQLException {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            return databaseProvider.getSchema(miniSession);
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
     }
 
     // [end]
@@ -416,7 +435,7 @@ public class MiniJdbcConnection implements Connection {
         try {
             miniSession.close();
         } catch (Exception e) {
-            throw new SQLException(e); // FIXME
+            throw new SQLException(e);
         }
     }
 
@@ -427,7 +446,12 @@ public class MiniJdbcConnection implements Connection {
 
     @Override
     public boolean isValid(int timeout) throws SQLException {
-        return !closed; // TODO
+        try {
+            databaseProvider.checkSessionValid(miniSession);
+        } catch (Exception e) {
+            return false;
+        }
+        return !closed;
     }
 
     @Override
