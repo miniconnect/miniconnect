@@ -5,7 +5,9 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 
+import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniResult;
+import hu.webarticum.miniconnect.lang.ImmutableList;
 
 public abstract class AbstractJdbcStatement implements Statement {
     
@@ -13,7 +15,9 @@ public abstract class AbstractJdbcStatement implements Statement {
     
     private volatile boolean escapeProcessing = false;
     
-    private volatile ResultHolder currentResult = null; // NOSONAR
+    private volatile ResultHolder currentResultHolder = null; // NOSONAR
+    
+    private volatile SQLWarning currentWarningHead = null; // NOSONAR
 
     
     AbstractJdbcStatement(MiniJdbcConnection connection) {
@@ -54,27 +58,32 @@ public abstract class AbstractJdbcStatement implements Statement {
 
     @Override
     public int getQueryTimeout() throws SQLException {
-        return 0; // TODO
+        return 0; // not supported
     }
 
     @Override
     public void setQueryTimeout(int seconds) throws SQLException {
-        // TODO
+       // not supported
     }
 
     @Override
     public int getMaxFieldSize() throws SQLException {
-        return 0; // TODO
+        return 0; // not supported
     }
 
     @Override
     public void setMaxFieldSize(int max) throws SQLException {
-        // TODO
+        // not supported
     }
 
     @Override
     public int getMaxRows() throws SQLException {
-        return 0; // TODO
+        return 0; // not supported
+    }
+
+    @Override
+    public void setMaxRows(int max) throws SQLException {
+        // not supported
     }
 
     @Override
@@ -83,18 +92,13 @@ public abstract class AbstractJdbcStatement implements Statement {
     }
 
     @Override
-    public void setMaxRows(int max) throws SQLException {
-        // TODO
-    }
-
-    @Override
     public SQLWarning getWarnings() throws SQLException {
-        return null; // TODO
+        return currentWarningHead;
     }
 
     @Override
     public void clearWarnings() throws SQLException {
-        // TODO
+        currentWarningHead = null;
     }
 
     @Override
@@ -104,47 +108,49 @@ public abstract class AbstractJdbcStatement implements Statement {
 
     @Override
     public ResultSet getResultSet() throws SQLException {
-        return (currentResult != null ? currentResult.jdbcResultSet : null);
+        return (currentResultHolder != null ? currentResultHolder.jdbcResultSet : null);
     }
 
     @Override
     public void setFetchDirection(int direction) throws SQLException {
-        // TODO
+        if (direction != ResultSet.FETCH_FORWARD) {
+            throw createForwardOnlyException();
+        }
     }
 
     @Override
     public int getFetchDirection() throws SQLException {
-        return 0; // TODO
+        return ResultSet.FETCH_FORWARD;
     }
 
     @Override
     public void setFetchSize(int rows) throws SQLException {
-        // TODO
+        // not supported
     }
 
     @Override
     public int getFetchSize() throws SQLException {
-        return 0; // TODO
+        return 0; // not supported
     }
 
     @Override
     public int getResultSetConcurrency() throws SQLException {
-        return 0; // TODO
+        return ResultSet.CONCUR_READ_ONLY;
     }
 
     @Override
     public int getResultSetType() throws SQLException {
-        return 0; // TODO
+        return ResultSet.TYPE_FORWARD_ONLY;
     }
 
     @Override
     public boolean getMoreResults() throws SQLException {
-        return false; // TODO
+        return false; // not supported
     }
 
     @Override
     public boolean getMoreResults(int current) throws SQLException {
-        return false; // TODO
+        return false; // not supported
     }
 
     @Override
@@ -154,33 +160,55 @@ public abstract class AbstractJdbcStatement implements Statement {
 
     @Override
     public int getResultSetHoldability() throws SQLException {
-        return 0; // TODO
+        return ResultSet.HOLD_CURSORS_OVER_COMMIT;
     }
 
     @Override
     public void cancel() throws SQLException {
-        // TODO
+        // not supported
     }
 
     @Override
     public void closeOnCompletion() throws SQLException {
-        // TODO
+        // not supported
     }
 
     @Override
     public boolean isCloseOnCompletion() throws SQLException {
-        return false; // TODO
+        return false;  // not supported
     }
 
 
-    protected void setCurrentResult(ResultHolder newResult) {
-        currentResult = newResult;
+    protected void handleExecuteCompleted(ResultHolder resultHolder) {
+        currentResultHolder = resultHolder;
+        currentWarningHead = wrapWarnings(resultHolder.result.warnings());
+        connection.setCurrentWarningHead(currentWarningHead);
     }
     
-    protected ResultHolder getCurrentResult() {
-        return currentResult;
+    private SQLWarning wrapWarnings(ImmutableList<MiniError> miniWarnings) {
+        if (miniWarnings.isEmpty()) {
+            return null;
+        }
+        
+        SQLWarning headWarning = wrapWarning(miniWarnings.get(0));
+        SQLWarning parentWarning = headWarning;
+        int length = miniWarnings.size();
+        for (int i = 1; i < length; i++) {
+            SQLWarning childWarning = wrapWarning(miniWarnings.get(i));
+            parentWarning.setNextException(childWarning);
+            parentWarning = childWarning;
+        }
+        return headWarning;
     }
     
+    private SQLWarning wrapWarning(MiniError miniWarning) {
+        return new SQLWarning(miniWarning.message(), miniWarning.sqlState(), miniWarning.code());
+    }
+
+    private SQLException createForwardOnlyException() {
+        return new SQLException("This result set is FORWARD_ONLY");
+    }
+
     
     protected static class ResultHolder {
         

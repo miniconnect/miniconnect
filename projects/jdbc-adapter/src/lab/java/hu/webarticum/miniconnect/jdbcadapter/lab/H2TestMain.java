@@ -26,12 +26,10 @@ public class H2TestMain {
         runRepl(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD, SET_STATEMENT);
     }
     
-    private static void runRepl(
-            String url, String username, String password, String setStatement) {
-        Supplier<JdbcLargeDataPutter> largeDataPutterFactory =
-                () -> new SimpleJdbcLargeDataPutter(setStatement);
-        MiniSessionManager sessionManager =
-                new JdbcAdapterSessionManager(url, username, password, largeDataPutterFactory);
+    private static void runRepl(String url, String username, String password, String setStatement) {
+        Supplier<JdbcLargeDataPutter> largeDataPutterFactory = () -> new SimpleJdbcLargeDataPutter(setStatement);
+        MiniSessionManager sessionManager = new JdbcAdapterSessionManager(
+                url, username, password, largeDataPutterFactory);
         try (MiniSession session = sessionManager.openSession()) {
             Repl repl = new SqlRepl(
                     session,

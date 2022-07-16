@@ -20,11 +20,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
+import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.record.lob.BlobValue;
 import hu.webarticum.miniconnect.record.lob.ClobValue;
-import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 
 public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
 
@@ -61,21 +61,17 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
     }
     
     
-    private final MiniJdbcResultSet resultSet;
+    private final ImmutableList<MiniColumnHeader> columnHeaders;
 
     private final ImmutableList<String> columnClassNames;
     
     
-    public MiniJdbcResultSetMetaData(MiniJdbcResultSet resultSet) {
-        this.resultSet = resultSet;
-        this.columnClassNames = resultSet.getValueTranslators()
-                .map(ValueTranslator::assuredClazzName);
+    public MiniJdbcResultSetMetaData(
+            ImmutableList<MiniColumnHeader> columnHeaders, ImmutableList<String> columnClassNames) {
+        this.columnHeaders = columnHeaders;
+        this.columnClassNames = columnClassNames;
     }
     
-    
-    public MiniJdbcResultSet getResultSet() {
-        return resultSet;
-    }
     
     @Override
     public <T> T unwrap(Class<T> type) throws SQLException {
@@ -95,7 +91,7 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public int getColumnCount() throws SQLException {
-        return resultSet.getColumnCount();
+        return columnClassNames.size();
     }
 
     @Override
@@ -125,13 +121,13 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public String getColumnLabel(int column) throws SQLException {
-        MiniColumnHeader columnHeader = resultSet.getMiniColumnHeaders().get(column - 1);
+        MiniColumnHeader columnHeader = columnHeaders.get(column - 1);
         return columnHeader.name();
     }
 
     @Override
     public String getColumnName(int column) throws SQLException {
-        return getColumnLabel(column);
+        return getColumnLabel(column); // FIXME
     }
 
     @Override
@@ -141,30 +137,40 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public int isNullable(int column) throws SQLException {
-        MiniColumnHeader columnHeader = resultSet.getMiniColumnHeaders().get(column - 1);
-        return columnHeader.isNullable() ?
-                ResultSetMetaData.columnNullable :
-                ResultSetMetaData.columnNoNulls;
+        MiniColumnHeader columnHeader = columnHeaders.get(column - 1);
+        return columnHeader.isNullable() ? ResultSetMetaData.columnNullable : ResultSetMetaData.columnNoNulls;
     }
 
     @Override
     public boolean isAutoIncrement(int column) throws SQLException {
-        return false; // TODO
+        return getColumnName(column).equalsIgnoreCase("id"); // FIXME heuristic
     }
 
     @Override
     public boolean isCaseSensitive(int column) throws SQLException {
-        return false; // TODO
+        return true; // TODO
     }
 
     @Override
     public boolean isCurrency(int column) throws SQLException {
-        return false; // TODO
+        // FIXME: support for currencies?
+        String type = columnHeaders.get(column - 1).valueDefinition().type();
+        try {
+            return Class.forName(type) == BigDecimal.class;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
     public boolean isSigned(int column) throws SQLException {
-        return false; // TODO
+        // FIXME: support for unsigned numbers?
+        String type = columnHeaders.get(column - 1).valueDefinition().type();
+        try {
+            return Number.class.isAssignableFrom(Class.forName(type));
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
@@ -174,12 +180,49 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public int getPrecision(int column) throws SQLException {
-        return 0; // TODO
+        MiniValueDefinition valueDefinition = columnHeaders.get(column - 1).valueDefinition();
+        Class<?> clazz;
+        try {
+            clazz = Class.forName(valueDefinition.type());
+        } catch (Exception e) {
+            return 0;
+        }
+        
+        if (clazz == String.class || clazz == ByteString.class || clazz == byte[].class) {
+            return Math.max(0, valueDefinition.length());
+        } else if (clazz == Boolean.class || clazz == Byte.class || clazz == Character.class) {
+            return 1;
+        } else if (clazz == Short.class) {
+            return 5;
+        } else if (clazz == Integer.class) {
+            return 10;
+        } else if (clazz == Long.class) {
+            return 19;
+        } else if (clazz == Float.class) {
+            return 7;
+        } else if (clazz == Double.class) {
+            return 15;
+        } else if (clazz == BigInteger.class || clazz == BigDecimal.class) {
+            return 30; // FIXME
+        } else {
+            return 0; // TODO
+        }
     }
 
     @Override
     public int getScale(int column) throws SQLException {
-        return 0; // TODO
+        MiniValueDefinition valueDefinition = columnHeaders.get(column - 1).valueDefinition();
+        Class<?> clazz;
+        try {
+            clazz = Class.forName(valueDefinition.type());
+        } catch (Exception e) {
+            return 0;
+        }
+        if (clazz == BigDecimal.class) {
+            return 3; // FIXME
+        } else {
+            return 0; // TODO
+        }
     }
 
     @Override
@@ -209,7 +252,9 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
 
     @Override
     public int getColumnDisplaySize(int column) throws SQLException {
-        return 0; // TODO
+        return Math.max(
+                columnHeaders.get(column - 1).name().length(),
+                getPrecision(column));
     }
-
+    
 }

@@ -60,22 +60,27 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
-        return null; // TODO
+        ResultSet resultSet = getResultSet();
+        if (resultSet == null) {
+            return null; // FIXME try to parse?
+        }
+        
+        return resultSet.getMetaData();
     }
 
     @Override
     public ParameterMetaData getParameterMetaData() throws SQLException {
-        return null; // TODO
+        return new MiniJdbcParameterMetaData(preparedStatementProvider.parameters());
     }
 
     @Override
     public void setPoolable(boolean poolable) throws SQLException {
-        // TODO
+        // not supported
     }
 
     @Override
     public boolean isPoolable() throws SQLException {
-        return false; // TODO
+        return false;
     }
 
     // [end]
@@ -92,7 +97,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public int executeUpdate() throws SQLException {
-        ResultHolder resultHolder = executeInternal();
+        executeInternal();
         return 0; // TODO
     }
 
@@ -117,7 +122,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
                 new MiniJdbcResultSet(this, result.resultSet()) :
                 null;
         ResultHolder resultHolder = new ResultHolder(result, jdbcResultSet);
-        setCurrentResult(resultHolder);
+        handleExecuteCompleted(resultHolder);
         
         return resultHolder;
     }
@@ -509,17 +514,33 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
         }
     }
 
-    // TODO
     public void closeInternal() throws SQLException {
         closed = true;
         getConnection().unregisterActiveStatement(this);
         for (ParameterValue parameterValue : parameters) {
             closeSilentlyIfNecessary(parameterValue);
         }
+        Exception resultSetCloseException = null;
+        try {
+            getResultSet().close();
+        } catch (Exception e) {
+            resultSetCloseException = e;
+        }
         try {
             preparedStatementProvider.close();
         } catch (Exception e) {
-            throw new SQLException(e);
+            SQLException e2 = new SQLException(e);
+            if (resultSetCloseException != null) {
+                e2.addSuppressed(resultSetCloseException);
+            }
+            throw e2;
+        }
+        if (resultSetCloseException != null) {
+            if (resultSetCloseException instanceof SQLException) {
+                throw (SQLException) resultSetCloseException;
+            } else {
+                throw new SQLException(resultSetCloseException);
+            }
         }
     }
     

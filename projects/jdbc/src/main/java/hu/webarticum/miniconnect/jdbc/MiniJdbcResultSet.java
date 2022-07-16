@@ -55,14 +55,18 @@ public class MiniJdbcResultSet implements ResultSet {
     private volatile ResultRecord currentRecord = null; // NOSONAR
     
     private volatile boolean wasNull = false;
+
+
+    private final Object closeLock = new Object();
     
-    private volatile int fetchSize = 0; // XXX ignored
+    private volatile boolean closed = false;
     
 
     public MiniJdbcResultSet(Statement statement, MiniResultSet miniResultSet) {
         this.statement = statement;
         this.resultTable = new ResultTable(miniResultSet);
-        this.metaData = new MiniJdbcResultSetMetaData(this);
+        this.metaData = new MiniJdbcResultSetMetaData(
+                getMiniColumnHeaders(), getValueTranslators().map(ValueTranslator::assuredClazzName));
         this.columnCount = miniResultSet.columnHeaders().size();
     }
     
@@ -171,12 +175,12 @@ public class MiniJdbcResultSet implements ResultSet {
 
     @Override
     public void setFetchSize(int rows) throws SQLException {
-        this.fetchSize = fetchSize;
+        // not supported
     }
 
     @Override
     public int getFetchSize() throws SQLException {
-        return fetchSize;
+        return 0; // not supported
     }
 
     // [end]
@@ -1200,15 +1204,28 @@ public class MiniJdbcResultSet implements ResultSet {
     
     // --- CLOSE ---
     // [start]
-    
+
     @Override
     public void close() throws SQLException {
-        // TODO
+        synchronized (closeLock) {
+            if (!closed) {
+                closeInternal();
+            }
+        }
+    }
+
+    public void closeInternal() throws SQLException {
+        closed = true;
+        try {
+            resultTable.resultSet().close();
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
     }
 
     @Override
     public boolean isClosed() throws SQLException {
-        return false; // TODO
+        return closed;
     }
     
     // [end]

@@ -7,33 +7,35 @@ import java.util.regex.Pattern;
 
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.jdbc.ParameterDefinition;
 import hu.webarticum.miniconnect.jdbc.ParameterValue;
 import hu.webarticum.miniconnect.jdbc.provider.PreparedStatementProvider;
+import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.regexbee.Bee;
 import hu.webarticum.regexbee.BeeFragment;
 import hu.webarticum.regexbee.common.StringLiteralFragment;
 
 public class H2PreparedStatementProvider implements PreparedStatementProvider {
     
-    private static final BeeFragment SINGLE_QUTED_FRAGMENT = StringLiteralFragment.builder()
+    private static final BeeFragment SINGLE_QUOTED_FRAGMENT = StringLiteralFragment.builder()
             .withDelimiter("'")
             .withEscaping('\\', true)
             .build();
     
-    private static final BeeFragment DOUBLE_QUTED_FRAGMENT = StringLiteralFragment.builder()
+    private static final BeeFragment DOUBLE_QUOTED_FRAGMENT = StringLiteralFragment.builder()
             .withDelimiter("\"")
             .withEscaping('\\', true)
             .build();
     
-    private static final BeeFragment TWODOLLARS_QUTED_FRAGMENT = StringLiteralFragment.builder()
+    private static final BeeFragment TWODOLLARS_QUOTED_FRAGMENT = StringLiteralFragment.builder()
             .withDelimiter("$$")
             .withoutAnyEscaping()
             .build();
 
     private static final Pattern STRING_OR_QUESTION_MARK_PATTERN =
-            SINGLE_QUTED_FRAGMENT
-            .or(DOUBLE_QUTED_FRAGMENT)
-            .or(TWODOLLARS_QUTED_FRAGMENT)
+            SINGLE_QUOTED_FRAGMENT
+            .or(DOUBLE_QUOTED_FRAGMENT)
+            .or(TWODOLLARS_QUOTED_FRAGMENT)
             .or(Bee.fixed("?"))
             .toPattern();
     
@@ -44,12 +46,15 @@ public class H2PreparedStatementProvider implements PreparedStatementProvider {
     
     private final String[] sqlParts;
     
+    private final ImmutableList<ParameterDefinition> parameters;
+    
     
     public H2PreparedStatementProvider(
             H2DatabaseProvider databaseProvider, MiniSession session, String sql) {
         this.databaseProvider = databaseProvider;
         this.session = session;
         this.sqlParts = compileSql(sql);
+        this.parameters = ImmutableList.fill(sqlParts.length - 1, i -> new ParameterDefinition()); // TODO
     }
     
     private static String[] compileSql(String sql) {
@@ -72,6 +77,11 @@ public class H2PreparedStatementProvider implements PreparedStatementProvider {
         return result;
     }
 
+    
+    @Override
+    public ImmutableList<ParameterDefinition> parameters() {
+        return parameters;
+    }
 
     @Override
     public MiniResult execute(List<ParameterValue> parameters) {
