@@ -35,6 +35,7 @@ import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.jdbc.blob.BlobClob;
 import hu.webarticum.miniconnect.jdbc.blob.WriteableBlob;
 import hu.webarticum.miniconnect.jdbc.io.LongBoundedReader;
+import hu.webarticum.miniconnect.jdbc.provider.ParameterValue;
 import hu.webarticum.miniconnect.jdbc.provider.PreparedStatementProvider;
 
 public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements PreparedStatement {

@@ -7,8 +7,8 @@ import java.util.regex.Pattern;
 
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
-import hu.webarticum.miniconnect.jdbc.ParameterDefinition;
-import hu.webarticum.miniconnect.jdbc.ParameterValue;
+import hu.webarticum.miniconnect.jdbc.provider.ParameterDefinition;
+import hu.webarticum.miniconnect.jdbc.provider.ParameterValue;
 import hu.webarticum.miniconnect.jdbc.provider.PreparedStatementProvider;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.regexbee.Bee;

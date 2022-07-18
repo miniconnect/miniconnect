@@ -19,6 +19,7 @@ import java.sql.Struct;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
@@ -27,8 +28,19 @@ import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.jdbc.blob.BlobClob;
 import hu.webarticum.miniconnect.jdbc.blob.WriteableBlob;
 import hu.webarticum.miniconnect.jdbc.provider.DatabaseProvider;
+import hu.webarticum.miniconnect.jdbc.provider.TransactionIsolationLevel;
 
 public class MiniJdbcConnection implements Connection {
+    
+    private static final Map<Integer, TransactionIsolationLevel> TRANSACTION_ISOLATION_LEVEL_MAP = new HashMap<>();
+    static {
+        TRANSACTION_ISOLATION_LEVEL_MAP.put(TRANSACTION_NONE, TransactionIsolationLevel.NONE);
+        TRANSACTION_ISOLATION_LEVEL_MAP.put(TRANSACTION_READ_UNCOMMITTED, TransactionIsolationLevel.READ_UNCOMMITTED);
+        TRANSACTION_ISOLATION_LEVEL_MAP.put(TRANSACTION_READ_COMMITTED, TransactionIsolationLevel.READ_COMMITTED);
+        TRANSACTION_ISOLATION_LEVEL_MAP.put(TRANSACTION_REPEATABLE_READ, TransactionIsolationLevel.REPEATABLE_READ);
+        TRANSACTION_ISOLATION_LEVEL_MAP.put(TRANSACTION_SERIALIZABLE, TransactionIsolationLevel.SERIALIZABLE);
+    }
+    
 
     private final MiniSession miniSession;
     
@@ -353,63 +365,120 @@ public class MiniJdbcConnection implements Connection {
     // [start]
 
     @Override
-    public void commit() throws SQLException {
-        // TODO
-    }
-
-    @Override
-    public void rollback() throws SQLException {
-        // TODO
-    }
-
-    @Override
-    public void rollback(Savepoint savepoint) throws SQLException {
-        // TODO
-    }
-
-    @Override
-    public Savepoint setSavepoint(String name) throws SQLException {
-        return null; // TODO
-    }
-
-    @Override
-    public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-        // TODO
-    }
-
-    @Override
     public void setAutoCommit(boolean autoCommit) throws SQLException {
-        // TODO
+        try {
+            databaseProvider.setAutoCommit(miniSession, autoCommit);
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
     }
 
     @Override
     public boolean getAutoCommit() throws SQLException {
-        return false; // TODO
+        try {
+            return databaseProvider.isAutoCommit(miniSession);
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
     }
 
     @Override
-    public void setHoldability(int holdability) throws SQLException {
-        // TODO
+    public void commit() throws SQLException {
+        try {
+            databaseProvider.commit(miniSession);
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
     }
 
     @Override
-    public int getHoldability() throws SQLException {
-        return 0; // TODO
-    }
-
-    @Override
-    public void setTransactionIsolation(int level) throws SQLException {
-        // TODO
-    }
-
-    @Override
-    public int getTransactionIsolation() throws SQLException {
-        return 0; // TODO
+    public void rollback() throws SQLException {
+        try {
+            databaseProvider.rollback(miniSession);
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
     }
 
     @Override
     public Savepoint setSavepoint() throws SQLException {
-        return null; // TODO
+        try {
+            return new MiniJdbcSavepoint(databaseProvider.setSavepoint(miniSession));
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
+    }
+
+    @Override
+    public Savepoint setSavepoint(String name) throws SQLException {
+        try {
+            databaseProvider.setSavepoint(miniSession, name);
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
+        return new MiniJdbcSavepoint(name);
+    }
+
+    @Override
+    public void rollback(Savepoint savepoint) throws SQLException {
+        try {
+            if (((MiniJdbcSavepoint) savepoint).isNamed()) {
+                databaseProvider.rollbackToSavepoint(miniSession, savepoint.getSavepointName());
+            } else {
+                databaseProvider.rollbackToSavepoint(miniSession, savepoint.getSavepointId());
+            }
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
+    }
+
+    @Override
+    public void releaseSavepoint(Savepoint savepoint) throws SQLException {
+        try {
+            if (((MiniJdbcSavepoint) savepoint).isNamed()) {
+                databaseProvider.releaseSavepoint(miniSession, savepoint.getSavepointName());
+            } else {
+                databaseProvider.releaseSavepoint(miniSession, savepoint.getSavepointId());
+            }
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
+    }
+
+    @Override
+    public void setHoldability(int holdability) throws SQLException {
+        // not supported
+    }
+
+    @Override
+    public int getHoldability() throws SQLException {
+        return ResultSet.HOLD_CURSORS_OVER_COMMIT;
+    }
+
+    @Override
+    public void setTransactionIsolation(int level) throws SQLException {
+        try {
+            databaseProvider.setTransactionIsolationLevel(
+                    miniSession,
+                    Objects.requireNonNull(TRANSACTION_ISOLATION_LEVEL_MAP.get(level)));
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
+    }
+
+    @Override
+    public int getTransactionIsolation() throws SQLException {
+        TransactionIsolationLevel levelObject;
+        try {
+            levelObject = databaseProvider.getTransactionIsolationLevel(miniSession);
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
+        return TRANSACTION_ISOLATION_LEVEL_MAP.entrySet().stream() // NOSONAR: NoSuchElementException is OK
+                .filter(e -> e.getValue() == levelObject)
+                .map(Map.Entry::getKey)
+                .findAny()
+                .get();
     }
 
     // [end]

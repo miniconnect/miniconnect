@@ -7,6 +7,7 @@ import java.sql.Statement;
 
 import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniResult;
+import hu.webarticum.miniconnect.impl.result.StoredResultSet;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 
 public abstract class AbstractJdbcStatement implements Statement {
@@ -49,7 +50,7 @@ public abstract class AbstractJdbcStatement implements Statement {
 
     @Override
     public void setEscapeProcessing(boolean enable) throws SQLException {
-        this.escapeProcessing = enable;
+        this.escapeProcessing = enable; // TODO: should be used in nativeSQL()
     }
 
     public boolean getEscapeProcessing() {
@@ -88,7 +89,7 @@ public abstract class AbstractJdbcStatement implements Statement {
 
     @Override
     public int getUpdateCount() throws SQLException {
-        return 0; // TODO
+        return -1; // TODO: currently not supported
     }
 
     @Override
@@ -103,7 +104,7 @@ public abstract class AbstractJdbcStatement implements Statement {
 
     @Override
     public void setCursorName(String name) throws SQLException {
-        // TODO
+        // not supported
     }
 
     @Override
@@ -155,7 +156,7 @@ public abstract class AbstractJdbcStatement implements Statement {
 
     @Override
     public ResultSet getGeneratedKeys() throws SQLException {
-        return null; // TODO
+        return new MiniJdbcResultSet(this, new StoredResultSet()); // TODO: currently not supported
     }
 
     @Override

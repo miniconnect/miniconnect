@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.jdbc;
+package hu.webarticum.miniconnect.jdbc.provider;
 
 public class ParameterDefinition {
 

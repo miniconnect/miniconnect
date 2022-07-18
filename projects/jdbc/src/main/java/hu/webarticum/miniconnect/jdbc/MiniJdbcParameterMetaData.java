@@ -5,6 +5,7 @@ import java.sql.ParameterMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import hu.webarticum.miniconnect.jdbc.provider.ParameterDefinition;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 
 public class MiniJdbcParameterMetaData implements ParameterMetaData {
