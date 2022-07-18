@@ -130,7 +130,10 @@ public class MiniJdbcStatement extends AbstractJdbcStatement {
         closed = true;
         getConnection().unregisterActiveStatement(this);
         try {
-            getResultSet().close();
+            ResultSet resultSet = getResultSet();
+            if (resultSet != null) {
+                resultSet.close();
+            }
         } catch (SQLException e) {
             throw e;
         } catch (Exception e) {

@@ -523,7 +523,10 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
         }
         Exception resultSetCloseException = null;
         try {
-            getResultSet().close();
+            ResultSet resultSet = getResultSet();
+            if (resultSet != null) {
+                resultSet.close();
+            }
         } catch (Exception e) {
             resultSetCloseException = e;
         }
