@@ -1,8 +1,10 @@
 package hu.webarticum.miniconnect.jdbc.provider.h2;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -13,9 +15,13 @@ import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.jdbc.provider.DatabaseProvider;
 import hu.webarticum.miniconnect.jdbc.provider.ParameterValue;
 import hu.webarticum.miniconnect.jdbc.provider.TransactionIsolationLevel;
+import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.record.ResultRecord;
 import hu.webarticum.miniconnect.record.ResultTable;
 
 public class H2DatabaseProvider implements DatabaseProvider {
+    
+    private static final String DATABASE_PRODUCT_NAME = "H2";
     
     private static final String SAVEPOINT_PREFIX = "MINICONNECT_H2_SAVEPOINT_";
     
@@ -34,10 +40,50 @@ public class H2DatabaseProvider implements DatabaseProvider {
     static {
         ADDITIONAL_TRANSACTION_ISOLATION_LEVELS.put("SNAPSHOT", TransactionIsolationLevel.READ_COMMITTED);
     }
-    
+
+
+    @Override
+    public String getDatabaseProductName(MiniSession session) {
+        return DATABASE_PRODUCT_NAME;
+    }
+
+    @Override
+    public String getDatabaseFullVersion(MiniSession session) {
+        String sql = "SELECT H2VERSION()";
+        return extractSingleField(checkResult(session.execute(sql)), String.class);
+    }
+
+    @Override
+    public int getDatabaseMajorVersion(MiniSession session) {
+        String fullVersion = getDatabaseFullVersion(session);
+        String[] tokens = fullVersion.split(".");
+        try {
+            return Integer.parseInt(tokens[0]);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    @Override
+    public int getDatabaseMinorVersion(MiniSession session) {
+        String fullVersion = getDatabaseFullVersion(session);
+        String[] tokens = fullVersion.split(".");
+        try {
+            return Integer.parseInt(tokens[1]);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    @Override
+    public String getUser(MiniSession session) {
+        String sql = "SELECT CURRENT_USER()";
+        return extractSingleField(checkResult(session.execute(sql)), String.class);
+    }
+
     @Override
     public boolean isReadOnly(MiniSession session) {
-        String sql = "CALL READONLY()";
+        String sql = "SELECT READONLY()";
         return extractSingleField(checkResult(session.execute(sql)), Boolean.class);
     }
 
@@ -53,6 +99,13 @@ public class H2DatabaseProvider implements DatabaseProvider {
     public String getSchema(MiniSession session) {
         String sql = "SELECT CURRENT_SCHEMA";
         return extractSingleField(checkResult(session.execute(sql)), String.class);
+    }
+
+    @Override
+    public ImmutableList<String> getSchemas(MiniSession session) {
+        String sql = "SHOW SCHEMAS";
+        return extractSingleColumn(checkResult(session.execute(sql)), String.class);
+        
     }
 
     @Override
@@ -163,7 +216,12 @@ public class H2DatabaseProvider implements DatabaseProvider {
                 .findAny()
                 .get();
     }
-    
+
+    @Override
+    public boolean isTransactionIsolationLevelSupported(MiniSession session, TransactionIsolationLevel level) {
+        return true;
+    }
+
     @Override
     public H2PreparedStatementProvider prepareStatement(MiniSession session, String sql) {
         return new H2PreparedStatementProvider(this, session, sql);
@@ -204,6 +262,18 @@ public class H2DatabaseProvider implements DatabaseProvider {
             ResultTable resultTable = new ResultTable(resultSet);
             return resultTable.iterator().next().get(0).as(clazz);
         }
+    }
+
+    private <T> ImmutableList<T> extractSingleColumn(MiniResult result, Class<T> clazz) {
+        List<T> resultBuilder = new ArrayList<>();
+        try (MiniResultSet resultSet = result.resultSet()) {
+            ResultTable resultTable = new ResultTable(resultSet);
+            for (ResultRecord resultRecord : resultTable) {
+                T value = resultRecord.get(0).as(clazz);
+                resultBuilder.add(value);
+            }
+        }
+        return ImmutableList.fromCollection(resultBuilder);
     }
 
 }

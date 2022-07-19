@@ -46,6 +46,8 @@ public class MiniJdbcConnection implements Connection {
     
     private final DatabaseProvider databaseProvider;
     
+    private final String connectionUrl;
+    
     private final MiniJdbcDatabaseMetaData metaData;
     
     private final Map<String, String> clientInfo = Collections.synchronizedMap(new HashMap<>());
@@ -58,10 +60,15 @@ public class MiniJdbcConnection implements Connection {
     
     private final CopyOnWriteArrayList<Statement> activeStatements = new CopyOnWriteArrayList<>();
     
-    
+
     public MiniJdbcConnection(MiniSession session, DatabaseProvider databaseProvider) {
+        this(session, databaseProvider, null);
+    }
+    
+    public MiniJdbcConnection(MiniSession session, DatabaseProvider databaseProvider, String connectionUrl) {
         this.miniSession = session;
         this.databaseProvider = databaseProvider;
+        this.connectionUrl = connectionUrl;
         this.metaData = new MiniJdbcDatabaseMetaData(this);
     }
 
@@ -72,6 +79,10 @@ public class MiniJdbcConnection implements Connection {
     
     public MiniSession getMiniSession() {
         return miniSession;
+    }
+
+    public String getConnectionUrl() {
+        return connectionUrl;
     }
 
     public DatabaseProvider getDatabaseProvider() {
@@ -479,6 +490,12 @@ public class MiniJdbcConnection implements Connection {
                 .map(Map.Entry::getKey)
                 .findAny()
                 .get();
+    }
+
+    public boolean supportsTransactionIsolationLevel(int level) throws SQLException {
+        return databaseProvider.isTransactionIsolationLevelSupported(
+                miniSession,
+                TRANSACTION_ISOLATION_LEVEL_MAP.get(level));
     }
 
     // [end]

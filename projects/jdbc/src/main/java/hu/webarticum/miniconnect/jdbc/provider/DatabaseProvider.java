@@ -1,13 +1,26 @@
 package hu.webarticum.miniconnect.jdbc.provider;
 
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.lang.ImmutableList;
 
 public interface DatabaseProvider {
+
+    public String getDatabaseProductName(MiniSession session);
+
+    public String getDatabaseFullVersion(MiniSession session);
+    
+    public int getDatabaseMajorVersion(MiniSession session);
+
+    public int getDatabaseMinorVersion(MiniSession session);
+
+    public String getUser(MiniSession session);
 
     public boolean isReadOnly(MiniSession session);
 
     public void setReadOnly(MiniSession session, boolean readOnly);
-    
+
+    public ImmutableList<String> getSchemas(MiniSession session);
+
     public String getSchema(MiniSession session);
 
     public void setSchema(MiniSession session, String schemaName);
@@ -41,7 +54,9 @@ public interface DatabaseProvider {
     public void setTransactionIsolationLevel(MiniSession session, TransactionIsolationLevel level);
 
     public TransactionIsolationLevel getTransactionIsolationLevel(MiniSession session);
-    
+
+    public boolean isTransactionIsolationLevelSupported(MiniSession session, TransactionIsolationLevel level);
+
     public PreparedStatementProvider prepareStatement(MiniSession session, String sql);
 
     public String quoteString(String text);
