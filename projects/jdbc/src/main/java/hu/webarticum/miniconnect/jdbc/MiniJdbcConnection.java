@@ -66,6 +66,11 @@ public class MiniJdbcConnection implements Connection {
     }
     
     public MiniJdbcConnection(MiniSession session, DatabaseProvider databaseProvider, String connectionUrl) {
+        this(session, databaseProvider, connectionUrl, () -> {});
+    }
+
+    public MiniJdbcConnection(
+            MiniSession session, DatabaseProvider databaseProvider, String connectionUrl, Runnable closeCallback) {
         this.miniSession = session;
         this.databaseProvider = databaseProvider;
         this.connectionUrl = connectionUrl;

@@ -9,7 +9,6 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import hu.webarticum.miniconnect.api.MiniSession;
-import hu.webarticum.miniconnect.api.MiniSessionManager;
 import hu.webarticum.miniconnect.jdbc.provider.DatabaseProvider;
 import hu.webarticum.miniconnect.jdbc.provider.h2.H2DatabaseProvider;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
@@ -77,11 +76,12 @@ public class MiniJdbcDriver implements Driver {
         ImmutableMap<String, String> properties = urlInfo.properties();
         String schema = urlInfo.schema();
         
-        MiniSession session = createRemoteSession(urlInfo.host(), urlInfo.port());
+        ClientMessenger clientMessenger = new ClientMessenger(urlInfo.host(), urlInfo.port());
+        MiniSession session = new MessengerSessionManager(clientMessenger).openSession();
         String providerName = properties.getOrDefault(PROPERTY_PROVIDER, PROVIDER_H2);
         DatabaseProvider databaseProvider = createProviderFor(providerName);
             
-        Connection connection = new MiniJdbcConnection(session, databaseProvider);
+        Connection connection = new MiniJdbcConnection(session, databaseProvider, url, clientMessenger::close);
         if (schema != null) {
             try {
                 connection.setSchema(schema);
@@ -92,12 +92,6 @@ public class MiniJdbcDriver implements Driver {
         }
         
         return connection;
-    }
-    
-    private MiniSession createRemoteSession(String host, int port) {
-        ClientMessenger clientMessenger = new ClientMessenger(host, port); // FIXME: close?
-        MiniSessionManager sessionManager = new MessengerSessionManager(clientMessenger);
-        return sessionManager.openSession();
     }
     
     private DatabaseProvider createProviderFor(String providerName) {
