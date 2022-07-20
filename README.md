@@ -26,7 +26,7 @@ And there are some related repositories:
 
 | Repository | Description |
 | ---------- | ----------- |
-| [HoloDB](https://github.com/davidsusu/holodb) | Holographical database engine |
+| [HoloDB](https://github.com/miniconnect/holodb) | Holographical database engine |
 | MiniBase | RDBMS framework built over MiniConnect (:zzz: planned) |
 
 From a user perspective, the session API is the most interesting.
