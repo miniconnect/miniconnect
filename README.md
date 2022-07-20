@@ -16,7 +16,7 @@ It consists of several separated components:
 | :electric_plug: `jdbc-adapter` | MiniConnect implementation backed by JDBC |
 | :books: `lang` | Essential value types |
 | :envelope: `messenger` | Default solution for messaging with message definitions |
-| :building_construction: `rdbms-framework` | Framework for building database engines |
+| :building_construction: `rdbms-framework` | Incubator for MiniBase (see above) |
 | :fast_forward: `record` | Easy-to-use wrapper for result sets |
 | :repeat: `repl` | MiniConnect REPL |
 | :postbox: `rest` | Simple REST service for MiniConnect |
@@ -29,9 +29,9 @@ And there are some related repositories:
 | Repository | Description |
 | ---------- | ----------- |
 | [HoloDB](https://github.com/davidsusu/holodb) | Holographical database engine |
-| HoloDB value sets | Useful value sets for HoloDB (:zzz: planned) |
+| MiniBase | RDBMS framework built over MiniConnect (:zzz: planned) |
 
-From a user perspective, the session API is most interesting.
+From a user perspective, the session API is the most interesting.
 
 ## Session API usage
 
@@ -76,7 +76,7 @@ a MiniConnect driver (or even a complete database engine).
 
 There are built-in JDBC->MiniConnect and MiniConnect->JDBC bridges,
 so any tool that understands JDBC (e. g. Hibernate) can use your MiniConnect driver,
-and, vica versa, any JDBC connection can be used via MiniConnect.
+and vica versa: any JDBC connection can be used via MiniConnect.
 
 Using a MiniConnect session via JDBC:
 
