@@ -8,6 +8,14 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.api.MiniSessionManager;
+import hu.webarticum.miniconnect.jdbc.provider.DatabaseProvider;
+import hu.webarticum.miniconnect.jdbc.provider.h2.H2DatabaseProvider;
+import hu.webarticum.miniconnect.lang.ImmutableMap;
+import hu.webarticum.miniconnect.messenger.adapter.MessengerSessionManager;
+import hu.webarticum.miniconnect.server.ClientMessenger;
+
 public class MiniJdbcDriver implements Driver {
 
     public static final int JDBC_MAJOR_VERSION = 4;
@@ -21,6 +29,16 @@ public class MiniJdbcDriver implements Driver {
     public static final int DRIVER_MINOR_VERSION = 1;
     
     public static final String DRIVER_VERSION = DRIVER_MAJOR_VERSION + "." + DRIVER_MINOR_VERSION;
+    
+    public static final String PROPERTY_USER = "user";
+    
+    public static final String PROPERTY_PASSSWORD = "password";
+    
+    public static final String PROPERTY_PROVIDER = "provider";
+    
+    public static final String PROVIDER_MINIBASE = "minibase";
+    
+    public static final String PROVIDER_H2 = "h2";
     
     
     @Override
@@ -56,11 +74,44 @@ public class MiniJdbcDriver implements Driver {
     @Override
     public Connection connect(String url, Properties info) throws SQLException {
         ConnectionUrlInfo urlInfo = ConnectionUrlInfo.parse(url, info);
+        ImmutableMap<String, String> properties = urlInfo.properties();
+        String schema = urlInfo.schema();
         
-        // TODO
+        MiniSession session = createRemoteSession(urlInfo.host(), urlInfo.port());
+        String providerName = properties.getOrDefault(PROPERTY_PROVIDER, PROVIDER_H2);
+        DatabaseProvider databaseProvider = createProviderFor(providerName);
+            
+        Connection connection = new MiniJdbcConnection(session, databaseProvider);
+        if (schema != null) {
+            try {
+                connection.setSchema(schema);
+            } catch (Exception e) {
+                connection.close();
+                throw e;
+            }
+        }
         
-        throw new UnsupportedOperationException("not implemented yet, urlInfo: " + urlInfo);
-        
+        return connection;
+    }
+    
+    private MiniSession createRemoteSession(String host, int port) {
+        ClientMessenger clientMessenger = new ClientMessenger(host, port); // FIXME: close?
+        MiniSessionManager sessionManager = new MessengerSessionManager(clientMessenger);
+        return sessionManager.openSession();
+    }
+    
+    private DatabaseProvider createProviderFor(String providerName) {
+        // FIXME
+        if (providerName.equals(PROVIDER_MINIBASE)) {
+            
+            // TODO
+            throw new UnsupportedOperationException("Not implemented yet");
+            
+        } else if (providerName.equals(PROVIDER_H2)) {
+            return new H2DatabaseProvider();
+        } else {
+            throw new IllegalArgumentException("Unsupported provider name: " + providerName);
+        }
     }
 
 }
