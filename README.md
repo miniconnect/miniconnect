@@ -2,8 +2,6 @@
 
 Minimalistic database API and JDBC bridge.
 
-> :construction: This project is in an incubating state. See [TODOs](./TODO.md).
-
 ## Overview of subprojects
 
 It consists of several separated components:
