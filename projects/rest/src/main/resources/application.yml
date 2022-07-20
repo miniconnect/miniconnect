@@ -1,6 +1,6 @@
 micronaut:
   application:
-    name: demo
+    name: miniconnect-rest
 netty:
   default:
     allocator:

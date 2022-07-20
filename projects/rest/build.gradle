@@ -35,6 +35,7 @@ application {
 
 graalvmNative.toolchainDetection = false
 micronaut {
+    version '3.2.2'
     runtime("netty")
     testRuntime("junit5")
     processing {
