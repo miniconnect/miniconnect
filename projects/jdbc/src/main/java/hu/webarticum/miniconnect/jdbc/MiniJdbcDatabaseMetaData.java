@@ -17,19 +17,6 @@ import hu.webarticum.miniconnect.record.translator.StringTranslator;
 
 public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
     
-    private static final int JDBC_MAJOR_VERSION = 4;
-    
-    private static final int JDBC_MINOR_VERSION = 2;
-    
-    private static final String DRIVER_NAME = "MiniConnect JDBC";
-    
-    private static final int DRIVER_MAJOR_VERSION = 0;
-    
-    private static final int DRIVER_MINOR_VERSION = 1;
-    
-    private static final String DRIVER_VERSION = DRIVER_MAJOR_VERSION + "." + DRIVER_MINOR_VERSION;
-    
-    
     private final MiniJdbcConnection connection;
     
 
@@ -65,32 +52,32 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
     
     @Override
     public int getJDBCMajorVersion() throws SQLException {
-        return JDBC_MAJOR_VERSION;
+        return MiniJdbcDriver.JDBC_MAJOR_VERSION;
     }
 
     @Override
     public int getJDBCMinorVersion() throws SQLException {
-        return JDBC_MINOR_VERSION;
+        return MiniJdbcDriver.JDBC_MINOR_VERSION;
     }
 
     @Override
     public String getDriverName() throws SQLException {
-        return DRIVER_NAME;
+        return MiniJdbcDriver.DRIVER_NAME;
     }
 
     @Override
     public String getDriverVersion() throws SQLException {
-        return DRIVER_VERSION;
+        return MiniJdbcDriver.DRIVER_VERSION;
     }
 
     @Override
     public int getDriverMajorVersion() {
-        return DRIVER_MAJOR_VERSION;
+        return MiniJdbcDriver.DRIVER_MAJOR_VERSION;
     }
 
     @Override
     public int getDriverMinorVersion() {
-        return DRIVER_MINOR_VERSION;
+        return MiniJdbcDriver.DRIVER_MINOR_VERSION;
     }
     
     // [end]
