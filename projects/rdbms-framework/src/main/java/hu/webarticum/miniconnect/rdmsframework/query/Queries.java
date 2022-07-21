@@ -6,6 +6,10 @@ public interface Queries {
         return SelectQuery.builder();
     }
 
+    public static SpecialSelectQuery.SpecialSelectQueryBuilder specialSelect() {
+        return SpecialSelectQuery.builder();
+    }
+
     public static InsertQuery.InsertQueryBuilder insert() {
         return InsertQuery.builder();
     }

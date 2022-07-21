@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.jdbc.provider.h2;
+package hu.webarticum.miniconnect.jdbc.provider.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.jdbc.provider.DatabaseProvider;
 import hu.webarticum.miniconnect.jdbc.provider.ParameterDefinition;
 import hu.webarticum.miniconnect.jdbc.provider.ParameterValue;
 import hu.webarticum.miniconnect.jdbc.provider.PreparedStatementProvider;
@@ -15,7 +16,7 @@ import hu.webarticum.regexbee.Bee;
 import hu.webarticum.regexbee.BeeFragment;
 import hu.webarticum.regexbee.common.StringLiteralFragment;
 
-public class H2PreparedStatementProvider implements PreparedStatementProvider {
+public class BlanketFakePreparedStatementProvider implements PreparedStatementProvider {
     
     private static final BeeFragment SINGLE_QUOTED_FRAGMENT = StringLiteralFragment.builder()
             .withDelimiter("'")
@@ -40,7 +41,7 @@ public class H2PreparedStatementProvider implements PreparedStatementProvider {
             .toPattern();
     
     
-    private final H2DatabaseProvider databaseProvider;
+    private final DatabaseProvider databaseProvider;
 
     private final MiniSession session;
     
@@ -49,8 +50,8 @@ public class H2PreparedStatementProvider implements PreparedStatementProvider {
     private final ImmutableList<ParameterDefinition> parameters;
     
     
-    public H2PreparedStatementProvider(
-            H2DatabaseProvider databaseProvider, MiniSession session, String sql) {
+    public BlanketFakePreparedStatementProvider(
+            DatabaseProvider databaseProvider, MiniSession session, String sql) {
         this.databaseProvider = databaseProvider;
         this.session = session;
         this.sqlParts = compileSql(sql);

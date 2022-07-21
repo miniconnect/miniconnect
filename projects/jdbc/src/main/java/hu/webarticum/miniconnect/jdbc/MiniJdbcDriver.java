@@ -10,7 +10,8 @@ import java.util.logging.Logger;
 
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.jdbc.provider.DatabaseProvider;
-import hu.webarticum.miniconnect.jdbc.provider.h2.H2DatabaseProvider;
+import hu.webarticum.miniconnect.jdbc.provider.impl.BlanketDatabaseProvider;
+import hu.webarticum.miniconnect.jdbc.provider.impl.H2DatabaseProvider;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.messenger.adapter.MessengerSessionManager;
 import hu.webarticum.miniconnect.server.ClientMessenger;
@@ -35,7 +36,7 @@ public class MiniJdbcDriver implements Driver {
     
     public static final String PROPERTY_PROVIDER = "provider";
     
-    public static final String PROVIDER_MINIBASE = "minibase";
+    public static final String PROVIDER_BLANKET = "blanket";
     
     public static final String PROVIDER_H2 = "h2";
     
@@ -78,9 +79,9 @@ public class MiniJdbcDriver implements Driver {
         
         ClientMessenger clientMessenger = new ClientMessenger(urlInfo.host(), urlInfo.port());
         MiniSession session = new MessengerSessionManager(clientMessenger).openSession();
-        String providerName = properties.getOrDefault(PROPERTY_PROVIDER, PROVIDER_H2);
+        String providerName = properties.getOrDefault(PROPERTY_PROVIDER, PROVIDER_BLANKET);
         DatabaseProvider databaseProvider = createProviderFor(providerName);
-            
+        
         Connection connection = new MiniJdbcConnection(session, databaseProvider, url, clientMessenger::close);
         if (schema != null) {
             try {
@@ -95,12 +96,8 @@ public class MiniJdbcDriver implements Driver {
     }
     
     private DatabaseProvider createProviderFor(String providerName) {
-        // FIXME
-        if (providerName.equals(PROVIDER_MINIBASE)) {
-            
-            // TODO
-            throw new UnsupportedOperationException("Not implemented yet");
-            
+        if (providerName.equals(PROVIDER_BLANKET)) {
+            return new BlanketDatabaseProvider();
         } else if (providerName.equals(PROVIDER_H2)) {
             return new H2DatabaseProvider();
         } else {

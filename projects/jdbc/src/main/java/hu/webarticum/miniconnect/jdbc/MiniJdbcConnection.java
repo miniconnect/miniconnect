@@ -473,6 +473,10 @@ public class MiniJdbcConnection implements Connection {
 
     @Override
     public void setTransactionIsolation(int level) throws SQLException {
+        if (level == -1) {
+            return;
+        }
+        
         try {
             databaseProvider.setTransactionIsolationLevel(
                     miniSession,

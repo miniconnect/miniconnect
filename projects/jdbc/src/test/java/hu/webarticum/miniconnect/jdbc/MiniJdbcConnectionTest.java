@@ -28,7 +28,7 @@ import hu.webarticum.miniconnect.impl.result.StoredResult;
 import hu.webarticum.miniconnect.impl.result.StoredResultSetData;
 import hu.webarticum.miniconnect.impl.result.StoredValue;
 import hu.webarticum.miniconnect.impl.result.StoredValueDefinition;
-import hu.webarticum.miniconnect.jdbc.provider.h2.H2DatabaseProvider;
+import hu.webarticum.miniconnect.jdbc.provider.impl.H2DatabaseProvider;
 import hu.webarticum.miniconnect.jdbcadapter.JdbcAdapterSession;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.record.type.StandardValueType;

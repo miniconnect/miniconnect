@@ -6,6 +6,7 @@ package hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar;
 
 sqlQuery: (
     selectQuery |
+    specialSelectQuery |
     updateQuery |
     insertQuery |
     deleteQuery |
@@ -16,7 +17,7 @@ sqlQuery: (
 
 selectQuery: (
     SELECT selectPart
-    FROM ( schemaName '.' )? tableName
+    FROM ( schemaName '.' )? tableName ( AS? tableAlias=identifier )? // currently table alias is ignored
     wherePart?
     orderByPart?
     limitPart?
@@ -24,8 +25,12 @@ selectQuery: (
 
 selectPart: selectItems | '*';
 selectItems: selectItem ( ',' selectItem )*;
-selectItem: fieldName ( AS? alias=identifier )?;
+selectItem: ( tableName '.' )? fieldName ( AS? alias=identifier )?; // currently tableName is ignored
 limitPart: LIMIT LIT_INTEGER;
+
+specialSelectQuery: ( SELECT | SHOW ) specialSelectable ( AS? alias=identifier )?;
+specialSelectable: specialSelectableName ( parentheses )?;
+specialSelectableName: CURRENT_USER | CURRENT_SCHEMA | CURRENT_CATALOG | READONLY | AUTOCOMMIT;
 
 updateQuery: UPDATE ( schemaName '.' )? tableName updatePart wherePart?;
 updatePart: SET updateItem ( ',' updateItem )*;
@@ -57,6 +62,7 @@ nullableValue: value | NULL;
 value: LIT_STRING | LIT_INTEGER;
 likePart: LIKE LIT_STRING;
 schemaName: identifier;
+parentheses: PAR_START PAR_END;
 
 SELECT: S E L E C T;
 INSERT: I N S E R T;
@@ -64,6 +70,12 @@ UPDATE: U P D A T E;
 DELETE: D E L E T E;
 SHOW: S H O W;
 USE: U S E;
+
+CURRENT_USER: C U R R E N T UNDERSCORE U S E R;
+CURRENT_SCHEMA: C U R R E N T UNDERSCORE S C H E M A;
+CURRENT_CATALOG: C U R R E N T UNDERSCORE C A T A L O G;
+READONLY: R E A D O N L Y;
+AUTOCOMMIT: A U T O C O M M I T;
 
 AS: A S;
 FROM: F R O M;
@@ -92,7 +104,12 @@ BACKTICKEDNAME: '`' ( '``' | ~[`] )* '`';
 LIT_STRING: '\'' ( '\\' . | '\'\'' | ~[\\'] )* '\'';
 LIT_INTEGER: '-'? [0-9]+;
 
+PAR_START: '(';
+PAR_END: ')';
+
 WHITESPACE: [ \n\t\r] -> skip;
+
+fragment UNDERSCORE: [_];
 
 fragment A: [Aa];
 fragment B: [Bb];

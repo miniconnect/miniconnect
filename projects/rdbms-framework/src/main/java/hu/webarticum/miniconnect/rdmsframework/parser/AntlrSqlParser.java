@@ -20,6 +20,8 @@ import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.ShowSchemasQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.ShowTablesQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.SpecialCondition;
+import hu.webarticum.miniconnect.rdmsframework.query.SpecialSelectQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.SpecialSelectQueryType;
 import hu.webarticum.miniconnect.rdmsframework.query.SqlUtil;
 import hu.webarticum.miniconnect.rdmsframework.query.UpdateQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.UseQuery;
@@ -43,6 +45,8 @@ import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParse
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ShowSchemasQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ShowTablesQueryContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SpecialSelectQueryContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SpecialSelectableNameContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SqlQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UpdateItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UpdatePartContext;
@@ -69,6 +73,11 @@ public class AntlrSqlParser implements SqlParser {
         SelectQueryContext selectQueryNode = rootNode.selectQuery();
         if (selectQueryNode != null) {
             return parseSelectNode(selectQueryNode);
+        }
+
+        SpecialSelectQueryContext specialSelectQueryNode = rootNode.specialSelectQuery();
+        if (specialSelectQueryNode != null) {
+            return parseSpecialSelectNode(specialSelectQueryNode);
         }
         
         InsertQueryContext insertQueryNode = rootNode.insertQuery();
@@ -129,6 +138,29 @@ public class AntlrSqlParser implements SqlParser {
                 .where(where)
                 .orderBy(orderBy)
                 .limit(limit)
+                .build();
+    }
+    
+    private SpecialSelectQuery parseSpecialSelectNode(SpecialSelectQueryContext specialSelectQueryNode) {
+        SpecialSelectableNameContext specialSelectableNameNode =
+                specialSelectQueryNode.specialSelectable().specialSelectableName();
+        SpecialSelectQueryType queryType;
+        if (specialSelectableNameNode.CURRENT_USER() != null) {
+            queryType = SpecialSelectQueryType.CURRENT_USER;
+        } else if (specialSelectableNameNode.CURRENT_SCHEMA() != null) {
+            queryType = SpecialSelectQueryType.CURRENT_SCHEMA;
+        } else if (specialSelectableNameNode.CURRENT_CATALOG() != null) {
+            queryType = SpecialSelectQueryType.CURRENT_CATALOG;
+        } else if (specialSelectableNameNode.READONLY() != null) {
+            queryType = SpecialSelectQueryType.READONLY;
+        } else if (specialSelectableNameNode.AUTOCOMMIT() != null) {
+            queryType = SpecialSelectQueryType.AUTOCOMMIT;
+        } else {
+            throw new IllegalArgumentException("Unknown selectable: " + specialSelectableNameNode.getText());
+        }
+        
+        return Queries.specialSelect()
+                .queryType(queryType)
                 .build();
     }
 

@@ -9,7 +9,6 @@ import java.time.LocalTime;
 import java.time.OffsetTime;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
