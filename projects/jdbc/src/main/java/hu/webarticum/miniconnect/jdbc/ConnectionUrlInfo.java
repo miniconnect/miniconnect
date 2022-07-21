@@ -14,7 +14,7 @@ import hu.webarticum.regexbee.BeeFragment;
 
 public class ConnectionUrlInfo {
     
-    public static final String URL_PREFIX = "jdbc:miniconnect:";
+    public static final String URL_PREFIX = "jdbc:miniconnect://";
     
     
     private static final String HOST_GROUPNAME = "host";
@@ -43,14 +43,13 @@ public class ConnectionUrlInfo {
     private static final Pattern URL_PATTERN = Bee
             .then(Bee.BEGIN)
             .then(Bee.fixed(URL_PREFIX))
-            .then(Bee.fixed("//")
-                    .then(Bee.checked("[^:/]+").as(HOST_GROUPNAME))
-                    .then(Bee.fixedChar(':')
-                            .then(Bee.UNSIGNED_INT.as(PORT_GROUPNAME)))
-                    .then(Bee.fixedChar('/')
-                            .then(Bee.checked("[^/\\?]+").as(SCHEMA_GROUPNAME))
-                            .then(Bee.fixedChar('/').optional())
-                            .optional()))
+            .then(Bee.checked("[^:/]+").as(HOST_GROUPNAME))
+            .then(Bee.fixedChar(':')
+                    .then(Bee.UNSIGNED_INT.as(PORT_GROUPNAME)))
+            .then(Bee.fixedChar('/')
+                    .then(Bee.checked("[^/\\?]+").as(SCHEMA_GROUPNAME))
+                    .then(Bee.fixedChar('/').optional())
+                    .optional())
             .then(Bee.fixedChar('?').then(
                     URL_PROPERTY_FRAGMENT
                             .then(Bee.fixedChar('&').then(URL_PROPERTY_FRAGMENT).any())
