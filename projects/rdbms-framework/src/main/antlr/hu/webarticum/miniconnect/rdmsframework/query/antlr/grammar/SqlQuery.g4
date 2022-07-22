@@ -17,7 +17,7 @@ sqlQuery: (
 
 selectQuery: (
     SELECT selectPart
-    FROM ( schemaName '.' )? tableName ( AS? tableAlias=identifier )? // currently table alias is ignored
+    FROM ( schemaName '.' )? tableName ( AS? tableAlias=identifier )?
     wherePart?
     orderByPart?
     limitPart?
@@ -25,7 +25,7 @@ selectQuery: (
 
 selectPart: selectItems | '*';
 selectItems: selectItem ( ',' selectItem )*;
-selectItem: ( tableName '.' )? fieldName ( AS? alias=identifier )?; // currently tableName is ignored
+selectItem: ( tableName '.' )? fieldName ( AS? alias=identifier )?;
 limitPart: LIMIT LIT_INTEGER;
 
 specialSelectQuery: ( SELECT | SHOW ) specialSelectable ( AS? alias=identifier )?;

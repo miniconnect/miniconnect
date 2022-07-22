@@ -48,6 +48,7 @@ import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParse
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SpecialSelectQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SpecialSelectableNameContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SqlQueryContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.TableNameContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UpdateItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UpdatePartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UpdateQueryContext;
@@ -115,13 +116,18 @@ public class AntlrSqlParser implements SqlParser {
 
     private SelectQuery parseSelectNode(SelectQueryContext selectQueryNode) {
         SelectPartContext selectPartNode = selectQueryNode.selectPart();
-        LinkedHashMap<String, String> fields = parseSelectPartNode(selectPartNode);
         SchemaNameContext schemaNameNode = selectQueryNode.schemaName();
         String schemaName = schemaNameNode != null ?
                 parseIdentifierNode(schemaNameNode.identifier()) :
                 null;
         IdentifierContext identifierNode = selectQueryNode.tableName().identifier();
         String tableName = parseIdentifierNode(identifierNode);
+        String tableAlias = tableName;
+        IdentifierContext aliasIdentifierNode = selectQueryNode.tableAlias;
+        if (aliasIdentifierNode != null) {
+            tableAlias = parseIdentifierNode(aliasIdentifierNode);
+        }
+        LinkedHashMap<String, String> fields = parseSelectPartNode(selectPartNode, tableAlias);
         WherePartContext wherePartNode = selectQueryNode.wherePart();
         LinkedHashMap<String, Object> where = parseWherePartNode(wherePartNode);
         OrderByPartContext orderByNode = selectQueryNode.orderByPart();
@@ -282,7 +288,7 @@ public class AntlrSqlParser implements SqlParser {
         return parseStringNode(likePartContext.LIT_STRING());
     }
 
-    private LinkedHashMap<String, String> parseSelectPartNode(SelectPartContext selectPartNode) {
+    private LinkedHashMap<String, String> parseSelectPartNode(SelectPartContext selectPartNode, String tableAlias) {
         LinkedHashMap<String, String> result = new LinkedHashMap<>();
         
         SelectItemsContext selectItemsNode = selectPartNode.selectItems();
@@ -292,6 +298,13 @@ public class AntlrSqlParser implements SqlParser {
         
         for (SelectItemContext selectItemNode : selectItemsNode.selectItem()) {
             String fieldName = parseIdentifierNode(selectItemNode.fieldName().identifier());
+            TableNameContext tableNameNode = selectItemNode.tableName();
+            if (tableNameNode != null) {
+                String fieldTableName = parseIdentifierNode(tableNameNode.identifier());
+                if (!fieldTableName.equals(tableAlias)) {
+                    throw new IllegalArgumentException("Unknown table: " + fieldTableName);
+                }
+            }
             String alias = selectItemNode.alias != null ?
                     selectItemNode.alias.getText() :
                     fieldName;
