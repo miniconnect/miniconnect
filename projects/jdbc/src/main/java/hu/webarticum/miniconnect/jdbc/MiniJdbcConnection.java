@@ -48,6 +48,8 @@ public class MiniJdbcConnection implements Connection {
     
     private final String connectionUrl;
     
+    private final Runnable closeCallback;
+    
     private final MiniJdbcDatabaseMetaData metaData;
     
     private final Map<String, String> clientInfo = Collections.synchronizedMap(new HashMap<>());
@@ -66,7 +68,7 @@ public class MiniJdbcConnection implements Connection {
     }
     
     public MiniJdbcConnection(MiniSession session, DatabaseProvider databaseProvider, String connectionUrl) {
-        this(session, databaseProvider, connectionUrl, () -> {});
+        this(session, databaseProvider, connectionUrl, null);
     }
 
     public MiniJdbcConnection(
@@ -74,6 +76,7 @@ public class MiniJdbcConnection implements Connection {
         this.miniSession = session;
         this.databaseProvider = databaseProvider;
         this.connectionUrl = connectionUrl;
+        this.closeCallback = closeCallback;
         this.metaData = new MiniJdbcDatabaseMetaData(this);
     }
 
@@ -531,6 +534,20 @@ public class MiniJdbcConnection implements Connection {
             miniSession.close();
         } catch (Exception e) {
             throw new SQLException(e);
+        } finally {
+            runCloseCallbackSilently();
+        }
+    }
+    
+    private void runCloseCallbackSilently() {
+        if (closeCallback == null) {
+            return;
+        }
+        
+        try {
+            closeCallback.run();
+        } catch (Exception e) {
+            // nothing to do
         }
     }
 
