@@ -5,11 +5,9 @@ import hu.webarticum.miniconnect.jdbc.provider.TransactionIsolationLevel;
 
 public class BlanketDatabaseProvider extends AbstractBlanketDatabaseProvider {
 
-    // FIXME / TODO: dirty temporary solution for easy dialect detection in hibernate
-    private static final String DATABASE_PRODUCT_NAME = "H2";
+    public static final String DATABASE_PRODUCT_NAME = "MINICONNECT-BLANKET";
 
-    // FIXME / TODO: dirty temporary solution for easy dialect detection in hibernate
-    private static final String DATABASE_FULL_VERSION = "1.4.200";
+    public static final String DATABASE_FULL_VERSION = "1.0.0";
     
 
     @Override

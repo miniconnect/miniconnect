@@ -4,6 +4,12 @@ plugins {
 
 description "JDBC driver backed by MiniConnect"
 
+java {
+    registerFeature('hibernateSupport') {
+        usingSourceSet(sourceSets.main)
+    }
+}
+
 dependencies {
     api project(':api')
     api project(':lang')
@@ -15,6 +21,8 @@ dependencies {
     implementation project(':util')
     implementation 'commons-io:commons-io:2.11.0'
     implementation 'hu.webarticum:regexbee:0.3.0'
+    
+    hibernateSupportImplementation 'org.hibernate:hibernate-core:5.4.31.Final'
     
     testImplementation project(':jdbc-adapter')
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
