@@ -2,11 +2,11 @@ package hu.webarticum.miniconnect.rdmsframework.query;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
@@ -149,15 +149,28 @@ public class TableQueryUtil {
         
         if (!unindexedColumnNames.isEmpty()) {
             for (String columnName : unindexedColumnNames) {
+                Column column = table.columns().get(columnName);
                 Object expectedValue = queryWhere.get(columnName);
                 Object actualValue = table.row(rowIndex).get(columnName);
-                if (!Objects.equals(actualValue, expectedValue)) {
+                if (!isValueMatching(expectedValue, actualValue, column)) {
                     return false;
                 }
             }
         }
         
         return true;
+    }
+    
+    private static boolean isValueMatching(Object expectedValue, Object actualValue, Column column) {
+        if (expectedValue == SpecialCondition.IS_NULL) {
+            return actualValue == null;
+        } else if (expectedValue == SpecialCondition.IS_NOT_NULL) {
+            return actualValue != null;
+        }
+        
+        @SuppressWarnings("unchecked")
+        Comparator<Object> comparator = (Comparator<Object>) column.definition().comparator();
+        return comparator.compare(actualValue, expectedValue) == 0;
     }
 
     public static Set<String> collectIndexes(
