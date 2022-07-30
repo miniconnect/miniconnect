@@ -25,7 +25,7 @@ selectQuery: (
 
 selectPart: selectItems | '*';
 selectItems: selectItem ( ',' selectItem )*;
-selectItem: ( tableName '.' )? fieldName ( AS? alias=identifier )?;
+selectItem: scopeableFieldName ( AS? alias=identifier )?;
 limitPart: LIMIT LIT_INTEGER;
 
 specialSelectQuery: ( SELECT | SHOW ) specialSelectable ( AS? alias=identifier )?;
@@ -49,12 +49,13 @@ showTablesQuery: SHOW TABLES ( FROM schemaName )? likePart?;
 useQuery: USE schemaName;
 
 wherePart: WHERE whereItem ( AND whereItem )*;
-whereItem: fieldName postfixCondition | '(' whereItem ')';
+whereItem: scopeableFieldName postfixCondition | '(' whereItem ')';
 postfixCondition: '=' value | isNull | isNotNull;
 isNull: IS NULL;
 isNotNull: IS NOT NULL;
 orderByPart: ORDER BY orderByItem ( ',' orderByItem )*;
-orderByItem: fieldName ( ASC | DESC )?;
+orderByItem: scopeableFieldName ( ASC | DESC )?;
+scopeableFieldName: ( tableName '.' )? fieldName;
 fieldName: identifier;
 tableName: identifier;
 identifier: SIMPLENAME | QUOTEDNAME | BACKTICKEDNAME;
