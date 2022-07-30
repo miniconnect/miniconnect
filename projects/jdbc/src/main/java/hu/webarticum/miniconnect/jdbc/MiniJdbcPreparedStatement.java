@@ -99,7 +99,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     @Override
     public int executeUpdate() throws SQLException {
         executeInternal();
-        return 0; // TODO
+        return 1; // FIXME / TODO: this is an ugly heuristic
     }
 
     @Override
