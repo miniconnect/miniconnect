@@ -638,7 +638,7 @@ public class MiniJdbcResultSet implements ResultSet {
         ResultField resultField = getResultField(columnIndex);
         Object value = resultField.get();
         
-        if (type.isAssignableFrom(value.getClass())) {
+        if (value == null || type.isAssignableFrom(value.getClass())) {
             return (T) value;
         }
         
