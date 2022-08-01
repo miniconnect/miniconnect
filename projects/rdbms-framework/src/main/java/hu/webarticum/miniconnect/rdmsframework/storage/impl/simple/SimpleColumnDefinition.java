@@ -7,9 +7,11 @@ import hu.webarticum.miniconnect.rdmsframework.util.ComparatorUtil;
 
 public class SimpleColumnDefinition implements ColumnDefinition {
     
+    private final Class<?> clazz;
+    
     private final boolean nullable;
     
-    private final Class<?> clazz;
+    private final boolean autoIncremented;
     
     private final Comparator<?> comparator;
     
@@ -23,12 +25,17 @@ public class SimpleColumnDefinition implements ColumnDefinition {
     }
     
     public SimpleColumnDefinition(Class<?> clazz, boolean nullable) {
-        this(clazz, nullable, null);
+        this(clazz, nullable, false);
+    }
+
+    public SimpleColumnDefinition(Class<?> clazz, boolean nullable, boolean autoIncremented) {
+        this(clazz, nullable, autoIncremented, null);
     }
     
-    public SimpleColumnDefinition(Class<?> clazz, boolean nullable, Comparator<?> comparator) {
+    public SimpleColumnDefinition(Class<?> clazz, boolean nullable, boolean autoIncremented, Comparator<?> comparator) {
         this.clazz = clazz;
         this.nullable = nullable;
+        this.autoIncremented = autoIncremented;
         this.comparator = comparator != null ? comparator : ComparatorUtil.createDefaultComparatorFor(clazz);
     }
     
@@ -41,6 +48,11 @@ public class SimpleColumnDefinition implements ColumnDefinition {
     @Override
     public boolean isNullable() {
         return nullable;
+    }
+    
+    @Override
+    public boolean isAutoIncremented() {
+        return autoIncremented;
     }
 
     @Override

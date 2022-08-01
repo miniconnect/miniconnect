@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
@@ -24,6 +25,7 @@ import hu.webarticum.miniconnect.record.converter.DefaultConverter;
 
 public class TableQueryUtil {
     
+    // TODO: move this to StorageAccess or similar place
     private static final DefaultConverter CONVERTER = new DefaultConverter();
     
 
@@ -220,6 +222,11 @@ public class TableQueryUtil {
         }
         return maxIndexColumnCount;
     }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T convert(Object source, Class<T> targetClazz) {
+        return (T) CONVERTER.convert(source, targetClazz);
+    }
     
     public static Map<String, Object> convertColumnValues(Table table, Map<String, Object> columnValues) {
         Map<String, Object> result = new LinkedHashMap<>();
@@ -230,7 +237,7 @@ public class TableQueryUtil {
             Object convertedValue = value;
             if (!(value instanceof SpecialCondition)) {
                 Class<?> columnClazz = columns.get(columnName).definition().clazz();
-                convertedValue = CONVERTER.convert(value, columnClazz);
+                convertedValue = convert(value, columnClazz);
             }
             result.put(columnName, convertedValue);
         }
@@ -242,6 +249,16 @@ public class TableQueryUtil {
         NamedResourceStore<Column> columns = table.columns();
         ImmutableList<String> columnNames = columns.names();
         return ImmutableMap.fromMap(columnValues).map(columnNames::indexOf, v -> v);
+    }
+
+    public static Optional<Column> getAutoIncrementedColumn(Table table) {
+        for (Column column : table.columns().resources()) {
+            if (column.definition().isAutoIncremented()) {
+                return Optional.of(column);
+            }
+        }
+        
+        return Optional.empty();
     }
     
 }

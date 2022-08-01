@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.hibernate.LockOptions;
 import org.hibernate.dialect.Dialect;
+import org.hibernate.dialect.identity.IdentityColumnSupport;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
 public class BlanketHibernateDialect extends Dialect {
@@ -19,5 +20,11 @@ public class BlanketHibernateDialect extends Dialect {
         // not supported
         return sql;
     }
+    
+    @Override
+    public IdentityColumnSupport getIdentityColumnSupport() {
+        return new BlanketIdentityColumnSupport();
+    }
+    
     
 }

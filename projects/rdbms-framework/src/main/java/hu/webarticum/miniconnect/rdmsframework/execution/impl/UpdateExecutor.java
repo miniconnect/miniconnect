@@ -3,6 +3,7 @@ package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.impl.result.StoredError;
@@ -14,6 +15,7 @@ import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.TableQueryUtil;
 import hu.webarticum.miniconnect.rdmsframework.query.UpdateQuery;
+import hu.webarticum.miniconnect.rdmsframework.storage.Column;
 import hu.webarticum.miniconnect.rdmsframework.storage.Schema;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
@@ -80,6 +82,16 @@ public class UpdateExecutor implements QueryExecutor {
         TablePatch patch = patchBuilder.build();
 
         table.applyPatch(patch);
+
+        Optional<Column> autoIncrementedColumnHolder = TableQueryUtil.getAutoIncrementedColumn(table);
+        if (autoIncrementedColumnHolder.isPresent()) {
+            String columnName = autoIncrementedColumnHolder.get().name();
+            if (convertedQueryUpdates.containsKey(columnName)) {
+                Object value = convertedQueryUpdates.get(columnName);
+                BigInteger bigIntegerValue = TableQueryUtil.convert(value, BigInteger.class);
+                table.sequence().ensureGreaterThan(bigIntegerValue);
+            }
+        }
         
         return new StoredResult();
     }

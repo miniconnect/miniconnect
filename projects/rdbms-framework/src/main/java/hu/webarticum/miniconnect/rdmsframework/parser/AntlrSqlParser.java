@@ -162,6 +162,8 @@ public class AntlrSqlParser implements SqlParser {
             queryType = SpecialSelectQueryType.READONLY;
         } else if (specialSelectableNameNode.AUTOCOMMIT() != null) {
             queryType = SpecialSelectQueryType.AUTOCOMMIT;
+        } else if (specialSelectableNameNode.IDENTITY() != null || specialSelectableNameNode.LAST_INSERT_ID() != null) {
+            queryType = SpecialSelectQueryType.LAST_INSERT_ID;
         } else {
             throw new IllegalArgumentException("Unknown selectable: " + specialSelectableNameNode.getText());
         }

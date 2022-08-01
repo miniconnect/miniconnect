@@ -16,6 +16,7 @@ import hu.webarticum.miniconnect.rdmsframework.storage.Column;
 import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
 import hu.webarticum.miniconnect.rdmsframework.storage.Row;
+import hu.webarticum.miniconnect.rdmsframework.storage.Sequence;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TablePatch;
@@ -39,6 +40,8 @@ public class SimpleTable implements Table {
     private final SimpleColumnStore columnStore = new SimpleColumnStore();
     
     private final SimpleTableIndexStore tableIndexStore = new SimpleTableIndexStore();
+    
+    private final SimpleSequence sequence;
 
     
     private SimpleTable(SimpleTableBuilder builder) {
@@ -49,6 +52,16 @@ public class SimpleTable implements Table {
         this.indexNames = ImmutableList.fromCollection(builder.indexes.keySet());
         this.indexColumnNames = ImmutableMap.fromMap(builder.indexes);
         this.rows.addAll(builder.rows);
+        this.sequence = new SimpleSequence(calculateSequenceValue(builder.sequenceValue, builder.rows));
+    }
+    
+    private BigInteger calculateSequenceValue(BigInteger sequenceValue, List<ImmutableList<Object>> rows) {
+        if (sequenceValue != null) {
+            return sequenceValue;
+        }
+        
+        // FIXME: find max id + 1?
+        return BigInteger.valueOf(rows.size() + 1L);
     }
     
     public static SimpleTableBuilder builder() {
@@ -108,6 +121,11 @@ public class SimpleTable implements Table {
             int deletedRowIndex = deletionsIterator.next().intValueExact();
             rows.remove(deletedRowIndex);
         }
+    }
+    
+    @Override
+    public Sequence sequence() {
+        return sequence;
     }
 
     
@@ -179,6 +197,8 @@ public class SimpleTable implements Table {
         private Map<String, ImmutableList<String>> indexes = new LinkedHashMap<>();
         
         private final List<ImmutableList<Object>> rows = new ArrayList<>();
+
+        private BigInteger sequenceValue = null;
         
         
         public SimpleTableBuilder name(String name) {
@@ -243,6 +263,11 @@ public class SimpleTable implements Table {
 
         public SimpleTableBuilder addRow(Collection<Object> row) {
             this.rows.add(ImmutableList.fromCollection(row));
+            return this;
+        }
+
+        public SimpleTableBuilder sequenceValue(BigInteger sequenceValue) {
+            this.sequenceValue = sequenceValue;
             return this;
         }
 

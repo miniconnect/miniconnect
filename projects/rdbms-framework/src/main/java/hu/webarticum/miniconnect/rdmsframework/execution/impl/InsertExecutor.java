@@ -1,8 +1,10 @@
 package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.impl.result.StoredError;
@@ -15,6 +17,7 @@ import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.InsertQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.TableQueryUtil;
+import hu.webarticum.miniconnect.rdmsframework.storage.Column;
 import hu.webarticum.miniconnect.rdmsframework.storage.Schema;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
@@ -58,6 +61,14 @@ public class InsertExecutor implements QueryExecutor {
 
         Map<String, Object> insertValues = insertQuery.values();
 
+        Optional<Column> autoIncrementedColumnHolder = TableQueryUtil.getAutoIncrementedColumn(table);
+        if (autoIncrementedColumnHolder.isPresent()) {
+            String columName = autoIncrementedColumnHolder.get().name();
+            if (!insertValues.containsKey(columName)) {
+                insertValues.put(columName, null);
+            }
+        }
+        
         // FIXME: currently default values are not supported
         if (insertValues.size() != table.columns().names().size()) {
             return new StoredResult(new StoredError(
@@ -72,6 +83,20 @@ public class InsertExecutor implements QueryExecutor {
             return new StoredResult(new StoredError(3, "00003", e.getMessage()));
         }
 
+        BigInteger lastInsertId = null;
+        if (autoIncrementedColumnHolder.isPresent()) {
+            String columName = autoIncrementedColumnHolder.get().name();
+            Object autoIncrementColumnValue = insertValues.get(columName);
+            if (autoIncrementColumnValue == null) {
+                BigInteger autoValue = table.sequence().getAndIncrement();
+                insertValues.put(columName, autoValue);
+                lastInsertId = autoValue;
+            } else {
+                BigInteger bigIntegerValue = TableQueryUtil.convert(autoIncrementColumnValue, BigInteger.class);
+                table.sequence().ensureGreaterThan(bigIntegerValue);
+            }
+        }
+        
         Map<String, Object> convertedInsertValues =
                 TableQueryUtil.convertColumnValues(table, insertValues);
 
@@ -90,6 +115,10 @@ public class InsertExecutor implements QueryExecutor {
         TablePatch patch =  TablePatch.builder().insert(rowData).build();
         
         table.applyPatch(patch);
+        
+        if (lastInsertId != null) {
+            state.setLastInsertId(lastInsertId);
+        }
         
         return new StoredResult();
     }

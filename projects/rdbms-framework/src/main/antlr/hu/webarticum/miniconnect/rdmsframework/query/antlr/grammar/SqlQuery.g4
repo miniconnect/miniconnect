@@ -28,9 +28,16 @@ selectItems: selectItem ( ',' selectItem )*;
 selectItem: scopeableFieldName ( AS? alias=identifier )?;
 limitPart: LIMIT LIT_INTEGER;
 
-specialSelectQuery: ( SELECT | SHOW ) specialSelectable ( AS? alias=identifier )?;
+specialSelectQuery: ( SELECT | SHOW | CALL ) specialSelectable ( AS? alias=identifier )?;
 specialSelectable: specialSelectableName ( parentheses )?;
-specialSelectableName: CURRENT_USER | CURRENT_SCHEMA | CURRENT_CATALOG | READONLY | AUTOCOMMIT;
+specialSelectableName:
+    CURRENT_USER |
+    CURRENT_SCHEMA |
+    CURRENT_CATALOG |
+    READONLY |
+    AUTOCOMMIT |
+    IDENTITY |
+    LAST_INSERT_ID;
 
 updateQuery: UPDATE ( schemaName '.' )? tableName updatePart wherePart?;
 updatePart: SET updateItem ( ',' updateItem )*;
@@ -70,6 +77,7 @@ INSERT: I N S E R T;
 UPDATE: U P D A T E;
 DELETE: D E L E T E;
 SHOW: S H O W;
+CALL: C A L L;
 USE: U S E;
 
 CURRENT_USER: C U R R E N T UNDERSCORE U S E R;
@@ -77,6 +85,8 @@ CURRENT_SCHEMA: C U R R E N T UNDERSCORE S C H E M A;
 CURRENT_CATALOG: C U R R E N T UNDERSCORE C A T A L O G;
 READONLY: R E A D O N L Y;
 AUTOCOMMIT: A U T O C O M M I T;
+IDENTITY: I D E N T I T Y;
+LAST_INSERT_ID: L A S T UNDERSCORE I N S E R T UNDERSCORE I D;
 
 AS: A S;
 FROM: F R O M;

@@ -15,5 +15,7 @@ public interface Table extends NamedResource {
     public boolean isWritable();
 
     public void applyPatch(TablePatch patch);
+
+    public Sequence sequence();
     
 }

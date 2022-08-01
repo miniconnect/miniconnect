@@ -29,6 +29,7 @@ import hu.webarticum.miniconnect.rdmsframework.storage.Column;
 import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
 import hu.webarticum.miniconnect.rdmsframework.storage.Row;
+import hu.webarticum.miniconnect.rdmsframework.storage.Sequence;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TablePatch;
@@ -36,6 +37,7 @@ import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.MultiComparator;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleColumn;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleRow;
+import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleSequence;
 import hu.webarticum.miniconnect.rdmsframework.util.ComparatorUtil;
 import hu.webarticum.miniconnect.rdmsframework.util.SelectionPredicate;
 import hu.webarticum.miniconnect.util.ChainedIterator;
@@ -53,12 +55,15 @@ public class DiffTable extends AbstractTableDecorator {
     private final NavigableMap<BigInteger, ImmutableMap<Integer, Object>> updates = new TreeMap<>();
     
     private final NavigableSet<BigInteger> deletions = new TreeSet<>();
+    
+    private final SimpleSequence sequence;
 
     
     public DiffTable(Table baseTable) {
         super(baseTable);
         this.columnStore = new DiffTableColumnStore();
         this.indexStore = new DiffTableIndexStore();
+        this.sequence = new SimpleSequence(baseTable.sequence().get());
     }
 
 
@@ -207,6 +212,11 @@ public class DiffTable extends AbstractTableDecorator {
         Collection<BigInteger> subDeletions = deletions.subSet(BigInteger.ZERO, baseRowIndex);
         BigInteger deletionCount = BigInteger.valueOf(subDeletions.size());
         return baseRowIndex.subtract(deletionCount);
+    }
+    
+    @Override
+    public Sequence sequence() {
+        return sequence;
     }
     
     

@@ -1,17 +1,16 @@
 package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 
+import java.math.BigInteger;
 import java.util.Optional;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResult;
-import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.impl.result.StoredColumnHeader;
 import hu.webarticum.miniconnect.impl.result.StoredError;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
 import hu.webarticum.miniconnect.impl.result.StoredResultSetData;
-import hu.webarticum.miniconnect.impl.result.StoredValue;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
@@ -51,6 +50,8 @@ public class SpecialSelectExecutor implements QueryExecutor {
                 return createSingleValueResult(Boolean.class, "READONLY", false); // FIXME
             case AUTOCOMMIT:
                 return createSingleValueResult(Boolean.class, "AUTOCOMMIT", true);
+            case LAST_INSERT_ID:
+                return createSingleValueResult(BigInteger.class, "LAST_INSERT_ID", state.getLastInsertId());
             default:
                 return new StoredResult(new StoredError(42, "00042", "No luck, sorry"));
         }

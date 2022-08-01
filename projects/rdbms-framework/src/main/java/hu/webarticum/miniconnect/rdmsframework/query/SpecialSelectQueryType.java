@@ -7,6 +7,7 @@ public enum SpecialSelectQueryType {
     CURRENT_CATALOG,
     READONLY,
     AUTOCOMMIT,
+    LAST_INSERT_ID
     ;
     
 }
