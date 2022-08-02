@@ -320,17 +320,25 @@ public class AntlrSqlParser implements SqlParser {
         }
         
         for (WhereItemContext whereItemNode : wherePartNode.whereItem()) {
-            
-
-            ScopeableFieldNameContext scopeableFieldNameNode = whereItemNode.scopeableFieldName();
-            String fieldName = parseIdentifierNode(scopeableFieldNameNode.fieldName().identifier());
-            
-            checkTableNameNode(scopeableFieldNameNode.tableName(), tableAlias);
-            
-            Object value = parsePostfixConditionNode(whereItemNode.postfixCondition());
-            result.put(fieldName, value);
+            Object[] fieldNameAndValue = parseWhereItemNode(whereItemNode, tableAlias);
+            result.put((String) fieldNameAndValue[0], fieldNameAndValue[1]);
         }
         return result;
+    }
+    
+    private Object[] parseWhereItemNode(WhereItemContext whereItemNode, String tableAlias) {
+        WhereItemContext subItemNode = whereItemNode.whereItem();
+        if (subItemNode != null) {
+            return parseWhereItemNode(subItemNode, tableAlias);
+        }
+        
+        ScopeableFieldNameContext scopeableFieldNameNode = whereItemNode.scopeableFieldName();
+        String fieldName = parseIdentifierNode(scopeableFieldNameNode.fieldName().identifier());
+        
+        checkTableNameNode(scopeableFieldNameNode.tableName(), tableAlias);
+        
+        Object value = parsePostfixConditionNode(whereItemNode.postfixCondition());
+        return new Object[] { fieldName, value };
     }
 
     private LinkedHashMap<String, Boolean> parseOrderByPartNode(OrderByPartContext orderByPartNode, String tableAlias) {
