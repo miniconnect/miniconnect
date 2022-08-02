@@ -59,26 +59,30 @@ public class InsertExecutor implements QueryExecutor {
             return new StoredResult(new StoredError(6, "00006", "Table is read-only: " + tableName));
         }
 
-        Map<String, Object> insertValues = insertQuery.values();
+        ImmutableList<String> givenInsertFields = insertQuery.fields();
+        ImmutableList<String> insertFields = givenInsertFields != null ? givenInsertFields : table.columns().names();
+        ImmutableList<Object> insertValues = insertQuery.values();
+        
+        Map<String, Object> insertValueMap = insertFields.assign((v, i) -> insertValues.get(i)).toHashMap();
 
         Optional<Column> autoIncrementedColumnHolder = TableQueryUtil.getAutoIncrementedColumn(table);
         if (autoIncrementedColumnHolder.isPresent()) {
             String columName = autoIncrementedColumnHolder.get().name();
-            if (!insertValues.containsKey(columName)) {
-                insertValues.put(columName, null);
+            if (!insertValueMap.containsKey(columName)) {
+                insertValueMap.put(columName, null);
             }
         }
         
         // FIXME: currently default values are not supported
-        if (insertValues.size() != table.columns().names().size()) {
+        if (insertValueMap.size() != table.columns().names().size()) {
             return new StoredResult(new StoredError(
                     7,
                     "00007",
-                    table.columns().names().size() + " values expected, but " + insertValues.size() + " found"));
+                    table.columns().names().size() + " values expected, but " + insertValueMap.size() + " found"));
         }
         
         try {
-            TableQueryUtil.checkFields(table, insertValues.keySet());
+            TableQueryUtil.checkFields(table, insertValueMap.keySet());
         } catch (Exception e) {
             return new StoredResult(new StoredError(3, "00003", e.getMessage()));
         }
@@ -86,10 +90,10 @@ public class InsertExecutor implements QueryExecutor {
         BigInteger lastInsertId = null;
         if (autoIncrementedColumnHolder.isPresent()) {
             String columName = autoIncrementedColumnHolder.get().name();
-            Object autoIncrementColumnValue = insertValues.get(columName);
+            Object autoIncrementColumnValue = insertValueMap.get(columName);
             if (autoIncrementColumnValue == null) {
                 BigInteger autoValue = table.sequence().getAndIncrement();
-                insertValues.put(columName, autoValue);
+                insertValueMap.put(columName, autoValue);
                 lastInsertId = autoValue;
             } else {
                 BigInteger bigIntegerValue = TableQueryUtil.convert(autoIncrementColumnValue, BigInteger.class);
@@ -98,7 +102,7 @@ public class InsertExecutor implements QueryExecutor {
         }
         
         Map<String, Object> convertedInsertValues =
-                TableQueryUtil.convertColumnValues(table, insertValues);
+                TableQueryUtil.convertColumnValues(table, insertValueMap);
 
         ImmutableMap<Integer, Object> values =
                 TableQueryUtil.toByColumnPoisitionedImmutableMap(table, convertedInsertValues);

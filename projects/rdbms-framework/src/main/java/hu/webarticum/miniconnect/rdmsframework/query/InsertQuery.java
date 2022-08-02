@@ -1,6 +1,5 @@
 package hu.webarticum.miniconnect.rdmsframework.query;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -12,25 +11,21 @@ public final class InsertQuery implements Query {
 
     private final String tableName;
     
-    private final LinkedHashMap<String, Object> values;
+    private final ImmutableList<String> fields;
+    
+    private final ImmutableList<Object> values;
     
     
     private InsertQuery(InsertQueryBuilder builder) {
         Objects.requireNonNull(builder.values);
         
-        int valueCount = builder.fields.size();
-        if (builder.values.size() != valueCount) {
+        if (builder.fields != null && builder.values.size() != builder.fields.size()) {
             throw new IllegalArgumentException("Count of fields and values must be the same");
         }
         this.schemaName = builder.schemaName;
         this.tableName = Objects.requireNonNull(builder.tableName);
-        
-        values = new LinkedHashMap<>(valueCount);
-        for (int i = 0; i < valueCount; i++) {
-            String fieldName = builder.fields.get(i);
-            Object value = builder.values.get(i);
-            values.put(fieldName, value);
-        }
+        this.fields = builder.fields;
+        this.values = builder.values;
     }
     
     public static InsertQueryBuilder builder() {
@@ -45,11 +40,14 @@ public final class InsertQuery implements Query {
     public String tableName() {
         return tableName;
     }
-
-    public Map<String, Object> values() {
-        return new LinkedHashMap<>(values);
+    
+    public ImmutableList<String> fields() {
+        return fields;
     }
 
+    public ImmutableList<Object> values() {
+        return values;
+    }
     
     @Override
     public String toString() {
@@ -61,10 +59,14 @@ public final class InsertQuery implements Query {
     }
     
     private void appendFieldsSql(StringBuilder sqlBuilder) {
+        if (fields == null) {
+            return;
+        }
+        
         sqlBuilder.append(" (");
         
         boolean first = true;
-        for (String fieldName : values.keySet()) {
+        for (String fieldName : fields) {
             if (first) {
                 first = false;
             } else {
@@ -80,7 +82,7 @@ public final class InsertQuery implements Query {
         sqlBuilder.append(" VALUES (");
         
         boolean first = true;
-        for (Object value : values.values()) {
+        for (Object value : values) {
             if (first) {
                 first = false;
             } else {

@@ -239,6 +239,10 @@ public final class ImmutableList<T> implements ReversibleIterable<T>, Serializab
         return ImmutableMap.assignFrom(data, data.size(), valueMapper);
     }
 
+    public <U> ImmutableMap<T, U> assign(BiFunction<T, Integer, U> valueMapper) {
+        return ImmutableMap.assignFrom(data, data.size(), valueMapper);
+    }
+
     @Override
     public int hashCode() {
         return data.hashCode();

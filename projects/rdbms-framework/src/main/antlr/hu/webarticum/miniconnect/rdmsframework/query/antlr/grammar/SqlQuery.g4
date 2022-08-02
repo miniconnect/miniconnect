@@ -43,7 +43,7 @@ updateQuery: UPDATE ( schemaName '.' )? tableName updatePart wherePart?;
 updatePart: SET updateItem ( ',' updateItem )*;
 updateItem: fieldName '=' value;
 
-insertQuery: INSERT INTO ( schemaName '.' )? tableName fieldList VALUES valueList;
+insertQuery: INSERT INTO ( schemaName '.' )? tableName fieldList? VALUES valueList;
 fieldList: '(' fieldName ( ',' fieldName )* ')';
 valueList: '(' nullableValue ( ',' nullableValue )* ')';
 
