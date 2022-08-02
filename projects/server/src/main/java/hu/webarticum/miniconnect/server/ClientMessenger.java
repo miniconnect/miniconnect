@@ -28,8 +28,7 @@ import hu.webarticum.miniconnect.util.GlobalIdGenerator;
 
 public class ClientMessenger implements Messenger, Closeable {
 
-    private static final Logger logger =
-            LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     
     
     private final SocketClient socketClient;
@@ -38,13 +37,11 @@ public class ClientMessenger implements Messenger, Closeable {
     
     private final MessageEncoder encoder;
 
-    private final Map<Consumer<Response>, ExchangeIdentity> exchangeResponseConsumers =
-            new WeakHashMap<>();
+    private final Map<Consumer<Response>, ExchangeIdentity> exchangeResponseConsumers = new WeakHashMap<>();
     
     private final Object exchangeResponseConsumersLock = new Object();
 
-    private final Map<Consumer<Response>, Instant> sessionInitConsumers =
-            new WeakHashMap<>();
+    private final Map<Consumer<Response>, Instant> sessionInitConsumers = new WeakHashMap<>();
     
     private final Object sessionInitConsumersLock = new Object();
     
@@ -89,7 +86,9 @@ public class ClientMessenger implements Messenger, Closeable {
     public void accept(Request request, Consumer<Response> responseConsumer) {
         logger.trace("Request accepted: {}", request);
         
-        if (request instanceof ExchangeMessage) {
+        if (responseConsumer == null) {
+            // nothing to do
+        } else if (request instanceof ExchangeMessage) {
             ExchangeMessage exchangeMessage = (ExchangeMessage) request;
             ExchangeIdentity exchangeIdentity = 
                     new ExchangeIdentity(exchangeMessage.sessionId(), exchangeMessage.exchangeId());
@@ -117,8 +116,7 @@ public class ClientMessenger implements Messenger, Closeable {
                 long responseSessionId = ((SessionMessage) response).sessionId();
                 ExchangeMessage exchangeMessage = (ExchangeMessage) response;
                 int exchangeId = exchangeMessage.exchangeId();
-                ExchangeIdentity exchangeIdentity =
-                        new ExchangeIdentity(responseSessionId, exchangeId);
+                ExchangeIdentity exchangeIdentity = new ExchangeIdentity(responseSessionId, exchangeId);
                 Consumer<Response> responseConsumer = findResponseConsumer(exchangeIdentity);
                 if (responseConsumer != null) {
                     responseConsumer.accept(response);
@@ -140,9 +138,7 @@ public class ClientMessenger implements Messenger, Closeable {
         Consumer<Response> oldestConsumer = null;
         synchronized (sessionInitConsumersLock) {
             Instant oldestInstant = null;
-            for (
-                    Map.Entry<Consumer<Response>, Instant> entry :
-                    sessionInitConsumers.entrySet()) {
+            for (Map.Entry<Consumer<Response>, Instant> entry : sessionInitConsumers.entrySet()) {
                 Instant instant = entry.getValue();
                 if (oldestInstant == null || instant.isBefore(oldestInstant)) {
                     oldestInstant = instant;
@@ -160,8 +156,7 @@ public class ClientMessenger implements Messenger, Closeable {
     
     private Consumer<Response> findResponseConsumer(ExchangeIdentity exchangeIdentity) {
         synchronized (exchangeResponseConsumersLock) {
-            for (Map.Entry<Consumer<Response>, ExchangeIdentity> entry :
-                    exchangeResponseConsumers.entrySet()) {
+            for (Map.Entry<Consumer<Response>, ExchangeIdentity> entry : exchangeResponseConsumers.entrySet()) {
                 if (entry.getValue().equals(exchangeIdentity)) {
                     return entry.getKey();
                 }
@@ -205,9 +200,7 @@ public class ClientMessenger implements Messenger, Closeable {
             }
             
             ExchangeIdentity otherExchangeIdentity = (ExchangeIdentity) other;
-            return
-                    sessionId == otherExchangeIdentity.sessionId &&
-                    exchangeId == otherExchangeIdentity.exchangeId;
+            return (sessionId == otherExchangeIdentity.sessionId) && (exchangeId == otherExchangeIdentity.exchangeId);
         }
         
     }
