@@ -1,16 +1,26 @@
 package hu.webarticum.miniconnect.jdbc;
 
+import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.regex.Pattern;
 
+import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniResult;
+import hu.webarticum.miniconnect.api.MiniValue;
+import hu.webarticum.miniconnect.impl.result.StoredColumnHeader;
 import hu.webarticum.miniconnect.impl.result.StoredResultSet;
+import hu.webarticum.miniconnect.impl.result.StoredResultSetData;
 import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.record.translator.BigintTranslator;
 
 public abstract class AbstractJdbcStatement implements Statement {
+    
+    private static final Pattern INSERT_PATTERN = Pattern.compile("^\\s*INSERT\\b", Pattern.CASE_INSENSITIVE);
+    
     
     private final MiniJdbcConnection connection;
     
@@ -19,6 +29,8 @@ public abstract class AbstractJdbcStatement implements Statement {
     private volatile ResultHolder currentResultHolder = null; // NOSONAR
     
     private volatile SQLWarning currentWarningHead = null; // NOSONAR
+    
+    private volatile BigInteger lastInsertedId = null;
 
     
     AbstractJdbcStatement(MiniJdbcConnection connection) {
@@ -156,7 +168,17 @@ public abstract class AbstractJdbcStatement implements Statement {
 
     @Override
     public ResultSet getGeneratedKeys() throws SQLException {
-        return new MiniJdbcResultSet(this, new StoredResultSet()); // TODO: currently not supported
+        BigintTranslator bigintTranslator = BigintTranslator.instance();
+        MiniColumnHeader columnHeader = new StoredColumnHeader("GENERATED_KEYS", false, bigintTranslator.definition());
+        ImmutableList<ImmutableList<MiniValue>> rows;
+        if (lastInsertedId != null) {
+            MiniValue resultValue = bigintTranslator.encodeFully(lastInsertedId);
+            rows = ImmutableList.of(ImmutableList.of(resultValue));
+        } else {
+            rows = ImmutableList.empty();
+        }
+        StoredResultSetData data = new StoredResultSetData(ImmutableList.of(columnHeader), rows);
+        return new MiniJdbcResultSet(this, new StoredResultSet(data)); // NOSONAR will be automatically closed
     }
 
     @Override
@@ -176,14 +198,19 @@ public abstract class AbstractJdbcStatement implements Statement {
 
     @Override
     public boolean isCloseOnCompletion() throws SQLException {
-        return false;  // not supported
+        return false; // not supported
     }
 
 
-    protected void handleExecuteCompleted(ResultHolder resultHolder) {
+    protected void handleExecuteCompleted(String sql, ResultHolder resultHolder) {
         currentResultHolder = resultHolder;
         currentWarningHead = wrapWarnings(resultHolder.result.warnings());
         connection.setCurrentWarningHead(currentWarningHead);
+        if (INSERT_PATTERN.matcher(sql).find()) {
+            lastInsertedId = connection.getDatabaseProvider().getLastInsertedId(connection.getMiniSession());
+        } else {
+            lastInsertedId = null;
+        }
     }
     
     private SQLWarning wrapWarnings(ImmutableList<MiniError> miniWarnings) {

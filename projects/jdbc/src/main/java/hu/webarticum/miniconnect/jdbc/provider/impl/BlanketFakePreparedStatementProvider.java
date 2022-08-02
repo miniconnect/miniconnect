@@ -45,6 +45,8 @@ public class BlanketFakePreparedStatementProvider implements PreparedStatementPr
 
     private final MiniSession session;
     
+    private final String sql;
+    
     private final String[] sqlParts;
     
     private final ImmutableList<ParameterDefinition> parameters;
@@ -54,6 +56,7 @@ public class BlanketFakePreparedStatementProvider implements PreparedStatementPr
             DatabaseProvider databaseProvider, MiniSession session, String sql) {
         this.databaseProvider = databaseProvider;
         this.session = session;
+        this.sql = sql;
         this.sqlParts = compileSql(sql);
         this.parameters = ImmutableList.fill(sqlParts.length - 1, i -> new ParameterDefinition()); // TODO
     }
@@ -78,6 +81,11 @@ public class BlanketFakePreparedStatementProvider implements PreparedStatementPr
         return result;
     }
 
+
+    @Override
+    public String sql() {
+        return sql;
+    }
     
     @Override
     public ImmutableList<ParameterDefinition> parameters() {

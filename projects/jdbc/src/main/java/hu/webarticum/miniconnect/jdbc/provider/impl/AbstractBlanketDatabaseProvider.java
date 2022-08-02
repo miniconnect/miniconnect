@@ -123,6 +123,12 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
     }
 
     @Override
+    public BigInteger getLastInsertedId(MiniSession session) {
+        String sql = "CALL IDENTITY()";
+        return extractSingleField(checkResult(session.execute(sql)), BigInteger.class);
+    }
+    
+    @Override
     public String quoteString(String text) {
         return "'" + text.replace("'", "''") + "'";
     }

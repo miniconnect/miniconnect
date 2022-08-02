@@ -1,5 +1,7 @@
 package hu.webarticum.miniconnect.jdbc.provider;
 
+import java.math.BigInteger;
+
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 
@@ -59,6 +61,8 @@ public interface DatabaseProvider {
 
     public PreparedStatementProvider prepareStatement(MiniSession session, String sql);
 
+    public BigInteger getLastInsertedId(MiniSession session);
+    
     public String quoteString(String text);
     
     public String quoteIdentifier(String identifier);

@@ -11,7 +11,7 @@ public class BlanketIdentityColumnSupport extends IdentityColumnSupportImpl {
 
     @Override
     public String getIdentitySelectString(String table, String column, int type) {
-        return "SELECT LAST_INSERT_ID()";
+        return "CALL IDENTITY()"; // h2 compatible version
     }
 
     @Override

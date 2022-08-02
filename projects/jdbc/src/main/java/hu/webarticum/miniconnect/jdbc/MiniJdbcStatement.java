@@ -92,7 +92,7 @@ public class MiniJdbcStatement extends AbstractJdbcStatement {
                 new MiniJdbcResultSet(this, result.resultSet()) :
                 null;
         ResultHolder resultHolder = new ResultHolder(result, jdbcResultSet);
-        handleExecuteCompleted(resultHolder);
+        handleExecuteCompleted(sql, resultHolder);
         
         return resultHolder;
     }

@@ -123,7 +123,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
                 new MiniJdbcResultSet(this, result.resultSet()) :
                 null;
         ResultHolder resultHolder = new ResultHolder(result, jdbcResultSet);
-        handleExecuteCompleted(resultHolder);
+        handleExecuteCompleted(preparedStatementProvider.sql(), resultHolder);
         
         return resultHolder;
     }
