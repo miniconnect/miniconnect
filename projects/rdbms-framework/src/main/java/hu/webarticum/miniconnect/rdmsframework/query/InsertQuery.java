@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.rdmsframework.util.SqlUtil;
 
 public final class InsertQuery implements Query {
 

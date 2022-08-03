@@ -12,12 +12,12 @@ import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.DeleteQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
-import hu.webarticum.miniconnect.rdmsframework.query.TableQueryUtil;
 import hu.webarticum.miniconnect.rdmsframework.storage.Schema;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TablePatch;
 import hu.webarticum.miniconnect.rdmsframework.storage.TablePatch.TablePatchBuilder;
+import hu.webarticum.miniconnect.rdmsframework.util.TableQueryUtil;
 
 public class DeleteExecutor implements QueryExecutor {
 
@@ -63,7 +63,7 @@ public class DeleteExecutor implements QueryExecutor {
             return new StoredResult(new StoredError(3, "00003", e.getMessage()));
         }
 
-        Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere);
+        Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere, state);
         
         List<BigInteger> rowIndexes = TableQueryUtil.filterRows(table, convertedQueryWhere, null);
         

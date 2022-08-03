@@ -10,8 +10,8 @@ public interface Queries {
         return SelectSpecialQuery.builder();
     }
 
-    public static SelectVariableQuery.SelectVariableQueryBuilder selectVariable() {
-        return SelectVariableQuery.builder();
+    public static SelectValueQuery.SelectValueQueryBuilder selectValue() {
+        return SelectValueQuery.builder();
     }
 
     public static InsertQuery.InsertQueryBuilder insert() {

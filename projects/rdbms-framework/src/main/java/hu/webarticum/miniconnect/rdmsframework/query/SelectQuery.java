@@ -4,6 +4,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import hu.webarticum.miniconnect.rdmsframework.util.SqlUtil;
+
 public final class SelectQuery implements Query {
     
     private final LinkedHashMap<String, String> fields;

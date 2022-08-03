@@ -23,13 +23,13 @@ import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery;
-import hu.webarticum.miniconnect.rdmsframework.query.TableQueryUtil;
 import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
 import hu.webarticum.miniconnect.rdmsframework.storage.Schema;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.MultiComparator;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.MultiComparator.MultiComparatorBuilder;
+import hu.webarticum.miniconnect.rdmsframework.util.TableQueryUtil;
 import hu.webarticum.miniconnect.record.translator.JavaTranslator;
 import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 import hu.webarticum.miniconnect.record.type.StandardValueType;
@@ -88,7 +88,7 @@ public class SelectExecutor implements QueryExecutor {
             return new StoredResult(new StoredError(3, "00003", e.getMessage()));
         }
         
-        Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere);
+        Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere, state);
         
         Integer unorderedLimit = queryOrderBy.isEmpty() ? queryLimit : null;
         List<BigInteger> rowIndexes = TableQueryUtil.filterRows(table, convertedQueryWhere, unorderedLimit);

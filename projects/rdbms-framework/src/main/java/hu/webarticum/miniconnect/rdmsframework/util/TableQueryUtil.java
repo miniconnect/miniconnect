@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.rdmsframework.query;
+package hu.webarticum.miniconnect.rdmsframework.util;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -12,6 +12,9 @@ import java.util.Set;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
+import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
+import hu.webarticum.miniconnect.rdmsframework.query.SpecialCondition;
+import hu.webarticum.miniconnect.rdmsframework.query.VariableValue;
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
 import hu.webarticum.miniconnect.rdmsframework.storage.RangeSelection;
@@ -21,6 +24,7 @@ import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.InclusionMode;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.NullsMode;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.SortMode;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
+import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleSelection;
 import hu.webarticum.miniconnect.record.converter.DefaultConverter;
 
 public class TableQueryUtil {
@@ -47,9 +51,24 @@ public class TableQueryUtil {
     public static List<BigInteger> filterRows(Table table, Map<String, Object> queryWhere, Integer unorderedLimit) {
         Map<ImmutableList<String>, TableIndex> indexesByColumnName = new LinkedHashMap<>();
         Set<String> unindexedColumnNames = collectIndexes(table, queryWhere.keySet(), indexesByColumnName);
-
-        TableSelection firstSelection = null;
+        
         List<TableSelection> moreSelections = new ArrayList<>();
+        TableSelection firstSelection = collectIndexSelections(
+                table.size(), queryWhere, indexesByColumnName, moreSelections);
+        
+        return matchRows(table, queryWhere, firstSelection, moreSelections, unindexedColumnNames, unorderedLimit);
+    }
+    
+    private static TableSelection collectIndexSelections(
+            BigInteger tableSize,
+            Map<String, Object> queryWhere,
+            Map<ImmutableList<String>, TableIndex> indexesByColumnName,
+            List<TableSelection> moreSelections) {
+        if (queryWhere.containsValue(null)) {
+            return new SimpleSelection(ImmutableList.empty());
+        }
+        
+        TableSelection firstSelection = null;
         for (Map.Entry<ImmutableList<String>, TableIndex> entry : indexesByColumnName.entrySet()) {
             ImmutableList<String> columnNames = entry.getKey();
             TableIndex tableIndex = entry.getValue();
@@ -68,10 +87,10 @@ public class TableQueryUtil {
             }
         }
         if (firstSelection == null) {
-            firstSelection = new RangeSelection(BigInteger.valueOf(0L), table.size());
+            firstSelection = new RangeSelection(BigInteger.valueOf(0L), tableSize);
         }
         
-        return matchRows(table, queryWhere, firstSelection, moreSelections, unindexedColumnNames, unorderedLimit);
+        return firstSelection;
     }
     
     private static NullsMode nullsModeForValue(Object value) {
@@ -228,16 +247,21 @@ public class TableQueryUtil {
         return (T) CONVERTER.convert(source, targetClazz);
     }
     
-    public static Map<String, Object> convertColumnValues(Table table, Map<String, Object> columnValues) {
+    public static Map<String, Object> convertColumnValues(
+            Table table, Map<String, Object> columnValues, EngineSessionState state) {
         Map<String, Object> result = new LinkedHashMap<>();
         NamedResourceStore<Column> columns = table.columns();
         for (Map.Entry<String, Object> entry : columnValues.entrySet()) {
             String columnName = entry.getKey();
             Object value = entry.getValue();
             Object convertedValue = value;
+            if (value instanceof VariableValue) {
+                String variableName = ((VariableValue) value).name();
+                convertedValue = state.getUserVariable(variableName);
+            }
             if (!(value instanceof SpecialCondition)) {
                 Class<?> columnClazz = columns.get(columnName).definition().clazz();
-                convertedValue = convert(value, columnClazz);
+                convertedValue = convert(convertedValue, columnClazz);
             }
             result.put(columnName, convertedValue);
         }

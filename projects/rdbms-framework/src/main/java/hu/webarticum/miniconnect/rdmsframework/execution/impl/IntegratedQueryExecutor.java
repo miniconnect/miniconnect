@@ -12,7 +12,7 @@ import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.ShowSchemasQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.ShowTablesQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectSpecialQuery;
-import hu.webarticum.miniconnect.rdmsframework.query.SelectVariableQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.SelectValueQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.SetVariableQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.UpdateQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.UseQuery;
@@ -26,8 +26,8 @@ public class IntegratedQueryExecutor implements QueryExecutor {
             return new SelectExecutor().execute(storageAccess, state, query);
         } else if (query instanceof SelectSpecialQuery) {
             return new SelectSpecialExecutor().execute(storageAccess, state, query);
-        } else if (query instanceof SelectVariableQuery) {
-            return new SelectVariableExecutor().execute(storageAccess, state, query);
+        } else if (query instanceof SelectValueQuery) {
+            return new SelectValueExecutor().execute(storageAccess, state, query);
         } else if (query instanceof InsertQuery) {
             return new InsertExecutor().execute(storageAccess, state, query);
         } else if (query instanceof UpdateQuery) {

@@ -10,6 +10,8 @@ import hu.webarticum.miniconnect.impl.result.StoredColumnHeader;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
 import hu.webarticum.miniconnect.impl.result.StoredResultSetData;
 import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
+import hu.webarticum.miniconnect.rdmsframework.query.VariableValue;
 import hu.webarticum.miniconnect.record.translator.JavaTranslator;
 import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 import hu.webarticum.miniconnect.record.type.StandardValueType;
@@ -25,7 +27,8 @@ public final class ResultUtil {
         Class<?> clazz = content == null ? String.class : content.getClass();
         ValueTranslator translator = createValueTranslatorFor(clazz);
         MiniValueDefinition columnDefinition = translator.definition();
-        MiniColumnHeader columnHeader = new StoredColumnHeader(columnName, false, columnDefinition);
+        boolean nullable = content == null;
+        MiniColumnHeader columnHeader = new StoredColumnHeader(columnName, nullable, columnDefinition);
         MiniValue value = translator.encodeFully(content);
         return new StoredResult(new StoredResultSetData(
                 ImmutableList.of(columnHeader),
@@ -39,6 +42,26 @@ public final class ResultUtil {
             return valueTypeOptional.get().defaultTranslator();
         } else {
             return JavaTranslator.of(clazz);
+        }
+    }
+    
+    public static Object resolveValue(Object value, EngineSessionState state) {
+        if (value instanceof VariableValue) {
+            String variableName = ((VariableValue) value).name();
+            return state.getUserVariable(variableName);
+        } else {
+            return value;
+        }
+    }
+
+    public static String getAutoFieldNameFor(Object value) {
+        if (value == null) {
+            return "NULL";
+        } else if (value instanceof VariableValue) {
+            String variableName = ((VariableValue) value).name();
+            return "@" + variableName;
+        } else {
+            return value.toString();
         }
     }
 

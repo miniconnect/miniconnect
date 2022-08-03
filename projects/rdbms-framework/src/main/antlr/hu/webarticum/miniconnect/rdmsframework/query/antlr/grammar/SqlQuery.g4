@@ -7,7 +7,7 @@ package hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar;
 sqlQuery: (
     selectQuery |
     selectSpecialQuery |
-    selectVariableQuery |
+    selectValueQuery |
     updateQuery |
     insertQuery |
     deleteQuery |
@@ -41,15 +41,15 @@ specialSelectableName:
     IDENTITY |
     LAST_INSERT_ID;
 
-selectVariableQuery: SELECT variable ( AS? alias=identifier )?;
+selectValueQuery: SELECT extendedValue ( AS? alias=identifier )?;
 
 updateQuery: UPDATE ( schemaName '.' )? tableName updatePart wherePart?;
 updatePart: SET updateItem ( ',' updateItem )*;
-updateItem: fieldName '=' value;
+updateItem: fieldName '=' extendedValue;
 
 insertQuery: INSERT INTO ( schemaName '.' )? tableName fieldList? VALUES valueList;
 fieldList: '(' fieldName ( ',' fieldName )* ')';
-valueList: '(' nullableValue ( ',' nullableValue )* ')';
+valueList: '(' extendedValue ( ',' extendedValue )* ')';
 
 deleteQuery: DELETE FROM ( schemaName '.' )? tableName wherePart?;
 
@@ -59,25 +59,22 @@ showTablesQuery: SHOW TABLES ( FROM schemaName )? likePart?;
 
 useQuery: USE schemaName;
 
-setVariableQuery: SET variable '=' nullableValue;
+setVariableQuery: SET variable '=' extendedValue;
 
 wherePart: WHERE whereItem ( AND whereItem )*;
 whereItem: scopeableFieldName postfixCondition | '(' whereItem ')';
-postfixCondition: '=' value | isNull | isNotNull;
+postfixCondition: '=' extendedValue | isNull | isNotNull;
 isNull: IS NULL;
 isNotNull: IS NOT NULL;
 orderByPart: ORDER BY orderByItem ( ',' orderByItem )*;
 orderByItem: scopeableFieldName ( ASC | DESC )?;
 scopeableFieldName: ( tableName '.' )? fieldName;
+extendedValue: literal | variable | NULL;
 variable: '@' identifier;
 fieldName: identifier;
 tableName: identifier;
 identifier: TOKEN_SIMPLENAME | TOKEN_QUOTEDNAME | TOKEN_BACKTICKEDNAME;
-
-// TODO: variable as value...
-nullableValue: value | NULL;
-value: TOKEN_STRING | TOKEN_INTEGER;
-
+literal: TOKEN_STRING | TOKEN_INTEGER;
 likePart: LIKE TOKEN_STRING;
 schemaName: identifier;
 parentheses: PAR_START PAR_END;

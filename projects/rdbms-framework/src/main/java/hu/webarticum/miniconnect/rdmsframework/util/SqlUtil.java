@@ -1,4 +1,4 @@
-package hu.webarticum.miniconnect.rdmsframework.query;
+package hu.webarticum.miniconnect.rdmsframework.util;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

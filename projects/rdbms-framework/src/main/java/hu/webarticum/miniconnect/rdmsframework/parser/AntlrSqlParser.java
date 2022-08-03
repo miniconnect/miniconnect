@@ -17,26 +17,27 @@ import hu.webarticum.miniconnect.rdmsframework.query.InsertQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.Queries;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery;
-import hu.webarticum.miniconnect.rdmsframework.query.SelectVariableQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.SelectValueQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.SetVariableQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.ShowSchemasQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.ShowTablesQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.SpecialCondition;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectSpecialQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.SpecialSelectableType;
-import hu.webarticum.miniconnect.rdmsframework.query.SqlUtil;
 import hu.webarticum.miniconnect.rdmsframework.query.UpdateQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.UseQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.VariableValue;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryLexer;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.DeleteQueryContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ExtendedValueContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.FieldListContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.FieldNameContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.IdentifierContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.InsertQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.LikePartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.LimitPartContext;
-import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.NullableValueContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.LiteralContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByPartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.PostfixConditionContext;
@@ -47,7 +48,7 @@ import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParse
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectPartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectSpecialQueryContext;
-import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectVariableQueryContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectValueQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SetVariableQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ShowSchemasQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ShowTablesQueryContext;
@@ -58,10 +59,11 @@ import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParse
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UpdatePartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UpdateQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.UseQueryContext;
-import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ValueContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ValueListContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.VariableContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.WhereItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.WherePartContext;
+import hu.webarticum.miniconnect.rdmsframework.util.SqlUtil;
 
 public class AntlrSqlParser implements SqlParser {
 
@@ -86,9 +88,9 @@ public class AntlrSqlParser implements SqlParser {
             return parseSelectSpecialNode(selectSpecialQueryNode);
         }
 
-        SelectVariableQueryContext selectVariableQueryNode = rootNode.selectVariableQuery();
-        if (selectVariableQueryNode != null) {
-            return parseSelectVariableNode(selectVariableQueryNode);
+        SelectValueQueryContext selectValueQueryNode = rootNode.selectValueQuery();
+        if (selectValueQueryNode != null) {
+            return parseSelectValueNode(selectValueQueryNode);
         }
         
         InsertQueryContext insertQueryNode = rootNode.insertQuery();
@@ -191,15 +193,15 @@ public class AntlrSqlParser implements SqlParser {
                 .build();
     }
 
-    private SelectVariableQuery parseSelectVariableNode(SelectVariableQueryContext selectVariableQueryNode) {
-        IdentifierContext variableNameNode = selectVariableQueryNode.variable().identifier();
-        String variableName = parseIdentifierNode(variableNameNode);
-
-        IdentifierContext aliasNode = selectVariableQueryNode.alias;
+    private SelectValueQuery parseSelectValueNode(SelectValueQueryContext selectValueQueryNode) {
+        ExtendedValueContext extendedValueContext = selectValueQueryNode.extendedValue();
+        Object value = parseExtendedValueNode(extendedValueContext);
+        
+        IdentifierContext aliasNode = selectValueQueryNode.alias;
         String alias = aliasNode != null ? parseIdentifierNode(aliasNode) : null;
         
-        return Queries.selectVariable()
-                .name(variableName)
+        return Queries.selectValue()
+                .value(value)
                 .alias(alias)
                 .build();
     }
@@ -239,8 +241,8 @@ public class AntlrSqlParser implements SqlParser {
 
     private ImmutableList<Object> parseInsertValueListNode(ValueListContext valueListNode) {
         List<Object> resultBuilder = new ArrayList<>();
-        for (NullableValueContext nullableValueNode : valueListNode.nullableValue()) {
-            Object value = parseNullableValueNode(nullableValueNode);
+        for (ExtendedValueContext nullableValueNode : valueListNode.extendedValue()) {
+            Object value = parseExtendedValueNode(nullableValueNode);
             resultBuilder.add(value);
         }
         return ImmutableList.fromCollection(resultBuilder);
@@ -318,8 +320,8 @@ public class AntlrSqlParser implements SqlParser {
     private SetVariableQuery parseSetVariableNode(SetVariableQueryContext setVariableNode) {
         IdentifierContext identifierNode = setVariableNode.variable().identifier();
         String variableName = parseIdentifierNode(identifierNode);
-        NullableValueContext valueNode = setVariableNode.nullableValue();
-        Object value = parseNullableValueNode(valueNode);
+        ExtendedValueContext valueNode = setVariableNode.extendedValue();
+        Object value = parseExtendedValueNode(valueNode);
         
         return Queries.setVariable()
                 .name(variableName)
@@ -406,7 +408,7 @@ public class AntlrSqlParser implements SqlParser {
         LinkedHashMap<String, Object> result = new LinkedHashMap<>();
         for (UpdateItemContext updateItemNode : updatePartNode.updateItem()) {
             String fieldName = parseIdentifierNode(updateItemNode.fieldName().identifier());
-            Object value = parseValueNode(updateItemNode.value());
+            Object value = parseExtendedValueNode(updateItemNode.extendedValue());
             result.put(fieldName, value);
         }
         return result;
@@ -443,9 +445,9 @@ public class AntlrSqlParser implements SqlParser {
     }
 
     private Object parsePostfixConditionNode(PostfixConditionContext postfixConditionNode) {
-        ValueContext valueNode = postfixConditionNode.value();
-        if (valueNode != null) {
-            return parseValueNode(valueNode);
+        ExtendedValueContext extendedValueNode = postfixConditionNode.extendedValue();
+        if (extendedValueNode != null) {
+            return parseExtendedValueNode(extendedValueNode);
         } else if (postfixConditionNode.isNull() != null) {
             return SpecialCondition.IS_NULL;
         } else if (postfixConditionNode.isNotNull() != null) {
@@ -455,31 +457,37 @@ public class AntlrSqlParser implements SqlParser {
         }
     }
 
-    private Object parseNullableValueNode(NullableValueContext nullableValueNode) {
-        ValueContext valueNode = nullableValueNode.value();
-        if (valueNode != null) {
-            return parseValueNode(valueNode);
+    private Object parseExtendedValueNode(ExtendedValueContext extendedValueNode) {
+        LiteralContext literalNode = extendedValueNode.literal();
+        if (literalNode != null) {
+            return parseLiteralNode(literalNode);
         }
         
-        if (nullableValueNode.NULL() != null) {
+        if (extendedValueNode.NULL() != null) {
             return null;
         }
+        
+        VariableContext variableNode = extendedValueNode.variable();
+        if (variableNode != null) {
+            String variableName = parseIdentifierNode(variableNode.identifier());
+            return new VariableValue(variableName);
+        }
 
-        throw new IllegalArgumentException("Invalid value: " + nullableValueNode.getText());
+        throw new IllegalArgumentException("Invalid value: " + extendedValueNode.getText());
     }
     
-    private Object parseValueNode(ValueContext valueNode) {
-        TerminalNode integerNode = valueNode.TOKEN_INTEGER();
+    private Object parseLiteralNode(LiteralContext literalNode) {
+        TerminalNode integerNode = literalNode.TOKEN_INTEGER();
         if (integerNode != null) {
             return parseIntegerNode(integerNode);
         }
         
-        TerminalNode stringNode = valueNode.TOKEN_STRING();
+        TerminalNode stringNode = literalNode.TOKEN_STRING();
         if (stringNode != null) {
             return parseStringNode(stringNode);
         }
         
-        throw new IllegalArgumentException("Invalid literal: " + valueNode.getText());
+        throw new IllegalArgumentException("Invalid literal: " + literalNode.getText());
     }
     
     private Integer parseIntegerNode(TerminalNode integerNode) {

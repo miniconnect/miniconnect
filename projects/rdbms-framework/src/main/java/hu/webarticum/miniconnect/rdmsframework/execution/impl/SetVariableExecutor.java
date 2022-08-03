@@ -9,6 +9,7 @@ import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.SetVariableQuery;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
+import hu.webarticum.miniconnect.rdmsframework.util.ResultUtil;
 
 public class SetVariableExecutor implements QueryExecutor {
     
@@ -25,8 +26,9 @@ public class SetVariableExecutor implements QueryExecutor {
     private MiniResult executeInternal(EngineSessionState state, SetVariableQuery setVariableQuery) {
         String variableName = setVariableQuery.name();
         Object value = setVariableQuery.value();
+        Object resolvedValue = ResultUtil.resolveValue(value, state);
         
-        state.setUserVariable(variableName, value);
+        state.setUserVariable(variableName, resolvedValue);
         
         return new StoredResult();
     }

@@ -16,12 +16,13 @@ import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.InsertQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
-import hu.webarticum.miniconnect.rdmsframework.query.TableQueryUtil;
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
 import hu.webarticum.miniconnect.rdmsframework.storage.Schema;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TablePatch;
+import hu.webarticum.miniconnect.rdmsframework.util.ResultUtil;
+import hu.webarticum.miniconnect.rdmsframework.util.TableQueryUtil;
 
 public class InsertExecutor implements QueryExecutor {
 
@@ -63,7 +64,7 @@ public class InsertExecutor implements QueryExecutor {
         ImmutableList<String> insertFields = givenInsertFields != null ? givenInsertFields : table.columns().names();
         ImmutableList<Object> insertValues = insertQuery.values();
         
-        Map<String, Object> insertValueMap = insertFields.assign((v, i) -> insertValues.get(i)).toHashMap();
+        Map<String, Object> insertValueMap = insertFields .assign((v, i) -> insertValues.get(i)).toHashMap();
 
         Optional<Column> autoIncrementedColumnHolder = TableQueryUtil.getAutoIncrementedColumn(table);
         if (autoIncrementedColumnHolder.isPresent()) {
@@ -90,20 +91,32 @@ public class InsertExecutor implements QueryExecutor {
         BigInteger lastInsertId = null;
         if (autoIncrementedColumnHolder.isPresent()) {
             String columName = autoIncrementedColumnHolder.get().name();
-            Object autoIncrementColumnValue = insertValueMap.get(columName);
+            Object autoIncrementColumnValue = ResultUtil.resolveValue(insertValueMap.get(columName), state);
             if (autoIncrementColumnValue == null) {
                 BigInteger autoValue = table.sequence().getAndIncrement();
                 insertValueMap.put(columName, autoValue);
                 lastInsertId = autoValue;
-            } else {
-                BigInteger bigIntegerValue = TableQueryUtil.convert(autoIncrementColumnValue, BigInteger.class);
-                table.sequence().ensureGreaterThan(bigIntegerValue);
             }
         }
         
-        Map<String, Object> convertedInsertValues =
-                TableQueryUtil.convertColumnValues(table, insertValueMap);
+        System.out.println("BEFORE:");
+        for (Map.Entry<String, Object> entry : insertValueMap.entrySet()) {
+            Object value = entry.getValue();
+            Class<?> clazz = value == null ? null : value.getClass();
+            System.out.println(entry.getKey() + " = " + clazz + ":" + value);
+        }
+        System.out.println();
+        
+        Map<String, Object> convertedInsertValues = TableQueryUtil.convertColumnValues(table, insertValueMap, state);
 
+        System.out.println("AFTER:");
+        for (Map.Entry<String, Object> entry : convertedInsertValues.entrySet()) {
+            Object value = entry.getValue();
+            Class<?> clazz = value == null ? null : value.getClass();
+            System.out.println(entry.getKey() + " = " + clazz + ":" + value);
+        }
+        System.out.println();
+        
         ImmutableMap<Integer, Object> values =
                 TableQueryUtil.toByColumnPoisitionedImmutableMap(table, convertedInsertValues);
         int columnCount = table.columns().names().size();
@@ -122,6 +135,11 @@ public class InsertExecutor implements QueryExecutor {
         
         if (lastInsertId != null) {
             state.setLastInsertId(lastInsertId);
+        } else if (autoIncrementedColumnHolder.isPresent()) {
+            String columName = autoIncrementedColumnHolder.get().name();
+            Object convertedAutoIncrementColumnValue = convertedInsertValues.get(columName);
+            BigInteger bigIntegerValue = TableQueryUtil.convert(convertedAutoIncrementColumnValue, BigInteger.class);
+            table.sequence().ensureGreaterThan(bigIntegerValue);
         }
         
         return new StoredResult();
