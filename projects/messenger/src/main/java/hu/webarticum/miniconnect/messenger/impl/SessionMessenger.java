@@ -33,8 +33,7 @@ public class SessionMessenger implements Messenger {
         if (request instanceof QueryRequest) {
             queryPartial.acceptQueryRequest((QueryRequest) request, responseConsumer);
         } else if (request instanceof LargeDataHeadRequest) {
-            largeDataPartial.acceptLargeDataHeadRequest(
-                    (LargeDataHeadRequest) request, responseConsumer);
+            largeDataPartial.acceptLargeDataHeadRequest((LargeDataHeadRequest) request, responseConsumer);
         } else if (request instanceof LargeDataPartRequest) {
             largeDataPartial.acceptLargeDataPartRequest((LargeDataPartRequest) request);
         } else if (request instanceof SessionCloseRequest) {

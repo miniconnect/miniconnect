@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 
 import hu.webarticum.regexbee.Bee;
 import hu.webarticum.regexbee.BeeFragment;
-import hu.webarticum.regexbee.Greediness;
 import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
@@ -31,7 +30,6 @@ public class SqlRepl implements Repl {
             .then(Bee.WHITESPACE.any())
             .then(Bee.fixed(")"));
 
-    //private static final BeeFragment DATA_FRAGMENT = Bee.fixed("DATA!");
     private static final BeeFragment DATA_FRAGMENT = Bee
             .then(Bee.WHITESPACE.any())
             .then(Bee.fixed("data:"))
@@ -58,7 +56,10 @@ public class SqlRepl implements Repl {
             .then(TERMINATOR_FRAGMENT.optional())
             .then(Bee.WHITESPACE.any());
     
-    private static final BeeFragment QUERY_FRAGMENT = Bee.ANYTHING;Object x = Bee
+    private static final BeeFragment QUERY_FRAGMENT = Bee.ANYTHING;
+    
+    /*
+    private static final BeeFragment QUERY_FRAGMENT = Bee
             .then(Bee.simple("[^'\"`\\\\;]").more(Greediness.POSSESSIVE) // TODO: range?
                     .or(Bee.fixed("\\").then(Bee.CHAR))
                     .or(Bee.oneCharOf("'\"`").as("quote")
@@ -68,7 +69,7 @@ public class SqlRepl implements Repl {
                             .then(Bee.ref("quote"))
                     ))
             .then(TERMINATOR_FRAGMENT.optional())
-            .then(Bee.WHITESPACE.any());
+            .then(Bee.WHITESPACE.any());*/
     
     private static final Pattern DATA_PATTERN = DATA_FRAGMENT.toPattern(Pattern.CASE_INSENSITIVE);
     
@@ -185,7 +186,6 @@ public class SqlRepl implements Repl {
             length = bytes.length;
             in = new ByteArrayInputStream(bytes);
         }
-
         MiniLargeDataSaveResult result = session.putLargeData(name, length, in);
         printLargeDataSaveResult(result, name, length);
     }

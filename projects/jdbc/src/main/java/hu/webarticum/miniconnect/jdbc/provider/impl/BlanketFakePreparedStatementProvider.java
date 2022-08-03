@@ -108,6 +108,9 @@ public class BlanketFakePreparedStatementProvider implements PreparedStatementPr
         
         StringBuilder resultBuilder = new StringBuilder();
         for (int i = 0; i < expectedParameterCount; i++) {
+            
+            // TODO: LOB objects
+            
             resultBuilder.append(sqlParts[i]);
             resultBuilder.append(databaseProvider.stringifyValue(parameters.get(i)));
         }

@@ -7,6 +7,7 @@ import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.impl.result.StoredError;
+import hu.webarticum.miniconnect.impl.result.StoredLargeDataSaveResult;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
 import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
 import hu.webarticum.miniconnect.rdmsframework.DatabaseException;
@@ -63,12 +64,11 @@ public class FrameworkSession implements MiniSession, CheckableCloseable {
     }
 
     @Override
-    public MiniLargeDataSaveResult putLargeData(
-            String variableName, long length, InputStream dataSource) {
+    public MiniLargeDataSaveResult putLargeData(String variableName, long length, InputStream dataSource) {
         checkClosed();
         
         // TODO
-        return null;
+        return new StoredLargeDataSaveResult(false, new StoredError(987, "00987", "Hopsz"));
         
     }
 

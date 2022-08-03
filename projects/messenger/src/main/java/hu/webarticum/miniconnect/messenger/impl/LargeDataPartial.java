@@ -37,14 +37,11 @@ class LargeDataPartial implements Closeable {
     
     private final MiniSession session;
     
-    private final ExecutorService putLargeDataInvokerExecutorService =
-            Executors.newCachedThreadPool();
+    private final ExecutorService putLargeDataInvokerExecutorService = Executors.newCachedThreadPool();
     
-    private final ExecutorService largeDataPartExecutorService =
-            Executors.newCachedThreadPool();
+    private final ExecutorService largeDataPartExecutorService = Executors.newCachedThreadPool();
     
-    private final Map<Integer, OrderAligningQueue<LargeDataPartRequest>> largeDataPartRequests =
-            new HashMap<>();
+    private final Map<Integer, OrderAligningQueue<LargeDataPartRequest>> largeDataPartRequests = new HashMap<>();
     
 
     public LargeDataPartial(long sessionId, MiniSession session) {
@@ -53,19 +50,15 @@ class LargeDataPartial implements Closeable {
     }
     
     
-    public void acceptLargeDataHeadRequest(
-            LargeDataHeadRequest headRequest, Consumer<Response> responseConsumer) {
+    public void acceptLargeDataHeadRequest(LargeDataHeadRequest headRequest, Consumer<Response> responseConsumer) {
         int exchangeId = headRequest.exchangeId();
-        OrderAligningQueue<LargeDataPartRequest> partQueue =
-                requireLargeDataPartQueue(exchangeId);
-        putLargeDataInvokerExecutorService.submit(
-                () -> invokePutLargeData(headRequest, responseConsumer, partQueue));
+        OrderAligningQueue<LargeDataPartRequest> partQueue = requireLargeDataPartQueue(exchangeId);
+        putLargeDataInvokerExecutorService.submit(() -> invokePutLargeData(headRequest, responseConsumer, partQueue));
     }
 
     public void acceptLargeDataPartRequest(LargeDataPartRequest partRequest) {
         int exchangeId = partRequest.exchangeId();
-        OrderAligningQueue<LargeDataPartRequest> partQueue =
-                requireLargeDataPartQueue(exchangeId);
+        OrderAligningQueue<LargeDataPartRequest> partQueue = requireLargeDataPartQueue(exchangeId);
         partQueue.add(partRequest);
     }
     
@@ -88,7 +81,6 @@ class LargeDataPartial implements Closeable {
             LargeDataHeadRequest headRequest,
             Consumer<Response> responseConsumer,
             OrderAligningQueue<LargeDataPartRequest> partQueue) {
-        
         int exchangeId = headRequest.exchangeId();
 
         try {
@@ -118,7 +110,6 @@ class LargeDataPartial implements Closeable {
             Consumer<Response> responseConsumer,
             OrderAligningQueue<LargeDataPartRequest> partQueue
             ) throws IOException, InterruptedException, TimeoutException, ExecutionException {
-        
         int exchangeId = headRequest.exchangeId();
         String variableName = headRequest.variableName();
         long fullLength = headRequest.length();

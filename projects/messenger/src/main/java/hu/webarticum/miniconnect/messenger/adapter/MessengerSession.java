@@ -60,24 +60,22 @@ public class MessengerSession implements MiniSession {
         loadSessionIdAsync(messenger, sessionIdFuture);
     }
 
-    private static void loadSessionIdAsync(
-            Messenger messenger, CompletableFuture<Long> future) {
+    private static void loadSessionIdAsync(Messenger messenger, CompletableFuture<Long> future) {
         new Thread(() -> loadSessionId(messenger, future)).start();
     }
     
-    private static void loadSessionId(
-            Messenger messenger, CompletableFuture<Long> future) {
+    private static void loadSessionId(Messenger messenger, CompletableFuture<Long> future) {
         Consumer<Response> responseConsumer = r -> acceptSessionInitResponse(r, future);
         messenger.accept(new SessionInitRequest(), responseConsumer);
         waitForFutureSilently(future);
         new Blackhole().consume(responseConsumer);
     }
     
-    private static void acceptSessionInitResponse(
-            Response response, CompletableFuture<Long> future) {
+    private static void acceptSessionInitResponse(Response response, CompletableFuture<Long> future) {
         if (!(response instanceof SessionInitResponse)) {
             return;
         }
+        
         SessionInitResponse sessionInitResponse = (SessionInitResponse) response;
         // TODO: store the entire response and handle potential errors
         future.complete(sessionInitResponse.sessionId());
@@ -220,9 +218,7 @@ public class MessengerSession implements MiniSession {
     }
 
     @Override
-    public MiniLargeDataSaveResult putLargeData(
-            String variableName, long length, InputStream dataSource) {
-        
+    public MiniLargeDataSaveResult putLargeData(String variableName, long length, InputStream dataSource) {
         int exchangeId = exchangeIdCounter.incrementAndGet();
         
         CompletableFuture<Response> responseFuture = new CompletableFuture<>();
