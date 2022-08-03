@@ -43,7 +43,11 @@ public class SimpleEngineSessionState implements EngineSessionState {
 
     @Override
     public void setUserVariable(String variableName, Object value) {
-        userVariables.put(variableName, value);
+        if (value != null) {
+            userVariables.put(variableName, value);
+        } else {
+            userVariables.remove(variableName);
+        }
     }
     
 }

@@ -11,7 +11,9 @@ import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.ShowSchemasQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.ShowTablesQuery;
-import hu.webarticum.miniconnect.rdmsframework.query.SpecialSelectQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.SelectSpecialQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.SelectVariableQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.SetVariableQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.UpdateQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.UseQuery;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
@@ -22,8 +24,10 @@ public class IntegratedQueryExecutor implements QueryExecutor {
     public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
         if (query instanceof SelectQuery) {
             return new SelectExecutor().execute(storageAccess, state, query);
-        } else if (query instanceof SpecialSelectQuery) {
-            return new SpecialSelectExecutor().execute(storageAccess, state, query);
+        } else if (query instanceof SelectSpecialQuery) {
+            return new SelectSpecialExecutor().execute(storageAccess, state, query);
+        } else if (query instanceof SelectVariableQuery) {
+            return new SelectVariableExecutor().execute(storageAccess, state, query);
         } else if (query instanceof InsertQuery) {
             return new InsertExecutor().execute(storageAccess, state, query);
         } else if (query instanceof UpdateQuery) {
@@ -36,6 +40,8 @@ public class IntegratedQueryExecutor implements QueryExecutor {
             return new ShowTablesExecutor().execute(storageAccess, state, query);
         } else if (query instanceof UseQuery) {
             return new UseExecutor().execute(storageAccess, state, query);
+        } else if (query instanceof SetVariableQuery) {
+            return new SetVariableExecutor().execute(storageAccess, state, query);
         } else {
             return new StoredResult(new StoredError(
                     1,

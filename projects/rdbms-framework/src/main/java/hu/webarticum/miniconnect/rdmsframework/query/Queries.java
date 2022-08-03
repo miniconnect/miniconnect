@@ -6,8 +6,12 @@ public interface Queries {
         return SelectQuery.builder();
     }
 
-    public static SpecialSelectQuery.SpecialSelectQueryBuilder specialSelect() {
-        return SpecialSelectQuery.builder();
+    public static SelectSpecialQuery.SelectSpecialQueryBuilder selectSpecial() {
+        return SelectSpecialQuery.builder();
+    }
+
+    public static SelectVariableQuery.SelectVariableQueryBuilder selectVariable() {
+        return SelectVariableQuery.builder();
     }
 
     public static InsertQuery.InsertQueryBuilder insert() {
@@ -32,6 +36,10 @@ public interface Queries {
 
     public static UseQuery.UseQueryBuilder use() {
         return UseQuery.builder();
+    }
+
+    public static SetVariableQuery.SetVariableQueryBuilder setVariable() {
+        return SetVariableQuery.builder();
     }
 
 }

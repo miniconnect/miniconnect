@@ -1,6 +1,6 @@
 package hu.webarticum.miniconnect.rdmsframework.query;
 
-public enum SpecialSelectQueryType {
+public enum SpecialSelectableType {
 
     CURRENT_USER,
     CURRENT_SCHEMA,

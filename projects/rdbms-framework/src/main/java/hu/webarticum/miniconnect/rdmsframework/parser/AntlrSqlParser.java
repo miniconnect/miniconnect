@@ -17,11 +17,13 @@ import hu.webarticum.miniconnect.rdmsframework.query.InsertQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.Queries;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.SelectVariableQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.SetVariableQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.ShowSchemasQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.ShowTablesQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.SpecialCondition;
-import hu.webarticum.miniconnect.rdmsframework.query.SpecialSelectQuery;
-import hu.webarticum.miniconnect.rdmsframework.query.SpecialSelectQueryType;
+import hu.webarticum.miniconnect.rdmsframework.query.SelectSpecialQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.SpecialSelectableType;
 import hu.webarticum.miniconnect.rdmsframework.query.SqlUtil;
 import hu.webarticum.miniconnect.rdmsframework.query.UpdateQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.UseQuery;
@@ -44,9 +46,11 @@ import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParse
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectItemsContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectPartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectQueryContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectSpecialQueryContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectVariableQueryContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SetVariableQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ShowSchemasQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ShowTablesQueryContext;
-import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SpecialSelectQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SpecialSelectableNameContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SqlQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.TableNameContext;
@@ -77,9 +81,14 @@ public class AntlrSqlParser implements SqlParser {
             return parseSelectNode(selectQueryNode);
         }
 
-        SpecialSelectQueryContext specialSelectQueryNode = rootNode.specialSelectQuery();
-        if (specialSelectQueryNode != null) {
-            return parseSpecialSelectNode(specialSelectQueryNode);
+        SelectSpecialQueryContext selectSpecialQueryNode = rootNode.selectSpecialQuery();
+        if (selectSpecialQueryNode != null) {
+            return parseSelectSpecialNode(selectSpecialQueryNode);
+        }
+
+        SelectVariableQueryContext selectVariableQueryNode = rootNode.selectVariableQuery();
+        if (selectVariableQueryNode != null) {
+            return parseSelectVariableNode(selectVariableQueryNode);
         }
         
         InsertQueryContext insertQueryNode = rootNode.insertQuery();
@@ -112,6 +121,11 @@ public class AntlrSqlParser implements SqlParser {
             return parseUseNode(useQueryNode);
         }
         
+        SetVariableQueryContext setVariableNode = rootNode.setVariableQuery();
+        if (setVariableNode != null) {
+            return parseSetVariableNode(setVariableNode);
+        }
+        
         throw new IllegalArgumentException("Query type not supported");
     }
 
@@ -135,7 +149,7 @@ public class AntlrSqlParser implements SqlParser {
         LinkedHashMap<String, Boolean> orderBy = parseOrderByPartNode(orderByNode, tableAlias);
         LimitPartContext limitPartNode = selectQueryNode.limitPart();
         Integer limit = limitPartNode != null ?
-                parseIntegerNode(limitPartNode.LIT_INTEGER()) :
+                parseIntegerNode(limitPartNode.TOKEN_INTEGER()) :
                 null;
         
         return Queries.select()
@@ -148,31 +162,48 @@ public class AntlrSqlParser implements SqlParser {
                 .build();
     }
     
-    private SpecialSelectQuery parseSpecialSelectNode(SpecialSelectQueryContext specialSelectQueryNode) {
+    private SelectSpecialQuery parseSelectSpecialNode(SelectSpecialQueryContext selectSpecialQueryNode) {
         SpecialSelectableNameContext specialSelectableNameNode =
-                specialSelectQueryNode.specialSelectable().specialSelectableName();
-        SpecialSelectQueryType queryType;
+                selectSpecialQueryNode.specialSelectable().specialSelectableName();
+        SpecialSelectableType queryType;
         if (specialSelectableNameNode.CURRENT_USER() != null) {
-            queryType = SpecialSelectQueryType.CURRENT_USER;
+            queryType = SpecialSelectableType.CURRENT_USER;
         } else if (specialSelectableNameNode.CURRENT_SCHEMA() != null) {
-            queryType = SpecialSelectQueryType.CURRENT_SCHEMA;
+            queryType = SpecialSelectableType.CURRENT_SCHEMA;
         } else if (specialSelectableNameNode.CURRENT_CATALOG() != null) {
-            queryType = SpecialSelectQueryType.CURRENT_CATALOG;
+            queryType = SpecialSelectableType.CURRENT_CATALOG;
         } else if (specialSelectableNameNode.READONLY() != null) {
-            queryType = SpecialSelectQueryType.READONLY;
+            queryType = SpecialSelectableType.READONLY;
         } else if (specialSelectableNameNode.AUTOCOMMIT() != null) {
-            queryType = SpecialSelectQueryType.AUTOCOMMIT;
+            queryType = SpecialSelectableType.AUTOCOMMIT;
         } else if (specialSelectableNameNode.IDENTITY() != null || specialSelectableNameNode.LAST_INSERT_ID() != null) {
-            queryType = SpecialSelectQueryType.LAST_INSERT_ID;
+            queryType = SpecialSelectableType.LAST_INSERT_ID;
         } else {
             throw new IllegalArgumentException("Unknown selectable: " + specialSelectableNameNode.getText());
         }
         
-        return Queries.specialSelect()
+        IdentifierContext aliasNode = selectSpecialQueryNode.alias;
+        String alias = aliasNode != null ? parseIdentifierNode(aliasNode) : null;
+        
+        return Queries.selectSpecial()
                 .queryType(queryType)
+                .alias(alias)
                 .build();
     }
 
+    private SelectVariableQuery parseSelectVariableNode(SelectVariableQueryContext selectVariableQueryNode) {
+        IdentifierContext variableNameNode = selectVariableQueryNode.variable().identifier();
+        String variableName = parseIdentifierNode(variableNameNode);
+
+        IdentifierContext aliasNode = selectVariableQueryNode.alias;
+        String alias = aliasNode != null ? parseIdentifierNode(aliasNode) : null;
+        
+        return Queries.selectVariable()
+                .name(variableName)
+                .alias(alias)
+                .build();
+    }
+    
     private InsertQuery parseInsertNode(InsertQueryContext insertQueryNode) {
         SchemaNameContext schemaNameNode = insertQueryNode.schemaName();
         String schemaName = schemaNameNode != null ?
@@ -284,11 +315,23 @@ public class AntlrSqlParser implements SqlParser {
                 .build();
     }
     
+    private SetVariableQuery parseSetVariableNode(SetVariableQueryContext setVariableNode) {
+        IdentifierContext identifierNode = setVariableNode.variable().identifier();
+        String variableName = parseIdentifierNode(identifierNode);
+        NullableValueContext valueNode = setVariableNode.nullableValue();
+        Object value = parseNullableValueNode(valueNode);
+        
+        return Queries.setVariable()
+                .name(variableName)
+                .value(value)
+                .build();
+    }
+    
     private String parseLikePart(LikePartContext likePartContext) {
         if (likePartContext == null) {
             return null;
         }
-        return parseStringNode(likePartContext.LIT_STRING());
+        return parseStringNode(likePartContext.TOKEN_STRING());
     }
 
     private LinkedHashMap<String, String> parseSelectPartNode(SelectPartContext selectPartNode, String tableAlias) {
@@ -381,17 +424,17 @@ public class AntlrSqlParser implements SqlParser {
     }
 
     private String parseIdentifierNode(IdentifierContext identifierNode) {
-        TerminalNode simpleNameNode = identifierNode.SIMPLENAME();
+        TerminalNode simpleNameNode = identifierNode.TOKEN_SIMPLENAME();
         if (simpleNameNode != null) {
             return simpleNameNode.getText();
         }
         
-        TerminalNode quotedNameNode = identifierNode.QUOTEDNAME();
+        TerminalNode quotedNameNode = identifierNode.TOKEN_QUOTEDNAME();
         if (quotedNameNode != null) {
             return SqlUtil.unquoteIdentifier(quotedNameNode.getText());
         }
         
-        TerminalNode backtickedNameNode = identifierNode.BACKTICKEDNAME();
+        TerminalNode backtickedNameNode = identifierNode.TOKEN_BACKTICKEDNAME();
         if (backtickedNameNode != null) {
             return SqlUtil.unbacktickIdentifier(backtickedNameNode.getText());
         }
@@ -426,12 +469,12 @@ public class AntlrSqlParser implements SqlParser {
     }
     
     private Object parseValueNode(ValueContext valueNode) {
-        TerminalNode integerNode = valueNode.LIT_INTEGER();
+        TerminalNode integerNode = valueNode.TOKEN_INTEGER();
         if (integerNode != null) {
             return parseIntegerNode(integerNode);
         }
         
-        TerminalNode stringNode = valueNode.LIT_STRING();
+        TerminalNode stringNode = valueNode.TOKEN_STRING();
         if (stringNode != null) {
             return parseStringNode(stringNode);
         }

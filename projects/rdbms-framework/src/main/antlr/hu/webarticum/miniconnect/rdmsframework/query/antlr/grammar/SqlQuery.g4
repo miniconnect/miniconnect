@@ -6,13 +6,15 @@ package hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar;
 
 sqlQuery: (
     selectQuery |
-    specialSelectQuery |
+    selectSpecialQuery |
+    selectVariableQuery |
     updateQuery |
     insertQuery |
     deleteQuery |
     showSchemasQuery |
     showTablesQuery |
-    useQuery
+    useQuery |
+    setVariableQuery
 ) EOF ;
 
 selectQuery: (
@@ -26,9 +28,9 @@ selectQuery: (
 selectPart: selectItems | '*';
 selectItems: selectItem ( ',' selectItem )*;
 selectItem: scopeableFieldName ( AS? alias=identifier )?;
-limitPart: LIMIT LIT_INTEGER;
+limitPart: LIMIT TOKEN_INTEGER;
 
-specialSelectQuery: ( SELECT | SHOW | CALL ) specialSelectable ( AS? alias=identifier )?;
+selectSpecialQuery: ( SELECT | SHOW | CALL ) specialSelectable ( AS? alias=identifier )?;
 specialSelectable: specialSelectableName ( parentheses )?;
 specialSelectableName:
     CURRENT_USER |
@@ -38,6 +40,8 @@ specialSelectableName:
     AUTOCOMMIT |
     IDENTITY |
     LAST_INSERT_ID;
+
+selectVariableQuery: SELECT variable ( AS? alias=identifier )?;
 
 updateQuery: UPDATE ( schemaName '.' )? tableName updatePart wherePart?;
 updatePart: SET updateItem ( ',' updateItem )*;
@@ -55,6 +59,8 @@ showTablesQuery: SHOW TABLES ( FROM schemaName )? likePart?;
 
 useQuery: USE schemaName;
 
+setVariableQuery: SET variable '=' nullableValue;
+
 wherePart: WHERE whereItem ( AND whereItem )*;
 whereItem: scopeableFieldName postfixCondition | '(' whereItem ')';
 postfixCondition: '=' value | isNull | isNotNull;
@@ -63,12 +69,16 @@ isNotNull: IS NOT NULL;
 orderByPart: ORDER BY orderByItem ( ',' orderByItem )*;
 orderByItem: scopeableFieldName ( ASC | DESC )?;
 scopeableFieldName: ( tableName '.' )? fieldName;
+variable: '@' identifier;
 fieldName: identifier;
 tableName: identifier;
-identifier: SIMPLENAME | QUOTEDNAME | BACKTICKEDNAME;
+identifier: TOKEN_SIMPLENAME | TOKEN_QUOTEDNAME | TOKEN_BACKTICKEDNAME;
+
+// TODO: variable as value...
 nullableValue: value | NULL;
-value: LIT_STRING | LIT_INTEGER;
-likePart: LIKE LIT_STRING;
+value: TOKEN_STRING | TOKEN_INTEGER;
+
+likePart: LIKE TOKEN_STRING;
 schemaName: identifier;
 parentheses: PAR_START PAR_END;
 
@@ -79,6 +89,7 @@ DELETE: D E L E T E;
 SHOW: S H O W;
 CALL: C A L L;
 USE: U S E;
+SET: S E T;
 
 CURRENT_USER: C U R R E N T UNDERSCORE U S E R;
 CURRENT_SCHEMA: C U R R E N T UNDERSCORE S C H E M A;
@@ -99,7 +110,6 @@ ASC: A S C;
 DESC: D E S C;
 LIMIT: L I M I T;
 VALUES: V A L U E S;
-SET: S E T;
 IS: I S;
 NOT: N O T;
 NULL: N U L L;
@@ -108,12 +118,12 @@ DATABASES: D A T A B A S E S;
 TABLES: T A B L E S;
 LIKE: L I K E;
 
-SIMPLENAME: [a-zA-Z_] [a-zA-Z_0-9]*;
-QUOTEDNAME: '"' ( '\\' . | '""' | ~[\\"] )* '"';
-BACKTICKEDNAME: '`' ( '``' | ~[`] )* '`';
+TOKEN_SIMPLENAME: [a-zA-Z_] [a-zA-Z_0-9]*;
+TOKEN_QUOTEDNAME: '"' ( '\\' . | '""' | ~[\\"] )* '"';
+TOKEN_BACKTICKEDNAME: '`' ( '``' | ~[`] )* '`';
 
-LIT_STRING: '\'' ( '\\' . | '\'\'' | ~[\\'] )* '\'';
-LIT_INTEGER: '-'? [0-9]+;
+TOKEN_STRING: '\'' ( '\\' . | '\'\'' | ~[\\'] )* '\'';
+TOKEN_INTEGER: '-'? [0-9]+;
 
 PAR_START: '(';
 PAR_END: ')';
