@@ -1,9 +1,12 @@
 package hu.webarticum.miniconnect.lang;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -50,35 +53,68 @@ public final class ByteString implements Serializable {
     }
 
     public static ByteString of(String string, Charset charset) {
-        return ByteString.wrap(string.getBytes(charset));
+        return wrap(string.getBytes(charset));
     }
 
     public static ByteString ofByte(byte b) {
-        return new ByteString(new byte[] { b });
+        return wrap(new byte[] { b });
     }
 
     public static ByteString ofChar(char charValue) {
-        return ByteString.wrap(ByteBuffer.allocate(Character.BYTES).putChar(charValue).array());
+        return wrap(ByteBuffer.allocate(Character.BYTES).putChar(charValue).array());
     }
 
     public static ByteString ofShort(short shortValue) {
-        return ByteString.wrap(ByteBuffer.allocate(Short.BYTES).putShort(shortValue).array());
+        return wrap(ByteBuffer.allocate(Short.BYTES).putShort(shortValue).array());
     }
 
     public static ByteString ofInt(int intValue) {
-        return ByteString.wrap(ByteBuffer.allocate(Integer.BYTES).putInt(intValue).array());
+        return wrap(ByteBuffer.allocate(Integer.BYTES).putInt(intValue).array());
     }
 
     public static ByteString ofLong(long longValue) {
-        return ByteString.wrap(ByteBuffer.allocate(Long.BYTES).putLong(longValue).array());
+        return wrap(ByteBuffer.allocate(Long.BYTES).putLong(longValue).array());
     }
 
     public static ByteString ofFloat(float floatValue) {
-        return ByteString.wrap(ByteBuffer.allocate(Float.BYTES).putFloat(floatValue).array());
+        return wrap(ByteBuffer.allocate(Float.BYTES).putFloat(floatValue).array());
     }
 
     public static ByteString ofDouble(double doubleValue) {
-        return ByteString.wrap(ByteBuffer.allocate(Double.BYTES).putDouble(doubleValue).array());
+        return wrap(ByteBuffer.allocate(Double.BYTES).putDouble(doubleValue).array());
+    }
+
+    public static ByteString fromInputStream(InputStream inputStream) {
+        return fromInputStream(inputStream, 1024);
+    }
+    
+    public static ByteString fromInputStream(InputStream inputStream, int size) {
+        ByteArrayOutputStream resultBuilder = new ByteArrayOutputStream();
+
+        System.out.println("inputStream class: " + inputStream.getClass());
+        System.out.println("AAAAA");
+        int readLength;
+        byte[] buffer = new byte[1024];
+        try {
+            System.out.println("BBBBB");
+            while ((readLength = inputStream.read(buffer, 0, buffer.length)) != -1) {
+                System.out.println("readLength: " + readLength);
+                resultBuilder.write(buffer, 0, readLength);
+                System.out.println("CCCCC");
+            }
+            System.out.println("DDDDD");
+            resultBuilder.flush();
+            System.out.println("EEEEE");
+        } catch (IOException e) {
+            System.out.println("XXXXX");
+            throw new UncheckedIOException(e);
+        }
+        System.out.println("FFFFF");
+        
+        byte[] bytes = resultBuilder.toByteArray();
+        System.out.println("GGGGG");
+        System.out.println("bytes: " + Arrays.toString(bytes));
+        return wrap(bytes);
     }
 
     public static ByteString wrap(byte[] bytes) {
