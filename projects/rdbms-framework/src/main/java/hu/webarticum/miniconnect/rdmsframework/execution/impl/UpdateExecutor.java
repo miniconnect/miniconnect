@@ -60,7 +60,7 @@ public class UpdateExecutor implements QueryExecutor {
 
         Map<String, Object> queryUpdates = updateQuery.values();
         Map<String, Object> queryWhere = updateQuery.where();
-
+        
         try {
             TableQueryUtil.checkFields(table, queryUpdates.keySet());
             TableQueryUtil.checkFields(table, queryWhere.keySet());
@@ -70,7 +70,7 @@ public class UpdateExecutor implements QueryExecutor {
 
         Map<String, Object> convertedQueryUpdates = TableQueryUtil.convertColumnValues(table, queryUpdates, state);
         Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere, state);
-        
+
         List<BigInteger> rowIndexes = TableQueryUtil.filterRows(table, convertedQueryWhere, null);
         
         ImmutableMap<Integer, Object> updates =

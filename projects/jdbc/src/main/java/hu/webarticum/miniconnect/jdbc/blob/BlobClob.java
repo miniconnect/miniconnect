@@ -44,6 +44,10 @@ public class BlobClob implements NClob {
         this(new WriteableBlob(), StandardCharsets.UTF_16BE, 2, targetCharset);
     }
 
+    public BlobClob(Charset blobCharset, Charset targetCharset) {
+        this(new WriteableBlob(), blobCharset, 0, targetCharset);
+    }
+
     public BlobClob(Blob blob, Charset blobCharset, Charset targetCharset) {
         this(blob, blobCharset, 0, targetCharset);
     }

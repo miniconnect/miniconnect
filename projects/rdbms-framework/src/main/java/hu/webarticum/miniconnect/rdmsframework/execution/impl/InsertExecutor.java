@@ -99,24 +99,8 @@ public class InsertExecutor implements QueryExecutor {
             }
         }
         
-        System.out.println("BEFORE:");
-        for (Map.Entry<String, Object> entry : insertValueMap.entrySet()) {
-            Object value = entry.getValue();
-            Class<?> clazz = value == null ? null : value.getClass();
-            System.out.println(entry.getKey() + " = " + clazz + ":" + value);
-        }
-        System.out.println();
-        
         Map<String, Object> convertedInsertValues = TableQueryUtil.convertColumnValues(table, insertValueMap, state);
 
-        System.out.println("AFTER:");
-        for (Map.Entry<String, Object> entry : convertedInsertValues.entrySet()) {
-            Object value = entry.getValue();
-            Class<?> clazz = value == null ? null : value.getClass();
-            System.out.println(entry.getKey() + " = " + clazz + ":" + value);
-        }
-        System.out.println();
-        
         ImmutableMap<Integer, Object> values =
                 TableQueryUtil.toByColumnPoisitionedImmutableMap(table, convertedInsertValues);
         int columnCount = table.columns().names().size();

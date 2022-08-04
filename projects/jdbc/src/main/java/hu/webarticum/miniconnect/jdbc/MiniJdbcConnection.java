@@ -1,5 +1,6 @@
 package hu.webarticum.miniconnect.jdbc;
 
+import java.nio.charset.StandardCharsets;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -354,12 +355,16 @@ public class MiniJdbcConnection implements Connection {
 
     @Override
     public Clob createClob() throws SQLException {
-        return new BlobClob(); // TODO: use client encoding
+        return createUtf8BlobClob();
     }
 
     @Override
     public NClob createNClob() throws SQLException {
-        return new BlobClob(); // TODO: use client encoding
+        return createUtf8BlobClob();
+    }
+
+    public BlobClob createUtf8BlobClob() {
+        return new BlobClob(StandardCharsets.UTF_8, StandardCharsets.UTF_8); // FIXME: what is the best way?
     }
 
     @Override

@@ -13,6 +13,7 @@ import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.jdbc.provider.DatabaseProvider;
 import hu.webarticum.miniconnect.jdbc.provider.ParameterValue;
+import hu.webarticum.miniconnect.jdbc.provider.PreparedStatementProvider;
 import hu.webarticum.miniconnect.jdbc.provider.TransactionIsolationLevel;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.record.ResultRecord;
@@ -118,8 +119,8 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
     }
 
     @Override
-    public BlanketFakePreparedStatementProvider prepareStatement(MiniSession session, String sql) {
-        return new BlanketFakePreparedStatementProvider(this, session, sql);
+    public PreparedStatementProvider prepareStatement(MiniSession session, String sql) {
+        return new VariablePreparedStatementProvider(this, session, sql);
     }
 
     @Override

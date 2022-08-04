@@ -24,7 +24,6 @@ import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.Calendar;
 
 import org.apache.commons.io.IOUtils;
@@ -41,8 +40,6 @@ import hu.webarticum.miniconnect.jdbc.provider.PreparedStatementProvider;
 public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements PreparedStatement {
     
     private final PreparedStatementProvider preparedStatementProvider;
-
-    private final ArrayList<ParameterValue> parameters = new ArrayList<>(4);
 
     private final Object closeLock = new Object();
     
@@ -109,7 +106,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     }
 
     private ResultHolder executeInternal() throws SQLException {
-        MiniResult result = preparedStatementProvider.execute(parameters);
+        MiniResult result = preparedStatementProvider.execute();
         if (!result.success()) {
             MiniError error = result.error();
             throw new SQLException(
@@ -348,8 +345,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     }
 
     @Override
-    public void setBlob(
-            int parameterIndex, InputStream inputStream, long length) throws SQLException {
+    public void setBlob(int parameterIndex, InputStream inputStream, long length) throws SQLException {
         setParameter(parameterIndex, new ParameterValue(
                 Blob.class, blobOf(inputStream, length), Types.OTHER, null, null, true));
     }
@@ -361,8 +357,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setClob(int parameterIndex, Reader reader) throws SQLException {
-        setParameter(parameterIndex, new ParameterValue(
-                Clob.class, clobOf(reader), Types.OTHER, null, null, true));
+        setParameter(parameterIndex, new ParameterValue(Clob.class, clobOf(reader), Types.OTHER, null, null, true));
     }
 
     @Override
@@ -403,25 +398,13 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     }
     
     private synchronized void setParameter(int parameterIndex, ParameterValue parameter) {
-        int currentSize = parameters.size();
-        if (parameterIndex > currentSize) {
-            parameters.ensureCapacity(parameterIndex);
-            for (int i = currentSize; i < parameterIndex; i++) {
-                parameters.add(null);
-            }
-        }
-        
         int zeroBasedIndex = parameterIndex - 1;
-        if (currentSize > zeroBasedIndex) {
-            closeSilentlyIfNecessary(parameters.get(zeroBasedIndex));
-        }
-        
-        parameters.set(zeroBasedIndex, parameter);
+        preparedStatementProvider.setParameterValue(zeroBasedIndex, parameter);
     }
 
     @Override
     public synchronized void clearParameters() throws SQLException {
-        parameters.clear();
+        preparedStatementProvider.clearParameterValues();
     }
 
     // [end]
@@ -503,9 +486,6 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     public void closeInternal() throws SQLException {
         closed = true;
         getConnection().unregisterActiveStatement(this);
-        for (ParameterValue parameterValue : parameters) {
-            closeSilentlyIfNecessary(parameterValue);
-        }
         Exception resultSetCloseException = null;
         try {
             ResultSet resultSet = getResultSet();
@@ -536,28 +516,6 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     // [end]
     
 
-    private void closeSilentlyIfNecessary(ParameterValue parameterValue) {
-        if (parameterValue == null || !parameterValue.managed()) {
-            return;
-        }
-        
-        try {
-            closeIfCan(parameterValue.value());
-        } catch (Exception e) {
-            // we are silent
-        }
-    }
-    
-    private void closeIfCan(Object value) throws Exception {
-        if (value instanceof Blob) {
-            ((Blob) value).free();
-        } else if (value instanceof Clob) {
-            ((Clob) value).free();
-        } else if (value instanceof AutoCloseable) {
-            ((AutoCloseable) value).close();
-        }
-    }
-
     private Blob blobOf(InputStream inputStream, long length) throws SQLException {
         return blobOf(new BoundedInputStream(inputStream, length));
     }
@@ -578,7 +536,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     }
     
     private NClob clobOf(Reader reader) throws SQLException {
-        BlobClob clob = new BlobClob();
+        BlobClob clob = getConnection().createUtf8BlobClob();
         Writer clobWriter = clob.setCharacterStream(1);
         try {
             IOUtils.copy(reader, clobWriter);
