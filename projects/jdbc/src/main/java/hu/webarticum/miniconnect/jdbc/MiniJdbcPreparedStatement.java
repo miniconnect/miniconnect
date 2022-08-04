@@ -167,8 +167,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setNull(int parameterIndex, int sqlType, String typeName) throws SQLException {
-        setParameter(parameterIndex, new ParameterValue(
-                Void.TYPE, null, sqlType, typeName, null));
+        setParameter(parameterIndex, new ParameterValue(Void.TYPE, null, sqlType, typeName, null));
     }
 
     @Override
@@ -223,8 +222,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setNString(int parameterIndex, String value) throws SQLException {
-        setParameter(parameterIndex, new ParameterValue(
-                String.class, value, Types.NVARCHAR, null, null));
+        setParameter(parameterIndex, new ParameterValue(String.class, value, Types.NVARCHAR, null, null));
     }
 
     @Override
@@ -234,8 +232,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setDate(int parameterIndex, Date x, Calendar cal) throws SQLException {
-        setParameter(parameterIndex, new ParameterValue(
-                Date.class, x, Types.OTHER, null, cal));
+        setParameter(parameterIndex, new ParameterValue(Date.class, x, Types.OTHER, null, cal));
     }
     
     @Override
@@ -245,8 +242,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setTime(int parameterIndex, Time x, Calendar cal) throws SQLException {
-        setParameter(parameterIndex, new ParameterValue(
-                Time.class, x, Types.OTHER, null, cal));
+        setParameter(parameterIndex, new ParameterValue(Time.class, x, Types.OTHER, null, cal));
     }
 
     @Override
@@ -256,8 +252,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setTimestamp(int parameterIndex, Timestamp x, Calendar cal) throws SQLException {
-        setParameter(parameterIndex, new ParameterValue(
-                Timestamp.class, x, Types.OTHER, null, cal));
+        setParameter(parameterIndex, new ParameterValue(Timestamp.class, x, Types.OTHER, null, cal));
     }
 
     @Override
@@ -291,14 +286,12 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     }
 
     @Override
-    public void setCharacterStream(
-            int parameterIndex, Reader reader, int length) throws SQLException {
+    public void setCharacterStream(int parameterIndex, Reader reader, int length) throws SQLException {
         setCharacterStream(parameterIndex, reader, (long) length);
     }
 
     @Override
-    public void setCharacterStream(
-            int parameterIndex, Reader reader, long length) throws SQLException {
+    public void setCharacterStream(int parameterIndex, Reader reader, long length) throws SQLException {
         setNCharacterStream(parameterIndex, reader, length);
     }
 
@@ -308,15 +301,13 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     }
 
     @Override
-    public void setNCharacterStream(
-            int parameterIndex, Reader value, long length) throws SQLException {
+    public void setNCharacterStream(int parameterIndex, Reader value, long length) throws SQLException {
         setParameter(parameterIndex, new ParameterValue(Reader.class, value, length));
     }
 
     @Deprecated
     @Override
-    public void setUnicodeStream(
-            int parameterIndex, InputStream x, int length) throws SQLException {
+    public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
         throw new SQLFeatureNotSupportedException();
     }
 
@@ -331,8 +322,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     }
 
     @Override
-    public void setBinaryStream(
-            int parameterIndex, InputStream x, long length) throws SQLException {
+    public void setBinaryStream(int parameterIndex, InputStream x, long length) throws SQLException {
         setParameter(parameterIndex, new ParameterValue(InputStream.class, x, length));
     }
 
@@ -388,8 +378,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setNClob(int parameterIndex, Reader reader) throws SQLException {
-        setParameter(parameterIndex, new ParameterValue(
-                NClob.class, clobOf(reader), Types.OTHER, null, null, true));
+        setParameter(parameterIndex, new ParameterValue(NClob.class, clobOf(reader), Types.OTHER, null, null, true));
     }
 
     @Override
@@ -405,16 +394,12 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     @Override
     public void setObject(int parameterIndex, Object x, int targetSqlType) throws SQLException {
-        setParameter(parameterIndex, new ParameterValue(
-                Object.class, x, targetSqlType, null, null));
+        setParameter(parameterIndex, new ParameterValue(Object.class, x, targetSqlType, null, null));
     }
 
     @Override
-    public void setObject(
-            int parameterIndex, Object x, int targetSqlType, int scaleOrLength
-            ) throws SQLException {
-        setParameter(parameterIndex, new ParameterValue(
-                Object.class, x, targetSqlType, null, scaleOrLength));
+    public void setObject(int parameterIndex, Object x, int targetSqlType, int scaleOrLength) throws SQLException {
+        setParameter(parameterIndex, new ParameterValue(Object.class, x, targetSqlType, null, scaleOrLength));
     }
     
     private synchronized void setParameter(int parameterIndex, ParameterValue parameter) {
