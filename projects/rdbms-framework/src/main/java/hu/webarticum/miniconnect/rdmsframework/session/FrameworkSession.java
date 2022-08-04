@@ -3,12 +3,14 @@ package hu.webarticum.miniconnect.rdmsframework.session;
 import java.io.InputStream;
 import java.util.concurrent.ExecutionException;
 
+import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.impl.result.StoredError;
 import hu.webarticum.miniconnect.impl.result.StoredLargeDataSaveResult;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
+import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
 import hu.webarticum.miniconnect.rdmsframework.DatabaseException;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSession;
@@ -36,7 +38,7 @@ public class FrameworkSession implements MiniSession, CheckableCloseable {
             Query query = sqlParser.parse(sql);
             return execute(query);
         } catch (Exception e) {
-            return resultOfException(e);
+            return new StoredResult(errorOfException(e));
         }
     }
     
@@ -53,7 +55,7 @@ public class FrameworkSession implements MiniSession, CheckableCloseable {
         } catch (Exception e) {
             exception = e;
         }
-        return resultOfException(exception);
+        return new StoredResult(errorOfException(exception));
     }
 
     public MiniResult executeThrowing(Query query) throws InterruptedException, ExecutionException {
@@ -66,10 +68,30 @@ public class FrameworkSession implements MiniSession, CheckableCloseable {
     @Override
     public MiniLargeDataSaveResult putLargeData(String variableName, long length, InputStream dataSource) {
         checkClosed();
+        Exception exception;
+        try {
+            return putLargeDataThrowing(variableName, length, dataSource);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            exception = e;
+        } catch (ExecutionException e) {
+            exception = (Exception) e.getCause();
+        } catch (Exception e) {
+            exception = e;
+        }
+        return new StoredLargeDataSaveResult(errorOfException(exception));
+    }
+    
+    private MiniLargeDataSaveResult putLargeDataThrowing(
+            String variableName, long length, InputStream dataSource) throws InterruptedException, ExecutionException {
+        if (length > Integer.MAX_VALUE) {
+            return new StoredLargeDataSaveResult(false, new StoredError(100, "00100", "Too large data"));
+        }
         
-        // TODO
-        return new StoredLargeDataSaveResult(false, new StoredError(987, "00987", "Hopsz"));
+        ByteString content = ByteString.fromInputStream(dataSource, (int) length);
+        engineSession.state().setUserVariable(variableName, content);
         
+        return new StoredLargeDataSaveResult();
     }
 
     @Override
@@ -81,18 +103,18 @@ public class FrameworkSession implements MiniSession, CheckableCloseable {
     public boolean isClosed() {
         return engineSession.isClosed();
     }
-    
-    private MiniResult resultOfException(Throwable exception) {
+
+    private MiniError errorOfException(Throwable exception) {
         if (!(exception instanceof DatabaseException)) {
             String message = "Unexpected error: " + extractMessage(exception);
-            return new StoredResult(new StoredError(99999, "99999", message));
+            return new StoredError(99999, "99999", message);
         }
         
         DatabaseException databaseException = (DatabaseException) exception;
-        return new StoredResult(new StoredError(
+        return new StoredError(
                 databaseException.code(),
                 databaseException.sqlState(),
-                databaseException.message()));
+                databaseException.message());
     }
     
     private String extractMessage(Throwable exception) {

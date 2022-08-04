@@ -114,12 +114,11 @@ class LargeDataPartial implements Closeable {
         String variableName = headRequest.variableName();
         long fullLength = headRequest.length();
 
-        MiniLargeDataSaveResult result;
         PipedInputStream in = new PipedInputStream();
+        Future<MiniLargeDataSaveResult> resultFuture = largeDataPartExecutorService.submit(
+                () -> session.putLargeData(variableName, fullLength, in));
+        
         try (PipedOutputStream out = new PipedOutputStream(in)) {
-            Future<MiniLargeDataSaveResult> resultFuture = largeDataPartExecutorService.submit(
-                    () -> session.putLargeData(variableName, fullLength, in));
-            
             long writtenOffset = 0L;
             while (writtenOffset < fullLength) {
                 LargeDataPartRequest partRequest = partQueue.take(PART_REQUEST_TIMEOUT_SECONDS, TimeUnit.SECONDS);
@@ -127,18 +126,18 @@ class LargeDataPartial implements Closeable {
                 content.writeTo(out);
                 writtenOffset += content.length();
             }
-            
-            result = resultFuture.get(RESULT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         }
+        
+        MiniLargeDataSaveResult result = resultFuture.get(RESULT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
         
         MiniError error = result.error();
         LargeDataSaveResponse response = new LargeDataSaveResponse(
                 sessionId,
                 exchangeId,
                 result.success(),
-                error.code(),
-                error.sqlState(),
-                error.message());
+                error != null ? error.code() : 0,
+                error != null ? error.sqlState() : "",
+                error != null ? error.message() : "");
         responseConsumer.accept(response);
     }
     

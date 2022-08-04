@@ -91,29 +91,18 @@ public final class ByteString implements Serializable {
     public static ByteString fromInputStream(InputStream inputStream, int size) {
         ByteArrayOutputStream resultBuilder = new ByteArrayOutputStream();
 
-        System.out.println("inputStream class: " + inputStream.getClass());
-        System.out.println("AAAAA");
         int readLength;
         byte[] buffer = new byte[1024];
         try {
-            System.out.println("BBBBB");
             while ((readLength = inputStream.read(buffer, 0, buffer.length)) != -1) {
-                System.out.println("readLength: " + readLength);
                 resultBuilder.write(buffer, 0, readLength);
-                System.out.println("CCCCC");
             }
-            System.out.println("DDDDD");
             resultBuilder.flush();
-            System.out.println("EEEEE");
         } catch (IOException e) {
-            System.out.println("XXXXX");
             throw new UncheckedIOException(e);
         }
-        System.out.println("FFFFF");
         
         byte[] bytes = resultBuilder.toByteArray();
-        System.out.println("GGGGG");
-        System.out.println("bytes: " + Arrays.toString(bytes));
         return wrap(bytes);
     }
 
