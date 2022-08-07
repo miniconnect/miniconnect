@@ -73,7 +73,6 @@ To tell the truth, in practice there is a third one:
 
 For this the `putLargeData()` method can be used:
 
-
 ```java
 // ...
 
@@ -82,13 +81,18 @@ session.putLargeData("mylargedata", 20000L, myDataInputStream);
 // now, your large data is stored in the @mylargedata SQL variable
 ```
 
-At the same time, there are some cons.
-The main difficulty comes with prepared queries.
-Most databases support the `PREPARE FROM` SQL statement,
-while some others, such as H2, just implement JDBC's `prepareStatement()`,
-and have no SQL equivalent.
-The best solution is to supplement the H2 driver with the ability
-to interpret the `PREPARE FROM` query.
+## No prepared statements?
+
+Following the logic of the above approach, on the client side, there is no place for a `prepare()` method in the API.
+If you want to take advantage of the performance and security gains of prepared queries,
+you should do so via the `PREPARE FROM` query.
+There's no point in sparing even the parsing of an `EXECUTE` query.
+
+In the `jdbc` project there are some helper `PreparedStatement` providers
+for RDBMS backends that do not support `PREPARE FROM` queries.
+One of these implementations emulates the execution of prepared queries by using user variables (default)
+and another by manipulating the query.
+Alternatively, as a last resort, you can easily implement `PREPARE FROM` and `EXECUTE` on the server side.
 
 ## Friendly result sets with the `record` project
 
