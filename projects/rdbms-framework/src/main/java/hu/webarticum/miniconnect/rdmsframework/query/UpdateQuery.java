@@ -4,8 +4,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import hu.webarticum.miniconnect.rdmsframework.util.SqlUtil;
-
 public final class UpdateQuery implements Query {
     
     private final String schemaName;
@@ -43,58 +41,6 @@ public final class UpdateQuery implements Query {
     
     public Map<String, Object> where() {
         return new LinkedHashMap<>(where);
-    }
-    
-    
-    @Override
-    public String toString() {
-        StringBuilder resultBuilder = new StringBuilder("UPDATE ");
-        resultBuilder.append(SqlUtil.quoteIdentifier(tableName));
-        appendSetSql(resultBuilder);
-        appendWhereSql(resultBuilder);
-        return resultBuilder.toString();
-    }
-    
-    private void appendSetSql(StringBuilder sqlBuilder) {
-        sqlBuilder.append(" SET");
-        
-        boolean first = true;
-        for (Map.Entry<String, Object> entry : values.entrySet()) {
-            String fieldName = entry.getKey();
-            Object value = entry.getValue();
-            if (first) {
-                first = false;
-            } else {
-                sqlBuilder.append(',');
-            }
-            sqlBuilder.append(' ');
-            sqlBuilder.append(SqlUtil.quoteIdentifier(fieldName));
-            sqlBuilder.append('=');
-            sqlBuilder.append(SqlUtil.stringifyValue(value));
-        }
-    }
-
-    private void appendWhereSql(StringBuilder sqlBuilder) {
-        if (where.isEmpty()) {
-            return;
-        }
-        
-        sqlBuilder.append(" WHERE");
-        
-        boolean first = true;
-        for (Map.Entry<String, Object> entry : where.entrySet()) {
-            String fieldName = entry.getKey();
-            Object value = entry.getValue();
-            if (first) {
-                first = false;
-            } else {
-                sqlBuilder.append(" AND");
-            }
-            sqlBuilder.append(' ');
-            sqlBuilder.append(SqlUtil.quoteIdentifier(fieldName));
-            sqlBuilder.append('=');
-            sqlBuilder.append(SqlUtil.stringifyValue(value));
-        }
     }
     
     

@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
-import hu.webarticum.miniconnect.rdmsframework.util.SqlUtil;
 
 public final class InsertQuery implements Query {
 
@@ -50,51 +49,6 @@ public final class InsertQuery implements Query {
         return values;
     }
     
-    @Override
-    public String toString() {
-        StringBuilder resultBuilder = new StringBuilder("INSERT INTO ");
-        resultBuilder.append(SqlUtil.quoteIdentifier(tableName));
-        appendFieldsSql(resultBuilder);
-        appendValuesSql(resultBuilder);
-        return resultBuilder.toString();
-    }
-    
-    private void appendFieldsSql(StringBuilder sqlBuilder) {
-        if (fields == null) {
-            return;
-        }
-        
-        sqlBuilder.append(" (");
-        
-        boolean first = true;
-        for (String fieldName : fields) {
-            if (first) {
-                first = false;
-            } else {
-                sqlBuilder.append(", ");
-            }
-            sqlBuilder.append(SqlUtil.quoteIdentifier(fieldName));
-        }
-        
-        sqlBuilder.append(")");
-    }
-
-    private void appendValuesSql(StringBuilder sqlBuilder) {
-        sqlBuilder.append(" VALUES (");
-        
-        boolean first = true;
-        for (Object value : values) {
-            if (first) {
-                first = false;
-            } else {
-                sqlBuilder.append(", ");
-            }
-            sqlBuilder.append(SqlUtil.stringifyValue(value));
-        }
-        
-        sqlBuilder.append(")");
-    }
-
     
     public static final class InsertQueryBuilder {
         

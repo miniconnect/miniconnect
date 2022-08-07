@@ -3,6 +3,8 @@ package hu.webarticum.miniconnect.rdmsframework.parser;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStreams;
@@ -63,10 +65,12 @@ import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParse
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.VariableContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.WhereItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.WherePartContext;
-import hu.webarticum.miniconnect.rdmsframework.util.SqlUtil;
 
 public class AntlrSqlParser implements SqlParser {
 
+    private static final Pattern UNQUOTE_PATTERN = Pattern.compile("\\\\(.)");
+    
+    
     @Override
     public Query parse(String sql) {
         SqlQueryLexer lexer = new SqlQueryLexer(CharStreams.fromString(sql));
@@ -433,12 +437,12 @@ public class AntlrSqlParser implements SqlParser {
         
         TerminalNode quotedNameNode = identifierNode.TOKEN_QUOTEDNAME();
         if (quotedNameNode != null) {
-            return SqlUtil.unquoteIdentifier(quotedNameNode.getText());
+            return unquote(quotedNameNode.getText());
         }
         
         TerminalNode backtickedNameNode = identifierNode.TOKEN_BACKTICKEDNAME();
         if (backtickedNameNode != null) {
-            return SqlUtil.unbacktickIdentifier(backtickedNameNode.getText());
+            return unbacktick(backtickedNameNode.getText());
         }
         
         throw new IllegalArgumentException("Invalid identifier: " + identifierNode.getText());
@@ -495,9 +499,21 @@ public class AntlrSqlParser implements SqlParser {
     }
 
     private String parseStringNode(TerminalNode stringNode) {
-        return SqlUtil.unquoteString(stringNode.getText());
+        return unquote(stringNode.getText());
     }
-    
+
+    private static String unquote(String token) {
+        int length = token.length();
+        String innerPart = token.substring(1, length - 1);
+        Matcher matcher = UNQUOTE_PATTERN.matcher(innerPart);
+        return matcher.replaceAll("$1");
+    }
+
+    public static String unbacktick(String token) {
+        int length = token.length();
+        return token.substring(1, length - 1).replace("``", "`");
+    }
+
     
     private static class ParseErrorListener extends BaseErrorListener {
         
