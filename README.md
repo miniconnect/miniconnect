@@ -28,10 +28,10 @@ From a user perspective, `api` is the most interesting.
 
 It's planned to separate some of the sub-projects into their own repositories.
 
-| Subproject | Planned Repo | Description |
+| Subproject | Planned Repository | Description |
 | ---------- | ------------ | ------------|
 | `rdbms-framework` | `minibase` | RDBMS framework built over MiniConnect |
-| `api` | `miniconnect-api` | MiniConnect API |
+| `api`, `lang` | `miniconnect-api` | MiniConnect API |
 
 The biggest advantage of API decoupling is that
 it makes it very easy to create transparent components
