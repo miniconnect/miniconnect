@@ -136,7 +136,7 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
     
     @Override
     public String quoteIdentifier(String identifier) {
-        return "\"" + identifier.replace("\"", "\"\"") + "\"";
+        return "`" + identifier.replace("`", "``") + "`";
     }
     
     @Override
