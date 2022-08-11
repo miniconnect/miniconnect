@@ -81,19 +81,6 @@ session.putLargeData("mylargedata", 20000L, myDataInputStream);
 // now, your large data is stored in the @mylargedata SQL variable
 ```
 
-## No prepared statements?
-
-Following the logic of the above approach, on the client side, there is no place for a `prepare()` method in the API.
-If you want to take advantage of the performance and security gains of prepared queries,
-you should do so via the `PREPARE FROM` query.
-There's no point in sparing even the parsing of an `EXECUTE` query.
-
-In the `jdbc` project there are some helper `PreparedStatement` providers
-for RDBMS backends that do not support `PREPARE FROM` queries.
-One of these implementations emulates the execution of prepared queries by using user variables (default)
-and another by manipulating the query.
-Alternatively, as a last resort, you can easily implement `PREPARE FROM` and `EXECUTE` on the server side.
-
 ## Friendly result sets with the `record` project
 
 The `record` project provides a higher level easy-to-use wrapper over `MiniResultSet`.
@@ -114,6 +101,19 @@ try (MiniSession session = connectionFactory.connect()) {
     }
 }
 ```
+
+## No prepared statements?
+
+Following the logic of the above approach, on the client side, there is no place for a `prepare()` method in the API.
+If you want to take advantage of the performance and security gains of prepared queries,
+you should do so via the `PREPARE FROM` query.
+There's no point in sparing even the parsing of an `EXECUTE` query.
+
+In the `jdbc` project there are some helper `PreparedStatement` providers
+for RDBMS backends that do not support `PREPARE FROM` queries.
+One of these implementations emulates the execution of prepared queries by using user variables (default)
+and another by manipulating the query.
+Alternatively, as a last resort, you can easily implement `PREPARE FROM` and `EXECUTE` on the server side.
 
 ## Database engines
 
