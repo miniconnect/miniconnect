@@ -1,13 +1,9 @@
 package hu.webarticum.miniconnect.repl;
 
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 public class RichAnsiAppendable implements AnsiAppendable {
     
-    private static final Pattern CONTROL_CHAR_PATTERN = Pattern.compile("[\\x{0000}-\\x{0008}\\x{000E}-\\x{001F}]");
-    
-
     private final Appendable baseOut;
     
     
@@ -18,17 +14,13 @@ public class RichAnsiAppendable implements AnsiAppendable {
     
     @Override
     public AnsiAppendable append(CharSequence text) throws IOException {
-        return appendAnsi(escapeText(text));
+        return appendAnsi(AnsiUtil.escapeText(text));
     }
 
     @Override
     public AnsiAppendable appendAnsi(CharSequence ansiText) throws IOException {
         baseOut.append(ansiText);
         return this;
-    }
-
-    private CharSequence escapeText(CharSequence text) {
-        return CONTROL_CHAR_PATTERN.matcher(text).replaceAll("");
     }
 
 }

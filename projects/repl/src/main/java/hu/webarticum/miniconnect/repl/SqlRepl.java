@@ -112,12 +112,12 @@ public class SqlRepl implements Repl {
 
     @Override
     public void prompt(AnsiAppendable out) throws IOException {
-        out.append("SQL > ");
+        out.appendAnsi("" + AnsiUtil.formatAsPrompt("SQL") + AnsiUtil.formatAsPrompt2(" > "));
     }
 
     @Override
     public void prompt2(AnsiAppendable out) throws IOException {
-        out.append("    > ");
+        out.appendAnsi(AnsiUtil.formatAsPrompt2("    > "));
     }
 
     @Override
@@ -169,11 +169,16 @@ public class SqlRepl implements Repl {
     }
 
     private void printResult(MiniResult result, AnsiAppendable out) throws IOException {
-        if (!result.success()) {
+        if (result.success()) {
+            printSuccessResult(result, out);
+        } else {
             printError(result.error(), out);
-            return;
         }
+    }
 
+    private void printSuccessResult(MiniResult result, AnsiAppendable out) throws IOException {
+        out.appendAnsi("\n  " + AnsiUtil.formatAsSuccess("Query was successfully executed!") + "\n");
+        
         ResultTable resultTable = new ResultTable(result.resultSet());
         new ResultSetPrinter().print(resultTable, out);
     }
@@ -204,16 +209,16 @@ public class SqlRepl implements Repl {
     }
 
     private void printSuccessLargeDataSaveResult(String name, long length, AnsiAppendable out) throws IOException {
-        out.append("  Successfully stored\n");
+        out.appendAnsi("  " + AnsiUtil.formatAsSuccess("Successfully stored") + "\n");
         out.append("  Size: " + length + " bytes\n");
         out.append("  Variable name: '" + name + "'\n");
     }
 
     private void printError(MiniError error, AnsiAppendable out) throws IOException {
-        out.append("  ERROR!\n");
+        out.appendAnsi("  " + AnsiUtil.formatAsError("ERROR!") + "\n");
         out.append("  Code: " + error.code() + "\n");
-        out.append("  SQL state: '" + error.sqlState() + "'\n");
-        out.append("  Message: '" + error.message() + "'\n");
+        out.append("  SQL state: " + error.sqlState() + "\n");
+        out.appendAnsi("  Message: " + AnsiUtil.formatAsError(error.message()) + "\n");
     }
     
     private void printHelp(AnsiAppendable out) throws IOException {
