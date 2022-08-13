@@ -23,4 +23,5 @@ dependencies {
     implementation project(':impl')
     implementation project(':record')
     implementation 'hu.webarticum:regexbee:0.3.0'
+    implementation 'org.jline:jline:3.21.0'
 }

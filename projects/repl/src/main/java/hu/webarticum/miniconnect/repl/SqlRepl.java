@@ -91,49 +91,46 @@ public class SqlRepl implements Repl {
 
     private final MiniSession session;
 
-    private final Appendable out;
 
-
-    public SqlRepl(MiniSession session, Appendable out) {
+    public SqlRepl(MiniSession session) {
         this.session = session;
-        this.out = out;
     }
 
 
     @Override
-    public Pattern commandPattern() {
-        return COMMAND_PATTERN;
+    public boolean isCommandComplete(String command) {
+        return COMMAND_PATTERN.matcher(command).matches();
     }
 
     @Override
-    public void welcome() throws IOException {
+    public void welcome(AnsiAppendable out) throws IOException {
         out.append("\nWelcome in miniConnect SQL REPL!\n\n");
     }
 
     @Override
-    public void prompt() throws IOException {
+    public void prompt(AnsiAppendable out) throws IOException {
         out.append("SQL > ");
     }
 
     @Override
-    public void prompt2() throws IOException {
+    public void prompt2(AnsiAppendable out) throws IOException {
         out.append("    > ");
     }
 
     @Override
-    public boolean execute(String command) throws IOException {
+    public boolean execute(String command, AnsiAppendable out) throws IOException {
         Matcher dataMatcher = DATA_PATTERN.matcher(command);
         if (dataMatcher.matches()) {
             String escapedName = dataMatcher.group("name");
             String name = UNESCAPE_PATTERN.matcher(escapedName).replaceAll("$1");
             String escapedSource = dataMatcher.group("source");
             String source = UNESCAPE_PATTERN.matcher(escapedSource).replaceAll("$1");
-            putLargeData(name, source);
+            putLargeData(name, source, out);
             return true;
         }
         
         if (HELP_PATTERN.matcher(command).matches()) {
-            printHelp();
+            printHelp(out);
             return true;
         }
 
@@ -145,17 +142,17 @@ public class SqlRepl implements Repl {
         try {
             result = session.execute(command);
         } catch (Exception e) {
-            printException(e);
+            printException(e, out);
         }
         
         if (result != null) {
-            printResult(result);
+            printResult(result, out);
         }
 
         return true;
     }
 
-    private void printException(Exception e) throws IOException {
+    private void printException(Exception e, AnsiAppendable out) throws IOException {
         String message = e.getMessage();
         if (message == null || message.isEmpty()) {
             message = e.getClass().getName();
@@ -164,9 +161,9 @@ public class SqlRepl implements Repl {
         out.append('\n');
     }
 
-    private void printResult(MiniResult result) throws IOException {
+    private void printResult(MiniResult result, AnsiAppendable out) throws IOException {
         if (!result.success()) {
-            printError(result.error());
+            printError(result.error(), out);
             return;
         }
 
@@ -174,7 +171,7 @@ public class SqlRepl implements Repl {
         new ResultSetPrinter().print(resultTable, out);
     }
     
-    private void putLargeData(String name, String source) throws IOException {
+    private void putLargeData(String name, String source, AnsiAppendable out) throws IOException {
         long length;
         InputStream in;
         if (source.length() > 0 && source.charAt(0) == '@') {
@@ -187,32 +184,32 @@ public class SqlRepl implements Repl {
             in = new ByteArrayInputStream(bytes);
         }
         MiniLargeDataSaveResult result = session.putLargeData(name, length, in);
-        printLargeDataSaveResult(result, name, length);
+        printLargeDataSaveResult(result, name, length, out);
     }
     
     private void printLargeDataSaveResult(
-            MiniLargeDataSaveResult result, String name, long length) throws IOException {
+            MiniLargeDataSaveResult result, String name, long length, AnsiAppendable out) throws IOException {
         if (result.success()) {
-            printSuccessLargeDataSaveResult(name, length);
+            printSuccessLargeDataSaveResult(name, length, out);
         } else {
-            printError(result.error());
+            printError(result.error(), out);
         }
     }
 
-    private void printSuccessLargeDataSaveResult(String name, long length) throws IOException {
+    private void printSuccessLargeDataSaveResult(String name, long length, AnsiAppendable out) throws IOException {
         out.append("  Successfully stored\n");
         out.append("  Size: " + length + " bytes\n");
         out.append("  Variable name: '" + name + "'\n");
     }
 
-    private void printError(MiniError error) throws IOException {
+    private void printError(MiniError error, AnsiAppendable out) throws IOException {
         out.append("  ERROR!\n");
         out.append("  Code: " + error.code() + "\n");
         out.append("  SQL state: '" + error.sqlState() + "'\n");
         out.append("  Message: '" + error.message() + "'\n");
     }
     
-    private void printHelp() throws IOException {
+    private void printHelp(AnsiAppendable out) throws IOException {
         out.append('\n');
         out.append(String.format("  MiniConnect SQL REPL - %s%n",
                 session.getClass().getSimpleName()));
@@ -228,7 +225,7 @@ public class SqlRepl implements Repl {
     }
 
     @Override
-    public void bye() throws IOException {
+    public void bye(AnsiAppendable out) throws IOException {
         out.append("\nBye-bye!\n\n");
     }
 

@@ -8,7 +8,7 @@ import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniSessionManager;
 import hu.webarticum.miniconnect.messenger.adapter.MessengerSessionManager;
 import hu.webarticum.miniconnect.repl.Repl;
-import hu.webarticum.miniconnect.repl.ReplRunner;
+import hu.webarticum.miniconnect.repl.PlainReplRunner;
 import hu.webarticum.miniconnect.repl.SqlRepl;
 import hu.webarticum.miniconnect.server.ClientMessenger;
 import hu.webarticum.miniconnect.server.ServerConstants;
@@ -30,10 +30,8 @@ public class DatabaseClientDemoMain {
         try (ClientMessenger clientMessenger = new ClientMessenger(host, port)) {
             MiniSessionManager sessionManager = new MessengerSessionManager(clientMessenger);
             try (MiniSession session = sessionManager.openSession()) {
-                Repl repl = new SqlRepl(
-                        session,
-                        System.out); // NOSONAR
-                new ReplRunner(repl, System.in).run();
+                Repl repl = new SqlRepl(session);
+                new PlainReplRunner(System.in, System.out).run(repl); // NOSONAR System.out is necessary
             }
         }
     }

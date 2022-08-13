@@ -8,7 +8,7 @@ import hu.webarticum.miniconnect.jdbcadapter.JdbcAdapterSessionManager;
 import hu.webarticum.miniconnect.jdbcadapter.JdbcLargeDataPutter;
 import hu.webarticum.miniconnect.jdbcadapter.SimpleJdbcLargeDataPutter;
 import hu.webarticum.miniconnect.repl.Repl;
-import hu.webarticum.miniconnect.repl.ReplRunner;
+import hu.webarticum.miniconnect.repl.PlainReplRunner;
 import hu.webarticum.miniconnect.repl.SqlRepl;
 
 public class H2TestMain {
@@ -22,7 +22,7 @@ public class H2TestMain {
     private static final String SET_STATEMENT = "SET @%s = ?";
     
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         runRepl(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD, SET_STATEMENT);
     }
     
@@ -31,10 +31,8 @@ public class H2TestMain {
         MiniSessionManager sessionManager = new JdbcAdapterSessionManager(
                 url, username, password, largeDataPutterFactory);
         try (MiniSession session = sessionManager.openSession()) {
-            Repl repl = new SqlRepl(
-                    session,
-                    System.out); // NOSONAR
-            new ReplRunner(repl, System.in).run();
+            Repl repl = new SqlRepl(session);
+            new PlainReplRunner(System.in, System.out).run(repl); // NOSONAR System.out is necessary
         }
     }
     
