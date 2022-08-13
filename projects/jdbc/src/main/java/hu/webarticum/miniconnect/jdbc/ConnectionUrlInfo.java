@@ -1,5 +1,6 @@
 package hu.webarticum.miniconnect.jdbc;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -103,12 +104,21 @@ public class ConnectionUrlInfo {
         if (propertiesPart != null) {
             Matcher propertyMatcher = URL_PROPERTY_GROUPED_PATTERN.matcher(propertiesPart);
             while (propertyMatcher.find()) {
-                String key = URLDecoder.decode(propertyMatcher.group(KEY_GROUPNAME), StandardCharsets.UTF_8);
-                String value = URLDecoder.decode(propertyMatcher.group(VALUE_GROUPNAME), StandardCharsets.UTF_8);
+                String key = urldecode(propertyMatcher.group(KEY_GROUPNAME));
+                String value = urldecode(propertyMatcher.group(VALUE_GROUPNAME));
                 propertiesBuilder.put(key, value);
             }
         }
         return new ConnectionUrlInfo(host, port, schema, ImmutableMap.fromMap(propertiesBuilder));
+    }
+    
+    private static String urldecode(String value) {
+        try {
+            return URLDecoder.decode(value, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            // could not be occured
+            return value;
+        }
     }
     
 

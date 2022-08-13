@@ -1,7 +1,5 @@
 package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 
-import java.util.Objects;
-
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.impl.result.StoredError;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
@@ -50,7 +48,8 @@ public class SelectSpecialExecutor implements QueryExecutor {
     }
 
     private MiniResult createResult(String alias, String autoColumnName, Object content) {
-        return ResultUtil.createSingleValueResult(Objects.requireNonNullElse(alias, autoColumnName), content);
+        String columnName = alias != null ? alias : autoColumnName;
+        return ResultUtil.createSingleValueResult(columnName, content);
     }
     
 }
