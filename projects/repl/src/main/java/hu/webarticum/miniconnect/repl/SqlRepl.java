@@ -99,6 +99,9 @@ public class SqlRepl implements Repl {
 
     @Override
     public boolean isCommandComplete(String command) {
+        if (command.isEmpty()) {
+            return true;
+        }
         return COMMAND_PATTERN.matcher(command).matches();
     }
 
@@ -119,6 +122,10 @@ public class SqlRepl implements Repl {
 
     @Override
     public boolean execute(String command, AnsiAppendable out) throws IOException {
+        if (command.isEmpty()) {
+            return true;
+        }
+        
         Matcher dataMatcher = DATA_PATTERN.matcher(command);
         if (dataMatcher.matches()) {
             String escapedName = dataMatcher.group("name");

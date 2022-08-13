@@ -4,18 +4,6 @@ plugins {
 
 description "MiniConnect implementation backed by JDBC"
 
-sourceSets {
-    lab {
-        compileClasspath += sourceSets.main.runtimeClasspath
-        runtimeClasspath += sourceSets.main.runtimeClasspath
-    }
-}
-
-configurations {
-    labImplementation.extendsFrom implementation
-    labRuntimeOnly.extendsFrom runtimeOnly
-}
-
 dependencies {
     api project(':api')
     api project(':lang')
@@ -29,7 +17,4 @@ dependencies {
     testImplementation 'org.junit.platform:junit-platform-launcher:1.7.1'
     testImplementation 'org.assertj:assertj-core:3.19.0'
 	testImplementation 'com.h2database:h2:1.4.200'
-    
-    labImplementation project(':repl')
-	labImplementation 'com.h2database:h2:1.4.200'
 }

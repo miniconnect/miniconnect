@@ -4,18 +4,6 @@ plugins {
 
 description "Lightweight and transparent MiniConnect server and client"
 
-sourceSets {
-    lab {
-        compileClasspath += sourceSets.main.runtimeClasspath
-        runtimeClasspath += sourceSets.main.runtimeClasspath
-    }
-}
-
-configurations {
-    labImplementation.extendsFrom implementation
-    labRuntimeOnly.extendsFrom runtimeOnly
-}
-
 dependencies {
     api project(':lang')
     api project(':messenger')
@@ -29,11 +17,4 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.7.1'
     testImplementation 'org.junit.platform:junit-platform-launcher:1.7.1'
     testImplementation 'org.assertj:assertj-core:3.19.0'
-    
-    labImplementation project(':jdbc-adapter')
-    labImplementation project(':repl')
-	labImplementation 'com.h2database:h2:1.4.200'
-	labImplementation 'mysql:mysql-connector-java:8.0.28'
-    labImplementation 'org.apache.logging.log4j:log4j-core:2.17.1'
-    labImplementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.1'
 }

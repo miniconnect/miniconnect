@@ -1,6 +1,12 @@
 plugins {
     id 'java-library'
+    id 'application'
+    id 'eclipse'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 description "MiniConnect REPL"
 
@@ -22,6 +28,17 @@ dependencies {
     
     implementation project(':impl')
     implementation project(':record')
+    implementation project(':messenger')
+    implementation project(':server')
+    
     implementation 'hu.webarticum:regexbee:0.3.0'
     implementation 'org.jline:jline:3.21.0'
+}
+
+application {
+    mainClass = "hu.webarticum.miniconnect.repl.ClientMain"
+}
+
+run {
+    standardInput = System.in
 }

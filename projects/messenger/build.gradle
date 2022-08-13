@@ -32,6 +32,4 @@ dependencies {
     testImplementation 'org.junit.platform:junit-platform-launcher:1.7.1'
     testImplementation 'org.assertj:assertj-core:3.19.0'
 	testImplementation 'com.h2database:h2:1.4.200'
-	
-    labImplementation project(':repl')
 }
