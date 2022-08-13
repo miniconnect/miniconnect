@@ -10,11 +10,17 @@ public class AnsiUtil {
     
     private static final String PROMPT_START_ANSI = "\u001B[1;34m";
 
-    private static final String PROMPT2_START_ANSI = "\u001B[0;33m";
+    private static final String PROMPT2_START_ANSI = "\u001B[1m";
 
     private static final String SUCCESS_START_ANSI = "\u001B[1;32m";
 
     private static final String ERROR_START_ANSI = "\u001B[1;31m";
+
+    private static final String HEADER_START_ANSI = "\u001B[1m";
+
+    private static final String PARAMETER_START_ANSI = "\u001B[3;33m";
+
+    private static final String NONE_START_ANSI = "\u001B[3;90m";
     
     private static final String RESET_ANSI = "\u001B[0m";
 
@@ -46,6 +52,18 @@ public class AnsiUtil {
 
     public static CharSequence formatAsError(CharSequence promptText) {
         return ERROR_START_ANSI + promptText + RESET_ANSI;
+    }
+
+    public static CharSequence formatAsHeader(CharSequence promptText) {
+        return HEADER_START_ANSI + promptText + RESET_ANSI;
+    }
+
+    public static CharSequence formatAsParameter(CharSequence promptText) {
+        return PARAMETER_START_ANSI + promptText + RESET_ANSI;
+    }
+
+    public static CharSequence formatAsNone(CharSequence promptText) {
+        return NONE_START_ANSI + promptText + RESET_ANSI;
     }
 
 }

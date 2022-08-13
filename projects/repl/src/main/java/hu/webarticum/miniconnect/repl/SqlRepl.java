@@ -97,6 +97,31 @@ public class SqlRepl implements Repl {
     }
 
 
+    public static void printHelp(AnsiAppendable out) throws IOException {
+        out.append("\n  ");
+        out.appendAnsi(AnsiUtil.formatAsHeader("MiniConnect SQL REPL"));
+        out.append("\n\n  ");
+        out.appendAnsi(AnsiUtil.formatAsHeader("Commands:"));
+        out.append("\n    ");
+        out.appendAnsi(AnsiUtil.formatAsHeader("help"));
+        out.append("                 prints this document\n    ");
+        out.appendAnsi(
+                AnsiUtil.formatAsHeader("data") +
+                ":" + AnsiUtil.formatAsParameter("<name>") +
+                ":" + AnsiUtil.formatAsParameter("<data>"));
+        out.append("   sends large data\n    ");
+        out.appendAnsi(
+                AnsiUtil.formatAsHeader("data") +
+                ":" + AnsiUtil.formatAsParameter("<name>") +
+                ":@" + AnsiUtil.formatAsParameter("<file>"));
+        out.append("  sends large data from file\n    ");
+        out.appendAnsi(AnsiUtil.formatAsHeader("exit") + ", " + AnsiUtil.formatAsHeader("quit"));
+        out.append("           quits this program\n    ");
+        out.appendAnsi(AnsiUtil.formatAsParameter("<any SQL>"));
+        out.append("            will be executed in the session\n\n");
+    }
+
+    
     @Override
     public boolean isCommandComplete(String command) {
         if (command.isEmpty()) {
@@ -221,21 +246,6 @@ public class SqlRepl implements Repl {
         out.appendAnsi("  Message: " + AnsiUtil.formatAsError(error.message()) + "\n");
     }
     
-    private void printHelp(AnsiAppendable out) throws IOException {
-        out.append('\n');
-        out.append(String.format("  MiniConnect SQL REPL - %s%n",
-                session.getClass().getSimpleName()));
-        out.append('\n');
-        out.append("  Commands:\n");
-        out.append("    \"help\": prints this document\n");
-        out.append("    \"data:\"<name>\":\"<data>: sends large data\n");
-        out.append("    \"data:\"<name>\":@\"<file>: sends large data from file\n");
-        out.append("    \"exit\", \"quit\": quits this program\n");
-        out.append("    <any SQL>: will be executed in the session\n");
-        out.append("      (must be terminated with \";\")\n");
-        out.append('\n');
-    }
-
     @Override
     public void bye(AnsiAppendable out) throws IOException {
         out.append("\nBye-bye!\n\n");
