@@ -20,6 +20,8 @@ public class AnsiUtil {
 
     private static final String PARAMETER_START_ANSI = "\u001B[3;33m";
 
+    private static final String NUMBER_START_ANSI = "\u001B[1;96m";
+    
     private static final String NONE_START_ANSI = "\u001B[3;90m";
     
     private static final String RESET_ANSI = "\u001B[0m";
@@ -30,39 +32,43 @@ public class AnsiUtil {
     }
     
 
-    public static CharSequence cleanAnsiText(CharSequence ansiText) {
+    public static String cleanAnsiText(CharSequence ansiText) {
         return ANSI_ESCAPE_PATTERN.matcher(ansiText).replaceAll("");
     }
 
-    public static CharSequence escapeText(CharSequence text) {
+    public static String escapeText(CharSequence text) {
         return CONTROL_CHAR_PATTERN.matcher(text).replaceAll("");
     }
 
-    public static CharSequence formatAsPrompt(CharSequence promptText) {
+    public static String formatAsPrompt(CharSequence promptText) {
         return PROMPT_START_ANSI + promptText + RESET_ANSI;
     }
 
-    public static CharSequence formatAsPrompt2(CharSequence promptText) {
+    public static String formatAsPrompt2(CharSequence promptText) {
         return PROMPT2_START_ANSI + promptText + RESET_ANSI;
     }
 
-    public static CharSequence formatAsSuccess(CharSequence promptText) {
+    public static String formatAsSuccess(CharSequence promptText) {
         return SUCCESS_START_ANSI + promptText + RESET_ANSI;
     }
 
-    public static CharSequence formatAsError(CharSequence promptText) {
+    public static String formatAsError(CharSequence promptText) {
         return ERROR_START_ANSI + promptText + RESET_ANSI;
     }
 
-    public static CharSequence formatAsHeader(CharSequence promptText) {
+    public static String formatAsHeader(CharSequence promptText) {
         return HEADER_START_ANSI + promptText + RESET_ANSI;
     }
 
-    public static CharSequence formatAsParameter(CharSequence promptText) {
+    public static String formatAsParameter(CharSequence promptText) {
         return PARAMETER_START_ANSI + promptText + RESET_ANSI;
     }
 
-    public static CharSequence formatAsNone(CharSequence promptText) {
+    public static String formatAsNumber(CharSequence promptText) {
+        return NUMBER_START_ANSI + promptText + RESET_ANSI;
+    }
+
+    public static String formatAsNone(CharSequence promptText) {
         return NONE_START_ANSI + promptText + RESET_ANSI;
     }
 

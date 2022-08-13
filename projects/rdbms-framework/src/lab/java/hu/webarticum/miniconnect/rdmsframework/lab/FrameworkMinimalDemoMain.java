@@ -23,6 +23,7 @@ import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleTable;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleResourceManager;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleSchema;
 import hu.webarticum.miniconnect.record.ResultTable;
+import hu.webarticum.miniconnect.repl.PlainAnsiAppendable;
 import hu.webarticum.miniconnect.repl.ResultSetPrinter;
 
 public class FrameworkMinimalDemoMain {
@@ -49,7 +50,7 @@ public class FrameworkMinimalDemoMain {
                 System.out.println(result.error().message());
             } else {
                 System.out.println("OK");
-                new ResultSetPrinter().print(new ResultTable(result.resultSet()), System.out);
+                new ResultSetPrinter().print(new ResultTable(result.resultSet()), new PlainAnsiAppendable(System.out));
             }
         }
     }
