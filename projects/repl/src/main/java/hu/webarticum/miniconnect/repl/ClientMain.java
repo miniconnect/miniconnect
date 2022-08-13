@@ -38,6 +38,10 @@ public class ClientMain {
     }
 
     private static ReplRunner createReplRunner() {
+        if (System.console() != null) {
+            return new RichReplRunner();
+        }
+        
         return new PlainReplRunner(System.in, System.out); // NOSONAR System.out is necessary
     }
 
