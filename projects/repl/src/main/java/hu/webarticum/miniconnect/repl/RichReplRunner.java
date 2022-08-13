@@ -8,6 +8,7 @@ import org.jline.reader.History;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.ParsedLine;
+import org.jline.reader.UserInterruptException;
 import org.jline.reader.impl.DefaultParser;
 import org.jline.reader.impl.history.DefaultHistory;
 import org.jline.terminal.Terminal;
@@ -36,7 +37,12 @@ public class RichReplRunner implements ReplRunner {
             LineReader reader = createLineReader(terminal);
             while (true) { // NOSONAR
                 String prompt = composePrompt(repl);
-                String line = reader.readLine(prompt);
+                String line;
+                try {
+                    line = reader.readLine(prompt);
+                } catch (UserInterruptException e) {
+                    break;
+                }
 
                 currentQueryBuilder.append(line);
                 String query = currentQueryBuilder.toString();
