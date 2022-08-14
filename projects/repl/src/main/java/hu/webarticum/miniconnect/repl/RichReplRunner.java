@@ -1,13 +1,10 @@
 package hu.webarticum.miniconnect.repl;
 
 import java.io.IOException;
-import java.util.List;
 
-import org.jline.reader.Candidate;
 import org.jline.reader.History;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
-import org.jline.reader.ParsedLine;
 import org.jline.reader.UserInterruptException;
 import org.jline.reader.impl.DefaultParser;
 import org.jline.reader.impl.history.DefaultHistory;
@@ -76,15 +73,9 @@ public class RichReplRunner implements ReplRunner {
                 .terminal(terminal)
                 .parser(parser)
                 .history(history)
-                .completer(this::complete)
                 .build();
     }
 
-    private void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
-        String lineStr = line.line();
-        candidates.add(new Candidate(lineStr + lineStr));
-    }
-    
     private String composePrompt(Repl repl) throws IOException {
         StringBuilder promptBuilder = new StringBuilder();
         AnsiAppendable promptOut = new RichAnsiAppendable(promptBuilder);
