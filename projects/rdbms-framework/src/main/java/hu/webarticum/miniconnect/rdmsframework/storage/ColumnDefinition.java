@@ -9,6 +9,8 @@ public interface ColumnDefinition {
     
     public boolean isNullable();
     
+    public boolean isUnique();
+    
     public boolean isAutoIncremented();
     
     // FIXME: Comparator<Object> ?

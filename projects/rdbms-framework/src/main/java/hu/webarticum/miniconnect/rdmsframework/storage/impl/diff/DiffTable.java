@@ -111,9 +111,154 @@ public class DiffTable extends AbstractTableDecorator {
 
     @Override
     public void applyPatch(TablePatch patch) {
+        checkNullsInPatch(patch);
+        checkUniqueInPatch(patch);
+        
         insertedRows.addAll(patch.insertedRows());
         applyUpdates(patch.updates());
         applyDeletions(patch.deletions());
+    }
+
+    private void checkNullsInPatch(TablePatch patch) {
+        ImmutableList<String> columnNames = columnStore.names();
+        ImmutableList<ColumnDefinition> columnDefinitions = columnStore.resources().map(Column::definition);
+        
+        Set<Integer> nonNullableColumnIndices = new HashSet<>();
+        int columnCount = columnNames.size();
+        for (int i = 0; i < columnCount; i++) {
+            if (!columnDefinitions.get(i).isNullable()) {
+                nonNullableColumnIndices.add(i);
+            }
+        }
+        if (nonNullableColumnIndices.isEmpty()) {
+            return;
+        }
+        
+        for (ImmutableMap<Integer, Object> rowUpdates : patch.updates().values()) {
+            for (Map.Entry<Integer, Object> updateEntry : rowUpdates.entrySet()) {
+                Integer columnIndex = updateEntry.getKey();
+                if (nonNullableColumnIndices.contains(columnIndex) && updateEntry.getValue() == null) {
+                    String columnName = columnNames.get(columnIndex);
+                    throw new IllegalArgumentException("NULL update for non nullable column: " + columnName);
+                }
+            }
+        }
+
+        for (ImmutableList<Object> insertedRow : patch.insertedRows()) {
+            for (Integer columnIndex : nonNullableColumnIndices) {
+                if (insertedRow.get(columnIndex) == null) {
+                    String columnName = columnNames.get(columnIndex);
+                    throw new IllegalArgumentException("NULL insert for non nullable column: " + columnName);
+                }
+            }
+        }
+    }
+
+    private void checkUniqueInPatch(TablePatch patch) {
+        ImmutableList<ColumnDefinition> columnDefinitions = columnStore.resources().map(Column::definition);
+        Map<Integer, Set<Object>> uniqueColumnValues = new HashMap<>();
+        int columnCount = columnDefinitions.size();
+        for (int i = 0; i < columnCount; i++) {
+            ColumnDefinition columnDefinition = columnDefinitions.get(i);
+            if (columnDefinition.isUnique()) {
+                @SuppressWarnings("unchecked")
+                Comparator<Object> comparator = (Comparator<Object>) columnDefinition.comparator();
+                uniqueColumnValues.put(i, new TreeSet<>(comparator));
+            }
+        }
+        if (uniqueColumnValues.isEmpty()) {
+            return;
+        }
+
+        for (ImmutableMap<Integer, Object> rowUpdates : patch.updates().values()) {
+            for (Map.Entry<Integer, Object> updateEntry : rowUpdates.entrySet()) {
+                checkAndAddUniqueValue(updateEntry.getKey(), updateEntry.getValue(), uniqueColumnValues);
+            }
+        }
+        for (ImmutableList<Object> insertedRow : patch.insertedRows()) {
+            for (Integer columnIndex : uniqueColumnValues.keySet()) {
+                checkAndAddUniqueValue(columnIndex, insertedRow.get(columnIndex), uniqueColumnValues);
+            }
+        }
+        
+        for (Map.Entry<Integer, Set<Object>> entry : uniqueColumnValues.entrySet()) {
+            checkUniqueColumnPatch(entry.getKey(), entry.getValue(), patch);
+        }
+    }
+    
+    private void checkUniqueColumnPatch(int columnIndex, Set<Object> newValues, TablePatch patch) {
+        if (newValues.isEmpty()) {
+            return;
+        }
+        
+        String columnName = columnStore.resources().get(columnIndex).name();
+        ImmutableList<String> columnNameList = ImmutableList.of(columnName);
+        TableIndex index = null;
+        for (TableIndex potentialIndex : indexStore.resources()) {
+            if (potentialIndex.columnNames().equals(columnNameList)) {
+                index = potentialIndex;
+                break;
+            }
+        }
+        if (index != null) {
+            checkUniqueColumnPatchWithIndex(columnIndex, newValues, patch, index);
+        } else {
+            checkUniqueColumnPatchWithFullTableScan(columnIndex, newValues, patch);
+        }
+    }
+
+    private void checkUniqueColumnPatchWithIndex(
+            Integer columnIndex, Set<Object> newValues, TablePatch patch, TableIndex index) {
+        String columnName = columnStore.resources().get(columnIndex).name();
+        for (Object newValue : newValues) {
+            TableSelection selection = index.find(newValue);
+            for (BigInteger rowIndex : selection) {
+                if (!isFieldUpdatedIn(rowIndex, columnIndex, patch)) {
+                    throw new IllegalArgumentException(
+                            "Already existing value given for unique column " + columnName + ": '" + newValue + "'");
+                }
+            }
+        }
+    }
+
+    private void checkUniqueColumnPatchWithFullTableScan(Integer columnIndex, Set<Object> newValues, TablePatch patch) {
+        String columnName = columnStore.resources().get(columnIndex).name();
+        BigInteger tableSize = size();
+        for (
+                BigInteger rowIndex = BigInteger.ZERO;
+                rowIndex.compareTo(tableSize) < 0;
+                rowIndex = rowIndex.add(BigInteger.ONE)) {
+            if (!isFieldUpdatedIn(rowIndex, columnIndex, patch)) {
+                Object value = row(rowIndex).get(columnIndex);
+                if (newValues.contains(value)) {
+                    throw new IllegalArgumentException(
+                            "Already existing value given for unique column " + columnName + ": '" + value + "'");
+                }
+            }
+        }
+    }
+    
+    private boolean isFieldUpdatedIn(BigInteger rowIndex, Integer columnIndex, TablePatch patch) {
+        if (patch.deletions().contains(rowIndex)) {
+            return true;
+        }
+        
+        ImmutableMap<Integer, Object> updatedRow = patch.updates().get(rowIndex);
+        return updatedRow != null && updatedRow.containsKey(columnIndex);
+    }
+    
+    private void checkAndAddUniqueValue(
+            int columnIndex, Object newValue, Map<Integer, Set<Object>> uniqueColumnValues) {
+        if (newValue == null) {
+            return;
+        }
+        
+        Set<Object> values = uniqueColumnValues.get(columnIndex);
+        if (values != null && !values.add(newValue)) {
+            String columnName = columnStore.resources().get(columnIndex).name();
+            throw new IllegalArgumentException(
+                    "Already existing value given for unique column " + columnName + ": '" + newValue + "'");
+        }
     }
     
     private void applyUpdates(

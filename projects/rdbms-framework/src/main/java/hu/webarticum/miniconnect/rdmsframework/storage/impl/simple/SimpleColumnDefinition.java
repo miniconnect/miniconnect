@@ -8,8 +8,10 @@ import hu.webarticum.miniconnect.rdmsframework.util.ComparatorUtil;
 public class SimpleColumnDefinition implements ColumnDefinition {
     
     private final Class<?> clazz;
-    
+
     private final boolean nullable;
+
+    private final boolean unique;
     
     private final boolean autoIncremented;
     
@@ -23,18 +25,24 @@ public class SimpleColumnDefinition implements ColumnDefinition {
     public SimpleColumnDefinition(Class<?> clazz) {
         this(clazz, true);
     }
-    
+
     public SimpleColumnDefinition(Class<?> clazz, boolean nullable) {
         this(clazz, nullable, false);
     }
 
-    public SimpleColumnDefinition(Class<?> clazz, boolean nullable, boolean autoIncremented) {
-        this(clazz, nullable, autoIncremented, null);
+    public SimpleColumnDefinition(Class<?> clazz, boolean nullable, boolean unique) {
+        this(clazz, nullable, unique, false);
+    }
+
+    public SimpleColumnDefinition(Class<?> clazz, boolean nullable, boolean unique, boolean autoIncremented) {
+        this(clazz, nullable, unique, autoIncremented, null);
     }
     
-    public SimpleColumnDefinition(Class<?> clazz, boolean nullable, boolean autoIncremented, Comparator<?> comparator) {
+    public SimpleColumnDefinition(
+            Class<?> clazz, boolean nullable, boolean unique, boolean autoIncremented, Comparator<?> comparator) {
         this.clazz = clazz;
         this.nullable = nullable;
+        this.unique = unique;
         this.autoIncremented = autoIncremented;
         this.comparator = comparator != null ? comparator : ComparatorUtil.createDefaultComparatorFor(clazz);
     }
@@ -44,10 +52,15 @@ public class SimpleColumnDefinition implements ColumnDefinition {
     public Class<?> clazz() {
         return clazz;
     }
-    
+
     @Override
     public boolean isNullable() {
         return nullable;
+    }
+
+    @Override
+    public boolean isUnique() {
+        return unique;
     }
     
     @Override

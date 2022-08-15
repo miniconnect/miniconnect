@@ -21,20 +21,20 @@ class DiffTableTest extends AbstractWritableTableTest {
         DiffTable diffTable = new DiffTable(baseTable);
         
         TablePatch patch1 = TablePatch.builder()
-                .insert(ImmutableList.of(5, "AAA", true))
-                .insert(ImmutableList.of(6, "BBB", false))
-                .insert(ImmutableList.of(7, "CCC", true))
-                .update(BigInteger.valueOf(2L), ImmutableMap.of(1, "UUU"))
-                .update(BigInteger.valueOf(3L), ImmutableMap.of(1, "VVV"))
+                .insert(ImmutableList.of(big(11), "AAA", true))
+                .insert(ImmutableList.of(big(12), "BBB", false))
+                .insert(ImmutableList.of(big(13), "CCC", true))
+                .update(big(2), ImmutableMap.of(1, "UUU"))
+                .update(big(3), ImmutableMap.of(1, "VVV"))
                 .delete(BigInteger.ZERO)
                 .build();
         diffTable.applyPatch(patch1);
 
         TablePatch patch2 = TablePatch.builder()
-                .insert(ImmutableList.of(8, "XXX", true))
-                .update(BigInteger.ONE, ImmutableMap.of(1, "uuuu", 2, false))
-                .delete(BigInteger.ZERO)
-                .delete(BigInteger.valueOf(3L))
+                .insert(ImmutableList.of(big(14), "XXX", true))
+                .update(big(1), ImmutableMap.of(1, "uuuu", 2, false))
+                .delete(big(0))
+                .delete(big(3))
                 .build();
         diffTable.applyPatch(patch2);
 

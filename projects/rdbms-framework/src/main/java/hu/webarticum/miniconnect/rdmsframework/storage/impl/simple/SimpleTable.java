@@ -4,11 +4,15 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
@@ -101,9 +105,9 @@ public class SimpleTable implements Table {
 
     @Override
     public synchronized void applyPatch(TablePatch patch) {
-        if (!writable) {
-            throw new UnsupportedOperationException("This table is read-only");
-        }
+        checkWritable();
+        checkNullsInPatch(patch);
+        checkUniqueInPatch(patch);
         
         rows.addAll(patch.insertedRows());
         
@@ -120,6 +124,103 @@ public class SimpleTable implements Table {
         while (deletionsIterator.hasNext()) {
             int deletedRowIndex = deletionsIterator.next().intValueExact();
             rows.remove(deletedRowIndex);
+        }
+    }
+    
+    private void checkWritable() {
+        if (!writable) {
+            throw new UnsupportedOperationException("This table is read-only");
+        }
+    }
+
+    private void checkNullsInPatch(TablePatch patch) {
+        Set<Integer> nonNullableColumnIndices = new HashSet<>();
+        int columnCount = columnNames.size();
+        for (int i = 0; i < columnCount; i++) {
+            if (!columnDefinitions.get(columnNames.get(i)).isNullable()) {
+                nonNullableColumnIndices.add(i);
+            }
+        }
+        if (nonNullableColumnIndices.isEmpty()) {
+            return;
+        }
+        
+        for (ImmutableMap<Integer, Object> rowUpdates : patch.updates().values()) {
+            for (Map.Entry<Integer, Object> updateEntry : rowUpdates.entrySet()) {
+                Integer columnIndex = updateEntry.getKey();
+                if (nonNullableColumnIndices.contains(columnIndex) && updateEntry.getValue() == null) {
+                    String columnName = columnNames.get(columnIndex);
+                    throw new IllegalArgumentException("NULL update for non nullable column: " + columnName);
+                }
+            }
+        }
+
+        for (ImmutableList<Object> insertedRow : patch.insertedRows()) {
+            for (Integer columnIndex : nonNullableColumnIndices) {
+                if (insertedRow.get(columnIndex) == null) {
+                    String columnName = columnNames.get(columnIndex);
+                    throw new IllegalArgumentException("NULL insert for non nullable column: " + columnName);
+                }
+            }
+        }
+    }
+    
+    private void checkUniqueInPatch(TablePatch patch) {
+        Map<Integer, Set<Object>> uniqueColumnValues = new HashMap<>();
+        int columnCount = columnNames.size();
+        for (int i = 0; i < columnCount; i++) {
+            ColumnDefinition columnDefinition = columnDefinitions.get(columnNames.get(i));
+            if (columnDefinition.isUnique()) {
+                @SuppressWarnings("unchecked")
+                Comparator<Object> comparator = (Comparator<Object>) columnDefinition.comparator();
+                uniqueColumnValues.put(i, new TreeSet<>(comparator));
+            }
+        }
+        if (uniqueColumnValues.isEmpty()) {
+            return;
+        }
+        
+        int rowCount = rows.size();
+        for (int i = 0; i < rowCount; i++) {
+            BigInteger rowIndex = BigInteger.valueOf(i);
+            ImmutableList<Object> row = rows.get(i);
+            for (Map.Entry<Integer, Set<Object>> rowEntry : uniqueColumnValues.entrySet()) {
+                Integer columnIndex = rowEntry.getKey();
+                Set<Object> values = rowEntry.getValue();
+                Object value = row.get(columnIndex);
+                if (
+                        value != null &&
+                        !patch.deletions().contains(rowIndex) &&
+                        (!patch.updates().containsKey(rowIndex) ||
+                                !patch.updates().get(rowIndex).containsKey(columnIndex))) {
+                    values.add(value);
+                }
+            }
+        }
+        
+        for (ImmutableMap<Integer, Object> rowUpdates : patch.updates().values()) {
+            for (Map.Entry<Integer, Object> updateEntry : rowUpdates.entrySet()) {
+                checkAndAddUniqueValue(updateEntry.getKey(), updateEntry.getValue(), uniqueColumnValues);
+            }
+        }
+        for (ImmutableList<Object> insertedRow : patch.insertedRows()) {
+            for (Integer columnIndex : uniqueColumnValues.keySet()) {
+                checkAndAddUniqueValue(columnIndex, insertedRow.get(columnIndex), uniqueColumnValues);
+            }
+        }
+    }
+    
+    private void checkAndAddUniqueValue(
+            int columnIndex, Object newValue, Map<Integer, Set<Object>> uniqueColumnValues) {
+        if (newValue == null) {
+            return;
+        }
+        
+        Set<Object> values = uniqueColumnValues.get(columnIndex);
+        if (values != null && !values.add(newValue)) {
+            String columnName = columnNames.get(columnIndex);
+            throw new IllegalArgumentException(
+                    "Already existing value given for unique column " + columnName + ": '" + newValue + "'");
         }
     }
     
@@ -180,7 +281,11 @@ public class SimpleTable implements Table {
         }
         
         private TableIndex createIndex(String name) {
-            return new ScanningTableIndex(SimpleTable.this, name, indexColumnNames.get(name));
+            ImmutableList<String> columnNames = indexColumnNames.get(name);
+            if (columnNames == null) {
+                return null;
+            }
+            return new ScanningTableIndex(SimpleTable.this, name, columnNames);
         }
         
     }

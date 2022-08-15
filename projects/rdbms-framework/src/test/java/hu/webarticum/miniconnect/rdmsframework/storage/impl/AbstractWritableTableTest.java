@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.rdmsframework.storage.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -565,6 +566,77 @@ public abstract class AbstractWritableTableTest {
                 .containsExactly(bigs(0, 1, 2, 3, 7, 9, 11));
     }
 
+    @Test
+    protected void testIllegalNullUpdate() {
+        Table table = createSubjectTable();
+        
+        TablePatch patch = TablePatch.builder()
+                .update(big(4), ImmutableMap.of(1, "ii", 2, 0))
+                .update(big(6), ImmutableMap.of(1, null, 2, 5))
+                .build();
+        
+        assertThatThrownBy(() -> table.applyPatch(patch)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    protected void testIllegalNullInsert() {
+        Table table = createSubjectTable();
+        
+        TablePatch patch = TablePatch.builder()
+                .insert(ImmutableList.of(big(104), null, 5))
+                .insert(ImmutableList.of(big(105), "ZZZ", 2))
+                .build();
+        
+        assertThatThrownBy(() -> table.applyPatch(patch)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    protected void testIllegalNonUniqueUpdate() {
+        Table table = createSubjectTable();
+        
+        TablePatch patch = TablePatch.builder()
+                .update(big(4), ImmutableMap.of(0, big(1), 1, "UUUU"))
+                .build();
+        
+        assertThatThrownBy(() -> table.applyPatch(patch)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    protected void testIllegalNonUniqueInsert() {
+        Table table = createSubjectTable();
+        
+        TablePatch patch = TablePatch.builder()
+                .insert(ImmutableList.of(big(1), "UUUUU", 1))
+                .build();
+        
+        assertThatThrownBy(() -> table.applyPatch(patch)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    protected void testIllegalNonUniqueDoubleInsert() {
+        Table table = createSubjectTable();
+        
+        TablePatch patch = TablePatch.builder()
+                .insert(ImmutableList.of(big(1111), "UUUUU", 1))
+                .build();
+        
+        table.applyPatch(patch); // apply in advance
+        
+        assertThatThrownBy(() -> table.applyPatch(patch)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    protected void testIllegalNonUniqueUpdateAndInsert() {
+        Table table = createSubjectTable();
+        
+        TablePatch patch = TablePatch.builder()
+                .update(big(4), ImmutableMap.of(0, big(1111), 1, "UUUU"))
+                .insert(ImmutableList.of(big(1111), "UUUUU", 1))
+                .build();
+        
+        assertThatThrownBy(() -> table.applyPatch(patch)).isInstanceOf(IllegalArgumentException.class);
+    }
+
     
     protected Table createSubjectTable() {
         return tableFrom(defaultColumnNames(), defaultColumnDefinitions(), defaultContent());
@@ -580,7 +652,7 @@ public abstract class AbstractWritableTableTest {
 
     protected ImmutableList<ColumnDefinition> defaultColumnDefinitions() {
         return ImmutableList.of(
-                new SimpleColumnDefinition(BigInteger.class, false),
+                new SimpleColumnDefinition(BigInteger.class, false, true),
                 new SimpleColumnDefinition(String.class, false),
                 new SimpleColumnDefinition(Integer.class, false));
     }
