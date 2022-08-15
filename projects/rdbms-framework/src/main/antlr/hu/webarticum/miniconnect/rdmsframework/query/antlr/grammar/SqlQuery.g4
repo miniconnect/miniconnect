@@ -6,6 +6,7 @@ package hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar;
 
 sqlQuery: (
     selectQuery |
+    selectCountQuery |
     selectSpecialQuery |
     selectValueQuery |
     updateQuery |
@@ -23,6 +24,12 @@ selectQuery: (
     wherePart?
     orderByPart?
     limitPart?
+);
+
+selectCountQuery: (
+    SELECT COUNT PAR_START wildcardSelectItem PAR_END
+    FROM ( schemaName '.' )? tableName ( AS? tableAlias=identifier )?
+    wherePart?
 );
 
 selectPart: selectItems | wildcardSelectItem;
@@ -98,6 +105,7 @@ IDENTITY: I D E N T I T Y;
 LAST_INSERT_ID: L A S T UNDERSCORE I N S E R T UNDERSCORE I D;
 
 AS: A S;
+COUNT: C O U N T;
 FROM: F R O M;
 INTO: I N T O;
 WHERE: W H E R E;

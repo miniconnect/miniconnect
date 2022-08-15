@@ -105,8 +105,7 @@ public class SelectExecutor implements QueryExecutor {
         return new StoredResult(new StoredResultSetData(columnHeaders, data));
     }
     
-    private void sortRowIndexes(
-            Table table, List<BigInteger> rowIndexes, Map<String, Boolean> queryOrderBy) {
+    private void sortRowIndexes(Table table, List<BigInteger> rowIndexes, Map<String, Boolean> queryOrderBy) {
         MultiComparator multiComparator = createMultiComparator(table, queryOrderBy);
         ImmutableList<String> orderColumnNames =
                 ImmutableList.fromCollection(queryOrderBy.keySet());
@@ -130,8 +129,7 @@ public class SelectExecutor implements QueryExecutor {
         return builder.build();
     }
     
-    private ImmutableList<ValueTranslator> collectValueTranslators(
-            Table table, Map<String, String> queryFields) {
+    private ImmutableList<ValueTranslator> collectValueTranslators(Table table, Map<String, String> queryFields) {
         return ImmutableList.fromCollection(queryFields.values())
                 .map(n -> table.columns().get(n).definition())
                 .map(this::createValueTranslator);

@@ -8,6 +8,7 @@ import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.DeleteQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.InsertQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
+import hu.webarticum.miniconnect.rdmsframework.query.SelectCountQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.ShowSchemasQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.ShowTablesQuery;
@@ -24,6 +25,8 @@ public class IntegratedQueryExecutor implements QueryExecutor {
     public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
         if (query instanceof SelectQuery) {
             return new SelectExecutor().execute(storageAccess, state, query);
+        } else if (query instanceof SelectCountQuery) {
+            return new SelectCountExecutor().execute(storageAccess, state, query);
         } else if (query instanceof SelectSpecialQuery) {
             return new SelectSpecialExecutor().execute(storageAccess, state, query);
         } else if (query instanceof SelectValueQuery) {

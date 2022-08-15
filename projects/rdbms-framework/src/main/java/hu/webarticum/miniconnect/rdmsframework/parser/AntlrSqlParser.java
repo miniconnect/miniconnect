@@ -18,6 +18,7 @@ import hu.webarticum.miniconnect.rdmsframework.query.DeleteQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.InsertQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.Queries;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
+import hu.webarticum.miniconnect.rdmsframework.query.SelectCountQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectValueQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.SetVariableQuery;
@@ -45,6 +46,7 @@ import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParse
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.PostfixConditionContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SchemaNameContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ScopeableFieldNameContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectCountQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectItemsContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectPartContext;
@@ -88,6 +90,11 @@ public class AntlrSqlParser implements SqlParser {
             return parseSelectNode(selectQueryNode);
         }
 
+        SelectCountQueryContext selectCountQueryNode = rootNode.selectCountQuery();
+        if (selectCountQueryNode != null) {
+            return parseSelectCountNode(selectCountQueryNode);
+        }
+        
         SelectSpecialQueryContext selectSpecialQueryNode = rootNode.selectSpecialQuery();
         if (selectSpecialQueryNode != null) {
             return parseSelectSpecialNode(selectSpecialQueryNode);
@@ -166,6 +173,35 @@ public class AntlrSqlParser implements SqlParser {
                 .where(where)
                 .orderBy(orderBy)
                 .limit(limit)
+                .build();
+    }
+    
+    private SelectCountQuery parseSelectCountNode(SelectCountQueryContext selectCountQueryNode) {
+        SchemaNameContext schemaNameNode = selectCountQueryNode.schemaName();
+        String schemaName = schemaNameNode != null ?
+                parseIdentifierNode(schemaNameNode.identifier()) :
+                null;
+        IdentifierContext identifierNode = selectCountQueryNode.tableName().identifier();
+        String tableName = parseIdentifierNode(identifierNode);
+        String tableAlias = tableName;
+        IdentifierContext aliasIdentifierNode = selectCountQueryNode.tableAlias;
+        if (aliasIdentifierNode != null) {
+            tableAlias = parseIdentifierNode(aliasIdentifierNode);
+        }
+        
+        WildcardSelectItemContext wildcardSelectItemNode = selectCountQueryNode.wildcardSelectItem();
+        TableNameContext tableNameNode = wildcardSelectItemNode.tableName();
+        if (tableNameNode != null) {
+            checkTableNameNode(tableNameNode, tableAlias);
+        }
+        
+        WherePartContext wherePartNode = selectCountQueryNode.wherePart();
+        LinkedHashMap<String, Object> where = parseWherePartNode(wherePartNode, tableAlias);
+        
+        return Queries.selectCount()
+                .inSchema(schemaName)
+                .from(tableName)
+                .where(where)
                 .build();
     }
     

@@ -48,6 +48,23 @@ public class TableQueryUtil {
         }
     }
 
+    public static BigInteger countRows(Table table, Map<String, Object> queryWhere) {
+        Map<ImmutableList<String>, TableIndex> indexesByColumnName = new LinkedHashMap<>();
+        Set<String> unindexedColumnNames = collectIndexes(table, queryWhere.keySet(), indexesByColumnName);
+        
+        List<TableSelection> moreSelections = new ArrayList<>();
+        TableSelection firstSelection = collectIndexSelections(
+                table.size(), queryWhere, indexesByColumnName, moreSelections);
+
+        BigInteger result = BigInteger.ZERO;
+        for (BigInteger rowIndex : firstSelection) {
+            if (isRowMatchingWithMore(table, rowIndex, queryWhere, moreSelections, unindexedColumnNames)) {
+                result = result.add(BigInteger.ONE);
+            }
+        }
+        return result;
+    }
+
     public static List<BigInteger> filterRows(Table table, Map<String, Object> queryWhere, Integer unorderedLimit) {
         Map<ImmutableList<String>, TableIndex> indexesByColumnName = new LinkedHashMap<>();
         Set<String> unindexedColumnNames = collectIndexes(table, queryWhere.keySet(), indexesByColumnName);
@@ -126,8 +143,7 @@ public class TableQueryUtil {
             Set<String> unindexedColumnNames) {
         List<BigInteger> result = new ArrayList<>();
         for (BigInteger rowIndex : firstSelection) {
-            if (isRowMatchingWithMore(
-                    table, rowIndex, queryWhere, moreSelections, unindexedColumnNames)) {
+            if (isRowMatchingWithMore(table, rowIndex, queryWhere, moreSelections, unindexedColumnNames)) {
                 result.add(rowIndex);
             }
         }

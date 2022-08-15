@@ -6,6 +6,10 @@ public interface Queries {
         return SelectQuery.builder();
     }
 
+    public static SelectCountQuery.SelectCountQueryBuilder selectCount() {
+        return SelectCountQuery.builder();
+    }
+
     public static SelectSpecialQuery.SelectSpecialQueryBuilder selectSpecial() {
         return SelectSpecialQuery.builder();
     }
