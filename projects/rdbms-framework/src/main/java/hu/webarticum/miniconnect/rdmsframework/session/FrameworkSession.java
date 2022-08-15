@@ -106,7 +106,7 @@ public class FrameworkSession implements MiniSession, CheckableCloseable {
 
     private MiniError errorOfException(Throwable exception) {
         if (!(exception instanceof DatabaseException)) {
-            String message = "Unexpected error: " + extractMessage(exception);
+            String message = extractMessage(exception);
             return new StoredError(99999, "99999", message);
         }
         

@@ -26,7 +26,6 @@ public class ResultSetPrinter {
 
     
     public void print(ResultTable resultTable, AnsiAppendable out) throws IOException {
-        out.append('\n');
         ImmutableList<MiniColumnHeader> columnHeaders = resultTable.resultSet().columnHeaders();
         ImmutableList<String> columnNames = columnHeaders.map(MiniColumnHeader::name);
         List<ImmutableList<Object>> decodedRowsBuffer = new ArrayList<>();
@@ -49,7 +48,7 @@ public class ResultSetPrinter {
     }
     
     private void printNoRows(AnsiAppendable out) throws IOException {
-        out.append("  Result contains no rows!\n\n");
+        out.append("  Result set contains no rows!\n\n");
     }
     
     private void printDecodedRows(

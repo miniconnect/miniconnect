@@ -65,6 +65,7 @@ import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParse
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.VariableContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.WhereItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.WherePartContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.WildcardSelectItemContext;
 
 public class AntlrSqlParser implements SqlParser {
 
@@ -345,6 +346,11 @@ public class AntlrSqlParser implements SqlParser {
         
         SelectItemsContext selectItemsNode = selectPartNode.selectItems();
         if (selectItemsNode == null) {
+            WildcardSelectItemContext wildcardSelectItemNode = selectPartNode.wildcardSelectItem();
+            TableNameContext tableNameNode = wildcardSelectItemNode.tableName();
+            if (tableNameNode != null) {
+                checkTableNameNode(tableNameNode, tableAlias);
+            }
             return result;
         }
         

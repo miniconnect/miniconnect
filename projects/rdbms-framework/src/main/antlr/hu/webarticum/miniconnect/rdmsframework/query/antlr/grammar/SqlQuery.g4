@@ -25,7 +25,8 @@ selectQuery: (
     limitPart?
 );
 
-selectPart: selectItems | '*';
+selectPart: selectItems | wildcardSelectItem;
+wildcardSelectItem: ( tableName '.' )? WILDCARD;
 selectItems: selectItem ( ',' selectItem )*;
 selectItem: scopeableFieldName ( AS? alias=identifier )?;
 limitPart: LIMIT TOKEN_INTEGER;
@@ -121,6 +122,8 @@ TOKEN_BACKTICKEDNAME: '`' ( '``' | ~[`] )* '`';
 
 TOKEN_STRING: '\'' ( '\\' . | '\'\'' | ~[\\'] )* '\'';
 TOKEN_INTEGER: '-'? [0-9]+;
+
+WILDCARD: '*';
 
 PAR_START: '(';
 PAR_END: ')';

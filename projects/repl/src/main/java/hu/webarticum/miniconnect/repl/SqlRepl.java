@@ -202,10 +202,12 @@ public class SqlRepl implements Repl {
     }
 
     private void printSuccessResult(MiniResult result, AnsiAppendable out) throws IOException {
-        out.appendAnsi("\n  " + AnsiUtil.formatAsSuccess("Query was successfully executed!") + "\n");
+        out.appendAnsi("\n  " + AnsiUtil.formatAsSuccess("Query was successfully executed!") + "\n\n");
         
-        ResultTable resultTable = new ResultTable(result.resultSet());
-        new ResultSetPrinter().print(resultTable, out);
+        if (result.hasResultSet()) {
+            ResultTable resultTable = new ResultTable(result.resultSet());
+            new ResultSetPrinter().print(resultTable, out);
+        }
     }
     
     private void putLargeData(String name, String source, AnsiAppendable out) throws IOException {
@@ -240,10 +242,12 @@ public class SqlRepl implements Repl {
     }
 
     private void printError(MiniError error, AnsiAppendable out) throws IOException {
-        out.appendAnsi("  " + AnsiUtil.formatAsError("ERROR!") + "\n");
+        out.append("\n  ");
+        out.appendAnsi(AnsiUtil.formatAsError("ERROR!"));
+        out.append("\n\n");
         out.append("  Code: " + error.code() + "\n");
         out.append("  SQL state: " + error.sqlState() + "\n");
-        out.appendAnsi("  Message: " + AnsiUtil.formatAsError(error.message()) + "\n");
+        out.appendAnsi("  Message: " + AnsiUtil.formatAsError(error.message()) + "\n\n");
     }
     
     @Override
