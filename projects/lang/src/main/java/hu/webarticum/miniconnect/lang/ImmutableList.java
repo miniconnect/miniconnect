@@ -146,6 +146,13 @@ public final class ImmutableList<T> implements ReversibleIterable<T>, Serializab
         return new ImmutableList<>(newData);
     }
 
+    public ImmutableList<T> append(T item) {
+        List<T> newData = new ArrayList<>(data.size() + 1);
+        newData.addAll(data);
+        newData.add(item);
+        return new ImmutableList<>(newData);
+    }
+
     public void forEachIndex(BiConsumer<Integer, T> action) {
         int length = data.size();
         for (int i = 0; i < length; i++) {
