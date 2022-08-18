@@ -65,7 +65,7 @@ public class DeleteExecutor implements QueryExecutor {
 
         Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere, state);
         
-        List<BigInteger> rowIndexes = TableQueryUtil.filterRows(table, convertedQueryWhere, null);
+        List<BigInteger> rowIndexes = TableQueryUtil.filterRowsToList(table, convertedQueryWhere, null);
         
         TablePatchBuilder patchBuilder = TablePatch.builder();
         rowIndexes.forEach(patchBuilder::delete);

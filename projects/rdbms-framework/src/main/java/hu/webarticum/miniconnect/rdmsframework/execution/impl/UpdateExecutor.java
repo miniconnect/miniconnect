@@ -71,7 +71,7 @@ public class UpdateExecutor implements QueryExecutor {
         Map<String, Object> convertedQueryUpdates = TableQueryUtil.convertColumnValues(table, queryUpdates, state);
         Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere, state);
 
-        List<BigInteger> rowIndexes = TableQueryUtil.filterRows(table, convertedQueryWhere, null);
+        List<BigInteger> rowIndexes = TableQueryUtil.filterRowsToList(table, convertedQueryWhere, null);
         
         ImmutableMap<Integer, Object> updates =
                 TableQueryUtil.toByColumnPoisitionedImmutableMap(table, convertedQueryUpdates);

@@ -1,8 +1,10 @@
 package hu.webarticum.miniconnect.rdmsframework.parser;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,25 +32,31 @@ import hu.webarticum.miniconnect.rdmsframework.query.SpecialSelectableType;
 import hu.webarticum.miniconnect.rdmsframework.query.UpdateQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.UseQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.VariableValue;
+import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery.LeftJoinItem;
+import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery.OrderByItem;
+import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery.SelectItem;
+import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery.WhereItem;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryLexer;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.DeleteQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ExtendedValueContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.FieldListContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.FieldNameContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.FieldSelectItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.IdentifierContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.InsertQueryContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.LeftJoinPartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.LikePartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.LimitPartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.LiteralContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByPartContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.OrderByPositionContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.PostfixConditionContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SchemaNameContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.ScopeableFieldNameContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectCountQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectItemContext;
-import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectItemsContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectPartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectQueryContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.SelectSpecialQueryContext;
@@ -156,20 +164,24 @@ public class AntlrSqlParser implements SqlParser {
         if (aliasIdentifierNode != null) {
             tableAlias = parseIdentifierNode(aliasIdentifierNode);
         }
-        LinkedHashMap<String, String> fields = parseSelectPartNode(selectPartNode, tableAlias);
+        ImmutableList<SelectItem> selectItems = parseSelectPartNode(selectPartNode);
+        List<LeftJoinPartContext> leftJoinParts = selectQueryNode.leftJoinPart();
+        ImmutableList<LeftJoinItem> leftJoins = parseLeftJoinPartNodes(leftJoinParts, tableAlias);
         WherePartContext wherePartNode = selectQueryNode.wherePart();
-        LinkedHashMap<String, Object> where = parseWherePartNode(wherePartNode, tableAlias);
+        ImmutableList<WhereItem> where = parseWherePartNode(wherePartNode);
         OrderByPartContext orderByNode = selectQueryNode.orderByPart();
-        LinkedHashMap<String, Boolean> orderBy = parseOrderByPartNode(orderByNode, tableAlias);
+        ImmutableList<OrderByItem> orderBy = parseOrderByPartNode(orderByNode, tableAlias);
         LimitPartContext limitPartNode = selectQueryNode.limitPart();
         Integer limit = limitPartNode != null ?
                 parseIntegerNode(limitPartNode.TOKEN_INTEGER()) :
                 null;
         
         return Queries.select()
-                .fields(fields)
+                .selectItems(selectItems)
                 .inSchema(schemaName)
                 .from(tableName)
+                .tableAlias(tableAlias)
+                .leftJoins(leftJoins)
                 .where(where)
                 .orderBy(orderBy)
                 .limit(limit)
@@ -196,7 +208,7 @@ public class AntlrSqlParser implements SqlParser {
         }
         
         WherePartContext wherePartNode = selectCountQueryNode.wherePart();
-        LinkedHashMap<String, Object> where = parseWherePartNode(wherePartNode, tableAlias);
+        LinkedHashMap<String, Object> where = parseSimpleWherePartNode(wherePartNode, tableAlias);
         
         return Queries.selectCount()
                 .inSchema(schemaName)
@@ -299,7 +311,7 @@ public class AntlrSqlParser implements SqlParser {
         UpdatePartContext updatePartNode = updateQueryNode.updatePart();
         LinkedHashMap<String, Object> values = parseUpdatePartNode(updatePartNode);
         WherePartContext wherePartNode = updateQueryNode.wherePart();
-        LinkedHashMap<String, Object> where = parseWherePartNode(wherePartNode, tableName); // TODO: alias?
+        LinkedHashMap<String, Object> where = parseSimpleWherePartNode(wherePartNode, tableName); // TODO: alias?
 
         return Queries.update()
                 .inSchema(schemaName)
@@ -317,7 +329,7 @@ public class AntlrSqlParser implements SqlParser {
         IdentifierContext identifierNode = deleteQueryNode.tableName().identifier();
         String tableName = parseIdentifierNode(identifierNode);
         WherePartContext wherePartNode = deleteQueryNode.wherePart();
-        LinkedHashMap<String, Object> where = parseWherePartNode(wherePartNode, tableName); // TODO: alias?
+        LinkedHashMap<String, Object> where = parseSimpleWherePartNode(wherePartNode, tableName); // TODO: alias?
         
         return Queries.delete()
                 .inSchema(schemaName)
@@ -377,50 +389,161 @@ public class AntlrSqlParser implements SqlParser {
         return parseStringNode(likePartContext.TOKEN_STRING());
     }
 
-    private LinkedHashMap<String, String> parseSelectPartNode(SelectPartContext selectPartNode, String tableAlias) {
-        LinkedHashMap<String, String> result = new LinkedHashMap<>();
-        
-        SelectItemsContext selectItemsNode = selectPartNode.selectItems();
-        if (selectItemsNode == null) {
-            WildcardSelectItemContext wildcardSelectItemNode = selectPartNode.wildcardSelectItem();
-            TableNameContext tableNameNode = wildcardSelectItemNode.tableName();
-            if (tableNameNode != null) {
-                checkTableNameNode(tableNameNode, tableAlias);
-            }
-            return result;
+    private ImmutableList<SelectItem> parseSelectPartNode(SelectPartContext selectPartNode) {
+        List<SelectItemContext> selectItemNodes = selectPartNode.selectItem();
+        List<SelectItem> resultBuilder = new ArrayList<>(selectItemNodes.size());
+        for (SelectItemContext selectItemNode : selectItemNodes) {
+            resultBuilder.add(parseSelectItemNode(selectItemNode));
         }
-        
-        for (SelectItemContext selectItemNode : selectItemsNode.selectItem()) {
-            ScopeableFieldNameContext scopeableFieldNameNode = selectItemNode.scopeableFieldName();
-            String fieldName = parseIdentifierNode(scopeableFieldNameNode.fieldName().identifier());
-            
-            checkTableNameNode(scopeableFieldNameNode.tableName(), tableAlias);
-            
-            String alias = selectItemNode.alias != null ?
-                    selectItemNode.alias.getText() :
-                    fieldName;
-            result.put(alias, fieldName);
+        return ImmutableList.fromCollection(resultBuilder);
+    }
+
+    private SelectItem parseSelectItemNode(SelectItemContext selectItemNode) {
+        WildcardSelectItemContext wildcardSelectItemNode = selectItemNode.wildcardSelectItem();
+        if (wildcardSelectItemNode != null) {
+            return parseWildcardSelectItemNode(wildcardSelectItemNode);
+        } else {
+            return parseFieldSelectItem(selectItemNode.fieldSelectItem());
         }
-        return result;
     }
     
-    private LinkedHashMap<String, Object> parseWherePartNode(WherePartContext wherePartNode, String tableAlias) {
+    private SelectItem parseWildcardSelectItemNode(WildcardSelectItemContext wildcardSelectItemNode) {
+        TableNameContext tableNameNode = wildcardSelectItemNode.tableName();
+        String tableName = tableNameNode != null ? parseIdentifierNode(tableNameNode.identifier()) : null;
+        
+        // TODO: check table name?
+        
+        return new SelectItem(tableName, null, null);
+    }
+    
+    private SelectItem parseFieldSelectItem(FieldSelectItemContext fieldSelectItemNode) {
+        ScopeableFieldNameContext scopeableFieldNameNode = fieldSelectItemNode.scopeableFieldName();
+        String fieldName = parseIdentifierNode(scopeableFieldNameNode.fieldName().identifier());
+        TableNameContext tableNameNode = scopeableFieldNameNode.tableName();
+        String tableName = tableNameNode != null ? parseIdentifierNode(tableNameNode.identifier()) : null;
+        
+        // TODO: check table name?
+        
+        String alias = fieldSelectItemNode.alias != null ?
+                fieldSelectItemNode.alias.getText() :
+                fieldName;
+        return new SelectItem(tableName, fieldName, alias);
+    }
+    
+    private ImmutableList<LeftJoinItem> parseLeftJoinPartNodes(
+            List<LeftJoinPartContext> leftJoinPartNodes, String tableAlias) {
+        Set<String> previousTableAliases = new HashSet<>(leftJoinPartNodes.size() + 1);
+        previousTableAliases.add(tableAlias);
+        List<LeftJoinItem> resultBuilder = new ArrayList<>(leftJoinPartNodes.size()); 
+        for (LeftJoinPartContext leftJoinPartNode : leftJoinPartNodes) {
+            resultBuilder.add(parseLeftJoinPartNode(leftJoinPartNode, previousTableAliases));
+        }
+        return ImmutableList.fromCollection(resultBuilder);
+    }
+
+    private LeftJoinItem parseLeftJoinPartNode(
+            LeftJoinPartContext leftJoinPartNode, Set<String> previousTableAliases) {
+        SchemaNameContext targetSchemaNameNode = leftJoinPartNode.targetSchemaName;
+        String targetSchemaName =
+                targetSchemaNameNode != null ?
+                parseIdentifierNode(targetSchemaNameNode.identifier()) :
+                null;
+        String targetTableName = parseIdentifierNode(leftJoinPartNode.targetTableName.identifier());
+        IdentifierContext tableAliasNode = leftJoinPartNode.tableAlias;
+        String targetTableAlias = tableAliasNode != null ? parseIdentifierNode(tableAliasNode) : targetTableName;
+        String scope1 = parseIdentifierNode(leftJoinPartNode.scope1.identifier());
+        String field1 = parseIdentifierNode(leftJoinPartNode.field1.identifier());
+        String scope2 = parseIdentifierNode(leftJoinPartNode.scope2.identifier());
+        String field2 = parseIdentifierNode(leftJoinPartNode.field2.identifier());
+        
+        if (scope1.equals(scope2)) {
+            throw new IllegalArgumentException("Can not join to the same table alias: " + scope1);
+        }
+        
+        String targetFieldName, sourceTableAlias, sourceFieldName;
+        if (scope1.equals(targetTableAlias)) {
+            targetFieldName = field1;
+            sourceTableAlias = scope2;
+            sourceFieldName = field2;
+        } else if (scope2.equals(targetTableAlias)) {
+            targetFieldName = field2;
+            sourceTableAlias = scope1;
+            sourceFieldName = field1;
+        } else {
+            throw new IllegalArgumentException(
+                    "Try to use join table alias " + targetTableAlias +
+                    ", but " + scope1 + " and " + scope2 + " found");
+        }
+
+        if (!previousTableAliases.contains(sourceTableAlias)) {
+            throw new IllegalArgumentException("Unknown table alias: " + sourceTableAlias);
+        }
+        
+        if (!previousTableAliases.add(targetTableAlias)) {
+            throw new IllegalArgumentException("Duplicated table alias: " + targetTableAlias);
+        }
+        
+        return new LeftJoinItem(
+                targetSchemaName,
+                targetTableName,
+                targetTableAlias,
+                targetFieldName,
+                sourceTableAlias,
+                sourceFieldName);
+    }
+    
+    private ImmutableList<WhereItem> parseWherePartNode(WherePartContext wherePartNode) {
+        if (wherePartNode == null) {
+            return ImmutableList.empty();
+        }
+        
+        List<WhereItemContext> whereItemNodes = wherePartNode.whereItem();
+        List<WhereItem> resultBuilder = new ArrayList<>(whereItemNodes.size());
+        for (WhereItemContext whereItemNode : whereItemNodes) {
+            resultBuilder.add(parseWhereItemNode(whereItemNode));
+        }
+        return ImmutableList.fromCollection(resultBuilder);
+    }
+    
+    private WhereItem parseWhereItemNode(WhereItemContext whereItemNode) {
+        WhereItemContext subItemNode = whereItemNode.whereItem();
+        if (subItemNode != null) {
+            return parseWhereItemNode(subItemNode);
+        }
+
+        ScopeableFieldNameContext scopeableFieldNameNode = whereItemNode.scopeableFieldName();
+        String fieldName = parseIdentifierNode(scopeableFieldNameNode.fieldName().identifier());
+        TableNameContext tableNameNode = scopeableFieldNameNode.tableName();
+        String tableName = tableNameNode != null ? parseIdentifierNode(tableNameNode.identifier()) : null;
+        
+        // TODO: check table name?
+        
+        Object value = parsePostfixConditionNode(whereItemNode.postfixCondition());
+        return new WhereItem(tableName, fieldName, value);
+    }
+    
+    private LinkedHashMap<String, Object> parseSimpleWherePartNode(WherePartContext wherePartNode, String tableAlias) {
         LinkedHashMap<String, Object> result = new LinkedHashMap<>();
         if (wherePartNode == null) {
             return result;
         }
         
         for (WhereItemContext whereItemNode : wherePartNode.whereItem()) {
-            Object[] fieldNameAndValue = parseWhereItemNode(whereItemNode, tableAlias);
-            result.put((String) fieldNameAndValue[0], fieldNameAndValue[1]);
+            Object[] fieldNameAndValue = parseSimpleWhereItemNode(whereItemNode, tableAlias);
+            String fieldName = (String) fieldNameAndValue[0];
+            if (result.containsKey(fieldName)) {
+                throw new IllegalArgumentException("Duplicated field in where clause: " + fieldName);
+            }
+            Object value = fieldNameAndValue[1];
+            result.put(fieldName, value);
         }
         return result;
     }
     
-    private Object[] parseWhereItemNode(WhereItemContext whereItemNode, String tableAlias) {
+    private Object[] parseSimpleWhereItemNode(WhereItemContext whereItemNode, String tableAlias) {
         WhereItemContext subItemNode = whereItemNode.whereItem();
         if (subItemNode != null) {
-            return parseWhereItemNode(subItemNode, tableAlias);
+            return parseSimpleWhereItemNode(subItemNode, tableAlias);
         }
         
         ScopeableFieldNameContext scopeableFieldNameNode = whereItemNode.scopeableFieldName();
@@ -432,22 +555,36 @@ public class AntlrSqlParser implements SqlParser {
         return new Object[] { fieldName, value };
     }
 
-    private LinkedHashMap<String, Boolean> parseOrderByPartNode(OrderByPartContext orderByPartNode, String tableAlias) {
-        LinkedHashMap<String, Boolean> result = new LinkedHashMap<>();
+    private ImmutableList<OrderByItem> parseOrderByPartNode(OrderByPartContext orderByPartNode, String tableAlias) {
         if (orderByPartNode == null) {
-            return result;
+            return ImmutableList.empty();
+        }
+
+        List<OrderByItemContext> orderByItemNodes = orderByPartNode.orderByItem();
+        List<OrderByItem> resultBuilder = new ArrayList<>(orderByItemNodes.size());
+        for (OrderByItemContext orderByItemNode : orderByItemNodes) {
+            OrderByItem orderByItem = parseOrderByItemNode(orderByItemNode);
+            resultBuilder.add(orderByItem);
+        }
+        return ImmutableList.fromCollection(resultBuilder);
+    }
+    
+    private OrderByItem parseOrderByItemNode(OrderByItemContext orderByItemNode) {
+        boolean ascOrder = (orderByItemNode.DESC() == null);
+        
+        OrderByPositionContext orderByPositionNode = orderByItemNode.orderByPosition();
+        if (orderByPositionNode != null) {
+            Integer orderByPosition = parseIntegerNode(orderByPositionNode.TOKEN_INTEGER());
+            return new OrderByItem(null, null, orderByPosition, ascOrder);
         }
         
-        for (OrderByItemContext orderByItemNode : orderByPartNode.orderByItem()) {
-            ScopeableFieldNameContext scopeableFieldNameNode = orderByItemNode.scopeableFieldName();
-            String fieldName = parseIdentifierNode(scopeableFieldNameNode.fieldName().identifier());
-            
-            checkTableNameNode(scopeableFieldNameNode.tableName(), tableAlias);
-            
-            Boolean ascOrder = (orderByItemNode.DESC() == null);
-            result.put(fieldName, ascOrder);
-        }
-        return result;
+        ScopeableFieldNameContext scopeableFieldNameNode = orderByItemNode.scopeableFieldName();
+        String fieldName = parseIdentifierNode(scopeableFieldNameNode.fieldName().identifier());
+        
+        TableNameContext tableNameNode = scopeableFieldNameNode.tableName();
+        String tableName = tableNameNode != null ? parseIdentifierNode(tableNameNode.identifier()) : null;
+        
+        return new OrderByItem(tableName, fieldName, null, ascOrder);
     }
     
     private LinkedHashMap<String, Object> parseUpdatePartNode(UpdatePartContext updatePartNode) {

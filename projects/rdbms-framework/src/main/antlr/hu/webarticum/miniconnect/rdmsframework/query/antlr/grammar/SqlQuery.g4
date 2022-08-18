@@ -21,9 +21,15 @@ sqlQuery: (
 selectQuery: (
     SELECT selectPart
     FROM ( schemaName '.' )? tableName ( AS? tableAlias=identifier )?
+    leftJoinPart*
     wherePart?
     orderByPart?
     limitPart?
+);
+
+leftJoinPart: (
+	LEFT JOIN ( targetSchemaName=schemaName '.' )? targetTableName=tableName ( AS? tableAlias=identifier )?
+	ON scope1=tableName '.' field1=fieldName '=' scope2=tableName '.' field2=fieldName
 );
 
 selectCountQuery: (
@@ -32,10 +38,10 @@ selectCountQuery: (
     wherePart?
 );
 
-selectPart: selectItems | wildcardSelectItem;
+selectPart: selectItem ( ',' selectItem )*;
+selectItem: fieldSelectItem | wildcardSelectItem;
+fieldSelectItem: scopeableFieldName ( AS? alias=identifier )?;
 wildcardSelectItem: ( tableName '.' )? WILDCARD;
-selectItems: selectItem ( ',' selectItem )*;
-selectItem: scopeableFieldName ( AS? alias=identifier )?;
 limitPart: LIMIT TOKEN_INTEGER;
 
 selectSpecialQuery: ( SELECT | SHOW | CALL ) specialSelectable ( AS? alias=identifier )?;
@@ -75,7 +81,8 @@ postfixCondition: '=' extendedValue | isNull | isNotNull;
 isNull: IS NULL;
 isNotNull: IS NOT NULL;
 orderByPart: ORDER BY orderByItem ( ',' orderByItem )*;
-orderByItem: scopeableFieldName ( ASC | DESC )?;
+orderByItem: ( scopeableFieldName | orderByPosition ) ( ASC | DESC )?;
+orderByPosition: TOKEN_INTEGER;
 scopeableFieldName: ( tableName '.' )? fieldName;
 extendedValue: literal | variable | NULL;
 variable: '@' identifier;
@@ -123,6 +130,9 @@ SCHEMAS: S C H E M A S;
 DATABASES: D A T A B A S E S;
 TABLES: T A B L E S;
 LIKE: L I K E;
+LEFT: L E F T;
+JOIN: J O I N;
+ON: O N;
 
 TOKEN_SIMPLENAME: [a-zA-Z_] [a-zA-Z_0-9]*;
 TOKEN_QUOTEDNAME: '"' ( '\\' . | '""' | ~[\\"] )* '"';

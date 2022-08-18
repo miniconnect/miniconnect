@@ -3,6 +3,7 @@ package hu.webarticum.miniconnect.rdmsframework.util;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -26,6 +27,7 @@ import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.SortMode;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleSelection;
 import hu.webarticum.miniconnect.record.converter.DefaultConverter;
+import hu.webarticum.miniconnect.util.FilteringIterator;
 
 public class TableQueryUtil {
     
@@ -65,7 +67,24 @@ public class TableQueryUtil {
         return result;
     }
 
-    public static List<BigInteger> filterRows(Table table, Map<String, Object> queryWhere, Integer unorderedLimit) {
+    public static List<BigInteger> filterRowsToList(
+            Table table, Map<String, Object> queryWhere, Integer unorderedLimit) {
+        List<BigInteger> result = new ArrayList<>();
+        Iterator<BigInteger> iterator = filterRows(table, queryWhere);
+        if (unorderedLimit == null) {
+            while (iterator.hasNext()) {
+                result.add(iterator.next());
+            }
+        } else {
+            for (int remaining = unorderedLimit; iterator.hasNext() && remaining > 0; remaining--) {
+                result.add(iterator.next());
+                
+            }
+        }
+        return result;
+    }
+    
+    public static Iterator<BigInteger> filterRows(Table table, Map<String, Object> queryWhere) {
         Map<ImmutableList<String>, TableIndex> indexesByColumnName = new LinkedHashMap<>();
         Set<String> unindexedColumnNames = collectIndexes(table, queryWhere.keySet(), indexesByColumnName);
         
@@ -73,7 +92,7 @@ public class TableQueryUtil {
         TableSelection firstSelection = collectIndexSelections(
                 table.size(), queryWhere, indexesByColumnName, moreSelections);
         
-        return matchRows(table, queryWhere, firstSelection, moreSelections, unindexedColumnNames, unorderedLimit);
+        return matchRows(table, queryWhere, firstSelection, moreSelections, unindexedColumnNames);
     }
     
     private static TableSelection collectIndexSelections(
@@ -120,58 +139,17 @@ public class TableQueryUtil {
         }
     }
     
-    private static List<BigInteger> matchRows(
-            Table table, 
-            Map<String, Object> queryWhere,
-            TableSelection firstSelection,
-            List<TableSelection> moreSelections,
-            Set<String> unindexedColumnNames,
-            Integer unorderedLimit) {
-        if (unorderedLimit == null) {
-            return matchRowsUnlimited(table, queryWhere, firstSelection, moreSelections, unindexedColumnNames);
-        } else {
-            return matchRowsLimited(
-                    table, queryWhere, firstSelection, moreSelections, unindexedColumnNames, unorderedLimit);
-        }
-    }
-    
-    private static List<BigInteger> matchRowsUnlimited(
+    private static Iterator<BigInteger> matchRows(
             Table table, 
             Map<String, Object> queryWhere,
             TableSelection firstSelection,
             List<TableSelection> moreSelections,
             Set<String> unindexedColumnNames) {
-        List<BigInteger> result = new ArrayList<>();
-        for (BigInteger rowIndex : firstSelection) {
-            if (isRowMatchingWithMore(table, rowIndex, queryWhere, moreSelections, unindexedColumnNames)) {
-                result.add(rowIndex);
-            }
-        }
-        return result;
+        return new FilteringIterator<>(
+                firstSelection.iterator(),
+                rowIndex -> isRowMatchingWithMore(table, rowIndex, queryWhere, moreSelections, unindexedColumnNames));
     }
 
-    private static List<BigInteger> matchRowsLimited(
-            Table table, 
-            Map<String, Object> queryWhere,
-            TableSelection firstSelection,
-            List<TableSelection> moreSelections,
-            Set<String> unindexedColumnNames,
-            int unorderedLimit) {
-        List<BigInteger> result = new ArrayList<>();
-        int remaining = unorderedLimit;
-        for (BigInteger rowIndex : firstSelection) {
-            if (isRowMatchingWithMore(
-                    table, rowIndex, queryWhere, moreSelections, unindexedColumnNames)) {
-                result.add(rowIndex);
-                remaining--;
-                if (remaining == 0) {
-                    break;
-                }
-            }
-        }
-        return result;
-    }
-    
     private static boolean isRowMatchingWithMore(
             Table table,
             BigInteger rowIndex,
