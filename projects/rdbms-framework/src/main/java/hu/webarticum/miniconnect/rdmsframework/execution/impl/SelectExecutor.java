@@ -116,7 +116,7 @@ public class SelectExecutor implements QueryExecutor {
     }
     
     private void addTableInfo(
-            LinkedHashMap<String, TableEntry> tableInfoMap,
+            LinkedHashMap<String, TableEntry> tableEntries,
             String alias,
             String schemaName,
             String tableName,
@@ -144,13 +144,29 @@ public class SelectExecutor implements QueryExecutor {
             alias = tableName;
         }
         
-        if (tableInfoMap.containsKey(alias)) {
+        if (tableEntries.containsKey(alias)) {
             throw new MiniErrorException(new StoredError(7, "00007", "Duplicated table alias: " + alias));
         }
         
-        tableInfoMap.put(alias, new TableEntry(table, leftJoin));
+        tableEntries.put(alias, new TableEntry(table, leftJoin));
+
+        checkLeftJoinItem(leftJoin, tableEntries);
     }
     
+    private void checkLeftJoinItem(LeftJoinItem leftJoin, Map<String, TableEntry> tableEntries) {
+        if (leftJoin == null) {
+            return;
+        }
+        
+        Table sourceTable = tableEntries.get(leftJoin.sourceTableAlias()).table;
+        String sourceFieldName = leftJoin.sourceFieldName();
+        checkColumn(sourceTable, sourceFieldName);
+
+        Table targetTable = tableEntries.get(leftJoin.targetTableAlias()).table;
+        String targetFieldName = leftJoin.targetFieldName();
+        checkColumn(targetTable, targetFieldName);
+    }
+
     private void addFilters(ImmutableList<WhereItem> whereItems, Map<String, TableEntry> tableEntries) {
         for (WhereItem whereItem : whereItems) {
             addFilter(whereItem, tableEntries);
@@ -308,7 +324,8 @@ public class SelectExecutor implements QueryExecutor {
     
     private void checkColumn(Table table, String columnName) {
         if (!table.columns().contains(columnName)) {
-            throw new MiniErrorException(new StoredError(3, "00003", "No such column: " + columnName));
+            throw new MiniErrorException(
+                    new StoredError(3, "00003", "No such column: " + table.name() + "." + columnName));
         }
     }
     
@@ -366,14 +383,15 @@ public class SelectExecutor implements QueryExecutor {
         List<String> remainingTableAliasList = new ArrayList<>(tableEntries.keySet());
         Map<String, BigInteger> joinedPrefix = new HashMap<>();
         List<Map<String, BigInteger>> result = new ArrayList<>();
-        collectRowsFromNextTable(result, remainingTableAliasList, joinedPrefix, tableEntries);
+        Integer preLimit = orderByEntries.isEmpty() ? limit : null;
+        collectRowsFromNextTable(result, remainingTableAliasList, joinedPrefix, limit, tableEntries);
         if (!orderByEntries.isEmpty()) {
             MultiComparator multiComparator = createJoinedMultiComparator(orderByEntries, tableEntries);
             result.sort((r1, r2) -> multiComparator.compare(
                     extractOrderValues(r1, orderByEntries, tableEntries),
                     extractOrderValues(r2, orderByEntries, tableEntries)));
         }
-        if (limit != null) {
+        if (limit != null && preLimit == null) {
             int end = Math.min(limit, result.size());
             result = result.subList(0, end);
         }
@@ -384,6 +402,7 @@ public class SelectExecutor implements QueryExecutor {
             List<Map<String, BigInteger>> result,
             List<String> remainingTableAliasList,
             Map<String, BigInteger> joinedPrefix,
+            Integer limit,
             Map<String, TableEntry> tableEntries) {
         boolean isLeaf = remainingTableAliasList.size() == 1;
         String tableAlias = remainingTableAliasList.get(0);
@@ -408,7 +427,10 @@ public class SelectExecutor implements QueryExecutor {
             } else {
                 List<String> subRemainingTableAliasList =
                         remainingTableAliasList.subList(1, remainingTableAliasList.size());
-                collectRowsFromNextTable(result, subRemainingTableAliasList, joinedRow, tableEntries);
+                collectRowsFromNextTable(result, subRemainingTableAliasList, joinedRow, limit, tableEntries);
+            }
+            if (limit != null && result.size() >= limit) {
+                break;
             }
         }
     }
