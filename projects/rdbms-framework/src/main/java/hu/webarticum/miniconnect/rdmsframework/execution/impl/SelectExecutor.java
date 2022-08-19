@@ -24,6 +24,7 @@ import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.JoinType;
+import hu.webarticum.miniconnect.rdmsframework.query.NullsMode;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery.JoinItem;
@@ -292,7 +293,11 @@ public class SelectExecutor implements QueryExecutor {
                 throw new MiniErrorException(new StoredError(8, "00008", "Invalid column position: " + position));
             }
             SelectItemEntry selectItemEntry = selectItemEntries.get(position - 1);
-            return new OrderByEntry(selectItemEntry.tableAlias, selectItemEntry.fieldName, orderByItem.ascOrder());
+            return new OrderByEntry(
+                    selectItemEntry.tableAlias,
+                    selectItemEntry.fieldName,
+                    orderByItem.ascOrder(),
+                    orderByItem.nullsMode());
         }
         
         String tableName = orderByItem.tableName();
@@ -308,7 +313,10 @@ public class SelectExecutor implements QueryExecutor {
             }
             if (matchingSelectItemEntry != null) {
                 return new OrderByEntry(
-                        matchingSelectItemEntry.tableAlias, matchingSelectItemEntry.fieldName, orderByItem.ascOrder());
+                        matchingSelectItemEntry.tableAlias,
+                        matchingSelectItemEntry.fieldName,
+                        orderByItem.ascOrder(),
+                        orderByItem.nullsMode());
             } else {
                 tableName = selectItemEntries.get(0).tableAlias;
             }
@@ -320,7 +328,7 @@ public class SelectExecutor implements QueryExecutor {
         }
         checkColumn(tableEntry.table, fieldName);
         
-        return new OrderByEntry(tableName, fieldName, orderByItem.ascOrder());
+        return new OrderByEntry(tableName, fieldName, orderByItem.ascOrder(), orderByItem.nullsMode());
     }
     
     private void checkColumn(Table table, String columnName) {
@@ -480,9 +488,19 @@ public class SelectExecutor implements QueryExecutor {
             ColumnDefinition columnDefinition = tableEntry.table.columns().get(columnName).definition();
             Comparator<?> columnComparator = columnDefinition.comparator();
             boolean nullable = columnDefinition.isNullable();
-            builder.add(columnComparator, nullable, orderByEntry.ascOrder, true);
+            boolean nullsLow = isNullsLow(orderByEntry);
+            builder.add(columnComparator, nullable, orderByEntry.ascOrder, nullsLow);
         }
         return builder.build();
+    }
+    
+    private boolean isNullsLow(OrderByEntry orderByEntry) {
+        if (orderByEntry.nullsMode == NullsMode.NULLS_AUTO) {
+            return true;
+        } else {
+            boolean nullsFirst = (orderByEntry.nullsMode == NullsMode.NULLS_FIRST);
+            return (orderByEntry.ascOrder == nullsFirst);
+        }
     }
     
     
@@ -542,11 +560,14 @@ public class SelectExecutor implements QueryExecutor {
 
         private final boolean ascOrder;
         
+        private final NullsMode nullsMode;
         
-        private OrderByEntry(String tableAlias, String fieldName, boolean ascOrder) {
+        
+        private OrderByEntry(String tableAlias, String fieldName, boolean ascOrder, NullsMode nullsMode) {
             this.tableAlias = tableAlias;
             this.fieldName = fieldName;
             this.ascOrder = ascOrder;
+            this.nullsMode = nullsMode;
         }
 
     }

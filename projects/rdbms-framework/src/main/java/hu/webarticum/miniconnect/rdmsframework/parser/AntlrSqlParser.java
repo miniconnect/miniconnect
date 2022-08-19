@@ -19,6 +19,7 @@ import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.rdmsframework.query.DeleteQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.InsertQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.JoinType;
+import hu.webarticum.miniconnect.rdmsframework.query.NullsMode;
 import hu.webarticum.miniconnect.rdmsframework.query.Queries;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectCountQuery;
@@ -171,7 +172,7 @@ public class AntlrSqlParser implements SqlParser {
         WherePartContext wherePartNode = selectQueryNode.wherePart();
         ImmutableList<WhereItem> where = parseWherePartNode(wherePartNode);
         OrderByPartContext orderByNode = selectQueryNode.orderByPart();
-        ImmutableList<OrderByItem> orderBy = parseOrderByPartNode(orderByNode, tableAlias);
+        ImmutableList<OrderByItem> orderBy = parseOrderByPartNode(orderByNode);
         LimitPartContext limitPartNode = selectQueryNode.limitPart();
         Integer limit = limitPartNode != null ?
                 parseIntegerNode(limitPartNode.TOKEN_INTEGER()) :
@@ -560,7 +561,7 @@ public class AntlrSqlParser implements SqlParser {
         return new Object[] { fieldName, value };
     }
 
-    private ImmutableList<OrderByItem> parseOrderByPartNode(OrderByPartContext orderByPartNode, String tableAlias) {
+    private ImmutableList<OrderByItem> parseOrderByPartNode(OrderByPartContext orderByPartNode) {
         if (orderByPartNode == null) {
             return ImmutableList.empty();
         }
@@ -577,10 +578,19 @@ public class AntlrSqlParser implements SqlParser {
     private OrderByItem parseOrderByItemNode(OrderByItemContext orderByItemNode) {
         boolean ascOrder = (orderByItemNode.DESC() == null);
         
+        NullsMode nullsMode;
+        if (orderByItemNode.nullsFirst() != null) {
+            nullsMode = NullsMode.NULLS_FIRST;
+        } else if (orderByItemNode.nullsLast() != null) {
+            nullsMode = NullsMode.NULLS_LAST;
+        } else {
+            nullsMode = NullsMode.NULLS_AUTO;
+        }
+        
         OrderByPositionContext orderByPositionNode = orderByItemNode.orderByPosition();
         if (orderByPositionNode != null) {
             Integer orderByPosition = parseIntegerNode(orderByPositionNode.TOKEN_INTEGER());
-            return new OrderByItem(null, null, orderByPosition, ascOrder);
+            return new OrderByItem(null, null, orderByPosition, ascOrder, nullsMode);
         }
         
         ScopeableFieldNameContext scopeableFieldNameNode = orderByItemNode.scopeableFieldName();
@@ -589,7 +599,7 @@ public class AntlrSqlParser implements SqlParser {
         TableNameContext tableNameNode = scopeableFieldNameNode.tableName();
         String tableName = tableNameNode != null ? parseIdentifierNode(tableNameNode.identifier()) : null;
         
-        return new OrderByItem(tableName, fieldName, null, ascOrder);
+        return new OrderByItem(tableName, fieldName, null, ascOrder, nullsMode);
     }
     
     private LinkedHashMap<String, Object> parseUpdatePartNode(UpdatePartContext updatePartNode) {

@@ -61,10 +61,10 @@ public class MultiComparator implements Comparator<ImmutableList<Object>> {
         }
 
         public MultiComparatorBuilder add(
-                Comparator<?> comparator, boolean nullable, boolean asc, boolean nullsFirst) {
+                Comparator<?> comparator, boolean nullable, boolean asc, boolean nullsLow) {
             Comparator<?> transformedComparator = comparator;
             if (nullable) {
-                transformedComparator = nullsFirst ?
+                transformedComparator = nullsLow ?
                         Comparator.nullsFirst(comparator) :
                         Comparator.nullsLast(comparator);
             }

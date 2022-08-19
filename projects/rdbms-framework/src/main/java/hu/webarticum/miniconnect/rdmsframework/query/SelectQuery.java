@@ -286,12 +286,16 @@ public final class SelectQuery implements Query {
         private final Integer position;
         
         private final boolean ascOrder;
+        
+        private final NullsMode nullsMode;
 
-        public OrderByItem(String tableName, String fieldName, Integer position, boolean ascOrder) {
+        public OrderByItem(
+                String tableName, String fieldName, Integer position, boolean ascOrder, NullsMode nullsMode) {
             this.tableName = tableName;
             this.fieldName = fieldName;
             this.position = position;
             this.ascOrder = ascOrder;
+            this.nullsMode = nullsMode;
         }
 
         
@@ -309,6 +313,10 @@ public final class SelectQuery implements Query {
 
         public boolean ascOrder() {
             return ascOrder;
+        }
+
+        public NullsMode nullsMode() {
+            return nullsMode;
         }
         
     }
