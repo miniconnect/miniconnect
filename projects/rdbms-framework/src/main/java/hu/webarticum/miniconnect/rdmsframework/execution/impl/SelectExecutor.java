@@ -23,9 +23,10 @@ import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
+import hu.webarticum.miniconnect.rdmsframework.query.JoinType;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery;
-import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery.LeftJoinItem;
+import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery.JoinItem;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery.OrderByItem;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery.SelectItem;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery.WhereItem;
@@ -60,7 +61,7 @@ public class SelectExecutor implements QueryExecutor {
         String schemaName = selectQuery.schemaName();
         String tableName = selectQuery.tableName();
         String tableAlias = selectQuery.tableAlias();
-        ImmutableList<LeftJoinItem> leftJoins = selectQuery.leftJoins();
+        ImmutableList<JoinItem> joinItems = selectQuery.join();
         
         LinkedHashMap<String, TableEntry> tableEntries = new LinkedHashMap<>();
         addTableInfo(
@@ -71,13 +72,13 @@ public class SelectExecutor implements QueryExecutor {
                 null,
                 storageAccess,
                 state);
-        for (LeftJoinItem leftJoin : leftJoins) {
+        for (JoinItem joinItem : joinItems) {
             addTableInfo(
                     tableEntries,
-                    leftJoin.targetTableAlias(),
-                    leftJoin.targetSchemaName(),
-                    leftJoin.targetTableName(),
-                    leftJoin,
+                    joinItem.targetTableAlias(),
+                    joinItem.targetSchemaName(),
+                    joinItem.targetTableName(),
+                    joinItem,
                     storageAccess,
                     state);
         }
@@ -120,7 +121,7 @@ public class SelectExecutor implements QueryExecutor {
             String alias,
             String schemaName,
             String tableName,
-            LeftJoinItem leftJoin,
+            JoinItem joinItem,
             StorageAccess storageAccess,
             EngineSessionState state) {
         if (schemaName == null) {
@@ -148,22 +149,22 @@ public class SelectExecutor implements QueryExecutor {
             throw new MiniErrorException(new StoredError(7, "00007", "Duplicated table alias: " + alias));
         }
         
-        tableEntries.put(alias, new TableEntry(table, leftJoin));
+        tableEntries.put(alias, new TableEntry(table, joinItem));
 
-        checkLeftJoinItem(leftJoin, tableEntries);
+        checkJoinItem(joinItem, tableEntries);
     }
     
-    private void checkLeftJoinItem(LeftJoinItem leftJoin, Map<String, TableEntry> tableEntries) {
-        if (leftJoin == null) {
+    private void checkJoinItem(JoinItem joinItem, Map<String, TableEntry> tableEntries) {
+        if (joinItem == null) {
             return;
         }
         
-        Table sourceTable = tableEntries.get(leftJoin.sourceTableAlias()).table;
-        String sourceFieldName = leftJoin.sourceFieldName();
+        Table sourceTable = tableEntries.get(joinItem.sourceTableAlias()).table;
+        String sourceFieldName = joinItem.sourceFieldName();
         checkColumn(sourceTable, sourceFieldName);
 
-        Table targetTable = tableEntries.get(leftJoin.targetTableAlias()).table;
-        String targetFieldName = leftJoin.targetFieldName();
+        Table targetTable = tableEntries.get(joinItem.targetTableAlias()).table;
+        String targetFieldName = joinItem.targetFieldName();
         checkColumn(targetTable, targetFieldName);
     }
 
@@ -362,8 +363,11 @@ public class SelectExecutor implements QueryExecutor {
         List<MiniValue> resultBuilder = new ArrayList<>(selectItemEntries.size());
         for (SelectItemEntry selectItemEntry : selectItemEntries) {
             BigInteger rowIndex = joinedRow.get(selectItemEntry.tableAlias);
-            TableEntry tableEntry = tableEntries.get(selectItemEntry.tableAlias);
-            Object value = tableEntry.table.row(rowIndex).get(selectItemEntry.fieldName);
+            Object value = null;
+            if (rowIndex != null) {
+                TableEntry tableEntry = tableEntries.get(selectItemEntry.tableAlias);
+                value = tableEntry.table.row(rowIndex).get(selectItemEntry.fieldName);
+            }
             MiniValue miniValue = selectItemEntry.valueTranslator.encodeFully(value);
             resultBuilder.add(miniValue);
         }
@@ -408,29 +412,46 @@ public class SelectExecutor implements QueryExecutor {
         String tableAlias = remainingTableAliasList.get(0);
         TableEntry tableEntry = tableEntries.get(tableAlias);
         Map<String, Object> subFilter = new HashMap<>(tableEntry.subFilter);
-        if (tableEntry.leftJoin != null) {
-            String sourceTableAlias = tableEntry.leftJoin.sourceTableAlias();
-            String sourceFieldName = tableEntry.leftJoin.sourceFieldName();
-            String targetFieldName = tableEntry.leftJoin.targetFieldName();
+        boolean baseIsNull = false;
+        if (tableEntry.joinItem != null) {
+            String sourceTableAlias = tableEntry.joinItem.sourceTableAlias();
+            String sourceFieldName = tableEntry.joinItem.sourceFieldName();
+            String targetFieldName = tableEntry.joinItem.targetFieldName();
             Table sourceTable = tableEntries.get(sourceTableAlias).table;
             BigInteger rowIndex = joinedPrefix.get(sourceTableAlias);
-            Object joinValue = sourceTable.row(rowIndex).get(sourceFieldName);
-            subFilter.put(targetFieldName, joinValue);
+            if (rowIndex != null) {
+                Object joinValue = sourceTable.row(rowIndex).get(sourceFieldName);
+                subFilter.put(targetFieldName, joinValue);
+            } else {
+                baseIsNull = true;
+            }
         }
-        Iterator<BigInteger> rowIndexIterator = TableQueryUtil.filterRows(tableEntry.table, subFilter);
-        while (rowIndexIterator.hasNext()) {
-            BigInteger rowIndex = rowIndexIterator.next();
+        List<String> subRemainingTableAliasList = remainingTableAliasList.subList(1, remainingTableAliasList.size());
+        boolean found = false;
+        if (!baseIsNull) {
+            Iterator<BigInteger> rowIndexIterator = TableQueryUtil.filterRows(tableEntry.table, subFilter);
+            found = rowIndexIterator.hasNext();
+            while (rowIndexIterator.hasNext()) {
+                BigInteger rowIndex = rowIndexIterator.next();
+                Map<String, BigInteger> joinedRow = new HashMap<>(joinedPrefix);
+                joinedRow.put(tableAlias, rowIndex);
+                if (isLeaf) {
+                    result.add(joinedRow);
+                } else {
+                    collectRowsFromNextTable(result, subRemainingTableAliasList, joinedRow, limit, tableEntries);
+                }
+                if (limit != null && result.size() >= limit) {
+                    break;
+                }
+            }
+        }
+        if (!found && tableEntry.joinItem.joinType() == JoinType.LEFT_OUTER) {
             Map<String, BigInteger> joinedRow = new HashMap<>(joinedPrefix);
-            joinedRow.put(tableAlias, rowIndex);
+            joinedRow.put(tableAlias, null);
             if (isLeaf) {
                 result.add(joinedRow);
             } else {
-                List<String> subRemainingTableAliasList =
-                        remainingTableAliasList.subList(1, remainingTableAliasList.size());
                 collectRowsFromNextTable(result, subRemainingTableAliasList, joinedRow, limit, tableEntries);
-            }
-            if (limit != null && result.size() >= limit) {
-                break;
             }
         }
     }
@@ -469,16 +490,16 @@ public class SelectExecutor implements QueryExecutor {
         
         private final Table table;
         
-        private final LeftJoinItem leftJoin;
+        private final JoinItem joinItem;
         
         private final Map<String, ValueTranslator> valueTranslators = new HashMap<>();
         
         private final Map<String, Object> subFilter = new LinkedHashMap<>();
         
         
-        private TableEntry(Table table, LeftJoinItem leftJoin) {
+        private TableEntry(Table table, JoinItem joinItem) {
             this.table = table;
-            this.leftJoin = leftJoin;
+            this.joinItem = joinItem;
         }
         
     }

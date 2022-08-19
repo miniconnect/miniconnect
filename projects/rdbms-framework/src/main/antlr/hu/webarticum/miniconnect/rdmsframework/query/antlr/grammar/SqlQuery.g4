@@ -21,16 +21,19 @@ sqlQuery: (
 selectQuery: (
     SELECT selectPart
     FROM ( schemaName '.' )? tableName ( AS? tableAlias=identifier )?
-    leftJoinPart*
+    joinPart*
     wherePart?
     orderByPart?
     limitPart?
 );
 
-leftJoinPart: (
-	LEFT JOIN ( targetSchemaName=schemaName '.' )? targetTableName=tableName ( AS? tableAlias=identifier )?
+joinPart: (
+	( innerJoin | leftJoin )
+	( targetSchemaName=schemaName '.' )? targetTableName=tableName ( AS? tableAlias=identifier )?
 	ON scope1=tableName '.' field1=fieldName '=' scope2=tableName '.' field2=fieldName
 );
+innerJoin: INNER? JOIN;
+leftJoin: LEFT OUTER? JOIN;
 
 selectCountQuery: (
     SELECT COUNT PAR_START wildcardSelectItem PAR_END
@@ -131,6 +134,8 @@ DATABASES: D A T A B A S E S;
 TABLES: T A B L E S;
 LIKE: L I K E;
 LEFT: L E F T;
+INNER: I N N E R;
+OUTER: O U T E R;
 JOIN: J O I N;
 ON: O N;
 

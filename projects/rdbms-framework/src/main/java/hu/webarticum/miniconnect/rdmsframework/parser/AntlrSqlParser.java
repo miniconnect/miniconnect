@@ -18,6 +18,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.rdmsframework.query.DeleteQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.InsertQuery;
+import hu.webarticum.miniconnect.rdmsframework.query.JoinType;
 import hu.webarticum.miniconnect.rdmsframework.query.Queries;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectCountQuery;
@@ -32,7 +33,7 @@ import hu.webarticum.miniconnect.rdmsframework.query.SpecialSelectableType;
 import hu.webarticum.miniconnect.rdmsframework.query.UpdateQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.UseQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.VariableValue;
-import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery.LeftJoinItem;
+import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery.JoinItem;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery.OrderByItem;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery.SelectItem;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery.WhereItem;
@@ -45,7 +46,7 @@ import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParse
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.FieldSelectItemContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.IdentifierContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.InsertQueryContext;
-import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.LeftJoinPartContext;
+import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.JoinPartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.LikePartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.LimitPartContext;
 import hu.webarticum.miniconnect.rdmsframework.query.antlr.grammar.SqlQueryParser.LiteralContext;
@@ -165,8 +166,8 @@ public class AntlrSqlParser implements SqlParser {
             tableAlias = parseIdentifierNode(aliasIdentifierNode);
         }
         ImmutableList<SelectItem> selectItems = parseSelectPartNode(selectPartNode);
-        List<LeftJoinPartContext> leftJoinParts = selectQueryNode.leftJoinPart();
-        ImmutableList<LeftJoinItem> leftJoins = parseLeftJoinPartNodes(leftJoinParts, tableAlias);
+        List<JoinPartContext> joinParts = selectQueryNode.joinPart();
+        ImmutableList<JoinItem> joins = parseJoinPartNodes(joinParts, tableAlias);
         WherePartContext wherePartNode = selectQueryNode.wherePart();
         ImmutableList<WhereItem> where = parseWherePartNode(wherePartNode);
         OrderByPartContext orderByNode = selectQueryNode.orderByPart();
@@ -181,7 +182,7 @@ public class AntlrSqlParser implements SqlParser {
                 .inSchema(schemaName)
                 .from(tableName)
                 .tableAlias(tableAlias)
-                .leftJoins(leftJoins)
+                .joins(joins)
                 .where(where)
                 .orderBy(orderBy)
                 .limit(limit)
@@ -430,37 +431,38 @@ public class AntlrSqlParser implements SqlParser {
         return new SelectItem(tableName, fieldName, alias);
     }
     
-    private ImmutableList<LeftJoinItem> parseLeftJoinPartNodes(
-            List<LeftJoinPartContext> leftJoinPartNodes, String tableAlias) {
-        Set<String> previousTableAliases = new HashSet<>(leftJoinPartNodes.size() + 1);
+    private ImmutableList<JoinItem> parseJoinPartNodes(
+            List<JoinPartContext> joinPartNodes, String tableAlias) {
+        Set<String> previousTableAliases = new HashSet<>(joinPartNodes.size() + 1);
         previousTableAliases.add(tableAlias);
-        List<LeftJoinItem> resultBuilder = new ArrayList<>(leftJoinPartNodes.size()); 
-        for (LeftJoinPartContext leftJoinPartNode : leftJoinPartNodes) {
-            resultBuilder.add(parseLeftJoinPartNode(leftJoinPartNode, previousTableAliases));
+        List<JoinItem> resultBuilder = new ArrayList<>(joinPartNodes.size()); 
+        for (JoinPartContext joinPartNode : joinPartNodes) {
+            resultBuilder.add(parseJoinPartNode(joinPartNode, previousTableAliases));
         }
         return ImmutableList.fromCollection(resultBuilder);
     }
 
-    private LeftJoinItem parseLeftJoinPartNode(
-            LeftJoinPartContext leftJoinPartNode, Set<String> previousTableAliases) {
-        SchemaNameContext targetSchemaNameNode = leftJoinPartNode.targetSchemaName;
+    private JoinItem parseJoinPartNode(JoinPartContext joinPartNode, Set<String> previousTableAliases) {
+        SchemaNameContext targetSchemaNameNode = joinPartNode.targetSchemaName;
         String targetSchemaName =
                 targetSchemaNameNode != null ?
                 parseIdentifierNode(targetSchemaNameNode.identifier()) :
                 null;
-        String targetTableName = parseIdentifierNode(leftJoinPartNode.targetTableName.identifier());
-        IdentifierContext tableAliasNode = leftJoinPartNode.tableAlias;
+        String targetTableName = parseIdentifierNode(joinPartNode.targetTableName.identifier());
+        IdentifierContext tableAliasNode = joinPartNode.tableAlias;
         String targetTableAlias = tableAliasNode != null ? parseIdentifierNode(tableAliasNode) : targetTableName;
-        String scope1 = parseIdentifierNode(leftJoinPartNode.scope1.identifier());
-        String field1 = parseIdentifierNode(leftJoinPartNode.field1.identifier());
-        String scope2 = parseIdentifierNode(leftJoinPartNode.scope2.identifier());
-        String field2 = parseIdentifierNode(leftJoinPartNode.field2.identifier());
+        String scope1 = parseIdentifierNode(joinPartNode.scope1.identifier());
+        String field1 = parseIdentifierNode(joinPartNode.field1.identifier());
+        String scope2 = parseIdentifierNode(joinPartNode.scope2.identifier());
+        String field2 = parseIdentifierNode(joinPartNode.field2.identifier());
         
         if (scope1.equals(scope2)) {
             throw new IllegalArgumentException("Can not join to the same table alias: " + scope1);
         }
         
-        String targetFieldName, sourceTableAlias, sourceFieldName;
+        String targetFieldName;
+        String sourceTableAlias;
+        String sourceFieldName;
         if (scope1.equals(targetTableAlias)) {
             targetFieldName = field1;
             sourceTableAlias = scope2;
@@ -483,7 +485,10 @@ public class AntlrSqlParser implements SqlParser {
             throw new IllegalArgumentException("Duplicated table alias: " + targetTableAlias);
         }
         
-        return new LeftJoinItem(
+        JoinType joinType = joinPartNode.leftJoin() != null ? JoinType.LEFT_OUTER : JoinType.INNER;
+        
+        return new JoinItem(
+                joinType,
                 targetSchemaName,
                 targetTableName,
                 targetTableAlias,

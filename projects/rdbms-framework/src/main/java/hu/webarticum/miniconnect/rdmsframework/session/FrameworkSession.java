@@ -38,10 +38,6 @@ public class FrameworkSession implements MiniSession, CheckableCloseable {
             Query query = sqlParser.parse(sql);
             return execute(query);
         } catch (Exception e) {
-
-            // FIXME
-            e.printStackTrace();
-            
             return new StoredResult(errorOfException(e));
         }
     }
@@ -59,10 +55,6 @@ public class FrameworkSession implements MiniSession, CheckableCloseable {
         } catch (Exception e) {
             exception = e;
         }
-        
-        // FIXME
-        exception.printStackTrace();
-        
         return new StoredResult(errorOfException(exception));
     }
 

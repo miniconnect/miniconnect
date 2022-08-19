@@ -14,7 +14,7 @@ public final class SelectQuery implements Query {
 
     private final String tableAlias;
     
-    private final ImmutableList<LeftJoinItem> leftJoins;
+    private final ImmutableList<JoinItem> joins;
     
     private final ImmutableList<WhereItem> where;
     
@@ -28,7 +28,7 @@ public final class SelectQuery implements Query {
         this.schemaName = builder.schemaName;
         this.tableName = Objects.requireNonNull(builder.tableName);
         this.tableAlias = builder.tableAlias;
-        this.leftJoins = Objects.requireNonNull(builder.leftJoins);
+        this.joins = Objects.requireNonNull(builder.joins);
         this.where = Objects.requireNonNull(builder.where);
         this.orderBy = Objects.requireNonNull(builder.orderBy);
         this.limit = builder.limit;
@@ -55,8 +55,8 @@ public final class SelectQuery implements Query {
         return tableAlias;
     }
 
-    public ImmutableList<LeftJoinItem> leftJoins() {
-        return leftJoins;
+    public ImmutableList<JoinItem> join() {
+        return joins;
     }
     
     public ImmutableList<WhereItem> where() {
@@ -82,7 +82,7 @@ public final class SelectQuery implements Query {
 
         private String tableAlias = null;
         
-        private ImmutableList<LeftJoinItem> leftJoins = ImmutableList.empty();
+        private ImmutableList<JoinItem> joins = ImmutableList.empty();
         
         private ImmutableList<WhereItem> where = ImmutableList.empty();
         
@@ -116,13 +116,13 @@ public final class SelectQuery implements Query {
             return this;
         }
 
-        public SelectQueryBuilder leftJoins(ImmutableList<LeftJoinItem> leftJoins) {
-            this.leftJoins = leftJoins;
+        public SelectQueryBuilder joins(ImmutableList<JoinItem> joins) {
+            this.joins = joins;
             return this;
         }
 
-        public SelectQueryBuilder leftJoin(LeftJoinItem leftJoin) {
-            this.leftJoins = leftJoins.append(leftJoin);
+        public SelectQueryBuilder join(JoinItem join) {
+            this.joins = joins.append(join);
             return this;
         }
 
@@ -180,7 +180,9 @@ public final class SelectQuery implements Query {
     }
     
     
-    public static class LeftJoinItem {
+    public static class JoinItem {
+        
+        private final JoinType joinType;
 
         private final String targetSchemaName;
         
@@ -195,13 +197,15 @@ public final class SelectQuery implements Query {
         private final String sourceFieldName;
 
         
-        public LeftJoinItem(
+        public JoinItem(
+                JoinType joinType,
                 String targetSchemaName,
                 String targetTableName,
                 String targetTableAlias,
                 String targetFieldName,
                 String sourceTableAlias,
                 String sourceFieldName) {
+            this.joinType = joinType;
             this.targetSchemaName = targetSchemaName;
             this.targetTableName = targetTableName;
             this.targetTableAlias = targetTableAlias;
@@ -210,7 +214,11 @@ public final class SelectQuery implements Query {
             this.sourceFieldName = sourceFieldName;
         }
 
-        
+
+        public JoinType joinType() {
+            return joinType;
+        }
+
         public String targetSchemaName() {
             return targetSchemaName;
         }
