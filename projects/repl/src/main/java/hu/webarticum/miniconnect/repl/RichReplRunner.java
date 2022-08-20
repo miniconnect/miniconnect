@@ -73,6 +73,7 @@ public class RichReplRunner implements ReplRunner {
                 .terminal(terminal)
                 .parser(parser)
                 .history(history)
+                .variable(LineReader.BLINK_MATCHING_PAREN, 0)
                 .build();
     }
 
