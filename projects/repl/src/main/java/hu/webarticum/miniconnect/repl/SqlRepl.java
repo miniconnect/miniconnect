@@ -21,6 +21,9 @@ import hu.webarticum.miniconnect.record.ResultTable;
 // TODO: better abstraction (context/executor vs output-handling), builder
 public class SqlRepl implements Repl {
     
+    public static final String DEFAULT_TITLE_MESSAGE = "Welcome in miniConnect SQL REPL!";
+    
+    
     private static final BeeFragment TERMINATOR_FRAGMENT = Bee
             .then(Bee.WHITESPACE.any())
             .then(Bee.fixed(";"));
@@ -91,10 +94,17 @@ public class SqlRepl implements Repl {
     
 
     private final MiniSession session;
+    
+    private final String titleMessage;
 
 
     public SqlRepl(MiniSession session) {
+        this(session, DEFAULT_TITLE_MESSAGE);
+    }
+
+    public SqlRepl(MiniSession session, String titleMessage) {
         this.session = session;
+        this.titleMessage = titleMessage;
     }
 
 
@@ -133,7 +143,9 @@ public class SqlRepl implements Repl {
 
     @Override
     public void welcome(AnsiAppendable out) throws IOException {
-        out.append("\nWelcome in miniConnect SQL REPL!\n\n");
+        out.append("\n");
+        out.appendAnsi(AnsiUtil.formatAsHeader(titleMessage));
+        out.append("\n\n");
     }
 
     @Override

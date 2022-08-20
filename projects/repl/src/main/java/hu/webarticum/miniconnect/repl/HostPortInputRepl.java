@@ -75,7 +75,7 @@ public class HostPortInputRepl implements Repl {
 
     @Override
     public void bye(AnsiAppendable out) throws IOException {
-        out.append("\nSelected server: " + host + ":" + port + "\n\n");
+        // nothing to do
     }
     
     public String getHost() {

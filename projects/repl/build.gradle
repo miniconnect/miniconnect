@@ -32,6 +32,7 @@ dependencies {
     implementation project(':server')
     
     implementation 'hu.webarticum:regexbee:0.3.0'
+    implementation 'info.picocli:picocli:4.6.3'
     implementation 'org.jline:jline:3.21.0'
     implementation 'org.slf4j:slf4j-nop:1.7.36'
 }
