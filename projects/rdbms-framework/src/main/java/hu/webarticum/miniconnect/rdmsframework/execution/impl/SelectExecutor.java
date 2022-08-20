@@ -32,6 +32,7 @@ import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery.OrderByItem;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery.SelectItem;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery.WhereItem;
 import hu.webarticum.miniconnect.rdmsframework.query.SpecialCondition;
+import hu.webarticum.miniconnect.rdmsframework.query.VariableValue;
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
 import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
@@ -101,14 +102,14 @@ public class SelectExecutor implements QueryExecutor {
                 .collect(ImmutableList.createCollector());
 
         try {
-            addFilters(selectQuery.where(), tableEntries);
+            addFilters(selectQuery.where(), tableEntries, state);
         } catch (IncompatibleFiltersException e) {
             return new StoredResult(new StoredResultSetData(columnHeaders, ImmutableList.empty()));
         }
 
         Integer limit = selectQuery.limit();
 
-        List<Map<String, BigInteger>> joinedRowIndices = collectRows(orderByEntries, limit, tableEntries);
+        List<Map<String, BigInteger>> joinedRowIndices = collectRows(orderByEntries, limit, tableEntries, state);
         
         ImmutableList<ImmutableList<MiniValue>> data = joinedRowIndices.stream()
                 .map(r -> selectRow(r, selectItemEntries, tableEntries))
@@ -169,13 +170,16 @@ public class SelectExecutor implements QueryExecutor {
         checkColumn(targetTable, targetFieldName);
     }
 
-    private void addFilters(ImmutableList<WhereItem> whereItems, Map<String, TableEntry> tableEntries) {
+    private void addFilters(
+            ImmutableList<WhereItem> whereItems,
+            Map<String, TableEntry> tableEntries,
+            EngineSessionState state) {
         for (WhereItem whereItem : whereItems) {
-            addFilter(whereItem, tableEntries);
+            addFilter(whereItem, tableEntries, state);
         }
     }
     
-    private void addFilter(WhereItem whereItem, Map<String, TableEntry> tableEntries) {
+    private void addFilter(WhereItem whereItem, Map<String, TableEntry> tableEntries, EngineSessionState state) {
         String tableName = whereItem.tableName();
         if (tableName == null) {
             tableName = tableEntries.keySet().iterator().next();
@@ -192,7 +196,7 @@ public class SelectExecutor implements QueryExecutor {
         Object value = whereItem.value();
         ColumnDefinition columnDefinition = tableEntry.table.columns().get(fieldName).definition();
         
-        applyFilterValue(tableEntry.subFilter, fieldName, value, columnDefinition);
+        applyFilterValue(tableEntry.subFilter, fieldName, value, columnDefinition, state);
     }
     
     private void addSelectItemEntries(
@@ -350,20 +354,26 @@ public class SelectExecutor implements QueryExecutor {
     }
 
     private List<Map<String, BigInteger>> collectRows(
-            List<OrderByEntry> orderByEntries, Integer limit, Map<String, TableEntry> tableEntries) {
+            List<OrderByEntry> orderByEntries,
+            Integer limit,
+            Map<String, TableEntry> tableEntries,
+            EngineSessionState state) {
         
         // TODO: handle easily optimizable cases
         
-        return collectRowsInAGeneralUnoptimizedWay(orderByEntries, limit, tableEntries);
+        return collectRowsInAGeneralUnoptimizedWay(orderByEntries, limit, tableEntries, state);
     }
     
     private List<Map<String, BigInteger>> collectRowsInAGeneralUnoptimizedWay(
-            List<OrderByEntry> orderByEntries, Integer limit, Map<String, TableEntry> tableEntries) {
+            List<OrderByEntry> orderByEntries,
+            Integer limit,
+            Map<String, TableEntry> tableEntries,
+            EngineSessionState state) {
         List<String> remainingTableAliasList = new ArrayList<>(tableEntries.keySet());
         Map<String, BigInteger> joinedPrefix = new HashMap<>();
         List<Map<String, BigInteger>> result = new ArrayList<>();
         Integer preLimit = orderByEntries.isEmpty() ? limit : null;
-        collectRowsFromNextTable(result, remainingTableAliasList, joinedPrefix, limit, tableEntries);
+        collectRowsFromNextTable(result, remainingTableAliasList, joinedPrefix, limit, tableEntries, state);
         if (!orderByEntries.isEmpty()) {
             MultiComparator multiComparator = createJoinedMultiComparator(orderByEntries, tableEntries);
             result.sort((r1, r2) -> multiComparator.compare(
@@ -382,7 +392,8 @@ public class SelectExecutor implements QueryExecutor {
             List<String> remainingTableAliasList,
             Map<String, BigInteger> joinedPrefix,
             Integer limit,
-            Map<String, TableEntry> tableEntries) {
+            Map<String, TableEntry> tableEntries,
+            EngineSessionState state) {
         boolean isLeaf = remainingTableAliasList.size() == 1;
         String tableAlias = remainingTableAliasList.get(0);
         TableEntry tableEntry = tableEntries.get(tableAlias);
@@ -398,7 +409,7 @@ public class SelectExecutor implements QueryExecutor {
                 Object joinValue = sourceTable.row(rowIndex).get(sourceFieldName);
                 ColumnDefinition columnDefinition = tableEntry.table.columns().get(targetFieldName).definition();
                 try {
-                    applyFilterValue(subFilter, targetFieldName, joinValue, columnDefinition);
+                    applyFilterValue(subFilter, targetFieldName, joinValue, columnDefinition, state);
                 } catch (IncompatibleFiltersException e) {
                     return;
                 }
@@ -418,7 +429,7 @@ public class SelectExecutor implements QueryExecutor {
                 if (isLeaf) {
                     result.add(joinedRow);
                 } else {
-                    collectRowsFromNextTable(result, subRemainingTableAliasList, joinedRow, limit, tableEntries);
+                    collectRowsFromNextTable(result, subRemainingTableAliasList, joinedRow, limit, tableEntries, state);
                 }
                 if (limit != null && result.size() >= limit) {
                     break;
@@ -431,17 +442,26 @@ public class SelectExecutor implements QueryExecutor {
             if (isLeaf) {
                 result.add(joinedRow);
             } else {
-                collectRowsFromNextTable(result, subRemainingTableAliasList, joinedRow, limit, tableEntries);
+                collectRowsFromNextTable(result, subRemainingTableAliasList, joinedRow, limit, tableEntries, state);
             }
         }
     }
     
     private void applyFilterValue(
-            Map<String, Object> subFilter, String key, Object newRawValue, ColumnDefinition columnDefinition) {
+            Map<String, Object> subFilter,
+            String key,
+            Object newRawValue,
+            ColumnDefinition columnDefinition,
+            EngineSessionState state) {
         Object existingValue = subFilter.get(key);
-        Object convertedValue = newRawValue instanceof SpecialCondition ?
-                newRawValue :
-                TableQueryUtil.convert(newRawValue, columnDefinition.clazz());
+        Object convertedValue = newRawValue;
+        if (convertedValue instanceof VariableValue) {
+            String variableName = ((VariableValue) convertedValue).name();
+            convertedValue = state.getUserVariable(variableName);
+        }
+        if (!(convertedValue instanceof SpecialCondition)) {
+            convertedValue = TableQueryUtil.convert(convertedValue, columnDefinition.clazz());
+        }
         @SuppressWarnings("unchecked")
         Comparator<Object> comparator = (Comparator<Object>) columnDefinition.comparator();
         subFilter.put(key, mergeFilterValue(existingValue, convertedValue, comparator));
