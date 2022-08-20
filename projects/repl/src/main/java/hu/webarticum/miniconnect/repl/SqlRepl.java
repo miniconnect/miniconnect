@@ -15,6 +15,7 @@ import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.record.ResultTable;
 
 // TODO: better abstraction (context/executor vs output-handling), builder
@@ -204,12 +205,28 @@ public class SqlRepl implements Repl {
     private void printSuccessResult(MiniResult result, AnsiAppendable out) throws IOException {
         out.appendAnsi("\n  " + AnsiUtil.formatAsSuccess("Query was successfully executed!") + "\n\n");
         
+        printWarnings(result.warnings(), out);
+        
         if (result.hasResultSet()) {
             ResultTable resultTable = new ResultTable(result.resultSet());
             new ResultSetPrinter().print(resultTable, out);
         }
     }
     
+    private void printWarnings(ImmutableList<MiniError> warnings, AnsiAppendable out) throws IOException {
+        if (warnings.isEmpty()) {
+            return;
+        }
+        
+        for (MiniError warning : warnings) {
+            out.appendAnsi(AnsiUtil.formatAsWarning("  WARNING: " + warning.message()));
+            out.append('\n');
+        }
+
+        out.append('\n');
+    }
+
+
     private void putLargeData(String name, String source, AnsiAppendable out) throws IOException {
         long length;
         InputStream in;

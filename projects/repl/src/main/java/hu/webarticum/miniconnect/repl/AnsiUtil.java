@@ -16,6 +16,8 @@ public class AnsiUtil {
 
     private static final String ERROR_START_ANSI = "\u001B[1;31m";
 
+    private static final String WARNING_START_ANSI = "\u001B[1;33m";
+    
     private static final String HEADER_START_ANSI = "\u001B[1m";
 
     private static final String PARAMETER_START_ANSI = "\u001B[3;33m";
@@ -54,6 +56,10 @@ public class AnsiUtil {
 
     public static String formatAsError(CharSequence promptText) {
         return ERROR_START_ANSI + promptText + RESET_ANSI;
+    }
+
+    public static String formatAsWarning(CharSequence promptText) {
+        return WARNING_START_ANSI + promptText + RESET_ANSI;
     }
 
     public static String formatAsHeader(CharSequence promptText) {

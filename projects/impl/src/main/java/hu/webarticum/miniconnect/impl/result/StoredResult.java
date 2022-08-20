@@ -45,12 +45,12 @@ public final class StoredResult implements MiniResult, Serializable {
     public StoredResult(
             boolean success,
             StoredError error,
-            ImmutableList<StoredError> warnings,
+            ImmutableList<? extends MiniError> warnings,
             boolean hasResultSet,
             StoredResultSetData resultSetData) {
         this.success = success;
         this.error = error;
-        this.warnings = warnings.map(e -> e);
+        this.warnings = warnings.map(StoredError::of);
         this.hasResultSet = hasResultSet;
         this.resultSetData = resultSetData;
     }
