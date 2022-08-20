@@ -191,41 +191,8 @@ public class SelectExecutor implements QueryExecutor {
         
         Object value = whereItem.value();
         ColumnDefinition columnDefinition = tableEntry.table.columns().get(fieldName).definition();
-        @SuppressWarnings("unchecked")
-        Comparator<Object> comparator = (Comparator<Object>) columnDefinition.comparator();
-        Object convertedValue = value;
-        if (!(value instanceof SpecialCondition)) {
-            convertedValue = TableQueryUtil.convert(value, columnDefinition.clazz());
-        }
-        Object existingValue = tableEntry.subFilter.get(fieldName);
-        tableEntry.subFilter.put(fieldName, mergeFilterValue(existingValue, convertedValue, comparator));
-    }
-    
-    private Object mergeFilterValue(Object existingValue, Object newValue, Comparator<Object> comparator) {
-        if (existingValue == null) {
-            return newValue;
-        }
         
-        if (
-                !(existingValue instanceof SpecialCondition) &&
-                !(newValue instanceof SpecialCondition) &&
-                comparator.compare(newValue, existingValue) == 0) {
-            return newValue;
-        }
-        
-        if (existingValue == SpecialCondition.IS_NOT_NULL) {
-            if (newValue == SpecialCondition.IS_NULL) {
-                throw new IncompatibleFiltersException();
-            }
-            return newValue;
-        } else if (existingValue == SpecialCondition.IS_NULL) {
-            if (newValue != SpecialCondition.IS_NULL) {
-                throw new IncompatibleFiltersException();
-            }
-            return newValue;
-        } else {
-            throw new IncompatibleFiltersException();
-        }
+        applyFilterValue(tableEntry.subFilter, fieldName, value, columnDefinition);
     }
     
     private void addSelectItemEntries(
@@ -429,7 +396,12 @@ public class SelectExecutor implements QueryExecutor {
             BigInteger rowIndex = joinedPrefix.get(sourceTableAlias);
             if (rowIndex != null) {
                 Object joinValue = sourceTable.row(rowIndex).get(sourceFieldName);
-                subFilter.put(targetFieldName, joinValue);
+                ColumnDefinition columnDefinition = tableEntry.table.columns().get(targetFieldName).definition();
+                try {
+                    applyFilterValue(subFilter, targetFieldName, joinValue, columnDefinition);
+                } catch (IncompatibleFiltersException e) {
+                    return;
+                }
             } else {
                 baseIsNull = true;
             }
@@ -463,7 +435,45 @@ public class SelectExecutor implements QueryExecutor {
             }
         }
     }
+    
+    private void applyFilterValue(
+            Map<String, Object> subFilter, String key, Object newRawValue, ColumnDefinition columnDefinition) {
+        Object existingValue = subFilter.get(key);
+        Object convertedValue = newRawValue instanceof SpecialCondition ?
+                newRawValue :
+                TableQueryUtil.convert(newRawValue, columnDefinition.clazz());
+        @SuppressWarnings("unchecked")
+        Comparator<Object> comparator = (Comparator<Object>) columnDefinition.comparator();
+        subFilter.put(key, mergeFilterValue(existingValue, convertedValue, comparator));
+    }
 
+    private Object mergeFilterValue(Object existingValue, Object newValue, Comparator<Object> comparator) {
+        if (existingValue == null) {
+            return newValue;
+        }
+        
+        if (
+                !(existingValue instanceof SpecialCondition) &&
+                !(newValue instanceof SpecialCondition) &&
+                comparator.compare(newValue, existingValue) == 0) {
+            return newValue;
+        }
+        
+        if (existingValue == SpecialCondition.IS_NOT_NULL) {
+            if (newValue == SpecialCondition.IS_NULL) {
+                throw new IncompatibleFiltersException();
+            }
+            return newValue;
+        } else if (existingValue == SpecialCondition.IS_NULL) {
+            if (newValue != SpecialCondition.IS_NULL) {
+                throw new IncompatibleFiltersException();
+            }
+            return newValue;
+        } else {
+            throw new IncompatibleFiltersException();
+        }
+    }
+    
     private ImmutableList<Object> extractOrderValues(
             Map<String, BigInteger> joinedRow,
             List<OrderByEntry> orderByEntries,
