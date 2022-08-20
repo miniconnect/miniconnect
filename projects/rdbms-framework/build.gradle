@@ -35,3 +35,7 @@ dependencies {
     
     labImplementation project(':repl')
 }
+
+afterEvaluate {
+	sourcesJar.dependsOn generateGrammarSource
+}

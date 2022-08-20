@@ -61,6 +61,10 @@ subprojects {
             withSourcesJar()
         }
         
+        javadoc {
+		    options.addStringOption('Xdoclint:none', '-quiet')
+		}
+		
         test {
             useJUnitPlatform()
             testLogging {
@@ -73,15 +77,11 @@ subprojects {
             }
         }
         
-        tasks.withType(JavaCompile) {
-            options.compilerArgs << '-Xlint:unchecked'
-            options.deprecation = true
-        }
-        
         publishing {
             publications {
                 mavenJava(MavenPublication) {
                     from components.java
+                    suppressAllPomMetadataWarnings()
                 }
             }
         }
