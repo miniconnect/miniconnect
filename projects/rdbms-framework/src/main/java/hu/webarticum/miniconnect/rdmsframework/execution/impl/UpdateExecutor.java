@@ -68,8 +68,9 @@ public class UpdateExecutor implements QueryExecutor {
             return new StoredResult(new StoredError(3, "00003", e.getMessage()));
         }
 
-        Map<String, Object> convertedQueryUpdates = TableQueryUtil.convertColumnValues(table, queryUpdates, state);
-        Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere, state);
+        Map<String, Object> convertedQueryUpdates =
+                TableQueryUtil.convertColumnValues(table, queryUpdates, state, true);
+        Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere, state, false);
 
         List<BigInteger> rowIndexes = TableQueryUtil.filterRowsToList(table, convertedQueryWhere, null);
         

@@ -63,7 +63,7 @@ public class DeleteExecutor implements QueryExecutor {
             return new StoredResult(new StoredError(3, "00003", e.getMessage()));
         }
 
-        Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere, state);
+        Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere, state, false);
         
         List<BigInteger> rowIndexes = TableQueryUtil.filterRowsToList(table, convertedQueryWhere, null);
         

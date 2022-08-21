@@ -61,7 +61,7 @@ public class SelectCountExecutor implements QueryExecutor {
             return ResultUtil.createSingleValueResult(columnName, table.size());
         }
         
-        Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere, state);
+        Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere, state, false);
         BigInteger count = TableQueryUtil.countRows(table, convertedQueryWhere);
         return ResultUtil.createSingleValueResult(columnName, count);
     }

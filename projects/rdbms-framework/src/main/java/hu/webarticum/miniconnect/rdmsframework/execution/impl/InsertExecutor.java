@@ -103,7 +103,8 @@ public class InsertExecutor implements QueryExecutor {
             }
         }
         
-        Map<String, Object> convertedInsertValues = TableQueryUtil.convertColumnValues(table, insertValueMap, state);
+        Map<String, Object> convertedInsertValues =
+                TableQueryUtil.convertColumnValues(table, insertValueMap, state, true);
 
         ImmutableMap<Integer, Object> values =
                 TableQueryUtil.toByColumnPoisitionedImmutableMap(table, convertedInsertValues);

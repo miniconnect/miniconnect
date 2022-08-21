@@ -17,6 +17,7 @@ import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.query.SpecialCondition;
 import hu.webarticum.miniconnect.rdmsframework.query.VariableValue;
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
+import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
 import hu.webarticum.miniconnect.rdmsframework.storage.RangeSelection;
 import hu.webarticum.miniconnect.rdmsframework.storage.Row;
@@ -241,22 +242,36 @@ public class TableQueryUtil {
     public static <T> T convert(Object source, Class<T> targetClazz) {
         return (T) CONVERTER.convert(source, targetClazz);
     }
-    
+
     public static Map<String, Object> convertColumnValues(
-            Table table, Map<String, Object> columnValues, EngineSessionState state) {
+            Table table, Map<String, Object> columnValues, EngineSessionState state, boolean check) {
         Map<String, Object> result = new LinkedHashMap<>();
         NamedResourceStore<Column> columns = table.columns();
         for (Map.Entry<String, Object> entry : columnValues.entrySet()) {
             String columnName = entry.getKey();
             Object value = entry.getValue();
             Object convertedValue = value;
-            if (value instanceof VariableValue) {
+            if (convertedValue instanceof VariableValue) {
                 String variableName = ((VariableValue) value).name();
                 convertedValue = state.getUserVariable(variableName);
             }
-            if (!(value instanceof SpecialCondition)) {
-                Class<?> columnClazz = columns.get(columnName).definition().clazz();
+            if (!(convertedValue instanceof SpecialCondition)) {
+                ColumnDefinition definition = columns.get(columnName).definition();
+                Class<?> columnClazz = definition.clazz();
                 convertedValue = convert(convertedValue, columnClazz);
+                
+                // FIXME currently, null check is performed in applyPatch()
+                if (check && convertedValue != null) {
+                    Optional<ImmutableList<Object>> enumValuesOptional = definition.enumValues();
+                    if (enumValuesOptional.isPresent()) {
+                        ImmutableList<Object> enumValues = enumValuesOptional.get();
+                        if (!enumValues.contains(convertedValue)) {
+                            throw new IllegalArgumentException(
+                                    "Invalid value for ENUM: " + convertedValue +
+                                    " (allowed values: " + enumValues + ")");
+                        }
+                    }
+                }
             }
             result.put(columnName, convertedValue);
         }
