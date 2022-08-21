@@ -6,6 +6,8 @@ import java.util.Objects;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 
 public final class InsertQuery implements Query {
+    
+    private final boolean replace;
 
     private final String schemaName;
 
@@ -22,6 +24,7 @@ public final class InsertQuery implements Query {
         if (builder.fields != null && builder.values.size() != builder.fields.size()) {
             throw new IllegalArgumentException("Count of fields and values must be the same");
         }
+        this.replace = builder.replace;
         this.schemaName = builder.schemaName;
         this.tableName = Objects.requireNonNull(builder.tableName);
         this.fields = builder.fields;
@@ -32,6 +35,10 @@ public final class InsertQuery implements Query {
         return new InsertQueryBuilder();
     }
     
+
+    public boolean replace() {
+        return replace;
+    }
 
     public String schemaName() {
         return schemaName;
@@ -52,6 +59,8 @@ public final class InsertQuery implements Query {
     
     public static final class InsertQueryBuilder {
         
+        private boolean replace = false;
+        
         private String schemaName = null;
         
         private String tableName = null;
@@ -65,6 +74,11 @@ public final class InsertQuery implements Query {
             // use builder()
         }
         
+
+        public InsertQueryBuilder replace(boolean replace) {
+            this.replace = replace;
+            return this;
+        }
 
         public InsertQueryBuilder inSchema(String schemaName) {
             this.schemaName = schemaName;

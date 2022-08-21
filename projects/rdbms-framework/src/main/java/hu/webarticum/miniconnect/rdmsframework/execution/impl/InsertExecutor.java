@@ -2,9 +2,11 @@ package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.impl.result.StoredError;
@@ -17,6 +19,8 @@ import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.InsertQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
+import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
+import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
 import hu.webarticum.miniconnect.rdmsframework.storage.Schema;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
@@ -113,7 +117,17 @@ public class InsertExecutor implements QueryExecutor {
         }
         ImmutableList<Object> rowData = ImmutableList.fromCollection(rowDataBuilder);
         
-        TablePatch patch =  TablePatch.builder().insert(rowData).build();
+        TablePatch.TablePatchBuilder patchBuilder = TablePatch.builder();
+        patchBuilder.insert(rowData);
+        
+        if (insertQuery.replace()) {
+            Set<BigInteger> conflictingRowIndices = collectConflictingRowIndices(convertedInsertValues, table);
+            for (BigInteger conflictingRowIndex : conflictingRowIndices) {
+                patchBuilder.delete(conflictingRowIndex);
+            }
+        }
+        
+        TablePatch patch = patchBuilder.build();
         
         table.applyPatch(patch);
         
@@ -128,5 +142,25 @@ public class InsertExecutor implements QueryExecutor {
         
         return new StoredResult();
     }
-    
+
+    private Set<BigInteger> collectConflictingRowIndices(Map<String, Object> convertedInsertValues, Table table) {
+        Set<BigInteger> result = new HashSet<>();
+        NamedResourceStore<Column> columns = table.columns();
+        for (Map.Entry<String, Object> entry : convertedInsertValues.entrySet()) {
+            Object value = entry.getValue();
+            if (value == null) {
+                continue;
+            }
+
+            String columnName = entry.getKey();
+            ColumnDefinition definition = columns.get(columnName).definition();
+            if (!definition.isUnique()) {
+                continue;
+            }
+            
+            result.addAll(TableQueryUtil.findAllNonNull(table, columnName, value));
+        }
+        return result;
+    }
+
 }

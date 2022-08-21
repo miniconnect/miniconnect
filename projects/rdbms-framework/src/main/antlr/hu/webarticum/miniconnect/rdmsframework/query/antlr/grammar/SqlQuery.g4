@@ -64,7 +64,7 @@ updateQuery: UPDATE ( schemaName '.' )? tableName updatePart wherePart?;
 updatePart: SET updateItem ( ',' updateItem )*;
 updateItem: fieldName '=' extendedValue;
 
-insertQuery: INSERT INTO ( schemaName '.' )? tableName fieldList? VALUES valueList;
+insertQuery: ( INSERT | REPLACE ) INTO ( schemaName '.' )? tableName fieldList? VALUES valueList;
 fieldList: '(' fieldName ( ',' fieldName )* ')';
 valueList: '(' extendedValue ( ',' extendedValue )* ')';
 
@@ -101,6 +101,7 @@ parentheses: PAR_START PAR_END;
 
 SELECT: S E L E C T;
 INSERT: I N S E R T;
+REPLACE: R E P L A C E;
 UPDATE: U P D A T E;
 DELETE: D E L E T E;
 SHOW: S H O W;

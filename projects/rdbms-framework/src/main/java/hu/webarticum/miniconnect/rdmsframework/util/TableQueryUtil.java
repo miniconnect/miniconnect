@@ -19,6 +19,7 @@ import hu.webarticum.miniconnect.rdmsframework.query.VariableValue;
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
 import hu.webarticum.miniconnect.rdmsframework.storage.RangeSelection;
+import hu.webarticum.miniconnect.rdmsframework.storage.Row;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.InclusionMode;
@@ -277,6 +278,29 @@ public class TableQueryUtil {
         }
         
         return Optional.empty();
+    }
+    
+    public static List<BigInteger> findAllNonNull(Table table, String columnName, Object value) {
+        List<BigInteger> result = new ArrayList<>();
+        for (TableIndex tableIndex : table.indexes().resources()) {
+            if (tableIndex.columnNames().get(0).equals(columnName)) {
+                tableIndex.find(value).forEach(result::add);
+                return result;
+            }
+        }
+        
+        @SuppressWarnings("unchecked")
+        Comparator<Object> comparator = (Comparator<Object>) table.columns().get(columnName).definition().comparator();
+        BigInteger size = table.size();
+        for (BigInteger i = BigInteger.ZERO; i.compareTo(size) < 0; i = i.add(BigInteger.ONE)) {
+            Row row = table.row(i);
+            Object foundValue = row.get(columnName);
+            if (foundValue != null && comparator.compare(value, foundValue) == 0) {
+                result.add(i);
+            }
+        }
+        
+        return result;
     }
     
 }

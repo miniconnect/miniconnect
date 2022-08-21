@@ -262,6 +262,7 @@ public class AntlrSqlParser implements SqlParser {
     }
     
     private InsertQuery parseInsertNode(InsertQueryContext insertQueryNode) {
+        boolean replace = (insertQueryNode.REPLACE() != null);
         SchemaNameContext schemaNameNode = insertQueryNode.schemaName();
         String schemaName = schemaNameNode != null ?
                 parseIdentifierNode(schemaNameNode.identifier()) :
@@ -274,6 +275,7 @@ public class AntlrSqlParser implements SqlParser {
         ImmutableList<Object> values = parseInsertValueListNode(valueListNode);
         
         return Queries.insert()
+                .replace(replace)
                 .inSchema(schemaName)
                 .into(tableName)
                 .fields(fields)
