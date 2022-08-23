@@ -32,7 +32,7 @@ public class MiniJdbcDriver implements Driver {
     
     public static final String PROPERTY_USER = "user";
     
-    public static final String PROPERTY_PASSSWORD = "password";
+    public static final String PROPERTY_PASSWORD = "password";
     
     public static final String PROPERTY_PROVIDER = "provider";
     
