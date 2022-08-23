@@ -436,7 +436,7 @@ public class SelectExecutor implements QueryExecutor {
                 }
             }
         }
-        if (!found && tableEntry.joinItem.joinType() == JoinType.LEFT_OUTER) {
+        if (!found && tableEntry.joinItem != null && tableEntry.joinItem.joinType() == JoinType.LEFT_OUTER) {
             Map<String, BigInteger> joinedRow = new HashMap<>(joinedPrefix);
             joinedRow.put(tableAlias, null);
             if (isLeaf) {
