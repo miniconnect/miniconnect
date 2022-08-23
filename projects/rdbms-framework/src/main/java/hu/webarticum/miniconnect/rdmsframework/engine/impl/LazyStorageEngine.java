@@ -66,14 +66,11 @@ public class LazyStorageEngine implements TackedEngine {
         Consumer<LazyStorageEngine> callback = onLoadedCallback;
         synchronized(this) {
             if (storageAccess == null) {
-                
-                // FIXME
                 try {
                     storageAccess = storageAccessSupplier.get();
-                } catch (Exception e) {
+                } catch (StorageAccessNotReadyException e) {
                     return new SimpleStorageAccess();
                 }
-                
                 storageAccessSupplier = null;
                 onLoadedCallback = null;
             }
@@ -104,6 +101,13 @@ public class LazyStorageEngine implements TackedEngine {
     @Override
     public boolean isClosed() {
         return closed;
+    }
+    
+    
+    public static class StorageAccessNotReadyException extends RuntimeException {
+
+        private static final long serialVersionUID = 1L;
+        
     }
 
 }
