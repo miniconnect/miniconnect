@@ -1,24 +1,25 @@
 package hu.webarticum.miniconnect.rdmsframework.engine.impl;
 
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSession;
+import hu.webarticum.miniconnect.rdmsframework.engine.TackedEngine;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.parser.SqlParser;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 
 public class SimpleEngineSession implements EngineSession {
     
-    private final SimpleEngine engine;
+    private final TackedEngine engine;
     
     private final SimpleEngineSessionState state = new SimpleEngineSessionState();
     
     
-    public SimpleEngineSession(SimpleEngine engine) {
+    public SimpleEngineSession(TackedEngine engine) {
         this.engine = engine;
     }
     
 
     @Override
-    public SimpleEngine engine() {
+    public TackedEngine engine() {
         return engine;
     }
 

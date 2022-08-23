@@ -30,6 +30,10 @@ public class FrameworkSession implements MiniSession, CheckableCloseable {
     }
     
     
+    public EngineSession engineSession() {
+        return engineSession;
+    }
+    
     @Override
     public MiniResult execute(String sql) {
         checkClosed();
