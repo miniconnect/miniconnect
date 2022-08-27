@@ -163,22 +163,4 @@ So any MiniConnect server or session factory can be used with Hibernate without 
 
 ## Changelog
 
-### Version 0.2.0
-
-- Improve MiniConnect API
-- Improve support for JDBC and Hibernate
-- Improve messaging
-- Improve RDBMS framework (AUTO_INCREMENT support, user variables, improved SQL grammar etc.)
-- Fix many problems
-- and more &hellip;
-
-### Version 0.1.0
-
-- MiniConnect API (minimalistic)
-- User friendly result set wrapper
-- Client-server and in-memory access
-- RDBMS framework
-- JDBC support (in both direction)
-- REPL
-- Automatic REST
-- and more &hellip;
+See [CHANGELOG.md](CHANGELOG.md).
