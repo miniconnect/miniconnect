@@ -127,6 +127,9 @@ It requires only a configuration file and provides an arbitrarily large database
 
 ## JDBC compatibility
 
+*Note: one of the major goals of MiniConnect is to relieve the pains of JDBC users and implementors.*
+**
+
 There are built-in JDBC->MiniConnect and MiniConnect->JDBC bridges,
 so any tool that understands JDBC (e. g. Hibernate) can use your MiniConnect driver,
 and vice versa: any JDBC connection can be used via MiniConnect.
