@@ -145,7 +145,7 @@ OUTER: O U T E R;
 JOIN: J O I N;
 ON: O N;
 
-TOKEN_SIMPLENAME: [a-zA-Z_] [a-zA-Z_0-9]*;
+TOKEN_SIMPLENAME: [\p{L}_] [\p{N}\p{L}_]* ;
 TOKEN_QUOTEDNAME: '"' ( '\\' . | '""' | ~[\\"] )* '"';
 TOKEN_BACKTICKEDNAME: '`' ( '``' | ~[`] )* '`';
 
