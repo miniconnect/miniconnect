@@ -3,6 +3,9 @@ package hu.webarticum.miniconnect.rdmsframework.session;
 import java.io.InputStream;
 import java.util.concurrent.ExecutionException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
@@ -22,6 +25,9 @@ import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 
 public class FrameworkSession implements MiniSession, CheckableCloseable {
     
+    private static final Logger logger = LoggerFactory.getLogger(FrameworkSession.class);
+    
+    
     private final EngineSession engineSession;
     
     
@@ -37,13 +43,15 @@ public class FrameworkSession implements MiniSession, CheckableCloseable {
     @Override
     public MiniResult execute(String sql) {
         checkClosed();
+        Query query;
         try {
             SqlParser sqlParser = engineSession.sqlParser();
-            Query query = sqlParser.parse(sql);
-            return execute(query);
+            query = sqlParser.parse(sql);
         } catch (Exception e) {
+            logger.error("Unable to parse query string: " + sql, e);
             return new StoredResult(errorOfException(e));
         }
+        return execute(query);
     }
     
     public MiniResult execute(Query query) {
@@ -58,6 +66,9 @@ public class FrameworkSession implements MiniSession, CheckableCloseable {
             exception = (Exception) e.getCause();
         } catch (Exception e) {
             exception = e;
+        }
+        if (exception != null) {
+            logger.error("Query execution failed", exception);
         }
         return new StoredResult(errorOfException(exception));
     }

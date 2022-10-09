@@ -25,6 +25,8 @@ dependencies {
     implementation project(':record')
     implementation project(':util')
     
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+    
     antlr 'org.antlr:antlr4:4.9.3'
     
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
