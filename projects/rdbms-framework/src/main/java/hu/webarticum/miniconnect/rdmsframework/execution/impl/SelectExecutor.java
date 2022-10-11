@@ -361,6 +361,11 @@ public class SelectExecutor implements QueryExecutor {
         
         // TODO: handle easily optimizable cases
         
+        // (filter and selected item order are already handled)
+        // classify order items: effectively unique or not
+        // join: eff. unique? to eff. unique?
+        // table order: reorder for matching to order items as possible (not a problem, see above)
+        
         return collectRowsInAGeneralUnoptimizedWay(orderByEntries, limit, tableEntries, state);
     }
     
