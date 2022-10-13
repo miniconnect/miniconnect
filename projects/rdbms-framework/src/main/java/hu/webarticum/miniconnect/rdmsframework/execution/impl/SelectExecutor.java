@@ -374,6 +374,7 @@ public class SelectExecutor implements QueryExecutor {
         
         // TODO
         // generalize join mechanism for using with update and delete queries too
+        // --> recursion: join to joined and other subqueries
         
         return collectRowsInAGeneralUnoptimizedWay(orderByEntries, limit, tableEntries, state);
     }
