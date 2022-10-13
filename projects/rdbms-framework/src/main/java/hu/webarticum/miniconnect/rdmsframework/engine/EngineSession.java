@@ -17,6 +17,4 @@ public interface EngineSession extends CheckableCloseable {
 
     public StorageAccess storageAccess();
     
-    // TODO: transaction management
-
 }
