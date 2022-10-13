@@ -368,6 +368,13 @@ public class SelectExecutor implements QueryExecutor {
         //   how hard is this?
         // track ordered status in the stack, perform full sort on the highest non-ordered level
         
+        // TODO
+        // (what about other join types? -- right outer, full outer, multi-table)
+        // natural join; cross join (same as inner)
+        
+        // TODO
+        // generalize join mechanism for using with update and delete queries too
+        
         return collectRowsInAGeneralUnoptimizedWay(orderByEntries, limit, tableEntries, state);
     }
     
