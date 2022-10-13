@@ -360,12 +360,13 @@ public class SelectExecutor implements QueryExecutor {
             EngineSessionState state) {
         
         // TODO: handle easily optimizable cases
-        
         // (filter and selected item order are already handled)
-        // classify order items: effectively unique or not
-        // join: eff. unique? to eff. unique?
-        // join: is left outer join? (are there any rows?) (does not matter)
-        // table order: reorder for matching to order items as possible (not a problem, see above)
+        // classify joins and order items: effectively unique or not
+        //   split to two parts: orderable + non-orderable
+        //   fields after effectively an unique column in the same table are eliminable
+        // reorder tables based on order items and join types (inner join is symmetric)
+        //   how hard is this?
+        // track ordered status in the stack, perform full sort on the highest non-ordered level
         
         return collectRowsInAGeneralUnoptimizedWay(orderByEntries, limit, tableEntries, state);
     }
