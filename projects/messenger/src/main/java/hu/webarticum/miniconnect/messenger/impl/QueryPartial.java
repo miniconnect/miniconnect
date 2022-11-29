@@ -69,9 +69,7 @@ class QueryPartial implements Closeable {
             int columnCount = columnHeaders.size();
             int maxRowCount = columnCount == 0 ? 1 : Math.max(1, MAX_CELL_COUNT / columnCount);
             long responseOffset = 0;
-            ImmutableList<Integer> nullables = columnHeaders
-                    .filter(MiniColumnHeader::isNullable)
-                    .map((i, j) -> i);
+            ImmutableList<Integer> nullables = collectNullables(columnHeaders);
             ImmutableMap<Integer, Integer> fixedSizes = collectFixedSizes(columnHeaders);
             List<ImmutableList<CellData>> responseRowsBuilder = new ArrayList<>();
             List<IncompleteContentHolder> incompleteContents = new ArrayList<>();
@@ -99,6 +97,18 @@ class QueryPartial implements Closeable {
             
             responseConsumer.accept(new ResultSetEofResponse(sessionId, exchangeId, offset));
         }
+    }
+    
+    private ImmutableList<Integer> collectNullables(ImmutableList<MiniColumnHeader> columnHeaders) {
+        List<Integer> resultBuilder = new ArrayList<>();
+        int i = 0;
+        for (MiniColumnHeader columnHeader : columnHeaders) {
+            if (columnHeader.isNullable()) {
+                resultBuilder.add(i);
+            }
+            i++;
+        }
+        return ImmutableList.fromCollection(resultBuilder);
     }
     
     private ImmutableMap<Integer, Integer> collectFixedSizes(ImmutableList<MiniColumnHeader> columnHeaders) {
