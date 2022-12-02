@@ -1,14 +1,21 @@
-package hu.webarticum.miniconnect.rdmsframework.execution.impl;
+package hu.webarticum.miniconnect.rdmsframework.execution.impl.select;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniErrorException;
@@ -24,7 +31,6 @@ import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.JoinType;
-import hu.webarticum.miniconnect.rdmsframework.query.NullsMode;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery.JoinItem;
@@ -36,12 +42,10 @@ import hu.webarticum.miniconnect.rdmsframework.query.VariableValue;
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
 import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
-import hu.webarticum.miniconnect.rdmsframework.storage.Row;
 import hu.webarticum.miniconnect.rdmsframework.storage.Schema;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.MultiComparator;
-import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.MultiComparator.MultiComparatorBuilder;
 import hu.webarticum.miniconnect.rdmsframework.util.TableQueryUtil;
 import hu.webarticum.miniconnect.record.translator.JavaTranslator;
 import hu.webarticum.miniconnect.record.translator.ValueTranslator;
@@ -60,23 +64,53 @@ public class SelectExecutor implements QueryExecutor {
     }
 
     private MiniResult executeInternal(StorageAccess storageAccess, EngineSessionState state, SelectQuery selectQuery) {
-        String schemaName = selectQuery.schemaName();
-        String tableName = selectQuery.tableName();
-        String tableAlias = selectQuery.tableAlias();
-        ImmutableList<JoinItem> joinItems = selectQuery.join();
+        LinkedHashMap<String, TableEntry> tableEntries = collectTableEntries(selectQuery, storageAccess, state);
         
-        LinkedHashMap<String, TableEntry> tableEntries = new LinkedHashMap<>();
+        List<SelectItemEntry> selectItemEntries = collectSelectItemEntries(selectQuery, tableEntries, storageAccess);
+        List<OrderByEntry> orderByEntries = collectOrderByEntries(selectQuery, selectItemEntries, tableEntries);
+        Set<String> uniqueOrderedAliases = new HashSet<>();
+        List<OrderByEntry> normalizedOrderByEntries = normalizeOrderByEntries(
+                tableEntries, orderByEntries, uniqueOrderedAliases);
+
+        LinkedHashMap<String, TableEntry> reorderedTableEntries = applyOrderByToTableEntries(
+                tableEntries, uniqueOrderedAliases, normalizedOrderByEntries);
+        
+        ImmutableList<MiniColumnHeader> columnHeaders = selectItemEntries.stream()
+                .map(e -> columnHeaderOf(e, reorderedTableEntries))
+                .collect(ImmutableList.createCollector());
+
+        try {
+            addFilters(selectQuery.where(), reorderedTableEntries, state);
+        } catch (IncompatibleFiltersException e) {
+            return new StoredResult(new StoredResultSetData(columnHeaders, ImmutableList.empty()));
+        }
+
+        BigInteger limit = selectQuery.limit();
+
+        List<Map<String, BigInteger>> joinedRowIndices = collectRows(
+                reorderedTableEntries, normalizedOrderByEntries, limit, state);
+        
+        ImmutableList<ImmutableList<MiniValue>> data = joinedRowIndices.stream()
+                .map(r -> selectRow(r, selectItemEntries, reorderedTableEntries))
+                .collect(ImmutableList.createCollector());
+        
+        return new StoredResult(new StoredResultSetData(columnHeaders, data));
+    }
+
+    private LinkedHashMap<String, TableEntry> collectTableEntries(
+            SelectQuery selectQuery, StorageAccess storageAccess, EngineSessionState state) {
+        LinkedHashMap<String, TableEntry> result = new LinkedHashMap<>();
         addTableInfo(
-                tableEntries,
-                tableAlias,
-                schemaName,
-                tableName,
+                result,
+                selectQuery.tableAlias(),
+                selectQuery.schemaName(),
+                selectQuery.tableName(),
                 null,
                 storageAccess,
                 state);
-        for (JoinItem joinItem : joinItems) {
+        for (JoinItem joinItem : selectQuery.join()) {
             addTableInfo(
-                    tableEntries,
+                    result,
                     joinItem.targetTableAlias(),
                     joinItem.targetSchemaName(),
                     joinItem.targetTableName(),
@@ -84,38 +118,269 @@ public class SelectExecutor implements QueryExecutor {
                     storageAccess,
                     state);
         }
+        return result;
+    }
+    
+    private List<OrderByEntry> normalizeOrderByEntries(
+            LinkedHashMap<String, TableEntry> tableEntries,
+            List<OrderByEntry> orderByEntries,
+            Set<String> uniqueOrderedAliasesOut) {
+        List<OrderByEntry> result = new ArrayList<>();
+        for (OrderByEntry orderByEntry : orderByEntries) {
+            String tableAlias = orderByEntry.tableAlias;
+            if (uniqueOrderedAliasesOut.contains(tableAlias)) {
+                continue;
+            }
+            
+            String fieldName = orderByEntry.fieldName;
+            ColumnDefinition definition = tableEntries.get(tableAlias).table.columns().get(fieldName).definition();
+            if (definition.isUnique() && !definition.isNullable()) {
+                uniqueOrderedAliasesOut.add(tableAlias);
+            }
+            result.add(orderByEntry);
+        }
+        return result;
+    }
+
+    private LinkedHashMap<String, TableEntry> applyOrderByToTableEntries(
+            LinkedHashMap<String, TableEntry> tableEntries,
+            Set<String> uniqueOrderedAliases,
+            List<OrderByEntry> orderByEntries) {
+        if (orderByEntries.isEmpty()) {
+            return tableEntries;
+        }
+
+        List<String> prefixOrderableTableNames = collectPrefixOrderableTableNames(uniqueOrderedAliases, orderByEntries);
+        prefixOrderableTableNames = matchPrefixOrderableTableNames(tableEntries, prefixOrderableTableNames);
+
+        if (prefixOrderableTableNames.isEmpty()) {
+            return tableEntries;
+        }
         
-        List<SelectItemEntry> selectItemEntries = new ArrayList<>();
+        boolean allPreorderable = prefixOrderableTableNames.size() == orderByEntries.size();
+        
+        LinkedHashMap<String, TableEntry> result = new LinkedHashMap<>();
+        
+        addTableEntriesFollowingAliases(tableEntries, prefixOrderableTableNames, true, result);
+        List<String> preorderableAliases = new ArrayList<>(result.keySet());
+
+        String baseAlias = tableEntries.keySet().iterator().next();
+        List<String> connectJoinPath = exploreJoinPath(tableEntries, preorderableAliases, baseAlias);
+        if (connectJoinPath == null) {
+            throw new MiniErrorException(new StoredError(
+                    99999, "99999", "Something went wrong while rearranging the joint tables"));
+        }
+        addTableEntriesFollowingAliases(tableEntries, connectJoinPath, allPreorderable, result);
+
+        List<String> tailJoinPath = new ArrayList<>(tableEntries.keySet());
+        tailJoinPath.removeAll(result.keySet());
+        addTableEntriesFollowingAliases(tableEntries, tailJoinPath, allPreorderable, result);
+
+        return result;
+    }
+    
+    private List<String> collectPrefixOrderableTableNames(
+            Set<String> uniqueOrderedAliases, List<OrderByEntry> orderByEntries) {
+        List<String> result = new ArrayList<>();
+        String previousAlias = null;
+        boolean aborted = false;
+        for (OrderByEntry orderByEntry : orderByEntries) {
+            int foundIndex = result.indexOf(orderByEntry.tableAlias);
+            if (foundIndex == -1) {
+                result.add(orderByEntry.tableAlias);
+            } else if (!orderByEntry.tableAlias.equals(previousAlias)) {
+                result = new ArrayList<>(result.subList(0, foundIndex));
+                aborted = true;
+                break;
+            }
+            previousAlias = orderByEntry.tableAlias;
+        }
+        int to = result.size();
+        if (!aborted) {
+            to--;
+        }
+        for (int i = 0; i < to; i++) {
+            if (!uniqueOrderedAliases.contains(orderByEntries.get(i).tableAlias)) {
+                return new ArrayList<>(result.subList(0, i));
+            }
+        }
+        return result;
+    }
+
+    private List<String> matchPrefixOrderableTableNames(
+            LinkedHashMap<String, TableEntry> tableEntries, List<String> prefixOrderableTableNames) {
+        List<String> result = new ArrayList<>();
+        Set<String> possibleNexts = collectInitialPossibleNextTableNames(tableEntries);
+        for (String tableName : prefixOrderableTableNames) {
+            if (!possibleNexts.contains(tableName)) {
+                return result;
+            }
+            
+            result.add(tableName);
+            possibleNexts.clear();
+            for (String tableAlias : tableEntries.keySet()) {
+                if (findJoinBetween(tableEntries, tableName, tableAlias) != null) {
+                    possibleNexts.add(tableAlias);
+                }
+            }
+        }
+        return result;
+    }
+    
+    private Set<String> collectInitialPossibleNextTableNames(LinkedHashMap<String, TableEntry> tableEntries) {
+        Set<String> result = new HashSet<>();
+        String baseTableName = tableEntries.keySet().iterator().next();
+        result.add(baseTableName);
+        int previousSize;
+        do {
+            previousSize = result.size();
+            for (TableEntry tableEntry : tableEntries.values()) {
+                String nextTableAlias = extractAdditionalInitialPossible(result, tableEntry);
+                if (nextTableAlias != null) {
+                    result.add(nextTableAlias);
+                }
+            }
+        } while (result.size() > previousSize);
+        return result;
+    }
+
+    private String extractAdditionalInitialPossible(Set<String> result, TableEntry tableEntry) {
+        JoinItem joinItem = tableEntry.joinItem;
+        if (joinItem == null || joinItem.joinType() != JoinType.INNER) {
+            return null;
+        } else if (result.contains(joinItem.sourceTableAlias())) {
+            return joinItem.targetTableAlias();
+        } else {
+            return null;
+        }
+    }
+    
+    private void addTableEntriesFollowingAliases(
+            LinkedHashMap<String, TableEntry> tableEntries,
+            Collection<String> tableAliases,
+            boolean preorderable,
+            LinkedHashMap<String, TableEntry> result) {
+        for (String tableAlias : tableAliases) {
+            TableEntry newTableEntry = detectTableEntryBetweenAny(tableEntries, result.keySet(), tableAlias, preorderable);
+            result.put(tableAlias, newTableEntry);
+        }
+    }
+
+    private TableEntry detectTableEntryBetweenAny(
+            LinkedHashMap<String, TableEntry> tableEntries,
+            Collection<String> previousAliases,
+            String nextAlias,
+            boolean preorderable) {
+        TableEntry originalTableEntry = tableEntries.get(nextAlias);
+        JoinItem joinItem = flipJoinItemIfNecessary(
+                detectJoinBetweenAny(tableEntries, previousAliases, nextAlias),
+                originalTableEntry,
+                nextAlias);
+        TableEntry newTableEntry = new TableEntry(
+                originalTableEntry.schemaName, originalTableEntry.table, joinItem, preorderable);
+        newTableEntry.valueTranslators.putAll(originalTableEntry.valueTranslators);
+        newTableEntry.subFilter.putAll(originalTableEntry.subFilter);
+        return newTableEntry;
+    }
+    
+    private JoinItem flipJoinItemIfNecessary(JoinItem joinItem, TableEntry targetEntry, String targetAlias) {
+        if (joinItem == null) {
+            return null;
+        } else if (joinItem.targetTableAlias().equals(targetAlias)) {
+            return joinItem;
+        }
+        
+        return new JoinItem(
+                joinItem.joinType(),
+                targetEntry.schemaName,
+                targetEntry.table.name(),
+                joinItem.sourceTableAlias(),
+                joinItem.sourceFieldName(),
+                joinItem.targetTableAlias(),
+                joinItem.targetFieldName());
+    }
+
+    private JoinItem detectJoinBetweenAny(
+            LinkedHashMap<String, TableEntry> tableEntries, Collection<String> previousAliases, String nextAlias) {
+        for (String previousAlias: previousAliases) {
+            JoinItem joinItem = findJoinBetween(tableEntries, previousAlias, nextAlias);
+            if (joinItem != null) {
+                return joinItem;
+            }
+        }
+        return null;
+    }
+    
+    private JoinItem findJoinBetween(
+            LinkedHashMap<String, TableEntry> tableEntries, String previousAlias, String nextAlias) {
+        TableEntry targetTableEntry = tableEntries.get(nextAlias);
+        JoinItem targetJoinItem = targetTableEntry.joinItem;
+        if (targetJoinItem != null && targetJoinItem.sourceTableAlias().equals(previousAlias)) {
+            return targetJoinItem;
+        }
+
+        TableEntry sourceTableEntry = tableEntries.get(previousAlias);
+        JoinItem sourceJoinItem = sourceTableEntry.joinItem;
+        if (
+                sourceJoinItem != null &&
+                sourceJoinItem.joinType() == JoinType.INNER &&
+                sourceJoinItem.sourceTableAlias().equals(nextAlias)) {
+            return sourceJoinItem;
+        }
+
+        return null;
+    }
+    
+    private List<String> exploreJoinPath(
+            LinkedHashMap<String, TableEntry> tableEntries, List<String> preorderableAliases, String baseAlias) {
+        if (preorderableAliases.contains(baseAlias)) {
+            return new LinkedList<>();
+        }
+        
+        List<String> innerJoinedAliases = tableEntries.values().stream()
+                .filter(e -> isInnerJoinFrom(e, baseAlias))
+                .map(e -> e.joinItem.targetTableAlias())
+                .collect(Collectors.toList());
+        
+        for (String targetAlias : innerJoinedAliases) {
+            List<String> subJoinPath = exploreJoinPath(tableEntries, preorderableAliases, targetAlias);
+            if (subJoinPath != null) {
+                subJoinPath.add(targetAlias);
+                return subJoinPath;
+            }
+        }
+        
+        return null;
+    }
+    
+    private boolean isInnerJoinFrom(TableEntry tableEntry, String baseAlias) {
+        JoinItem joinItem = tableEntry.joinItem;
+        return
+                joinItem != null &&
+                joinItem.joinType() == JoinType.INNER &&
+                joinItem.sourceTableAlias().equals(baseAlias);
+    }
+    
+    private List<SelectItemEntry> collectSelectItemEntries(
+            SelectQuery selectQuery, LinkedHashMap<String, TableEntry> tableEntries, StorageAccess storageAccess) {
+        List<SelectItemEntry> result = new ArrayList<>();
         ImmutableList<SelectItem> querySelectItems = selectQuery.selectItems();
         for (SelectItem querySelectItem : querySelectItems) {
-            addSelectItemEntries(selectItemEntries, querySelectItem, tableEntries, storageAccess);
+            addSelectItemEntries(result, querySelectItem, tableEntries, storageAccess);
         }
-        
-        List<OrderByEntry> orderByEntries = new ArrayList<>();
+        return result;
+    }
+    
+    private List<OrderByEntry> collectOrderByEntries(
+            SelectQuery selectQuery,
+            List<SelectItemEntry> selectItemEntries,
+            LinkedHashMap<String, TableEntry> tableEntries) {
+        List<OrderByEntry> result = new ArrayList<>();
         ImmutableList<OrderByItem> orderByItems = selectQuery.orderBy();
         for (OrderByItem orderByItem : orderByItems) {
-            orderByEntries.add(toOrderByEntry(orderByItem, selectItemEntries, tableEntries));
+            result.add(toOrderByEntry(orderByItem, selectItemEntries, tableEntries));
         }
-        
-        ImmutableList<MiniColumnHeader> columnHeaders = selectItemEntries.stream()
-                .map(this::columnHeaderOf)
-                .collect(ImmutableList.createCollector());
-
-        try {
-            addFilters(selectQuery.where(), tableEntries, state);
-        } catch (IncompatibleFiltersException e) {
-            return new StoredResult(new StoredResultSetData(columnHeaders, ImmutableList.empty()));
-        }
-
-        Integer limit = selectQuery.limit();
-
-        List<Map<String, BigInteger>> joinedRowIndices = collectRows(orderByEntries, limit, tableEntries, state);
-        
-        ImmutableList<ImmutableList<MiniValue>> data = joinedRowIndices.stream()
-                .map(r -> selectRow(r, selectItemEntries, tableEntries))
-                .collect(ImmutableList.createCollector());
-        
-        return new StoredResult(new StoredResultSetData(columnHeaders, data));
+        return result;
     }
     
     private void addTableInfo(
@@ -151,7 +416,7 @@ public class SelectExecutor implements QueryExecutor {
             throw new MiniErrorException(new StoredError(7, "00007", "Duplicated table alias: " + alias));
         }
         
-        tableEntries.put(alias, new TableEntry(table, joinItem));
+        tableEntries.put(alias, new TableEntry(schemaName, table, joinItem, false));
 
         checkJoinItem(joinItem, tableEntries);
     }
@@ -202,13 +467,13 @@ public class SelectExecutor implements QueryExecutor {
     private void addSelectItemEntries(
             List<SelectItemEntry> selectItemEntries,
             SelectItem querySelectItem,
-            LinkedHashMap<String, TableEntry> tableInfoMap,
+            LinkedHashMap<String, TableEntry> tableEntries,
             StorageAccess storageAccess) {
         String tableName = querySelectItem.tableName();
         String fieldName = querySelectItem.fieldName();
         
         if (fieldName == null) {
-            addSelectItemEntriesForWildcard(selectItemEntries, tableName, tableInfoMap, storageAccess);
+            addSelectItemEntriesForWildcard(selectItemEntries, tableName, tableEntries, storageAccess);
             return;
         }
         
@@ -219,11 +484,11 @@ public class SelectExecutor implements QueryExecutor {
         }
         
         if (tableName == null) {
-            tableName = tableInfoMap.keySet().iterator().next();
-        } else if (!tableInfoMap.containsKey(tableName)) {
+            tableName = tableEntries.keySet().iterator().next();
+        } else if (!tableEntries.containsKey(tableName)) {
             throw new MiniErrorException(new StoredError(2, "00002", "No such table: " + tableName));
         }
-        TableEntry tableEntry = tableInfoMap.get(tableName);
+        TableEntry tableEntry = tableEntries.get(tableName);
         checkColumn(tableEntry.table, fieldName);
         
         ValueTranslator valueTranslator = getValueTranslator(tableEntry, fieldName);
@@ -234,16 +499,16 @@ public class SelectExecutor implements QueryExecutor {
     private void addSelectItemEntriesForWildcard(
             List<SelectItemEntry> selectItemEntries,
             String tableName,
-            LinkedHashMap<String, TableEntry> tableInfoMap,
+            LinkedHashMap<String, TableEntry> tableEntries,
             StorageAccess storageAccess) {
         if (tableName == null) {
-            for (String infoTableName : tableInfoMap.keySet()) {
-                addSelectItemEntriesForWildcard(selectItemEntries, infoTableName, tableInfoMap, storageAccess);
+            for (String infoTableName : tableEntries.keySet()) {
+                addSelectItemEntriesForWildcard(selectItemEntries, infoTableName, tableEntries, storageAccess);
             }
             return;
         }
         
-        TableEntry tableEntry = tableInfoMap.get(tableName);
+        TableEntry tableEntry = tableEntries.get(tableName);
         Table table = tableEntry.table;
         NamedResourceStore<Column> columns = table.columns();
         for (String columnName : columns.names()) {
@@ -257,7 +522,7 @@ public class SelectExecutor implements QueryExecutor {
     private OrderByEntry toOrderByEntry(
             OrderByItem orderByItem,
             List<SelectItemEntry> selectItemEntries,
-            LinkedHashMap<String, TableEntry> tableInfoMap) {
+            LinkedHashMap<String, TableEntry> tableEntries) {
         Integer position = orderByItem.position();
         if (orderByItem.position() != null) {
             if (position < 1 || position > selectItemEntries.size()) {
@@ -268,7 +533,7 @@ public class SelectExecutor implements QueryExecutor {
                     selectItemEntry.tableAlias,
                     selectItemEntry.fieldName,
                     orderByItem.ascOrder(),
-                    orderByItem.nullsMode());
+                    orderByItem.nullsOrderMode());
         }
         
         String tableName = orderByItem.tableName();
@@ -287,19 +552,19 @@ public class SelectExecutor implements QueryExecutor {
                         matchingSelectItemEntry.tableAlias,
                         matchingSelectItemEntry.fieldName,
                         orderByItem.ascOrder(),
-                        orderByItem.nullsMode());
+                        orderByItem.nullsOrderMode());
             } else {
                 tableName = selectItemEntries.get(0).tableAlias;
             }
         }
 
-        TableEntry tableEntry = tableInfoMap.get(tableName);
+        TableEntry tableEntry = tableEntries.get(tableName);
         if (tableEntry == null) {
             throw new MiniErrorException(new StoredError(2, "00002", "No such table: " + tableName));
         }
         checkColumn(tableEntry.table, fieldName);
         
-        return new OrderByEntry(tableName, fieldName, orderByItem.ascOrder(), orderByItem.nullsMode());
+        return new OrderByEntry(tableName, fieldName, orderByItem.ascOrder(), orderByItem.nullsOrderMode());
     }
     
     private void checkColumn(Table table, String columnName) {
@@ -329,10 +594,28 @@ public class SelectExecutor implements QueryExecutor {
         return JavaTranslator.of(clazz);
     }
     
-    private MiniColumnHeader columnHeaderOf(SelectItemEntry selectItemEntry) {
+    private MiniColumnHeader columnHeaderOf(SelectItemEntry selectItemEntry, Map<String, TableEntry> tableEntries) {
         MiniValueDefinition valueDefinition = selectItemEntry.valueTranslator.definition();
         boolean isNullable = selectItemEntry.columnDefinition.isNullable();
+        if (!isNullable && isTransitivelyLeftJoined(selectItemEntry.tableAlias, tableEntries)) {
+            isNullable = true;
+        }
         return new StoredColumnHeader(selectItemEntry.fieldAlias, isNullable, valueDefinition);
+    }
+
+    private boolean isTransitivelyLeftJoined(String tableAlias, Map<String, TableEntry> tableEntries) {
+        return isTransitivelyLeftJoined(tableAlias, tableEntries, 0);
+    }
+    
+    private boolean isTransitivelyLeftJoined(String tableAlias, Map<String, TableEntry> tableEntries, int i) {
+        JoinItem joinItem = tableEntries.get(tableAlias).joinItem;
+        if (joinItem == null) {
+            return false;
+        } else if (joinItem.joinType() == JoinType.LEFT_OUTER) {
+            return true;
+        } else {
+            return isTransitivelyLeftJoined(joinItem.sourceTableAlias(), tableEntries, i + 1);
+        }
     }
     
     private ImmutableList<MiniValue> selectRow(
@@ -354,73 +637,40 @@ public class SelectExecutor implements QueryExecutor {
     }
 
     private List<Map<String, BigInteger>> collectRows(
+            LinkedHashMap<String, TableEntry> tableEntries,
             List<OrderByEntry> orderByEntries,
-            Integer limit,
-            Map<String, TableEntry> tableEntries,
-            EngineSessionState state) {
-        
-        // TODO: handle easily optimizable cases
-        // (filter and selected item order are already handled)
-        // classify joins and order items: effectively unique or not
-        //   split to two parts: orderable + non-orderable
-        //   fields after effectively an unique column in the same table are eliminable
-        // reorder tables based on order items and join types (inner join is symmetric)
-        //   how hard is this?
-        // track ordered status in the stack, perform full sort on the highest non-ordered level
-        
-        // TODO
-        // (what about other join types? -- right outer, full outer, multi-table)
-        // natural join; cross join (same as inner)
-        
-        // TODO
-        // generalize join mechanism for using with update and delete queries too
-        // --> recursion: join to joined and other subqueries
-        
-        return collectRowsInAGeneralUnoptimizedWay(orderByEntries, limit, tableEntries, state);
-    }
-    
-    private List<Map<String, BigInteger>> collectRowsInAGeneralUnoptimizedWay(
-            List<OrderByEntry> orderByEntries,
-            Integer limit,
-            Map<String, TableEntry> tableEntries,
+            BigInteger limit,
             EngineSessionState state) {
         List<String> remainingTableAliasList = new ArrayList<>(tableEntries.keySet());
         Map<String, BigInteger> joinedPrefix = new HashMap<>();
         List<Map<String, BigInteger>> result = new ArrayList<>();
-        Integer preLimit = orderByEntries.isEmpty() ? limit : null;
-        collectRowsFromNextTable(result, remainingTableAliasList, joinedPrefix, limit, tableEntries, state);
-        if (!orderByEntries.isEmpty()) {
-            MultiComparator multiComparator = createJoinedMultiComparator(orderByEntries, tableEntries);
-            result.sort((r1, r2) -> multiComparator.compare(
-                    extractOrderValues(r1, orderByEntries, tableEntries),
-                    extractOrderValues(r2, orderByEntries, tableEntries)));
-        }
-        if (limit != null && preLimit == null) {
-            int end = Math.min(limit, result.size());
-            result = result.subList(0, end);
-        }
+        collectRowsFromNextTable(
+                result, null, remainingTableAliasList, orderByEntries, joinedPrefix, limit, tableEntries, state);
         return result;
     }
     
     private void collectRowsFromNextTable(
             List<Map<String, BigInteger>> result,
+            String previousAlias,
             List<String> remainingTableAliasList,
+            List<OrderByEntry> remainingOrderByEntries,
             Map<String, BigInteger> joinedPrefix,
-            Integer limit,
-            Map<String, TableEntry> tableEntries,
+            BigInteger limit,
+            LinkedHashMap<String, TableEntry> tableEntries,
             EngineSessionState state) {
         boolean isLeaf = remainingTableAliasList.size() == 1;
         String tableAlias = remainingTableAliasList.get(0);
         TableEntry tableEntry = tableEntries.get(tableAlias);
         Map<String, Object> subFilter = new HashMap<>(tableEntry.subFilter);
+        
         boolean baseIsNull = false;
         if (tableEntry.joinItem != null) {
             String sourceTableAlias = tableEntry.joinItem.sourceTableAlias();
-            String sourceFieldName = tableEntry.joinItem.sourceFieldName();
-            String targetFieldName = tableEntry.joinItem.targetFieldName();
             Table sourceTable = tableEntries.get(sourceTableAlias).table;
             BigInteger rowIndex = joinedPrefix.get(sourceTableAlias);
             if (rowIndex != null) {
+                String sourceFieldName = tableEntry.joinItem.sourceFieldName();
+                String targetFieldName = tableEntry.joinItem.targetFieldName();
                 Object joinValue = sourceTable.row(rowIndex).get(sourceFieldName);
                 ColumnDefinition columnDefinition = tableEntry.table.columns().get(targetFieldName).definition();
                 try {
@@ -433,23 +683,84 @@ public class SelectExecutor implements QueryExecutor {
             }
         }
         List<String> subRemainingTableAliasList = remainingTableAliasList.subList(1, remainingTableAliasList.size());
+        List<OrderByEntry> currentOrderByEntries = new ArrayList<>();
+        List<OrderByEntry> subRemainingOrderByEntries = new ArrayList<>();
+        if (tableEntry.preorderable) {
+            for (OrderByEntry orderByEntry : remainingOrderByEntries) {
+                if (!orderByEntry.tableAlias.equals(tableAlias)) {
+                    break;
+                }
+                currentOrderByEntries.add(orderByEntry);
+            }
+            subRemainingOrderByEntries.addAll(
+                    remainingOrderByEntries.subList(currentOrderByEntries.size(), remainingOrderByEntries.size()));
+        }
+        
+        int intLimit = Integer.MAX_VALUE;
+        if (limit != null) {
+            try {
+                intLimit = limit.intValueExact();
+            } catch (ArithmeticException e) {
+                // XXX: falls back to Integer.MAX_VALUE
+            }
+        }
+        
         boolean found = false;
-        if (!baseIsNull) {
-            Iterator<BigInteger> rowIndexIterator = TableQueryUtil.filterRows(tableEntry.table, subFilter);
+        if (previousAlias == null || !baseIsNull) {
+            int previousSize = result.size();
+            
+            List<Map<String, BigInteger>> subResult = new ArrayList<>();
+            
+            Iterator<BigInteger> rowIndexIterator;
+            if (tableEntry.preorderable) {
+                rowIndexIterator = TableQueryUtil.filterRows(
+                        tableEntry.table, subFilter, currentOrderByEntries, limit);
+            } else {
+                rowIndexIterator = TableQueryUtil.filterRows(
+                        tableEntry.table, subFilter, Collections.emptyList(), limit);
+            }
             found = rowIndexIterator.hasNext();
             while (rowIndexIterator.hasNext()) {
                 BigInteger rowIndex = rowIndexIterator.next();
                 Map<String, BigInteger> joinedRow = new HashMap<>(joinedPrefix);
                 joinedRow.put(tableAlias, rowIndex);
                 if (isLeaf) {
-                    result.add(joinedRow);
+                    subResult.add(joinedRow);
                 } else {
-                    collectRowsFromNextTable(result, subRemainingTableAliasList, joinedRow, limit, tableEntries, state);
+                    collectRowsFromNextTable(
+                            subResult,
+                            tableAlias,
+                            subRemainingTableAliasList,
+                            subRemainingOrderByEntries,
+                            joinedRow,
+                            limit,
+                            tableEntries,
+                            state);
                 }
-                if (limit != null && result.size() >= limit) {
+                if (
+                        limit != null &&
+                        previousSize + subResult.size() >= intLimit) {
                     break;
                 }
             }
+
+            boolean rootNonPreorderable =
+                    !tableEntry.preorderable &&
+                    (previousAlias == null || tableEntries.get(previousAlias).preorderable);
+            if (rootNonPreorderable && !remainingOrderByEntries.isEmpty()) {
+                Function<String, Table> tableResolver = alias -> tableEntries.get(alias).table;
+                MultiComparator multiComparator = TableQueryUtil.createMultiComparator(
+                        remainingOrderByEntries, tableResolver);
+                Comparator<Map<String, BigInteger>> rowIndexComparator = (r1, r2) -> multiComparator.compare(
+                        TableQueryUtil.extractOrderValues(remainingOrderByEntries, tableResolver, r1::get),
+                        TableQueryUtil.extractOrderValues(remainingOrderByEntries, tableResolver, r2::get));
+                subResult.sort(rowIndexComparator);
+                if (limit != null) {
+                    subResult = subResult.subList(0, intLimit);
+                }
+            }
+            
+            result.addAll(subResult);
         }
         if (!found && tableEntry.joinItem != null && tableEntry.joinItem.joinType() == JoinType.LEFT_OUTER) {
             Map<String, BigInteger> joinedRow = new HashMap<>(joinedPrefix);
@@ -457,7 +768,15 @@ public class SelectExecutor implements QueryExecutor {
             if (isLeaf) {
                 result.add(joinedRow);
             } else {
-                collectRowsFromNextTable(result, subRemainingTableAliasList, joinedRow, limit, tableEntries, state);
+                collectRowsFromNextTable(
+                        result,
+                        tableAlias,
+                        subRemainingTableAliasList,
+                        subRemainingOrderByEntries,
+                        joinedRow,
+                        limit,
+                        tableEntries,
+                        state);
             }
         }
     }
@@ -496,132 +815,17 @@ public class SelectExecutor implements QueryExecutor {
         
         if (existingValue == SpecialCondition.IS_NOT_NULL) {
             if (newValue == SpecialCondition.IS_NULL) {
-                throw new IncompatibleFiltersException();
+                throw new IncompatibleFiltersException(existingValue, newValue);
             }
             return newValue;
         } else if (existingValue == SpecialCondition.IS_NULL) {
             if (newValue != SpecialCondition.IS_NULL) {
-                throw new IncompatibleFiltersException();
+                throw new IncompatibleFiltersException(existingValue, newValue);
             }
             return newValue;
         } else {
-            throw new IncompatibleFiltersException();
+            throw new IncompatibleFiltersException(existingValue, newValue);
         }
-    }
-    
-    private ImmutableList<Object> extractOrderValues(
-            Map<String, BigInteger> joinedRow,
-            List<OrderByEntry> orderByEntries,
-            Map<String, TableEntry> tableEntries) {
-        List<Object> result = new ArrayList<>(orderByEntries.size());
-        Map<String, Row> rowCache = new HashMap<>();
-        for (OrderByEntry orderByEntry : orderByEntries) {
-            TableEntry tableEntry = tableEntries.get(orderByEntry.tableAlias);
-            BigInteger rowIndex = joinedRow.get(orderByEntry.tableAlias);
-            Row row = rowCache.computeIfAbsent(orderByEntry.tableAlias, a -> tableEntry.table.row(rowIndex));
-            result.add(row.get(orderByEntry.fieldName));
-        }
-        return ImmutableList.fromCollection(result);
-    }
-    
-    private MultiComparator createJoinedMultiComparator(
-            List<OrderByEntry> orderByEntries, Map<String, TableEntry> tableEntries) {
-        MultiComparatorBuilder builder = MultiComparator.builder();
-        for (OrderByEntry orderByEntry : orderByEntries) {
-            String columnName = orderByEntry.fieldName;
-            TableEntry tableEntry = tableEntries.get(orderByEntry.tableAlias);
-            ColumnDefinition columnDefinition = tableEntry.table.columns().get(columnName).definition();
-            Comparator<?> columnComparator = columnDefinition.comparator();
-            boolean nullable = columnDefinition.isNullable();
-            boolean nullsLow = isNullsLow(orderByEntry);
-            builder.add(columnComparator, nullable, orderByEntry.ascOrder, nullsLow);
-        }
-        return builder.build();
-    }
-    
-    private boolean isNullsLow(OrderByEntry orderByEntry) {
-        if (orderByEntry.nullsMode == NullsMode.NULLS_AUTO) {
-            return true;
-        } else {
-            boolean nullsFirst = (orderByEntry.nullsMode == NullsMode.NULLS_FIRST);
-            return (orderByEntry.ascOrder == nullsFirst);
-        }
-    }
-    
-    
-    private static class TableEntry {
-        
-        private final Table table;
-        
-        private final JoinItem joinItem;
-        
-        private final Map<String, ValueTranslator> valueTranslators = new HashMap<>();
-        
-        private final Map<String, Object> subFilter = new LinkedHashMap<>();
-        
-        
-        private TableEntry(Table table, JoinItem joinItem) {
-            this.table = table;
-            this.joinItem = joinItem;
-        }
-        
-    }
-    
-    
-    private static class SelectItemEntry {
-
-        private final String tableAlias;
-
-        private final String fieldName;
-
-        private final String fieldAlias;
-
-        private final ValueTranslator valueTranslator;
-
-        private final ColumnDefinition columnDefinition;
-        
-        
-        private SelectItemEntry(
-                String tableAlias,
-                String fieldName,
-                String fieldAlias,
-                ValueTranslator valueTranslator,
-                ColumnDefinition columnDefinition) {
-            this.tableAlias = tableAlias;
-            this.fieldName = fieldName;
-            this.fieldAlias = fieldAlias;
-            this.valueTranslator = valueTranslator;
-            this.columnDefinition = columnDefinition;
-        }
-
-    }
-
-    
-    private static class OrderByEntry {
-
-        private final String tableAlias;
-
-        private final String fieldName;
-
-        private final boolean ascOrder;
-        
-        private final NullsMode nullsMode;
-        
-        
-        private OrderByEntry(String tableAlias, String fieldName, boolean ascOrder, NullsMode nullsMode) {
-            this.tableAlias = tableAlias;
-            this.fieldName = fieldName;
-            this.ascOrder = ascOrder;
-            this.nullsMode = nullsMode;
-        }
-
-    }
-    
-    
-    private static class IncompatibleFiltersException extends RuntimeException {
-
-        private static final long serialVersionUID = 1L;
-        
     }
     
 }

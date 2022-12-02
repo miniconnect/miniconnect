@@ -2,7 +2,10 @@ package hu.webarticum.miniconnect.rdmsframework.util;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -10,10 +13,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
+import hu.webarticum.miniconnect.rdmsframework.execution.impl.select.OrderByEntry;
+import hu.webarticum.miniconnect.rdmsframework.query.NullsOrderMode;
 import hu.webarticum.miniconnect.rdmsframework.query.SpecialCondition;
 import hu.webarticum.miniconnect.rdmsframework.query.VariableValue;
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
@@ -27,9 +33,13 @@ import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.InclusionMode;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.NullsMode;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableIndex.SortMode;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
+import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.MultiComparator;
 import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.SimpleSelection;
+import hu.webarticum.miniconnect.rdmsframework.storage.impl.simple.MultiComparator.MultiComparatorBuilder;
 import hu.webarticum.miniconnect.record.converter.DefaultConverter;
 import hu.webarticum.miniconnect.util.FilteringIterator;
+import hu.webarticum.miniconnect.util.GroupingIterator;
+import hu.webarticum.miniconnect.util.LimitingIterator;
 
 public class TableQueryUtil {
     
@@ -58,7 +68,7 @@ public class TableQueryUtil {
         
         List<TableSelection> moreSelections = new ArrayList<>();
         TableSelection firstSelection = collectIndexSelections(
-                table.size(), queryWhere, indexesByColumnName, moreSelections);
+                table.size(), queryWhere, Collections.emptyList(), indexesByColumnName, moreSelections);
 
         BigInteger result = BigInteger.ZERO;
         for (BigInteger rowIndex : firstSelection) {
@@ -70,39 +80,193 @@ public class TableQueryUtil {
     }
 
     public static List<BigInteger> filterRowsToList(
-            Table table, Map<String, Object> queryWhere, Integer unorderedLimit) {
-        List<BigInteger> result = new ArrayList<>();
-        Iterator<BigInteger> iterator = filterRows(table, queryWhere);
-        if (unorderedLimit == null) {
-            while (iterator.hasNext()) {
-                result.add(iterator.next());
+            Table table, Map<String, Object> filter, List<OrderByEntry> orderBy, BigInteger limit) {
+        Iterator<BigInteger> iterator = filterRows(table, filter, orderBy, limit);
+        return collectIterator(iterator);
+    }
+    
+    public static Iterator<BigInteger> filterRows(
+            Table table, Map<String, Object> filter, List<OrderByEntry> orderBy, BigInteger limit) {
+        Set<String> filterIndexColumns = new HashSet<>(filter.keySet());
+        List<OrderByEntry> matchedOrderByEntries = new ArrayList<>();
+        List<String> matchedFilterColumns = new ArrayList<>();
+        TableIndex orderIndex = findOrderIndex(
+                table, orderBy, filterIndexColumns, matchedOrderByEntries, matchedFilterColumns);
+        if (orderIndex != null) {
+            filterIndexColumns.removeAll(matchedFilterColumns);
+        }
+        Map<ImmutableList<String>, TableIndex> indexesByColumnName = new LinkedHashMap<>();
+        Set<String> unindexedColumnNames = collectIndexes(table, filterIndexColumns, indexesByColumnName);
+        indexesByColumnName = prependIndex(matchedFilterColumns, orderIndex, indexesByColumnName);
+
+        List<TableSelection> moreSelections = new ArrayList<>();
+        TableSelection firstSelection = collectIndexSelections(
+                table.size(), filter, matchedOrderByEntries, indexesByColumnName, moreSelections);
+        
+        Iterator<BigInteger> result = matchRows(table, filter, firstSelection, moreSelections, unindexedColumnNames);
+        
+        if (!orderBy.isEmpty() && orderIndex == null) {
+            List<BigInteger> resultList = collectIterator(result);
+            MultiComparator rowComparator = createMultiComparator(orderBy, s -> table);
+            Comparator<BigInteger> rowIndexComparator = createRowIndexComparator(rowComparator, table, orderBy);
+            resultList.sort(rowIndexComparator);
+            if (limit != null) {
+                int intLimit = limit.intValueExact();
+                resultList = resultList.subList(0, intLimit);
             }
-        } else {
-            for (int remaining = unorderedLimit; iterator.hasNext() && remaining > 0; remaining--) {
-                result.add(iterator.next());
-                
+            result = resultList.iterator();
+        } else if (matchedOrderByEntries.size() < orderBy.size()) {
+            MultiComparator outerRowComparator = createMultiComparator(matchedOrderByEntries, s -> table);
+            Comparator<BigInteger> outerRowIndexComparator = createRowIndexComparator(
+                    outerRowComparator, table, orderBy);
+            MultiComparator innerRowComparator = createMultiComparator(matchedOrderByEntries, s -> table);
+            Comparator<BigInteger> innerRowIndexComparator = createRowIndexComparator(
+                    innerRowComparator, table, orderBy);
+            result = new GroupingIterator<>(result, outerRowIndexComparator, (List<BigInteger> groupItems) -> {
+                groupItems.sort(innerRowIndexComparator);
+                return groupItems;
+            });
+            if (limit != null) {
+                result = new LimitingIterator<>(result, limit);
+            }
+        } else if (limit != null) {
+            result = new LimitingIterator<>(result, limit);
+        }
+        
+        return result;
+    }
+    
+    private static Comparator<BigInteger> createRowIndexComparator(
+            MultiComparator rowComparator, Table table, List<OrderByEntry> orderByEntries) {
+        return (i1, i2) -> rowComparator.compare(
+                TableQueryUtil.extractOrderValues(orderByEntries, s -> table, s -> i1),
+                TableQueryUtil.extractOrderValues(orderByEntries, s -> table, s -> i2));
+    }
+    
+    private static TableIndex findOrderIndex(
+            Table table,
+            List<OrderByEntry> orderBy,
+            Set<String> filterIndexColumns,
+            List<OrderByEntry> matchedOrderByEntries,
+            List<String> matchedFilterColumns) {
+        if (orderBy.isEmpty()) {
+            return null;
+        }
+        
+        Set<String> columnNames = filterIndexColumns;
+        if (columnNames.isEmpty()) {
+            columnNames = new HashSet<>(table.columns().names().asList());
+        }
+        
+        List<OrderByEntry> indexableOrderByEntries = new ArrayList<>();
+        for (OrderByEntry orderByEntry : orderBy) {
+            if (!columnNames.contains(orderByEntry.fieldName)) {
+                break;
+            }
+            indexableOrderByEntries.add(orderByEntry);
+        }
+        if (indexableOrderByEntries.isEmpty()) {
+            return null;
+        }
+
+        List<OrderByEntry> maxOrderByEntries = new ArrayList<>();
+        List<String> maxfilterColumns = new ArrayList<>();
+        TableIndex result = null;
+        for (TableIndex tableIndex : table.indexes().resources()) {
+            List<OrderByEntry> orderByEntriesOut = new ArrayList<>();
+            List<String> filterColumnsOut = new ArrayList<>();
+            if (matchOrderByIndex(
+                    tableIndex, indexableOrderByEntries, columnNames, orderByEntriesOut, filterColumnsOut)) {
+                int matchLength = orderByEntriesOut.size();
+                int filterCount = filterColumnsOut.size();
+                int maxMatchLength = maxOrderByEntries.size();
+                int maxMatchMaxFilterCount = maxfilterColumns.size();
+                if (
+                        matchLength > maxMatchLength ||
+                        (matchLength == maxMatchLength && filterCount > maxMatchMaxFilterCount)) {
+                    maxOrderByEntries = orderByEntriesOut;
+                    maxfilterColumns = filterColumnsOut;
+                }
+            }
+        }
+        matchedOrderByEntries.addAll(maxOrderByEntries);
+        matchedFilterColumns.addAll(maxfilterColumns);
+        return result;
+    }
+    
+    private static boolean matchOrderByIndex(
+            TableIndex tableIndex,
+            List<OrderByEntry> orderByEntries,
+            Set<String> columnNames,
+            List<OrderByEntry> orderByEntriesOut,
+            List<String> filterColumnsOut) {
+        boolean result = false;
+        ImmutableList<String> indexColumnNames = tableIndex.columnNames();
+        
+        int indexLength = indexColumnNames.size();
+        int orderLength = Math.min(indexLength, orderByEntries.size());
+        for (int i = 0; i < orderLength; i++) {
+            String indexColumnName = indexColumnNames.get(i);
+            OrderByEntry orderByEntry = orderByEntries.get(i);
+            if (!orderByEntry.fieldName.equals(indexColumnName)) {
+                return result;
+            }
+            result = true;
+            orderByEntriesOut.add(orderByEntry);
+            filterColumnsOut.add(orderByEntry.fieldName);
+        }
+        
+        for (int i = orderLength; i < indexLength; i++) {
+            String indexColumnName = indexColumnNames.get(i);
+            if (!columnNames.contains(indexColumnName)) {
+                break;
+            }
+            filterColumnsOut.add(indexColumnName);
+        }
+        
+        return result;
+    }
+    
+    private static Map<ImmutableList<String>, TableIndex> prependIndex(
+            List<String> columnNames, TableIndex index, Map<ImmutableList<String>, TableIndex> indexes) {
+        if (index == null) {
+            return indexes;
+        }
+        
+        Map<ImmutableList<String>, TableIndex> result = new LinkedHashMap<>();
+        result.put(ImmutableList.fromCollection(columnNames), index);
+        result.putAll(indexes);
+        return result;
+    }
+    
+    private static Set<String> collectIndexes(
+            Table table, Set<String> columnNames, Map<ImmutableList<String>, TableIndex> map) {
+        NamedResourceStore<TableIndex> indexStore = table.indexes();
+        ImmutableList<TableIndex> indexes = indexStore.resources();
+        int maxIndexColumnCount = calculateMaxIndexColumnCount(indexes);
+        int maxMatchingColumnCount = Math.min(columnNames.size(), maxIndexColumnCount);
+        Set<String> result = new LinkedHashSet<>(columnNames);
+        for (int columnCount = maxMatchingColumnCount; columnCount > 0; columnCount--) {
+            for (TableIndex tableIndex : indexes) {
+                ImmutableList<String> indexColumnNames = tableIndex.columnNames();
+                if (areColumnsMatching(indexColumnNames, result, columnCount)) {
+                    ImmutableList<String> matchedColumnNames =
+                            indexColumnNames.section(0, columnCount);
+                    map.put(matchedColumnNames, tableIndex);
+                    result.removeAll(matchedColumnNames.asList());
+                }
             }
         }
         return result;
     }
-    
-    public static Iterator<BigInteger> filterRows(Table table, Map<String, Object> queryWhere) {
-        Map<ImmutableList<String>, TableIndex> indexesByColumnName = new LinkedHashMap<>();
-        Set<String> unindexedColumnNames = collectIndexes(table, queryWhere.keySet(), indexesByColumnName);
-        
-        List<TableSelection> moreSelections = new ArrayList<>();
-        TableSelection firstSelection = collectIndexSelections(
-                table.size(), queryWhere, indexesByColumnName, moreSelections);
-        
-        return matchRows(table, queryWhere, firstSelection, moreSelections, unindexedColumnNames);
-    }
-    
+
     private static TableSelection collectIndexSelections(
             BigInteger tableSize,
-            Map<String, Object> queryWhere,
+            Map<String, Object> filter,
+            List<OrderByEntry> orderBy,
             Map<ImmutableList<String>, TableIndex> indexesByColumnName,
             List<TableSelection> moreSelections) {
-        if (queryWhere.containsValue(null)) {
+        if (filter.containsValue(null)) {
             return new SimpleSelection(ImmutableList.empty());
         }
         
@@ -110,14 +274,20 @@ public class TableQueryUtil {
         for (Map.Entry<ImmutableList<String>, TableIndex> entry : indexesByColumnName.entrySet()) {
             ImmutableList<String> columnNames = entry.getKey();
             TableIndex tableIndex = entry.getValue();
-            ImmutableList<Object> values = columnNames.map(queryWhere::get);
+            ImmutableList<Object> values = columnNames.map(filter::get);
+            ImmutableList<SortMode> sortModes;
+            if (firstSelection == null && !orderBy.isEmpty()) {
+                sortModes = values.map((i, v) -> getIndexNthSortMode(i, orderBy));
+            } else {
+                sortModes = values.map(v -> SortMode.UNSORTED);
+            }
             TableSelection selection = tableIndex.findMulti(
                     values.map(v -> v instanceof SpecialCondition ? null : v),
                     InclusionMode.INCLUDE,
                     values.map(v -> v instanceof SpecialCondition ? null : v),
                     InclusionMode.INCLUDE,
                     values.map(TableQueryUtil::nullsModeForValue),
-                    values.map(v -> SortMode.UNSORTED));
+                    sortModes);
             if (firstSelection == null) {
                 firstSelection = selection;
             } else {
@@ -141,12 +311,39 @@ public class TableQueryUtil {
         }
     }
     
+    private static SortMode getIndexNthSortMode(int i, List<OrderByEntry> orderBy) {
+        if (orderBy.size() <= i) {
+            return SortMode.UNSORTED;
+        }
+        
+        return getSortModeOf(orderBy.get(i));
+    }
+    
+    private static SortMode getSortModeOf(OrderByEntry orderByEntry) {
+        boolean nullsFirst;
+        if (orderByEntry.nullsOrderMode == NullsOrderMode.NULLS_AUTO) {
+            nullsFirst = orderByEntry.ascOrder;
+        } else {
+            nullsFirst = (orderByEntry.nullsOrderMode == NullsOrderMode.NULLS_FIRST);
+        }
+        
+        if (orderByEntry.ascOrder) {
+            return nullsFirst ? SortMode.ASC_NULLS_FIRST : SortMode.ASC_NULLS_LAST;
+        } else {
+            return nullsFirst ? SortMode.DESC_NULLS_FIRST : SortMode.DESC_NULLS_LAST;
+        }
+    }
+    
     private static Iterator<BigInteger> matchRows(
-            Table table, 
+            Table table,
             Map<String, Object> queryWhere,
             TableSelection firstSelection,
             List<TableSelection> moreSelections,
             Set<String> unindexedColumnNames) {
+        if (moreSelections.isEmpty() && unindexedColumnNames.isEmpty()) {
+            return firstSelection.iterator();
+        }
+        
         return new FilteringIterator<>(
                 firstSelection.iterator(),
                 rowIndex -> isRowMatchingWithMore(table, rowIndex, queryWhere, moreSelections, unindexedColumnNames));
@@ -188,27 +385,6 @@ public class TableQueryUtil {
         @SuppressWarnings("unchecked")
         Comparator<Object> comparator = (Comparator<Object>) column.definition().comparator();
         return comparator.compare(actualValue, expectedValue) == 0;
-    }
-
-    public static Set<String> collectIndexes(
-            Table table, Set<String> columnNames, Map<ImmutableList<String>, TableIndex> map) {
-        NamedResourceStore<TableIndex> indexStore = table.indexes();
-        ImmutableList<TableIndex> indexes = indexStore.names().map(indexStore::get);
-        int maxIndexColumnCount = calculateMaxIndexColumnCount(indexes);
-        int maxMatchingColumnCount = Math.min(columnNames.size(), maxIndexColumnCount);
-        Set<String> result = new LinkedHashSet<>(columnNames);
-        for (int columnCount = maxMatchingColumnCount; columnCount > 0; columnCount--) {
-            for (TableIndex tableIndex : indexes) {
-                ImmutableList<String> indexColumnNames = tableIndex.columnNames();
-                if (areColumnsMatching(indexColumnNames, result, columnCount)) {
-                    ImmutableList<String> matchedColumnNames =
-                            indexColumnNames.section(0, columnCount);
-                    map.put(matchedColumnNames, tableIndex);
-                    result.removeAll(matchedColumnNames.asList());
-                }
-            }
-        }
-        return result;
     }
 
     private static boolean areColumnsMatching(
@@ -316,6 +492,56 @@ public class TableQueryUtil {
         }
         
         return result;
+    }
+
+    private static <T> List<T> collectIterator(Iterator<T> iterator) {
+        List<T> result = new ArrayList<>();
+        while (iterator.hasNext()) {
+            result.add(iterator.next());
+        }
+        return result;
+    }
+    
+    public static MultiComparator createMultiComparator(
+            List<OrderByEntry> orderByEntries, Function<String, Table> tableResolver) {
+        MultiComparatorBuilder builder = MultiComparator.builder();
+        for (OrderByEntry orderByEntry : orderByEntries) {
+            String columnName = orderByEntry.fieldName;
+            Table table = tableResolver.apply(orderByEntry.tableAlias);
+            ColumnDefinition columnDefinition = table.columns().get(columnName).definition();
+            Comparator<?> columnComparator = columnDefinition.comparator();
+            boolean nullsLow = isNullsLow(orderByEntry);
+            builder.add(columnComparator, true, orderByEntry.ascOrder, nullsLow);
+        }
+        return builder.build();
+    }
+    
+    public static boolean isNullsLow(OrderByEntry orderByEntry) {
+        if (orderByEntry.nullsOrderMode == NullsOrderMode.NULLS_AUTO) {
+            return true;
+        } else {
+            boolean nullsFirst = (orderByEntry.nullsOrderMode == NullsOrderMode.NULLS_FIRST);
+            return (orderByEntry.ascOrder == nullsFirst);
+        }
+    }
+
+    public static ImmutableList<Object> extractOrderValues(
+            List<OrderByEntry> orderByEntries,
+            Function<String, Table> tableResolver,
+            Function<String, BigInteger> rowIndexResolver) {
+        List<Object> result = new ArrayList<>(orderByEntries.size());
+        Map<String, Row> rowCache = new HashMap<>();
+        for (OrderByEntry orderByEntry : orderByEntries) {
+            BigInteger rowIndex = rowIndexResolver.apply(orderByEntry.tableAlias);
+            if (rowIndex != null) {
+                Table table = tableResolver.apply(orderByEntry.tableAlias);
+                Row row = rowCache.computeIfAbsent(orderByEntry.tableAlias, a -> table.row(rowIndex));
+                result.add(row.get(orderByEntry.fieldName));
+            } else {
+                result.add(null);
+            }
+        }
+        return ImmutableList.fromCollection(result);
     }
     
 }

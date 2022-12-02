@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 
 import java.math.BigInteger;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -65,7 +66,8 @@ public class DeleteExecutor implements QueryExecutor {
 
         Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere, state, false);
         
-        List<BigInteger> rowIndexes = TableQueryUtil.filterRowsToList(table, convertedQueryWhere, null);
+        List<BigInteger> rowIndexes = TableQueryUtil.filterRowsToList(
+                table, convertedQueryWhere, Collections.emptyList(), null);
         
         TablePatchBuilder patchBuilder = TablePatch.builder();
         rowIndexes.forEach(patchBuilder::delete);

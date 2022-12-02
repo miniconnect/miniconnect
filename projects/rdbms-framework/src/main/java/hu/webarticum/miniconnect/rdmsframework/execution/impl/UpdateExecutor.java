@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 
 import java.math.BigInteger;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -72,7 +73,8 @@ public class UpdateExecutor implements QueryExecutor {
                 TableQueryUtil.convertColumnValues(table, queryUpdates, state, true);
         Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere, state, false);
 
-        List<BigInteger> rowIndexes = TableQueryUtil.filterRowsToList(table, convertedQueryWhere, null);
+        List<BigInteger> rowIndexes = TableQueryUtil.filterRowsToList(
+                table, convertedQueryWhere, Collections.emptyList(), null);
         
         ImmutableMap<Integer, Object> updates =
                 TableQueryUtil.toByColumnPoisitionedImmutableMap(table, convertedQueryUpdates);

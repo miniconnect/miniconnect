@@ -1,6 +1,6 @@
 package hu.webarticum.miniconnect.rdmsframework.query;
 
-public enum NullsMode {
+public enum NullsOrderMode {
     
     NULLS_AUTO,
 

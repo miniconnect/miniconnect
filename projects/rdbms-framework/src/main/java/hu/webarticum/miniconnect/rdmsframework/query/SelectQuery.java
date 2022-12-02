@@ -1,5 +1,6 @@
 package hu.webarticum.miniconnect.rdmsframework.query;
 
+import java.math.BigInteger;
 import java.util.Objects;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
@@ -20,7 +21,7 @@ public final class SelectQuery implements Query {
     
     private final ImmutableList<OrderByItem> orderBy;
 
-    private final Integer limit;
+    private final BigInteger limit;
     
     
     private SelectQuery(SelectQueryBuilder builder) {
@@ -67,7 +68,7 @@ public final class SelectQuery implements Query {
         return orderBy;
     }
 
-    public Integer limit() {
+    public BigInteger limit() {
         return limit;
     }
     
@@ -88,7 +89,7 @@ public final class SelectQuery implements Query {
         
         private ImmutableList<OrderByItem> orderBy = ImmutableList.empty();
 
-        private Integer limit = null;
+        private BigInteger limit = null;
         
         
         private SelectQueryBuilder() {
@@ -136,7 +137,7 @@ public final class SelectQuery implements Query {
             return this;
         }
 
-        public SelectQueryBuilder limit(Integer limit) {
+        public SelectQueryBuilder limit(BigInteger limit) {
             this.limit = limit;
             return this;
         }
@@ -287,15 +288,15 @@ public final class SelectQuery implements Query {
         
         private final boolean ascOrder;
         
-        private final NullsMode nullsMode;
+        private final NullsOrderMode nullsOrderMode;
 
         public OrderByItem(
-                String tableName, String fieldName, Integer position, boolean ascOrder, NullsMode nullsMode) {
+                String tableName, String fieldName, Integer position, boolean ascOrder, NullsOrderMode nullsOrderMode) {
             this.tableName = tableName;
             this.fieldName = fieldName;
             this.position = position;
             this.ascOrder = ascOrder;
-            this.nullsMode = nullsMode;
+            this.nullsOrderMode = nullsOrderMode;
         }
 
         
@@ -315,8 +316,8 @@ public final class SelectQuery implements Query {
             return ascOrder;
         }
 
-        public NullsMode nullsMode() {
-            return nullsMode;
+        public NullsOrderMode nullsOrderMode() {
+            return nullsOrderMode;
         }
         
     }
