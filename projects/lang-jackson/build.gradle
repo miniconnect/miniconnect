@@ -1,0 +1,18 @@
+plugins {
+    id 'java-library'
+}
+
+description "Jackson support for essential value types"
+
+java {
+    registerFeature('runtimeDependencies') {
+        usingSourceSet(sourceSets.main)
+    }
+}
+
+dependencies {
+    api project(':lang')
+    
+    runtimeDependenciesImplementation 'com.fasterxml.jackson.core:jackson-core:2.13.3'
+    runtimeDependenciesImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
+}
