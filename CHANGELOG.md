@@ -1,5 +1,29 @@
 # Changelog
 
+## Version 0.3.0
+
+Released on *2022-12-04*
+
+**Added:**
+
+- Improved REPL with colored output
+- Unique constraint
+- Enum columns
+- LEFT OUTER and INNER join
+- REPLACE INTO query
+- Scoped wildcard syntax in SQL
+- Simple COUNT queries
+- NULLS FIRST and NULLS LAST clauses in SQL
+
+**Improved:**
+
+- Improved gradle build
+- More improvements in SQL execution
+
+**Fixed:**
+
+- Ensure full java8 compatibility
+
 ## Version 0.2.0
 
 Released on *2022-08-10*
