@@ -1,5 +1,6 @@
 package hu.webarticum.miniconnect.lang;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
@@ -190,6 +191,8 @@ public abstract class LargeInteger extends Number implements Comparable<LargeInt
     public abstract String toString(int radix);
     
     public abstract BigInteger bigIntegerValue();
+
+    public abstract BigDecimal bigDecimalValue();
     
     public abstract boolean isFittingInLong();
     
@@ -281,9 +284,15 @@ public abstract class LargeInteger extends Number implements Comparable<LargeInt
             
             return Long.compare(value, other.longValueExact());
         }
-        
+
+        @Override
         public BigInteger bigIntegerValue() {
             return BigInteger.valueOf(value);
+        }
+
+        @Override
+        public BigDecimal bigDecimalValue() {
+            return BigDecimal.valueOf(value);
         }
         
         @Override
@@ -644,9 +653,15 @@ public abstract class LargeInteger extends Number implements Comparable<LargeInt
             
             return value.compareTo(other.bigIntegerValue());
         }
-        
+
+        @Override
         public BigInteger bigIntegerValue() {
             return value;
+        }
+
+        @Override
+        public BigDecimal bigDecimalValue() {
+            return new BigDecimal(value);
         }
         
         @Override
