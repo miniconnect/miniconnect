@@ -22,6 +22,7 @@ import hu.webarticum.miniconnect.record.converter.typed.standard.ToDoubleConvert
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToFloatConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToInstantConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToIntegerConverter;
+import hu.webarticum.miniconnect.record.converter.typed.standard.ToLargeIntegerConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToLocalDateConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToLocalDateTimeConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToLocalTimeConverter;
@@ -50,6 +51,7 @@ public interface TypedConverter<T> {
                 new ToLongConverter(),
                 new ToFloatConverter(),
                 new ToDoubleConverter(),
+                new ToLargeIntegerConverter(),
                 new ToBigIntegerConverter(),
                 new ToBigDecimalConverter(),
                 new ToByteStringConverter(),

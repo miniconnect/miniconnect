@@ -1,6 +1,6 @@
 package hu.webarticum.miniconnect.rdmsframework.engine;
 
-import java.math.BigInteger;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 
 public interface EngineSessionState {
 
@@ -8,9 +8,9 @@ public interface EngineSessionState {
 
     public void setCurrentSchema(String schemaName);
 
-    public BigInteger getLastInsertId();
+    public LargeInteger getLastInsertId();
 
-    public void setLastInsertId(BigInteger lastInsertId);
+    public void setLastInsertId(LargeInteger lastInsertId);
 
     public Object getUserVariable(String variableName);
 

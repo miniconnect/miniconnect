@@ -1,11 +1,11 @@
 package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 
-import java.math.BigInteger;
 import java.util.Map;
 
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.impl.result.StoredError;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
@@ -62,7 +62,7 @@ public class SelectCountExecutor implements QueryExecutor {
         }
         
         Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere, state, false);
-        BigInteger count = TableQueryUtil.countRows(table, convertedQueryWhere);
+        LargeInteger count = TableQueryUtil.countRows(table, convertedQueryWhere);
         return ResultUtil.createSingleValueResult(columnName, count);
     }
     

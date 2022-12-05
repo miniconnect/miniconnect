@@ -1,22 +1,22 @@
 package hu.webarticum.miniconnect.rdmsframework.storage.impl.simple;
 
-import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.function.Predicate;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.rdmsframework.storage.TableSelection;
 
 public class SimpleSelection implements TableSelection {
     
-    private final Predicate<BigInteger> containmentPredicate;
+    private final Predicate<LargeInteger> containmentPredicate;
     
-    private final Iterable<BigInteger> rowIndexes;
+    private final Iterable<LargeInteger> rowIndexes;
     
-    private final Iterable<BigInteger> reverseRowIndexes;
+    private final Iterable<LargeInteger> reverseRowIndexes;
     
 
-    public SimpleSelection(ImmutableList<BigInteger> rowIndexes) {
+    public SimpleSelection(ImmutableList<LargeInteger> rowIndexes) {
         this(
                 rowIndexes::contains,
                 rowIndexes,
@@ -24,9 +24,9 @@ public class SimpleSelection implements TableSelection {
     }
 
     public SimpleSelection(
-            Predicate<BigInteger> containmentPredicate,
-            Iterable<BigInteger> rowIndexes,
-            Iterable<BigInteger> reverseRowIndexes) {
+            Predicate<LargeInteger> containmentPredicate,
+            Iterable<LargeInteger> rowIndexes,
+            Iterable<LargeInteger> reverseRowIndexes) {
         this.containmentPredicate = containmentPredicate;
         this.rowIndexes = rowIndexes;
         this.reverseRowIndexes = reverseRowIndexes;
@@ -34,12 +34,12 @@ public class SimpleSelection implements TableSelection {
     
 
     @Override
-    public Iterator<BigInteger> iterator() {
+    public Iterator<LargeInteger> iterator() {
         return rowIndexes.iterator();
     }
 
     @Override
-    public boolean containsRow(BigInteger rowIndex) {
+    public boolean containsRow(LargeInteger rowIndex) {
         return containmentPredicate.test(rowIndex);
     }
     

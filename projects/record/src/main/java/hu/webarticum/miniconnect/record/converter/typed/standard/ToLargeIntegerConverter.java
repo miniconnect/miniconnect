@@ -14,43 +14,43 @@ import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 
-public class ToBigIntegerConverter implements TypedConverter<BigInteger> {
+public class ToLargeIntegerConverter implements TypedConverter<LargeInteger> {
     
     @Override
-    public Class<BigInteger> targetClazz() {
-        return BigInteger.class;
+    public Class<LargeInteger> targetClazz() {
+        return LargeInteger.class;
     }
 
     @Override
-    public BigInteger convert(Object source) {
+    public LargeInteger convert(Object source) {
         if (source instanceof LargeInteger) {
-            return ((LargeInteger) source).bigIntegerValue();
+            return (LargeInteger) source;
         } else if (source instanceof BigInteger) {
-            return (BigInteger) source;
+            return LargeInteger.of((BigInteger) source);
         } else if (source instanceof BigDecimal) {
-            return ((BigDecimal) source).toBigInteger();
+            return LargeInteger.of(((BigDecimal) source).toBigInteger());
         } else if (source instanceof Number) {
-            return BigInteger.valueOf(((Number) source).longValue());
+            return LargeInteger.of(((Number) source).longValue());
         } else if (source instanceof Boolean) {
-            return ((boolean) source) ? BigInteger.ONE: BigInteger.ZERO;
+            return ((boolean) source) ? LargeInteger.ONE: LargeInteger.ZERO;
         } else if (source instanceof Character) {
-            return BigInteger.valueOf((long) (char) source); // NOSONAR it's better to be explicit
+            return LargeInteger.of((long) (char) source); // NOSONAR it's better to be explicit
         } else if (source instanceof LocalDate) {
-            return BigInteger.valueOf(((LocalDate) source).toEpochDay());
+            return LargeInteger.of(((LocalDate) source).toEpochDay());
         } else if (source instanceof LocalTime) {
-            return BigInteger.valueOf(((LocalTime) source).getSecond());
+            return LargeInteger.of(((LocalTime) source).getSecond());
         } else if (source instanceof OffsetTime) {
             return convert(((OffsetTime) source).toLocalTime());
         } else if (source instanceof LocalDateTime) {
-            return BigInteger.valueOf(((LocalDateTime) source).toEpochSecond(ZoneOffset.UTC));
+            return LargeInteger.of(((LocalDateTime) source).toEpochSecond(ZoneOffset.UTC));
         } else if (source instanceof OffsetDateTime) {
             return convert(((OffsetDateTime) source).toInstant());
         } else if (source instanceof Instant) {
-            return BigInteger.valueOf(((Instant) source).getEpochSecond());
+            return LargeInteger.of(((Instant) source).getEpochSecond());
         } else if (source instanceof CustomValue) {
             return convert(((CustomValue) source).get());
         } else {
-            return new BigInteger(source.toString());
+            return LargeInteger.of(source.toString());
         }
     }
 

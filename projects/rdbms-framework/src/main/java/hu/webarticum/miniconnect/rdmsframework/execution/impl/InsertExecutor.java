@@ -1,6 +1,5 @@
 package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +12,7 @@ import hu.webarticum.miniconnect.impl.result.StoredError;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
@@ -92,12 +92,12 @@ public class InsertExecutor implements QueryExecutor {
             return new StoredResult(new StoredError(3, "00003", e.getMessage()));
         }
 
-        BigInteger lastInsertId = null;
+        LargeInteger lastInsertId = null;
         if (autoIncrementedColumnHolder.isPresent()) {
             String columName = autoIncrementedColumnHolder.get().name();
             Object autoIncrementColumnValue = ResultUtil.resolveValue(insertValueMap.get(columName), state);
             if (autoIncrementColumnValue == null) {
-                BigInteger autoValue = table.sequence().getAndIncrement();
+                LargeInteger autoValue = table.sequence().getAndIncrement();
                 insertValueMap.put(columName, autoValue);
                 lastInsertId = autoValue;
             }
@@ -122,8 +122,8 @@ public class InsertExecutor implements QueryExecutor {
         patchBuilder.insert(rowData);
         
         if (insertQuery.replace()) {
-            Set<BigInteger> conflictingRowIndices = collectConflictingRowIndices(convertedInsertValues, table);
-            for (BigInteger conflictingRowIndex : conflictingRowIndices) {
+            Set<LargeInteger> conflictingRowIndices = collectConflictingRowIndices(convertedInsertValues, table);
+            for (LargeInteger conflictingRowIndex : conflictingRowIndices) {
                 patchBuilder.delete(conflictingRowIndex);
             }
         }
@@ -137,15 +137,15 @@ public class InsertExecutor implements QueryExecutor {
         } else if (autoIncrementedColumnHolder.isPresent()) {
             String columName = autoIncrementedColumnHolder.get().name();
             Object convertedAutoIncrementColumnValue = convertedInsertValues.get(columName);
-            BigInteger bigIntegerValue = TableQueryUtil.convert(convertedAutoIncrementColumnValue, BigInteger.class);
-            table.sequence().ensureGreaterThan(bigIntegerValue);
+            LargeInteger largeIntegerValue = TableQueryUtil.convert(convertedAutoIncrementColumnValue, LargeInteger.class);
+            table.sequence().ensureGreaterThan(largeIntegerValue);
         }
         
         return new StoredResult();
     }
 
-    private Set<BigInteger> collectConflictingRowIndices(Map<String, Object> convertedInsertValues, Table table) {
-        Set<BigInteger> result = new HashSet<>();
+    private Set<LargeInteger> collectConflictingRowIndices(Map<String, Object> convertedInsertValues, Table table) {
+        Set<LargeInteger> result = new HashSet<>();
         NamedResourceStore<Column> columns = table.columns();
         for (Map.Entry<String, Object> entry : convertedInsertValues.entrySet()) {
             Object value = entry.getValue();

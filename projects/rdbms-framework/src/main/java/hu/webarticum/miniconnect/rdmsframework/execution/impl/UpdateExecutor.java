@@ -1,6 +1,5 @@
 package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 
-import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +9,7 @@ import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.impl.result.StoredError;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
@@ -73,7 +73,7 @@ public class UpdateExecutor implements QueryExecutor {
                 TableQueryUtil.convertColumnValues(table, queryUpdates, state, true);
         Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere, state, false);
 
-        List<BigInteger> rowIndexes = TableQueryUtil.filterRowsToList(
+        List<LargeInteger> rowIndexes = TableQueryUtil.filterRowsToList(
                 table, convertedQueryWhere, Collections.emptyList(), null);
         
         ImmutableMap<Integer, Object> updates =
@@ -89,8 +89,8 @@ public class UpdateExecutor implements QueryExecutor {
             String columnName = autoIncrementedColumnHolder.get().name();
             if (convertedQueryUpdates.containsKey(columnName)) {
                 Object value = convertedQueryUpdates.get(columnName);
-                BigInteger bigIntegerValue = TableQueryUtil.convert(value, BigInteger.class);
-                table.sequence().ensureGreaterThan(bigIntegerValue);
+                LargeInteger largeIntegerValue = TableQueryUtil.convert(value, LargeInteger.class);
+                table.sequence().ensureGreaterThan(largeIntegerValue);
             }
         }
         

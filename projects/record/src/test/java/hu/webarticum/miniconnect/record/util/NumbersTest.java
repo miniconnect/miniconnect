@@ -10,6 +10,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 
 class NumbersTest {
 
@@ -36,11 +37,30 @@ class NumbersTest {
     }
 
     @Test
+    void testLargeIntegerToBigDecimal() {
+        Map<LargeInteger, Integer> inputs = new LinkedHashMap<>();
+        inputs.put(LargeInteger.of("2"), 0);
+        inputs.put(LargeInteger.of("34"), 2);
+        inputs.put(LargeInteger.of("143"), -1);
+        inputs.put(LargeInteger.of("132435465768791324354657687913243546576879"), 3);
+        ImmutableList<String> actual = inputs.entrySet().stream()
+                .map(e -> Numbers.toBigDecimal(e.getKey(), e.getValue()))
+                .map(BigDecimal::toPlainString)
+                .collect(ImmutableList.createCollector());
+        assertThat(actual).containsExactly(
+                "2",
+                "34.00",
+                "140",
+                "132435465768791324354657687913243546576879.000");
+    }
+
+    @Test
     void testBigIntegerToBigDecimal() {
         Map<BigInteger, Integer> inputs = new LinkedHashMap<>();
         inputs.put(new BigInteger("8"), 0);
         inputs.put(new BigInteger("15"), 2);
         inputs.put(new BigInteger("234"), -1);
+        inputs.put(new BigInteger("23456789876543212345678987654321"), 1);
         ImmutableList<String> actual = inputs.entrySet().stream()
                 .map(e -> Numbers.toBigDecimal(e.getKey(), e.getValue()))
                 .map(BigDecimal::toPlainString)
@@ -48,7 +68,8 @@ class NumbersTest {
         assertThat(actual).containsExactly(
                 "8",
                 "15.00",
-                "230");
+                "230",
+                "23456789876543212345678987654321.0");
     }
 
     @Test

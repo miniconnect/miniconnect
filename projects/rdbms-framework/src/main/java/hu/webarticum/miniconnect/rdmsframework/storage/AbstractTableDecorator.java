@@ -1,6 +1,6 @@
 package hu.webarticum.miniconnect.rdmsframework.storage;
 
-import java.math.BigInteger;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 
 public abstract class AbstractTableDecorator implements Table {
     
@@ -28,12 +28,12 @@ public abstract class AbstractTableDecorator implements Table {
     }
 
     @Override
-    public BigInteger size() {
+    public LargeInteger size() {
         return baseTable.size();
     }
 
     @Override
-    public Row row(BigInteger rowIndex) {
+    public Row row(LargeInteger rowIndex) {
         return baseTable.row(rowIndex);
     }
 

@@ -1,20 +1,21 @@
 package hu.webarticum.miniconnect.rdmsframework.storage.impl.simple;
 
-import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class Sequence implements Iterable<BigInteger> {
+import hu.webarticum.miniconnect.lang.LargeInteger;
+
+public class Sequence implements Iterable<LargeInteger> {
     
-    private final BigInteger until;
+    private final LargeInteger until;
     
 
     public Sequence(long until) {
-        this(BigInteger.valueOf(until));
+        this(LargeInteger.of(until));
     }
     
-    public Sequence(BigInteger until) {
-        if (until.compareTo(BigInteger.ZERO) < 0) {
+    public Sequence(LargeInteger until) {
+        if (until.compareTo(LargeInteger.ZERO) < 0) {
             throw new IllegalArgumentException();
         }
         
@@ -23,14 +24,14 @@ public class Sequence implements Iterable<BigInteger> {
     
 
     @Override
-    public Iterator<BigInteger> iterator() {
+    public Iterator<LargeInteger> iterator() {
         return new SequenceIterator();
     }
     
     
-    private class SequenceIterator implements Iterator<BigInteger> {
+    private class SequenceIterator implements Iterator<LargeInteger> {
         
-        private BigInteger counter = BigInteger.ZERO;
+        private LargeInteger counter = LargeInteger.ZERO;
 
         
         @Override
@@ -39,13 +40,13 @@ public class Sequence implements Iterable<BigInteger> {
         }
 
         @Override
-        public BigInteger next() {
+        public LargeInteger next() {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
             
-            BigInteger result = counter;
-            counter = counter.add(BigInteger.ONE);
+            LargeInteger result = counter;
+            counter = counter.add(LargeInteger.ONE);
             return result;
         }
         

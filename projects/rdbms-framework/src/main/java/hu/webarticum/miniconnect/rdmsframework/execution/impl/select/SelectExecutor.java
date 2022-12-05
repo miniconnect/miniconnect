@@ -1,6 +1,5 @@
 package hu.webarticum.miniconnect.rdmsframework.execution.impl.select;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,6 +26,7 @@ import hu.webarticum.miniconnect.impl.result.StoredError;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
 import hu.webarticum.miniconnect.impl.result.StoredResultSetData;
 import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
@@ -85,9 +85,9 @@ public class SelectExecutor implements QueryExecutor {
             return new StoredResult(new StoredResultSetData(columnHeaders, ImmutableList.empty()));
         }
 
-        BigInteger limit = selectQuery.limit();
+        LargeInteger limit = selectQuery.limit();
 
-        List<Map<String, BigInteger>> joinedRowIndices = collectRows(
+        List<Map<String, LargeInteger>> joinedRowIndices = collectRows(
                 reorderedTableEntries, normalizedOrderByEntries, limit, state);
         
         ImmutableList<ImmutableList<MiniValue>> data = joinedRowIndices.stream()
@@ -619,12 +619,12 @@ public class SelectExecutor implements QueryExecutor {
     }
     
     private ImmutableList<MiniValue> selectRow(
-            Map<String, BigInteger> joinedRow,
+            Map<String, LargeInteger> joinedRow,
             List<SelectItemEntry> selectItemEntries,
             Map<String, TableEntry> tableEntries) {
         List<MiniValue> resultBuilder = new ArrayList<>(selectItemEntries.size());
         for (SelectItemEntry selectItemEntry : selectItemEntries) {
-            BigInteger rowIndex = joinedRow.get(selectItemEntry.tableAlias);
+            LargeInteger rowIndex = joinedRow.get(selectItemEntry.tableAlias);
             Object value = null;
             if (rowIndex != null) {
                 TableEntry tableEntry = tableEntries.get(selectItemEntry.tableAlias);
@@ -636,26 +636,26 @@ public class SelectExecutor implements QueryExecutor {
         return ImmutableList.fromCollection(resultBuilder);
     }
 
-    private List<Map<String, BigInteger>> collectRows(
+    private List<Map<String, LargeInteger>> collectRows(
             LinkedHashMap<String, TableEntry> tableEntries,
             List<OrderByEntry> orderByEntries,
-            BigInteger limit,
+            LargeInteger limit,
             EngineSessionState state) {
         List<String> remainingTableAliasList = new ArrayList<>(tableEntries.keySet());
-        Map<String, BigInteger> joinedPrefix = new HashMap<>();
-        List<Map<String, BigInteger>> result = new ArrayList<>();
+        Map<String, LargeInteger> joinedPrefix = new HashMap<>();
+        List<Map<String, LargeInteger>> result = new ArrayList<>();
         collectRowsFromNextTable(
                 result, null, remainingTableAliasList, orderByEntries, joinedPrefix, limit, tableEntries, state);
         return result;
     }
     
     private void collectRowsFromNextTable(
-            List<Map<String, BigInteger>> result,
+            List<Map<String, LargeInteger>> result,
             String previousAlias,
             List<String> remainingTableAliasList,
             List<OrderByEntry> remainingOrderByEntries,
-            Map<String, BigInteger> joinedPrefix,
-            BigInteger limit,
+            Map<String, LargeInteger> joinedPrefix,
+            LargeInteger limit,
             LinkedHashMap<String, TableEntry> tableEntries,
             EngineSessionState state) {
         boolean isLeaf = remainingTableAliasList.size() == 1;
@@ -667,7 +667,7 @@ public class SelectExecutor implements QueryExecutor {
         if (tableEntry.joinItem != null) {
             String sourceTableAlias = tableEntry.joinItem.sourceTableAlias();
             Table sourceTable = tableEntries.get(sourceTableAlias).table;
-            BigInteger rowIndex = joinedPrefix.get(sourceTableAlias);
+            LargeInteger rowIndex = joinedPrefix.get(sourceTableAlias);
             if (rowIndex != null) {
                 String sourceFieldName = tableEntry.joinItem.sourceFieldName();
                 String targetFieldName = tableEntry.joinItem.targetFieldName();
@@ -709,9 +709,9 @@ public class SelectExecutor implements QueryExecutor {
         if (previousAlias == null || !baseIsNull) {
             int previousSize = result.size();
             
-            List<Map<String, BigInteger>> subResult = new ArrayList<>();
+            List<Map<String, LargeInteger>> subResult = new ArrayList<>();
             
-            Iterator<BigInteger> rowIndexIterator;
+            Iterator<LargeInteger> rowIndexIterator;
             if (tableEntry.preorderable) {
                 rowIndexIterator = TableQueryUtil.filterRows(
                         tableEntry.table, subFilter, currentOrderByEntries, limit);
@@ -721,8 +721,8 @@ public class SelectExecutor implements QueryExecutor {
             }
             found = rowIndexIterator.hasNext();
             while (rowIndexIterator.hasNext()) {
-                BigInteger rowIndex = rowIndexIterator.next();
-                Map<String, BigInteger> joinedRow = new HashMap<>(joinedPrefix);
+                LargeInteger rowIndex = rowIndexIterator.next();
+                Map<String, LargeInteger> joinedRow = new HashMap<>(joinedPrefix);
                 joinedRow.put(tableAlias, rowIndex);
                 if (isLeaf) {
                     subResult.add(joinedRow);
@@ -751,7 +751,7 @@ public class SelectExecutor implements QueryExecutor {
                 Function<String, Table> tableResolver = alias -> tableEntries.get(alias).table;
                 MultiComparator multiComparator = TableQueryUtil.createMultiComparator(
                         remainingOrderByEntries, tableResolver);
-                Comparator<Map<String, BigInteger>> rowIndexComparator = (r1, r2) -> multiComparator.compare(
+                Comparator<Map<String, LargeInteger>> rowIndexComparator = (r1, r2) -> multiComparator.compare(
                         TableQueryUtil.extractOrderValues(remainingOrderByEntries, tableResolver, r1::get),
                         TableQueryUtil.extractOrderValues(remainingOrderByEntries, tableResolver, r2::get));
                 subResult.sort(rowIndexComparator);
@@ -763,7 +763,7 @@ public class SelectExecutor implements QueryExecutor {
             result.addAll(subResult);
         }
         if (!found && tableEntry.joinItem != null && tableEntry.joinItem.joinType() == JoinType.LEFT_OUTER) {
-            Map<String, BigInteger> joinedRow = new HashMap<>(joinedPrefix);
+            Map<String, LargeInteger> joinedRow = new HashMap<>(joinedPrefix);
             joinedRow.put(tableAlias, null);
             if (isLeaf) {
                 result.add(joinedRow);

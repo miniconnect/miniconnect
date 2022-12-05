@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 
+import hu.webarticum.miniconnect.lang.LargeInteger;
+
 public final class Numbers {
     
     private Numbers() {
@@ -15,6 +17,8 @@ public final class Numbers {
         BigDecimal rawValue;
         if (number instanceof BigDecimal) {
             rawValue = (BigDecimal) number;
+        } else if (number instanceof LargeInteger) {
+            rawValue = ((LargeInteger) number).bigDecimalValue();
         } else if (number instanceof BigInteger) {
             rawValue = new BigDecimal((BigInteger) number);
         } else if (

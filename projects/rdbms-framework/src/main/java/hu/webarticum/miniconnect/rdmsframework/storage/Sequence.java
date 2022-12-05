@@ -1,13 +1,13 @@
 package hu.webarticum.miniconnect.rdmsframework.storage;
 
-import java.math.BigInteger;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 
 public interface Sequence {
     
-    public BigInteger get();
+    public LargeInteger get();
     
-    public BigInteger getAndIncrement();
+    public LargeInteger getAndIncrement();
     
-    public void ensureGreaterThan(BigInteger high);
+    public void ensureGreaterThan(LargeInteger high);
 
 }

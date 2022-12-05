@@ -1,9 +1,9 @@
 package hu.webarticum.miniconnect.rdmsframework.storage;
 
-import java.math.BigInteger;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 
-public interface TableSelection extends Iterable<BigInteger> {
+public interface TableSelection extends Iterable<LargeInteger> {
 
-    public boolean containsRow(BigInteger rowIndex);
+    public boolean containsRow(LargeInteger rowIndex);
     
 }

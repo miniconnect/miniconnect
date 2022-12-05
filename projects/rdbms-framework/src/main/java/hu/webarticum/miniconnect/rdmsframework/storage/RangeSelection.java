@@ -1,28 +1,29 @@
 package hu.webarticum.miniconnect.rdmsframework.storage;
 
-import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import hu.webarticum.miniconnect.lang.LargeInteger;
+
 public class RangeSelection implements TableSelection {
     
-    private final BigInteger from;
+    private final LargeInteger from;
     
-    private final BigInteger until;
+    private final LargeInteger until;
     
     private final boolean ascOrder;
 
     public RangeSelection(long from, long until) {
-        this(BigInteger.valueOf(from), BigInteger.valueOf(until));
+        this(LargeInteger.of(from), LargeInteger.of(until));
     }
     
-    public RangeSelection(BigInteger from, BigInteger until) {
+    public RangeSelection(LargeInteger from, LargeInteger until) {
         this(from, until, true);
     }
     
     public RangeSelection(
-            BigInteger from,
-            BigInteger until,
+            LargeInteger from,
+            LargeInteger until,
             boolean ascOrder) {
         if (from.compareTo(until) > 0) {
             throw new IllegalArgumentException(String.format(
@@ -36,12 +37,12 @@ public class RangeSelection implements TableSelection {
     
 
     @Override
-    public Iterator<BigInteger> iterator() {
+    public Iterator<LargeInteger> iterator() {
         return ascOrder ? new AscIterator() : new DescIterator();
     }
 
     @Override
-    public boolean containsRow(BigInteger rowIndex) {
+    public boolean containsRow(LargeInteger rowIndex) {
         return (rowIndex.compareTo(from) >= 0 && rowIndex.compareTo(until) < 0);
     }
 
@@ -54,9 +55,9 @@ public class RangeSelection implements TableSelection {
     }
 
     
-    private class AscIterator implements Iterator<BigInteger> {
+    private class AscIterator implements Iterator<LargeInteger> {
 
-        private BigInteger next = from;
+        private LargeInteger next = from;
         
         
         @Override
@@ -65,21 +66,21 @@ public class RangeSelection implements TableSelection {
         }
 
         @Override
-        public BigInteger next() {
+        public LargeInteger next() {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            BigInteger result = next;
-            next = next.add(BigInteger.ONE);
+            LargeInteger result = next;
+            next = next.add(LargeInteger.ONE);
             return result;
         }
         
     }
     
     
-    private class DescIterator implements Iterator<BigInteger> {
+    private class DescIterator implements Iterator<LargeInteger> {
 
-        private BigInteger next = until.subtract(BigInteger.ONE);
+        private LargeInteger next = until.subtract(LargeInteger.ONE);
         
         
         @Override
@@ -88,12 +89,12 @@ public class RangeSelection implements TableSelection {
         }
 
         @Override
-        public BigInteger next() {
+        public LargeInteger next() {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            BigInteger result = next;
-            next = next.subtract(BigInteger.ONE);
+            LargeInteger result = next;
+            next = next.subtract(LargeInteger.ONE);
             return result;
         }
         

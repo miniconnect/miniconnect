@@ -1,6 +1,5 @@
 package hu.webarticum.miniconnect.rdmsframework.parser;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -17,6 +16,7 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.rdmsframework.query.DeleteQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.InsertQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.JoinType;
@@ -175,7 +175,7 @@ public class AntlrSqlParser implements SqlParser {
         OrderByPartContext orderByNode = selectQueryNode.orderByPart();
         ImmutableList<OrderByItem> orderBy = parseOrderByPartNode(orderByNode);
         LimitPartContext limitPartNode = selectQueryNode.limitPart();
-        BigInteger limit = limitPartNode != null ?
+        LargeInteger limit = limitPartNode != null ?
                 parseBigIntegerNode(limitPartNode.TOKEN_INTEGER()) :
                 null;
         
@@ -695,8 +695,8 @@ public class AntlrSqlParser implements SqlParser {
         return Integer.parseInt(integerNode.getText());
     }
 
-    private BigInteger parseBigIntegerNode(TerminalNode integerNode) {
-        return new BigInteger(integerNode.getText());
+    private LargeInteger parseBigIntegerNode(TerminalNode integerNode) {
+        return LargeInteger.of(integerNode.getText());
     }
 
     private String parseStringNode(TerminalNode stringNode) {

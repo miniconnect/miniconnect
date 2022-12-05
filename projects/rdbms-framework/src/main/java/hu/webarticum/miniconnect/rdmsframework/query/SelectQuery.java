@@ -1,9 +1,9 @@
 package hu.webarticum.miniconnect.rdmsframework.query;
 
-import java.math.BigInteger;
 import java.util.Objects;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 
 public final class SelectQuery implements Query {
     
@@ -21,7 +21,7 @@ public final class SelectQuery implements Query {
     
     private final ImmutableList<OrderByItem> orderBy;
 
-    private final BigInteger limit;
+    private final LargeInteger limit;
     
     
     private SelectQuery(SelectQueryBuilder builder) {
@@ -68,7 +68,7 @@ public final class SelectQuery implements Query {
         return orderBy;
     }
 
-    public BigInteger limit() {
+    public LargeInteger limit() {
         return limit;
     }
     
@@ -89,7 +89,7 @@ public final class SelectQuery implements Query {
         
         private ImmutableList<OrderByItem> orderBy = ImmutableList.empty();
 
-        private BigInteger limit = null;
+        private LargeInteger limit = null;
         
         
         private SelectQueryBuilder() {
@@ -137,7 +137,7 @@ public final class SelectQuery implements Query {
             return this;
         }
 
-        public SelectQueryBuilder limit(BigInteger limit) {
+        public SelectQueryBuilder limit(LargeInteger limit) {
             this.limit = limit;
             return this;
         }

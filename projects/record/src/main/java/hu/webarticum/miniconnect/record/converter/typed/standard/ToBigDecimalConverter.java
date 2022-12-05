@@ -10,6 +10,7 @@ import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZoneOffset;
 
+import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 
@@ -22,10 +23,12 @@ public class ToBigDecimalConverter implements TypedConverter<BigDecimal> {
 
     @Override
     public BigDecimal convert(Object source) {
-        if (source instanceof BigDecimal) {
-            return (BigDecimal) source;
+        if (source instanceof LargeInteger) {
+            return ((LargeInteger) source).bigDecimalValue();
         } else if (source instanceof BigInteger) {
             return new BigDecimal((BigInteger) source);
+        } else if (source instanceof BigDecimal) {
+            return (BigDecimal) source;
         } else if (source instanceof Long) {
             return BigDecimal.valueOf((Long) source);
         } else if (source instanceof Number) {

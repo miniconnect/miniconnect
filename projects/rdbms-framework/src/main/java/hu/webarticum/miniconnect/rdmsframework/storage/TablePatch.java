@@ -1,6 +1,5 @@
 package hu.webarticum.miniconnect.rdmsframework.storage;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -11,14 +10,15 @@ import java.util.TreeSet;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 
 public class TablePatch {
     
     private final List<ImmutableList<Object>> insertedRows;
     
-    private final NavigableMap<BigInteger, ImmutableMap<Integer, Object>> updates;
+    private final NavigableMap<LargeInteger, ImmutableMap<Integer, Object>> updates;
     
-    private final NavigableSet<BigInteger> deletions;
+    private final NavigableSet<LargeInteger> deletions;
 
     
     private TablePatch(TablePatchBuilder builder) {
@@ -36,11 +36,11 @@ public class TablePatch {
         return insertedRows;
     }
 
-    public NavigableMap<BigInteger, ImmutableMap<Integer, Object>> updates() {
+    public NavigableMap<LargeInteger, ImmutableMap<Integer, Object>> updates() {
         return updates;
     }
 
-    public NavigableSet<BigInteger> deletions() {
+    public NavigableSet<LargeInteger> deletions() {
         return deletions;
     }
     
@@ -49,10 +49,10 @@ public class TablePatch {
         
         private final List<ImmutableList<Object>> insertedRows = new ArrayList<>();
         
-        private final NavigableMap<BigInteger, ImmutableMap<Integer, Object>> updates =
+        private final NavigableMap<LargeInteger, ImmutableMap<Integer, Object>> updates =
                 new TreeMap<>();
         
-        private final NavigableSet<BigInteger> deletions = new TreeSet<>();
+        private final NavigableSet<LargeInteger> deletions = new TreeSet<>();
         
         private volatile boolean closed = false;
         
@@ -68,13 +68,13 @@ public class TablePatch {
             return this;
         }
 
-        public TablePatchBuilder update(BigInteger index, ImmutableMap<Integer, Object> rowUpdates) {
+        public TablePatchBuilder update(LargeInteger index, ImmutableMap<Integer, Object> rowUpdates) {
             checkClosed();
             updates.put(index, rowUpdates);
             return this;
         }
 
-        public TablePatchBuilder delete(BigInteger index) {
+        public TablePatchBuilder delete(LargeInteger index) {
             checkClosed();
             deletions.add(index);
             return this;

@@ -1,6 +1,5 @@
 package hu.webarticum.miniconnect.rdmsframework.storage.impl.simple;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,6 +15,7 @@ import java.util.TreeSet;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
 import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
@@ -59,13 +59,13 @@ public class SimpleTable implements Table {
         this.sequence = new SimpleSequence(calculateSequenceValue(builder.sequenceValue, builder.rows));
     }
     
-    private BigInteger calculateSequenceValue(BigInteger sequenceValue, List<ImmutableList<Object>> rows) {
+    private LargeInteger calculateSequenceValue(LargeInteger sequenceValue, List<ImmutableList<Object>> rows) {
         if (sequenceValue != null) {
             return sequenceValue;
         }
         
         // FIXME: find max id + 1?
-        return BigInteger.valueOf(rows.size() + 1L);
+        return LargeInteger.of(rows.size()).increment();
     }
     
     public static SimpleTableBuilder builder() {
@@ -89,12 +89,12 @@ public class SimpleTable implements Table {
     }
 
     @Override
-    public BigInteger size() {
-        return BigInteger.valueOf(rows.size());
+    public LargeInteger size() {
+        return LargeInteger.of(rows.size());
     }
 
     @Override
-    public synchronized Row row(BigInteger rowIndex) {
+    public synchronized Row row(LargeInteger rowIndex) {
         return new SimpleRow(columnStore.names(), rows.get(rowIndex.intValue()));
     }
 
@@ -111,7 +111,7 @@ public class SimpleTable implements Table {
         
         rows.addAll(patch.insertedRows());
         
-        for (Map.Entry<BigInteger, ImmutableMap<Integer, Object>> entry :
+        for (Map.Entry<LargeInteger, ImmutableMap<Integer, Object>> entry :
                 patch.updates().entrySet()) {
             int rowIndex = entry.getKey().intValueExact();
             ImmutableMap<Integer, Object> rowUpdates = entry.getValue();
@@ -120,7 +120,7 @@ public class SimpleTable implements Table {
             rows.set(rowIndex, updatedRow);
         }
         
-        Iterator<BigInteger> deletionsIterator = patch.deletions().descendingIterator();
+        Iterator<LargeInteger> deletionsIterator = patch.deletions().descendingIterator();
         while (deletionsIterator.hasNext()) {
             int deletedRowIndex = deletionsIterator.next().intValueExact();
             rows.remove(deletedRowIndex);
@@ -182,7 +182,7 @@ public class SimpleTable implements Table {
         
         int rowCount = rows.size();
         for (int i = 0; i < rowCount; i++) {
-            BigInteger rowIndex = BigInteger.valueOf(i);
+            LargeInteger rowIndex = LargeInteger.of(i);
             ImmutableList<Object> row = rows.get(i);
             for (Map.Entry<Integer, Set<Object>> rowEntry : uniqueColumnValues.entrySet()) {
                 Integer columnIndex = rowEntry.getKey();
@@ -303,7 +303,7 @@ public class SimpleTable implements Table {
         
         private final List<ImmutableList<Object>> rows = new ArrayList<>();
 
-        private BigInteger sequenceValue = null;
+        private LargeInteger sequenceValue = null;
         
         
         public SimpleTableBuilder name(String name) {
@@ -371,7 +371,7 @@ public class SimpleTable implements Table {
             return this;
         }
 
-        public SimpleTableBuilder sequenceValue(BigInteger sequenceValue) {
+        public SimpleTableBuilder sequenceValue(LargeInteger sequenceValue) {
             this.sequenceValue = sequenceValue;
             return this;
         }

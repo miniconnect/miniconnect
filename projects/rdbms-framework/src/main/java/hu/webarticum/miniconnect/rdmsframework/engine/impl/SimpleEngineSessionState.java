@@ -1,17 +1,17 @@
 package hu.webarticum.miniconnect.rdmsframework.engine.impl;
 
-import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 
 public class SimpleEngineSessionState implements EngineSessionState {
 
     private volatile String currentSchema = null;
 
-    private volatile BigInteger lastInsertId = null;
+    private volatile LargeInteger lastInsertId = null;
 
     private final Map<String, Object> userVariables = Collections.synchronizedMap(new HashMap<>());
     
@@ -27,12 +27,12 @@ public class SimpleEngineSessionState implements EngineSessionState {
     }
 
     @Override
-    public BigInteger getLastInsertId() {
+    public LargeInteger getLastInsertId() {
         return lastInsertId;
     }
 
     @Override
-    public void setLastInsertId(BigInteger lastInsertId) {
+    public void setLastInsertId(LargeInteger lastInsertId) {
         this.lastInsertId = lastInsertId;
     }
 

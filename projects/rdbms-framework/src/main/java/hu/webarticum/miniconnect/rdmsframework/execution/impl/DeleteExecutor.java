@@ -1,6 +1,5 @@
 package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 
-import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +7,7 @@ import java.util.Map;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.impl.result.StoredError;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
@@ -66,7 +66,7 @@ public class DeleteExecutor implements QueryExecutor {
 
         Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere, state, false);
         
-        List<BigInteger> rowIndexes = TableQueryUtil.filterRowsToList(
+        List<LargeInteger> rowIndexes = TableQueryUtil.filterRowsToList(
                 table, convertedQueryWhere, Collections.emptyList(), null);
         
         TablePatchBuilder patchBuilder = TablePatch.builder();

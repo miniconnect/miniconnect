@@ -1,45 +1,45 @@
 package hu.webarticum.miniconnect.rdmsframework.storage.impl.simple;
 
-import java.math.BigInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.rdmsframework.storage.Sequence;
 
 public class SimpleSequence implements Sequence {
     
-    private final AtomicReference<BigInteger> valueHolder;
+    private final AtomicReference<LargeInteger> valueHolder;
     
     
     public SimpleSequence() {
-        this(BigInteger.ONE);
+        this(LargeInteger.ONE);
     }
 
-    public SimpleSequence(BigInteger value) {
+    public SimpleSequence(LargeInteger value) {
         this.valueHolder = new AtomicReference<>(value);
     }
     
 
     @Override
-    public BigInteger get() {
+    public LargeInteger get() {
         return valueHolder.get();
     }
 
     @Override
-    public BigInteger getAndIncrement() {
-        return valueHolder.getAndUpdate(v -> v.add(BigInteger.ONE));
+    public LargeInteger getAndIncrement() {
+        return valueHolder.getAndUpdate(v -> v.add(LargeInteger.ONE));
     }
 
     @Override
-    public void ensureGreaterThan(BigInteger high) {
+    public void ensureGreaterThan(LargeInteger high) {
         valueHolder.updateAndGet(v -> calculateForEnsureGreaterThan(v, high));
     }
     
-    private BigInteger calculateForEnsureGreaterThan(BigInteger currentValue, BigInteger high) {
+    private LargeInteger calculateForEnsureGreaterThan(LargeInteger currentValue, LargeInteger high) {
         if (currentValue.compareTo(high) > 0) {
             return currentValue;
         }
         
-        return high.add(BigInteger.ONE);
+        return high.add(LargeInteger.ONE);
     }
 
 }

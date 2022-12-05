@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 
-import java.math.BigInteger;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 
 class SequenceTest {
 
@@ -30,10 +30,10 @@ class SequenceTest {
     }
 
     
-    private BigInteger[] bigs(int... values) {
-        BigInteger[] result = new BigInteger[values.length];
+    private LargeInteger[] bigs(int... values) {
+        LargeInteger[] result = new LargeInteger[values.length];
         for (int i = 0; i < values.length; i++) {
-            result[i] = BigInteger.valueOf(values[i]);
+            result[i] = LargeInteger.of(values[i]);
         }
         return result;
     }

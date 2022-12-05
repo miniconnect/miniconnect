@@ -1,21 +1,22 @@
 package hu.webarticum.miniconnect.util;
 
-import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+
+import hu.webarticum.miniconnect.lang.LargeInteger;
 
 public class LimitingIterator<T> implements Iterator<T> {
     
     private final Iterator<T> baseIterator;
     
-    private BigInteger rest;
+    private LargeInteger rest;
     
 
     public LimitingIterator(Iterator<T> baseIterator, long limit) {
-        this(baseIterator, BigInteger.valueOf(limit));
+        this(baseIterator, LargeInteger.of(limit));
     }
     
-    public LimitingIterator(Iterator<T> baseIterator, BigInteger limit) {
+    public LimitingIterator(Iterator<T> baseIterator, LargeInteger limit) {
         this.baseIterator = baseIterator;
         this.rest = limit;
     }
@@ -23,7 +24,7 @@ public class LimitingIterator<T> implements Iterator<T> {
     
     @Override
     public boolean hasNext() {
-        return rest.compareTo(BigInteger.ZERO) > 0 && baseIterator.hasNext();
+        return rest.compareTo(LargeInteger.ZERO) > 0 && baseIterator.hasNext();
     }
 
     @Override
@@ -32,7 +33,7 @@ public class LimitingIterator<T> implements Iterator<T> {
             throw new NoSuchElementException();
         }
         
-        rest = rest.subtract(BigInteger.ONE);
+        rest = rest.subtract(LargeInteger.ONE);
         return baseIterator.next();
     }
     

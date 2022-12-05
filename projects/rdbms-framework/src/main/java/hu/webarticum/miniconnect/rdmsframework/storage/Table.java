@@ -1,6 +1,6 @@
 package hu.webarticum.miniconnect.rdmsframework.storage;
 
-import java.math.BigInteger;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 
 public interface Table extends NamedResource {
 
@@ -8,9 +8,9 @@ public interface Table extends NamedResource {
 
     public NamedResourceStore<TableIndex> indexes();
     
-    public BigInteger size();
+    public LargeInteger size();
 
-    public Row row(BigInteger rowIndex);
+    public Row row(LargeInteger rowIndex);
 
     public boolean isWritable();
 

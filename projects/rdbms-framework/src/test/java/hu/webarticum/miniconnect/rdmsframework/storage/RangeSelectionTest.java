@@ -2,9 +2,9 @@ package hu.webarticum.miniconnect.rdmsframework.storage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.math.BigInteger;
-
 import org.junit.jupiter.api.Test;
+
+import hu.webarticum.miniconnect.lang.LargeInteger;
 
 class RangeSelectionTest {
 
@@ -12,41 +12,41 @@ class RangeSelectionTest {
     void testEmpty() {
         RangeSelection selection = new RangeSelection(0L, 0L);
         assertThat(selection).isEmpty();
-        assertThat(selection.containsRow(BigInteger.valueOf(3L))).isFalse();
+        assertThat(selection.containsRow(LargeInteger.of(3L))).isFalse();
     }
 
     @Test
     void testAsc() {
         RangeSelection selection = new RangeSelection(
-                BigInteger.valueOf(3L),
-                BigInteger.valueOf(10L),
+                LargeInteger.of(3L),
+                LargeInteger.of(10L),
                 true);
-        assertThat(selection).containsExactly(bigs(3L, 4L, 5L, 6L, 7L, 8L, 9L));
-        assertThat(selection.containsRow(BigInteger.valueOf(0L))).isFalse();
-        assertThat(selection.containsRow(BigInteger.valueOf(3L))).isTrue();
-        assertThat(selection.containsRow(BigInteger.valueOf(7L))).isTrue();
-        assertThat(selection.containsRow(BigInteger.valueOf(10L))).isFalse();
-        assertThat(selection.containsRow(BigInteger.valueOf(15L))).isFalse();
+        assertThat(selection).containsExactly(larges(3L, 4L, 5L, 6L, 7L, 8L, 9L));
+        assertThat(selection.containsRow(LargeInteger.of(0L))).isFalse();
+        assertThat(selection.containsRow(LargeInteger.of(3L))).isTrue();
+        assertThat(selection.containsRow(LargeInteger.of(7L))).isTrue();
+        assertThat(selection.containsRow(LargeInteger.of(10L))).isFalse();
+        assertThat(selection.containsRow(LargeInteger.of(15L))).isFalse();
     }
 
     @Test
     void testDesc() {
         RangeSelection selection = new RangeSelection(
-                BigInteger.valueOf(3L),
-                BigInteger.valueOf(10L),
+                LargeInteger.of(3L),
+                LargeInteger.of(10L),
                 false);
-        assertThat(selection).containsExactly(bigs(9L, 8L, 7L, 6L, 5L, 4L, 3L));
-        assertThat(selection.containsRow(BigInteger.valueOf(0L))).isFalse();
-        assertThat(selection.containsRow(BigInteger.valueOf(3L))).isTrue();
-        assertThat(selection.containsRow(BigInteger.valueOf(7L))).isTrue();
-        assertThat(selection.containsRow(BigInteger.valueOf(10L))).isFalse();
-        assertThat(selection.containsRow(BigInteger.valueOf(15L))).isFalse();
+        assertThat(selection).containsExactly(larges(9L, 8L, 7L, 6L, 5L, 4L, 3L));
+        assertThat(selection.containsRow(LargeInteger.of(0L))).isFalse();
+        assertThat(selection.containsRow(LargeInteger.of(3L))).isTrue();
+        assertThat(selection.containsRow(LargeInteger.of(7L))).isTrue();
+        assertThat(selection.containsRow(LargeInteger.of(10L))).isFalse();
+        assertThat(selection.containsRow(LargeInteger.of(15L))).isFalse();
     }
 
-    private BigInteger[] bigs(long... values) {
-        BigInteger[] result = new BigInteger[values.length];
+    private LargeInteger[] larges(long... values) {
+        LargeInteger[] result = new LargeInteger[values.length];
         for (int i = 0; i < values.length; i++) {
-            result[i] = BigInteger.valueOf(values[i]);
+            result[i] = LargeInteger.of(values[i]);
         }
         return result;
     }

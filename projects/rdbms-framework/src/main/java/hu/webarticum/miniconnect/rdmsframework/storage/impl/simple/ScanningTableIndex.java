@@ -1,12 +1,12 @@
 package hu.webarticum.miniconnect.rdmsframework.storage.impl.simple;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
 import hu.webarticum.miniconnect.rdmsframework.storage.Table;
@@ -91,7 +91,7 @@ public class ScanningTableIndex implements TableIndex {
             Collections.sort(foundEntries, Comparator.comparing(e -> e.values, multiComparator));
         }
 
-        ImmutableList<BigInteger> rowIndexes = foundEntries.stream()
+        ImmutableList<LargeInteger> rowIndexes = foundEntries.stream()
                 .map(e -> e.index)
                 .collect(ImmutableList.createCollector());
         return new SimpleSelection(rowIndexes);
@@ -104,13 +104,13 @@ public class ScanningTableIndex implements TableIndex {
             boolean toInclusive,
             ImmutableList<NullsMode> nullsModes,
             MultiComparator multiComparator) {
-        BigInteger tableSize = table.size();
+        LargeInteger tableSize = table.size();
         List<SortHelper> foundRowEntries = new ArrayList<>();
         boolean fromAndToAreEqual = areEqual(from, to, multiComparator);
         for (
-                BigInteger i = BigInteger.ZERO;
+                LargeInteger i = LargeInteger.ZERO;
                 i.compareTo(tableSize) < 0;
-                i = i.add(BigInteger.ONE)) {
+                i = i.add(LargeInteger.ONE)) {
             ImmutableList<Object> row = table.row(i).getAll();
             ImmutableList<Object> values = extractValues(row);
             boolean isRowSelected = checkValues(
@@ -278,12 +278,12 @@ public class ScanningTableIndex implements TableIndex {
     
     private static class SortHelper {
         
-        private final BigInteger index;
+        private final LargeInteger index;
         
         private final ImmutableList<Object> values;
 
         
-        private SortHelper(BigInteger index, ImmutableList<Object> values) {
+        private SortHelper(LargeInteger index, ImmutableList<Object> values) {
             this.index = index;
             this.values = values;
         }
