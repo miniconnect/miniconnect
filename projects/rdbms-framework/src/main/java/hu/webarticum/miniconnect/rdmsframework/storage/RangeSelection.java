@@ -27,7 +27,9 @@ public class RangeSelection implements TableSelection {
             boolean ascOrder) {
         if (from.compareTo(until) > 0) {
             throw new IllegalArgumentException(String.format(
-                    "From must be not greater than until (from: %d, until: %d)", from, until));
+                    "From must be not greater than until (from: %d, until: %d)",
+                    from.bigIntegerValue(),
+                    until.bigIntegerValue()));
         }
 
         this.from = from;

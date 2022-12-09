@@ -484,7 +484,7 @@ public class TableQueryUtil {
         @SuppressWarnings("unchecked")
         Comparator<Object> comparator = (Comparator<Object>) table.columns().get(columnName).definition().comparator();
         LargeInteger size = table.size();
-        for (LargeInteger i = LargeInteger.ZERO; i.compareTo(size) < 0; i = i.add(LargeInteger.ONE)) {
+        for (LargeInteger i = LargeInteger.ZERO; i.isLessThan(size); i = i.add(LargeInteger.ONE)) {
             Row row = table.row(i);
             Object foundValue = row.get(columnName);
             if (foundValue != null && comparator.compare(value, foundValue) == 0) {

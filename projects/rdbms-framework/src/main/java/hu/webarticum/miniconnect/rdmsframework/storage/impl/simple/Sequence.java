@@ -15,7 +15,7 @@ public class Sequence implements Iterable<LargeInteger> {
     }
     
     public Sequence(LargeInteger until) {
-        if (until.compareTo(LargeInteger.ZERO) < 0) {
+        if (until.isNegative()) {
             throw new IllegalArgumentException();
         }
         

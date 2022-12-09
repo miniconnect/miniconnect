@@ -698,7 +698,7 @@ public abstract class AbstractWritableTableTest {
     protected ImmutableList<ImmutableList<Object>> contentOf(Table table) {
         List<ImmutableList<Object>> resultBuilder = new ArrayList<>();
         LargeInteger size = table.size();
-        for (LargeInteger i = LargeInteger.ZERO; i.compareTo(size) < 0; i = i.add(LargeInteger.ONE)) {
+        for (LargeInteger i = LargeInteger.ZERO; i.isLessThan(size); i = i.add(LargeInteger.ONE)) {
             resultBuilder.add(table.row(i).getAll());
         }
         return ImmutableList.fromCollection(resultBuilder);

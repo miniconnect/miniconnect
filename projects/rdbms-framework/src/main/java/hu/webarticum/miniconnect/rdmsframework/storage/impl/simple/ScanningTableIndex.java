@@ -42,8 +42,7 @@ public class ScanningTableIndex implements TableIndex {
             String columnName = columnNames.get(i);
             int columnIndex = tableColumnNames.indexOf(columnName);
             if (columnIndex == -1) {
-                throw new IllegalArgumentException(
-                        String.format("Column not found: '%s'", columnName));
+                throw new IllegalArgumentException(String.format("Column not found: '%s'", columnName));
             }
             indexes[i] = columnIndex;
         }
@@ -107,10 +106,7 @@ public class ScanningTableIndex implements TableIndex {
         LargeInteger tableSize = table.size();
         List<SortHelper> foundRowEntries = new ArrayList<>();
         boolean fromAndToAreEqual = areEqual(from, to, multiComparator);
-        for (
-                LargeInteger i = LargeInteger.ZERO;
-                i.compareTo(tableSize) < 0;
-                i = i.add(LargeInteger.ONE)) {
+        for (LargeInteger i = LargeInteger.ZERO; i.isLessThan(tableSize); i = i.add(LargeInteger.ONE)) {
             ImmutableList<Object> row = table.row(i).getAll();
             ImmutableList<Object> values = extractValues(row);
             boolean isRowSelected = checkValues(

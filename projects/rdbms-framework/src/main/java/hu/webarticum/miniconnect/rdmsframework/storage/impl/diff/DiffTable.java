@@ -90,7 +90,7 @@ public class DiffTable extends AbstractTableDecorator {
         LargeInteger baseTableSize = baseTable.size();
         LargeInteger adjustedRowIndex = adjustByDeletions(LargeInteger.ZERO, rowIndex);
         
-        if (adjustedRowIndex.compareTo(baseTableSize) >= 0) {
+        if (adjustedRowIndex.isGreaterThanOrEqualTo(baseTableSize)) {
             ImmutableList<Object> rowData =
                     insertedRows.get(adjustedRowIndex.subtract(baseTableSize).intValueExact());
             return new SimpleRow(baseTable.columns().names(), rowData);
@@ -226,8 +226,8 @@ public class DiffTable extends AbstractTableDecorator {
         LargeInteger tableSize = size();
         for (
                 LargeInteger rowIndex = LargeInteger.ZERO;
-                rowIndex.compareTo(tableSize) < 0;
-                rowIndex = rowIndex.add(LargeInteger.ONE)) {
+                rowIndex.isLessThan(tableSize);
+                rowIndex = rowIndex.increment()) {
             if (!isFieldUpdatedIn(rowIndex, columnIndex, patch)) {
                 Object value = row(rowIndex).get(columnIndex);
                 if (newValues.contains(value)) {
@@ -282,7 +282,7 @@ public class DiffTable extends AbstractTableDecorator {
             LargeInteger adjustedRowIndex,
             ImmutableMap<Integer, Object> rowUpdates,
             LargeInteger baseTableSize) {
-        if (adjustedRowIndex.compareTo(baseTableSize) < 0) {
+        if (adjustedRowIndex.isLessThan(baseTableSize)) {
             ImmutableMap<Integer, Object> currentRowUpdates = updates.get(adjustedRowIndex);
             ImmutableMap<Integer, Object> newRowUpdates;
             if (currentRowUpdates == null) {

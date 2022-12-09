@@ -27,8 +27,7 @@ public class SimpleJdbcLargeDataPutter implements JdbcLargeDataPutter {
             Connection jdbcConnection, String variableName, long length, InputStream dataSource) {
         try (
                 PreparedStatement preparedStatement =
-                jdbcConnection.prepareStatement(String.format(setterStatementFormat, variableName))
-                ) {
+                        jdbcConnection.prepareStatement(String.format(setterStatementFormat, variableName))) {
             preparedStatement.setBinaryStream(1, dataSource, length);
             preparedStatement.execute();
         } catch (SQLException e) {

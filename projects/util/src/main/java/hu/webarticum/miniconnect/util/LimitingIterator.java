@@ -24,7 +24,7 @@ public class LimitingIterator<T> implements Iterator<T> {
     
     @Override
     public boolean hasNext() {
-        return rest.compareTo(LargeInteger.ZERO) > 0 && baseIterator.hasNext();
+        return rest.isPositive() && baseIterator.hasNext();
     }
 
     @Override
