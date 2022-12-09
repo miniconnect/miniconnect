@@ -23,6 +23,7 @@ import java.util.stream.IntStream;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.lang.LargeInteger;
+import hu.webarticum.miniconnect.rdmsframework.PredefinedError;
 import hu.webarticum.miniconnect.rdmsframework.storage.AbstractNamedResourceStoreDecorator;
 import hu.webarticum.miniconnect.rdmsframework.storage.AbstractTableDecorator;
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
@@ -139,7 +140,7 @@ public class DiffTable extends AbstractTableDecorator {
                 Integer columnIndex = updateEntry.getKey();
                 if (nonNullableColumnIndices.contains(columnIndex) && updateEntry.getValue() == null) {
                     String columnName = columnNames.get(columnIndex);
-                    throw new IllegalArgumentException("NULL update for non nullable column: " + columnName);
+                    throw PredefinedError.COLUMN_VALUE_NULL.toException(columnName);
                 }
             }
         }
@@ -148,7 +149,7 @@ public class DiffTable extends AbstractTableDecorator {
             for (Integer columnIndex : nonNullableColumnIndices) {
                 if (insertedRow.get(columnIndex) == null) {
                     String columnName = columnNames.get(columnIndex);
-                    throw new IllegalArgumentException("NULL insert for non nullable column: " + columnName);
+                    throw PredefinedError.COLUMN_VALUE_NULL.toException(columnName);
                 }
             }
         }
@@ -214,8 +215,7 @@ public class DiffTable extends AbstractTableDecorator {
             TableSelection selection = index.find(newValue);
             for (LargeInteger rowIndex : selection) {
                 if (!isFieldUpdatedIn(rowIndex, columnIndex, patch)) {
-                    throw new IllegalArgumentException(
-                            "Already existing value given for unique column " + columnName + ": '" + newValue + "'");
+                    throw PredefinedError.COLUMN_VALUE_NOT_UNIQUE.toException(columnName, newValue);
                 }
             }
         }
@@ -231,8 +231,7 @@ public class DiffTable extends AbstractTableDecorator {
             if (!isFieldUpdatedIn(rowIndex, columnIndex, patch)) {
                 Object value = row(rowIndex).get(columnIndex);
                 if (newValues.contains(value)) {
-                    throw new IllegalArgumentException(
-                            "Already existing value given for unique column " + columnName + ": '" + value + "'");
+                    throw PredefinedError.COLUMN_VALUE_NOT_UNIQUE.toException(columnName, value);
                 }
             }
         }
@@ -256,8 +255,7 @@ public class DiffTable extends AbstractTableDecorator {
         Set<Object> values = uniqueColumnValues.get(columnIndex);
         if (values != null && !values.add(newValue)) {
             String columnName = columnStore.resources().get(columnIndex).name();
-            throw new IllegalArgumentException(
-                    "Already existing value given for unique column " + columnName + ": '" + newValue + "'");
+            throw PredefinedError.COLUMN_VALUE_NOT_UNIQUE.toException(columnName, newValue);
         }
     }
     

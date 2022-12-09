@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import hu.webarticum.miniconnect.api.MiniError;
+import hu.webarticum.miniconnect.api.MiniErrorException;
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
@@ -15,7 +16,6 @@ import hu.webarticum.miniconnect.impl.result.StoredLargeDataSaveResult;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
-import hu.webarticum.miniconnect.rdmsframework.DatabaseException;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSession;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
@@ -120,16 +120,16 @@ public class FrameworkSession implements MiniSession, CheckableCloseable {
     }
 
     private MiniError errorOfException(Throwable exception) {
-        if (!(exception instanceof DatabaseException)) {
+        if (!(exception instanceof MiniErrorException)) {
             String message = extractMessage(exception);
             return new StoredError(99999, "99999", message);
         }
         
-        DatabaseException databaseException = (DatabaseException) exception;
+        MiniErrorException errorException = (MiniErrorException) exception;
         return new StoredError(
-                databaseException.code(),
-                databaseException.sqlState(),
-                databaseException.message());
+                errorException.code(),
+                errorException.sqlState(),
+                errorException.getMessage());
     }
     
     private String extractMessage(Throwable exception) {

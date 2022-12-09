@@ -8,14 +8,13 @@ import java.util.Optional;
 import java.util.Set;
 
 import hu.webarticum.miniconnect.api.MiniResult;
-import hu.webarticum.miniconnect.impl.result.StoredError;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.lang.LargeInteger;
-import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
+import hu.webarticum.miniconnect.rdmsframework.PredefinedError;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
-import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
+import hu.webarticum.miniconnect.rdmsframework.execution.ThrowingQueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.InsertQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
@@ -28,18 +27,13 @@ import hu.webarticum.miniconnect.rdmsframework.storage.TablePatch;
 import hu.webarticum.miniconnect.rdmsframework.util.ResultUtil;
 import hu.webarticum.miniconnect.rdmsframework.util.TableQueryUtil;
 
-public class InsertExecutor implements QueryExecutor {
+public class InsertExecutor implements ThrowingQueryExecutor {
 
     @Override
-    public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
-        try (CheckableCloseable lock = storageAccess.lockManager().lockExclusively()) {
-            return executeInternal(storageAccess, state, (InsertQuery) query);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return new StoredResult(new StoredError(99, "00099", "Query was interrupted"));
-        }
+    public MiniResult executeThrowing(StorageAccess storageAccess, EngineSessionState state, Query query) {
+        return executeInternal(storageAccess, state, (InsertQuery) query);
     }
-    
+
     private MiniResult executeInternal(StorageAccess storageAccess, EngineSessionState state, InsertQuery insertQuery) {
         String schemaName = insertQuery.schemaName();
         String tableName = insertQuery.tableName();
@@ -48,20 +42,20 @@ public class InsertExecutor implements QueryExecutor {
             schemaName = state.getCurrentSchema();
         }
         if (schemaName == null) {
-            return new StoredResult(new StoredError(5, "00005", "No schema is selected"));
+            throw PredefinedError.SCHEMA_NOT_SELECTED.toException();
         }
         
         Schema schema = storageAccess.schemas().get(schemaName);
         if (schema == null) {
-            return new StoredResult(new StoredError(4, "00004", "No such schema: " + schemaName));
+            throw PredefinedError.SCHEMA_NOT_FOUND.toException(schemaName);
         }
         
         Table table = schema.tables().get(tableName);
         if (table == null) {
-            return new StoredResult(new StoredError(2, "00002", "No such table: " + tableName));
+            throw PredefinedError.TABLE_NOT_FOUND.toException(tableName);
         }
         if (!table.isWritable()) {
-            return new StoredResult(new StoredError(6, "00006", "Table is read-only: " + tableName));
+            throw PredefinedError.TABLE_READONLY.toException(tableName);
         }
 
         ImmutableList<String> givenInsertFields = insertQuery.fields();
@@ -79,18 +73,13 @@ public class InsertExecutor implements QueryExecutor {
         }
         
         // FIXME: currently default values are not supported
-        if (insertValueMap.size() != table.columns().names().size()) {
-            return new StoredResult(new StoredError(
-                    7,
-                    "00007",
-                    table.columns().names().size() + " values expected, but " + insertValueMap.size() + " found"));
+        int columnCount = table.columns().names().size();
+        int givenCount = insertValueMap.size();
+        if (givenCount != columnCount) {
+            throw PredefinedError.COLUMN_COUNT_NOT_MATCHING.toException(columnCount, givenCount);
         }
         
-        try {
-            TableQueryUtil.checkFields(table, insertValueMap.keySet());
-        } catch (Exception e) {
-            return new StoredResult(new StoredError(3, "00003", e.getMessage()));
-        }
+        TableQueryUtil.checkFields(table, insertValueMap.keySet());
 
         LargeInteger lastInsertId = null;
         if (autoIncrementedColumnHolder.isPresent()) {
@@ -108,11 +97,11 @@ public class InsertExecutor implements QueryExecutor {
 
         ImmutableMap<Integer, Object> values =
                 TableQueryUtil.toByColumnPoisitionedImmutableMap(table, convertedInsertValues);
-        int columnCount = table.columns().names().size();
         List<Object> rowDataBuilder = new ArrayList<>(columnCount);
         for (int i = 0; i < columnCount; i++) {
             if (!values.containsKey(i)) {
-                return new StoredResult(new StoredError(7, "00007", "Missing column: " + i));
+                String columnName = table.columns().names().get(i);
+                throw PredefinedError.COLUMN_MISSING.toException(columnName);
             }
             rowDataBuilder.add(values.get(i));
         }

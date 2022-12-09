@@ -17,6 +17,7 @@ import java.util.function.Function;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.lang.LargeInteger;
+import hu.webarticum.miniconnect.rdmsframework.PredefinedError;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.impl.select.OrderByEntry;
 import hu.webarticum.miniconnect.rdmsframework.query.NullsOrderMode;
@@ -58,7 +59,7 @@ public class TableQueryUtil {
 
     public static void checkField(Table table, String columnName) {
         if (!table.columns().contains(columnName)) {
-            throw new IllegalArgumentException(String.format("No column '%s' in table '%s'", columnName, table.name()));
+            throw PredefinedError.COLUMN_NOT_FOUND.toException(table.name(), columnName);
         }
     }
 

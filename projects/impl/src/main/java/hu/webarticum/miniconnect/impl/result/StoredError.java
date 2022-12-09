@@ -3,6 +3,7 @@ package hu.webarticum.miniconnect.impl.result;
 import java.io.Serializable;
 
 import hu.webarticum.miniconnect.api.MiniError;
+import hu.webarticum.miniconnect.api.MiniErrorException;
 
 public final class StoredError implements MiniError, Serializable {
 
@@ -31,6 +32,10 @@ public final class StoredError implements MiniError, Serializable {
         }
         
         return new StoredError(error.code(), error.sqlState(), error.message());
+    }
+
+    public static StoredError of(MiniErrorException exception) {
+        return new StoredError(exception.code(), exception.sqlState(), exception.message());
     }
     
 

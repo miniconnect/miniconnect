@@ -1,32 +1,27 @@
 package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 
 import hu.webarticum.miniconnect.api.MiniResult;
-import hu.webarticum.miniconnect.impl.result.StoredError;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
-import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
+import hu.webarticum.miniconnect.rdmsframework.PredefinedError;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
-import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
+import hu.webarticum.miniconnect.rdmsframework.execution.ThrowingQueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.UseQuery;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 
-public class UseExecutor implements QueryExecutor {
-    
+public class UseExecutor implements ThrowingQueryExecutor {
+
     @Override
-    public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
-        try (CheckableCloseable lock = storageAccess.lockManager().lockShared()) {
-            return executeInternal(storageAccess, state, (UseQuery) query);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return new StoredResult(new StoredError(99, "00099", "Query was interrupted"));
-        }
+    public MiniResult executeThrowing(StorageAccess storageAccess, EngineSessionState state, Query query) {
+        return executeInternal(storageAccess, state, (UseQuery) query);
     }
     
     private MiniResult executeInternal(StorageAccess storageAccess, EngineSessionState state, UseQuery useQuery) {
         String schemaName = useQuery.schema();
         if (!storageAccess.schemas().contains(schemaName)) {
-            return new StoredResult(new StoredError(4, "00004", "No such schema: " + schemaName));
+            throw PredefinedError.SCHEMA_NOT_FOUND.toException(schemaName);
         }
+        
         state.setCurrentSchema(schemaName);
         return new StoredResult();
     }

@@ -4,13 +4,11 @@ import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.impl.result.StoredColumnHeader;
-import hu.webarticum.miniconnect.impl.result.StoredError;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
 import hu.webarticum.miniconnect.impl.result.StoredResultSetData;
 import hu.webarticum.miniconnect.lang.ImmutableList;
-import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
-import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
+import hu.webarticum.miniconnect.rdmsframework.execution.ThrowingQueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.ShowSchemasQuery;
 import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
@@ -18,19 +16,14 @@ import hu.webarticum.miniconnect.rdmsframework.util.LikeMatcher;
 import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 import hu.webarticum.miniconnect.record.type.StandardValueType;
 
-public class ShowSchemasExecutor implements QueryExecutor {
-    
+public class ShowSchemasExecutor implements ThrowingQueryExecutor {
+
     private static final String COLUMN_NAME = "Schemas";
     
 
     @Override
-    public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
-        try (CheckableCloseable lock = storageAccess.lockManager().lockShared()) {
-            return executeInternal(storageAccess, state, (ShowSchemasQuery) query);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return new StoredResult(new StoredError(99, "00099", "Query was interrupted"));
-        }
+    public MiniResult executeThrowing(StorageAccess storageAccess, EngineSessionState state, Query query) {
+        return executeInternal(storageAccess, state, (ShowSchemasQuery) query);
     }
     
     private MiniResult executeInternal(

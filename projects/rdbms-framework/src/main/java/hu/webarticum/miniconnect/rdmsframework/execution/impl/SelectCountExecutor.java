@@ -3,12 +3,10 @@ package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 import java.util.Map;
 
 import hu.webarticum.miniconnect.api.MiniResult;
-import hu.webarticum.miniconnect.impl.result.StoredError;
-import hu.webarticum.miniconnect.impl.result.StoredResult;
 import hu.webarticum.miniconnect.lang.LargeInteger;
-import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
+import hu.webarticum.miniconnect.rdmsframework.PredefinedError;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
-import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
+import hu.webarticum.miniconnect.rdmsframework.execution.ThrowingQueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectCountQuery;
 import hu.webarticum.miniconnect.rdmsframework.storage.Schema;
@@ -17,19 +15,14 @@ import hu.webarticum.miniconnect.rdmsframework.storage.Table;
 import hu.webarticum.miniconnect.rdmsframework.util.ResultUtil;
 import hu.webarticum.miniconnect.rdmsframework.util.TableQueryUtil;
 
-public class SelectCountExecutor implements QueryExecutor {
+public class SelectCountExecutor implements ThrowingQueryExecutor {
+
+    private static final String COLUMN_NAME = "COUNT";
+    
     
     @Override
-    public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
-        try (CheckableCloseable lock = storageAccess.lockManager().lockShared()) {
-            return executeInternal(storageAccess, state, (SelectCountQuery) query);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return new StoredResult(new StoredError(99, "00099", "Query was interrupted"));
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
+    public MiniResult executeThrowing(StorageAccess storageAccess, EngineSessionState state, Query query) {
+        return executeInternal(storageAccess, state, (SelectCountQuery) query);
     }
     
     private MiniResult executeInternal(
@@ -41,29 +34,27 @@ public class SelectCountExecutor implements QueryExecutor {
             schemaName = state.getCurrentSchema();
         }
         if (schemaName == null) {
-            return new StoredResult(new StoredError(5, "00005", "No schema is selected"));
+            throw PredefinedError.SCHEMA_NOT_SELECTED.toException();
         }
         
         Schema schema = storageAccess.schemas().get(schemaName);
         if (schema == null) {
-            return new StoredResult(new StoredError(4, "00004", "No such schema: " + schemaName));
+            throw PredefinedError.SCHEMA_NOT_FOUND.toException(schemaName);
         }
         
         Table table = schema.tables().get(tableName);
         if (table == null) {
-            return new StoredResult(new StoredError(2, "00002", "No such table: " + tableName));
+            throw PredefinedError.TABLE_NOT_FOUND.toException(tableName);
         }
-        
-        String columnName = "COUNT";
         
         Map<String, Object> queryWhere = selectCountQuery.where();
         if (queryWhere.isEmpty()) {
-            return ResultUtil.createSingleValueResult(columnName, table.size());
+            return ResultUtil.createSingleValueResult(COLUMN_NAME, table.size());
         }
         
         Map<String, Object> convertedQueryWhere = TableQueryUtil.convertColumnValues(table, queryWhere, state, false);
         LargeInteger count = TableQueryUtil.countRows(table, convertedQueryWhere);
-        return ResultUtil.createSingleValueResult(columnName, count);
+        return ResultUtil.createSingleValueResult(COLUMN_NAME, count);
     }
     
 }

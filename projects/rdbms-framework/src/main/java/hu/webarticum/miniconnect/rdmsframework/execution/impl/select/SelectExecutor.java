@@ -17,19 +17,17 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
-import hu.webarticum.miniconnect.api.MiniErrorException;
 import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.impl.result.StoredColumnHeader;
-import hu.webarticum.miniconnect.impl.result.StoredError;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
 import hu.webarticum.miniconnect.impl.result.StoredResultSetData;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.LargeInteger;
-import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
+import hu.webarticum.miniconnect.rdmsframework.PredefinedError;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
-import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
+import hu.webarticum.miniconnect.rdmsframework.execution.ThrowingQueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.JoinType;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectQuery;
@@ -51,16 +49,11 @@ import hu.webarticum.miniconnect.record.translator.JavaTranslator;
 import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 import hu.webarticum.miniconnect.record.type.StandardValueType;
 
-public class SelectExecutor implements QueryExecutor {
+public class SelectExecutor implements ThrowingQueryExecutor {
 
     @Override
-    public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
-        try (CheckableCloseable lock = storageAccess.lockManager().lockShared()) {
-            return executeInternal(storageAccess, state, (SelectQuery) query);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return new StoredResult(new StoredError(99, "00099", "Query was interrupted"));
-        }
+    public MiniResult executeThrowing(StorageAccess storageAccess, EngineSessionState state, Query query) {
+        return executeInternal(storageAccess, state, (SelectQuery) query);
     }
 
     private MiniResult executeInternal(StorageAccess storageAccess, EngineSessionState state, SelectQuery selectQuery) {
@@ -167,8 +160,7 @@ public class SelectExecutor implements QueryExecutor {
         String baseAlias = tableEntries.keySet().iterator().next();
         List<String> connectJoinPath = exploreJoinPath(tableEntries, preorderableAliases, baseAlias);
         if (connectJoinPath == null) {
-            throw new MiniErrorException(new StoredError(
-                    99999, "99999", "Something went wrong while rearranging the joint tables"));
+            throw PredefinedError.OTHER_ERROR.toException();
         }
         addTableEntriesFollowingAliases(tableEntries, connectJoinPath, allPreorderable, result);
 
@@ -395,17 +387,17 @@ public class SelectExecutor implements QueryExecutor {
             schemaName = state.getCurrentSchema();
         }
         if (schemaName == null) {
-            throw new MiniErrorException(new StoredError(5, "00005", "No schema is selected"));
+            throw PredefinedError.SCHEMA_NOT_SELECTED.toException();
         }
         
         Schema schema = storageAccess.schemas().get(schemaName);
         if (schema == null) {
-            throw new MiniErrorException(new StoredError(4, "00004", "No such schema: " + schemaName));
+            throw PredefinedError.SCHEMA_NOT_FOUND.toException(schemaName);
         }
         
         Table table = schema.tables().get(tableName);
         if (table == null) {
-            throw new MiniErrorException(new StoredError(2, "00002", "No such table: " + tableName));
+            throw PredefinedError.TABLE_NOT_FOUND.toException(tableName);
         }
         
         if (alias == null) {
@@ -413,7 +405,7 @@ public class SelectExecutor implements QueryExecutor {
         }
         
         if (tableEntries.containsKey(alias)) {
-            throw new MiniErrorException(new StoredError(7, "00007", "Duplicated table alias: " + alias));
+            throw PredefinedError.TABLE_ALIAS_DUPLICATED.toException(alias);
         }
         
         tableEntries.put(alias, new TableEntry(schemaName, table, joinItem, false));
@@ -452,7 +444,7 @@ public class SelectExecutor implements QueryExecutor {
         
         TableEntry tableEntry = tableEntries.get(tableName);
         if (tableEntry == null) {
-            throw new MiniErrorException(new StoredError(2, "00002", "No such table: " + tableName));
+            throw PredefinedError.TABLE_NOT_FOUND.toException(tableName);
         }
 
         String fieldName = whereItem.fieldName();
@@ -486,7 +478,7 @@ public class SelectExecutor implements QueryExecutor {
         if (tableName == null) {
             tableName = tableEntries.keySet().iterator().next();
         } else if (!tableEntries.containsKey(tableName)) {
-            throw new MiniErrorException(new StoredError(2, "00002", "No such table: " + tableName));
+            throw PredefinedError.TABLE_NOT_FOUND.toException(tableName);
         }
         TableEntry tableEntry = tableEntries.get(tableName);
         checkColumn(tableEntry.table, fieldName);
@@ -526,7 +518,7 @@ public class SelectExecutor implements QueryExecutor {
         Integer position = orderByItem.position();
         if (orderByItem.position() != null) {
             if (position < 1 || position > selectItemEntries.size()) {
-                throw new MiniErrorException(new StoredError(8, "00008", "Invalid column position: " + position));
+                throw PredefinedError.COLUMN_POSITION_INVALID.toException(position);
             }
             SelectItemEntry selectItemEntry = selectItemEntries.get(position - 1);
             return new OrderByEntry(
@@ -560,7 +552,7 @@ public class SelectExecutor implements QueryExecutor {
 
         TableEntry tableEntry = tableEntries.get(tableName);
         if (tableEntry == null) {
-            throw new MiniErrorException(new StoredError(2, "00002", "No such table: " + tableName));
+            throw PredefinedError.TABLE_NOT_FOUND.toException(tableName);
         }
         checkColumn(tableEntry.table, fieldName);
         
@@ -569,8 +561,7 @@ public class SelectExecutor implements QueryExecutor {
     
     private void checkColumn(Table table, String columnName) {
         if (!table.columns().contains(columnName)) {
-            throw new MiniErrorException(
-                    new StoredError(3, "00003", "No such column: " + table.name() + "." + columnName));
+            throw PredefinedError.COLUMN_NOT_FOUND.toException(table.name(), columnName);
         }
     }
     

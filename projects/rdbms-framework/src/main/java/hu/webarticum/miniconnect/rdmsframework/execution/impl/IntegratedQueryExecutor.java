@@ -1,8 +1,7 @@
 package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 
 import hu.webarticum.miniconnect.api.MiniResult;
-import hu.webarticum.miniconnect.impl.result.StoredError;
-import hu.webarticum.miniconnect.impl.result.StoredResult;
+import hu.webarticum.miniconnect.rdmsframework.PredefinedError;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
 import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.execution.impl.select.SelectExecutor;
@@ -47,10 +46,7 @@ public class IntegratedQueryExecutor implements QueryExecutor {
         } else if (query instanceof SetVariableQuery) {
             return new SetVariableExecutor().execute(storageAccess, state, query);
         } else {
-            return new StoredResult(new StoredError(
-                    1,
-                    "00001",
-                    "Unknown query type: " + query.getClass().getName()));
+            return PredefinedError.QUERY_TYPE_NOT_FOUND.toResult(query.getClass().getName());
         }
     }
 

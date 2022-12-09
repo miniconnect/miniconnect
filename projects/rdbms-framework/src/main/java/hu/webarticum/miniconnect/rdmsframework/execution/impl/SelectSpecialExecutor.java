@@ -1,11 +1,9 @@
 package hu.webarticum.miniconnect.rdmsframework.execution.impl;
 
 import hu.webarticum.miniconnect.api.MiniResult;
-import hu.webarticum.miniconnect.impl.result.StoredError;
-import hu.webarticum.miniconnect.impl.result.StoredResult;
-import hu.webarticum.miniconnect.rdmsframework.CheckableCloseable;
+import hu.webarticum.miniconnect.rdmsframework.PredefinedError;
 import hu.webarticum.miniconnect.rdmsframework.engine.EngineSessionState;
-import hu.webarticum.miniconnect.rdmsframework.execution.QueryExecutor;
+import hu.webarticum.miniconnect.rdmsframework.execution.ThrowingQueryExecutor;
 import hu.webarticum.miniconnect.rdmsframework.query.Query;
 import hu.webarticum.miniconnect.rdmsframework.query.SelectSpecialQuery;
 import hu.webarticum.miniconnect.rdmsframework.query.SpecialSelectableType;
@@ -13,16 +11,11 @@ import hu.webarticum.miniconnect.rdmsframework.storage.StorageAccess;
 import hu.webarticum.miniconnect.rdmsframework.util.ResultUtil;
 import hu.webarticum.miniconnect.record.type.StandardValueType;
 
-public class SelectSpecialExecutor implements QueryExecutor {
-    
+public class SelectSpecialExecutor implements ThrowingQueryExecutor {
+
     @Override
-    public MiniResult execute(StorageAccess storageAccess, EngineSessionState state, Query query) {
-        try (CheckableCloseable lock = storageAccess.lockManager().lockShared()) {
-            return executeInternal(state, (SelectSpecialQuery) query);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            return new StoredResult(new StoredError(99, "00099", "Query was interrupted"));
-        }
+    public MiniResult executeThrowing(StorageAccess storageAccess, EngineSessionState state, Query query) {
+        return executeInternal(state, (SelectSpecialQuery) query);
     }
     
     private MiniResult executeInternal(EngineSessionState state, SelectSpecialQuery selectSpecialQuery) {
@@ -43,7 +36,7 @@ public class SelectSpecialExecutor implements QueryExecutor {
             case LAST_INSERT_ID:
                 return createResult(alias, "LAST_INSERT_ID", state.getLastInsertId());
             default:
-                return new StoredResult(new StoredError(42, "00042", "No luck, sorry"));
+                throw PredefinedError.OTHER_ERROR.toException();
         }
     }
 

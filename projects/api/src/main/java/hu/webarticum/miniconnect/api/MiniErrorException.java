@@ -9,11 +9,15 @@ public class MiniErrorException extends RuntimeException {
 
     private final String sqlState;
 
-    
+
     public MiniErrorException(MiniError error) {
-        super(error.message());
-        this.code = error.code();
-        this.sqlState = error.sqlState();
+        this(error.code(), error.sqlState(), error.message());
+    }
+    
+    public MiniErrorException(int code, String sqlState, String message) {
+        super(message);
+        this.code = code;
+        this.sqlState = sqlState;
     }
     
 
@@ -24,5 +28,9 @@ public class MiniErrorException extends RuntimeException {
     public String sqlState() {
         return sqlState;
     }
-
+    
+    public String message() {
+        return getMessage();
+    }
+    
 }

@@ -16,6 +16,7 @@ import java.util.TreeSet;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.lang.LargeInteger;
+import hu.webarticum.miniconnect.rdmsframework.PredefinedError;
 import hu.webarticum.miniconnect.rdmsframework.storage.Column;
 import hu.webarticum.miniconnect.rdmsframework.storage.ColumnDefinition;
 import hu.webarticum.miniconnect.rdmsframework.storage.NamedResourceStore;
@@ -129,7 +130,7 @@ public class SimpleTable implements Table {
     
     private void checkWritable() {
         if (!writable) {
-            throw new UnsupportedOperationException("This table is read-only");
+            throw PredefinedError.TABLE_READONLY.toException(name);
         }
     }
 
@@ -150,7 +151,7 @@ public class SimpleTable implements Table {
                 Integer columnIndex = updateEntry.getKey();
                 if (nonNullableColumnIndices.contains(columnIndex) && updateEntry.getValue() == null) {
                     String columnName = columnNames.get(columnIndex);
-                    throw new IllegalArgumentException("NULL update for non nullable column: " + columnName);
+                    throw PredefinedError.COLUMN_VALUE_NULL.toException(columnName);
                 }
             }
         }
@@ -159,7 +160,7 @@ public class SimpleTable implements Table {
             for (Integer columnIndex : nonNullableColumnIndices) {
                 if (insertedRow.get(columnIndex) == null) {
                     String columnName = columnNames.get(columnIndex);
-                    throw new IllegalArgumentException("NULL insert for non nullable column: " + columnName);
+                    throw PredefinedError.COLUMN_VALUE_NULL.toException(columnName);
                 }
             }
         }
@@ -219,8 +220,7 @@ public class SimpleTable implements Table {
         Set<Object> values = uniqueColumnValues.get(columnIndex);
         if (values != null && !values.add(newValue)) {
             String columnName = columnNames.get(columnIndex);
-            throw new IllegalArgumentException(
-                    "Already existing value given for unique column " + columnName + ": '" + newValue + "'");
+            throw PredefinedError.COLUMN_VALUE_NOT_UNIQUE.toException(columnName, newValue);
         }
     }
     
