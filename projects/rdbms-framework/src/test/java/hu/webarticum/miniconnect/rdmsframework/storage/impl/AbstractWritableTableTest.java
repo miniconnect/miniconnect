@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import hu.webarticum.miniconnect.api.MiniErrorException;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.lang.LargeInteger;
@@ -77,9 +78,9 @@ public abstract class AbstractWritableTableTest {
     protected void testUpdate() {
         Table table = createSubjectTable();
         TablePatch patch = TablePatch.builder()
-                .update(LargeInteger.of(1L), ImmutableMap.of(1, "oooo"))
-                .update(LargeInteger.of(2L), ImmutableMap.of(1, "pppp", 2, 0))
-                .update(LargeInteger.of(5L), ImmutableMap.of(0, large(106), 1, "qqqq"))
+                .update(large(1L), ImmutableMap.of(1, "oooo"))
+                .update(large(2L), ImmutableMap.of(1, "pppp", 2, 0))
+                .update(large(5L), ImmutableMap.of(0, large(106), 1, "qqqq"))
                 .build();
         table.applyPatch(patch);
 
@@ -289,7 +290,7 @@ public abstract class AbstractWritableTableTest {
                         ImmutableList.of(large(6), "hhhh", 4),
                         ImmutableList.of(large(9), "iiii", 3),
                         ImmutableList.of(large(10), "ffff", 1));
-        assertThat(table.size()).isEqualTo(expectedContent1.size());
+        assertThat(table.size()).isEqualTo(large(expectedContent1.size()));
         assertThat(contentOf(table)).isEqualTo(expectedContent1);
         
         TablePatch delete2Patch = TablePatch.builder()
@@ -303,7 +304,7 @@ public abstract class AbstractWritableTableTest {
                 ImmutableList.of(large(6), "hhhh", 4),
                 ImmutableList.of(large(9), "iiii", 3),
                 ImmutableList.of(large(10), "ffff", 1));
-        assertThat(table.size()).isEqualTo(expectedContent2.size());
+        assertThat(table.size()).isEqualTo(large(expectedContent2.size()));
         assertThat(contentOf(table)).isEqualTo(expectedContent2);
         
         TablePatch delete3Patch = TablePatch.builder()
@@ -315,7 +316,7 @@ public abstract class AbstractWritableTableTest {
                 ImmutableList.of(large(3), "gggg", 3),
                 ImmutableList.of(large(6), "hhhh", 4),
                 ImmutableList.of(large(9), "iiii", 3));
-        assertThat(table.size()).isEqualTo(expectedContent3.size());
+        assertThat(table.size()).isEqualTo(large(expectedContent3.size()));
         assertThat(contentOf(table)).isEqualTo(expectedContent3);
     }
 
@@ -495,7 +496,7 @@ public abstract class AbstractWritableTableTest {
                 ImmutableList.of(large(104), null, 5),
                 ImmutableList.of(large(105), "ZZZ", 2));
         
-        assertThat(table.size()).isEqualTo(expectedContent.size());
+        assertThat(table.size()).isEqualTo(large(expectedContent.size()));
         assertThat(contentOf(table)).isEqualTo(expectedContent);
     }
     
@@ -575,7 +576,7 @@ public abstract class AbstractWritableTableTest {
                 .update(large(6), ImmutableMap.of(1, null, 2, 5))
                 .build();
         
-        assertThatThrownBy(() -> table.applyPatch(patch)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> table.applyPatch(patch)).isInstanceOf(MiniErrorException.class);
     }
 
     @Test
@@ -587,7 +588,7 @@ public abstract class AbstractWritableTableTest {
                 .insert(ImmutableList.of(large(105), "ZZZ", 2))
                 .build();
         
-        assertThatThrownBy(() -> table.applyPatch(patch)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> table.applyPatch(patch)).isInstanceOf(MiniErrorException.class);
     }
 
     @Test
@@ -598,7 +599,7 @@ public abstract class AbstractWritableTableTest {
                 .update(large(4), ImmutableMap.of(0, large(1), 1, "UUUU"))
                 .build();
         
-        assertThatThrownBy(() -> table.applyPatch(patch)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> table.applyPatch(patch)).isInstanceOf(MiniErrorException.class);
     }
 
     @Test
@@ -609,7 +610,7 @@ public abstract class AbstractWritableTableTest {
                 .insert(ImmutableList.of(large(1), "UUUUU", 1))
                 .build();
         
-        assertThatThrownBy(() -> table.applyPatch(patch)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> table.applyPatch(patch)).isInstanceOf(MiniErrorException.class);
     }
 
     @Test
@@ -622,7 +623,7 @@ public abstract class AbstractWritableTableTest {
         
         table.applyPatch(patch); // apply in advance
         
-        assertThatThrownBy(() -> table.applyPatch(patch)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> table.applyPatch(patch)).isInstanceOf(MiniErrorException.class);
     }
 
     @Test
@@ -634,7 +635,7 @@ public abstract class AbstractWritableTableTest {
                 .insert(ImmutableList.of(large(1111), "UUUUU", 1))
                 .build();
         
-        assertThatThrownBy(() -> table.applyPatch(patch)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> table.applyPatch(patch)).isInstanceOf(MiniErrorException.class);
     }
 
     
