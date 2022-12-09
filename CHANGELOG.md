@@ -9,11 +9,12 @@ Released on *2022-12-04*
 - Improved REPL with colored output
 - Unique constraint
 - Enum columns
-- LEFT OUTER and INNER join
+- LEFT OUTER join and INNER join
 - REPLACE INTO query
 - Scoped wildcard syntax in SQL
 - Simple COUNT queries
 - NULLS FIRST and NULLS LAST clauses in SQL
+- Support for unicode letters in unquoted identifiers
 
 **Improved:**
 
