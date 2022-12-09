@@ -219,8 +219,16 @@ public abstract class LargeInteger extends Number implements Comparable<LargeInt
         return compareTo(ZERO) > 0;
     }
 
+    public boolean isNonPositive() {
+        return compareTo(ZERO) <= 0;
+    }
+
     public boolean isNegative() {
         return compareTo(ZERO) < 0;
+    }
+
+    public boolean isNonNegative() {
+        return compareTo(ZERO) >= 0;
     }
 
     public boolean isEven() {
@@ -234,13 +242,25 @@ public abstract class LargeInteger extends Number implements Comparable<LargeInt
     public boolean isDivisibleBy(LargeInteger val) {
         return remainder(val).isZero();
     }
-    
+
+    public boolean isEqualTo(LargeInteger val) {
+        return equals(val);
+    }
+
     public boolean isLessThan(LargeInteger val) {
         return compareTo(val) < 0;
+    }
+
+    public boolean isLessThanOrEqualTo(LargeInteger val) {
+        return compareTo(val) <= 0;
     }
     
     public boolean isGreaterThan(LargeInteger val) {
         return compareTo(val) > 0;
+    }
+
+    public boolean isGreaterThanOrEqualTo(LargeInteger val) {
+        return compareTo(val) >= 0;
     }
     
     public abstract LargeInteger increment();
