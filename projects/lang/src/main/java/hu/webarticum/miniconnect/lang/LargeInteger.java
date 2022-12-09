@@ -84,8 +84,17 @@ public abstract class LargeInteger extends Number implements Comparable<LargeInt
     }
 
     public static LargeInteger of(byte[] bytes) {
-        if (bytes.length <= Long.BYTES) {
+        if (bytes.length == Long.BYTES) {
             return ofSmall(ByteBuffer.wrap(bytes).getLong());
+        } else if (bytes.length == 0) {
+            return ZERO;
+        } else if (bytes.length < Long.BYTES) {
+            ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+            buffer.position(Long.BYTES - bytes.length);
+            buffer.put(bytes);
+            buffer.position(0);
+            long value = buffer.getLong();
+            return ofSmall(value);
         } else {
             return of(new BigInteger(bytes));
         }
