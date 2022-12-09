@@ -10,29 +10,29 @@ public enum PredefinedError {
     
     NO_ERROR(0, "00000", ""),
 
-    QUERY_TYPE_NOT_FOUND(1, "00001", "Unknown query type: %s"),
+    QUERY_TYPE_NOT_FOUND(1, "00001", "Unknown query type: '%s'"),
     
-    TABLE_NOT_FOUND(2, "00002", "No such table: %s"),
+    TABLE_NOT_FOUND(2, "00002", "No such table: '%s'"),
     
     COLUMN_NOT_FOUND(3, "00003", "No column '%2$s' in table '%1$s'"),
     
-    SCHEMA_NOT_FOUND(4, "00004", "No such schema: %s"),
+    SCHEMA_NOT_FOUND(4, "00004", "No such schema: '%s'"),
     
     SCHEMA_NOT_SELECTED(5, "00005", "No schema is selected"),
 
-    TABLE_READONLY(6, "00006", "Table is read-only: %s"),
+    TABLE_READONLY(6, "00006", "Table is read-only: '%s'"),
 
-    COLUMN_COUNT_NOT_MATCHING(7, "00007", "%d values expected, but %d"),
+    COLUMN_COUNT_NOT_MATCHING(7, "00007", "%d values expected, but %d given"),
 
-    COLUMN_MISSING(8, "00008", "Missing column: %s"),
+    COLUMN_MISSING(8, "00008", "Missing column: '%s'"),
     
     COLUMN_POSITION_INVALID(9, "00009", "Invalid column position: %d"),
     
-    TABLE_ALIAS_DUPLICATED(10, "00010", "Duplicated table alias: %s"),
+    TABLE_ALIAS_DUPLICATED(10, "00010", "Duplicated table alias: '%s'"),
     
-    COLUMN_VALUE_NOT_UNIQUE(11, "00011", "Already existing value given for unique column %s: %s"),
+    COLUMN_VALUE_NOT_UNIQUE(11, "00011", "Already existing value given for unique column '%s': '%s'"),
     
-    COLUMN_VALUE_NULL(12, "00012", "NULL value for non nullable column %s"),
+    COLUMN_VALUE_NULL(12, "00012", "NULL value for non nullable column '%s'"),
     
     QUERY_INTERRUPTED(99, "00099", "Query was interrupted"),
     
