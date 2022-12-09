@@ -1,11 +1,10 @@
 package hu.webarticum.miniconnect.record.translator;
 
-import java.math.BigInteger;
-
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.impl.result.StoredContentAccess;
 import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 
 public class BigintTranslator implements ValueTranslator {
     
@@ -36,19 +35,19 @@ public class BigintTranslator implements ValueTranslator {
     
     @Override
     public Object decode(MiniContentAccess contentAccess) {
-        return new BigInteger(contentAccess.get().extract());
+        return LargeInteger.of(contentAccess.get().extract());
     }
 
     @Override
     public MiniContentAccess encode(Object value) {
-        BigInteger bigIntegerValue = (BigInteger) value;
-        ByteString bytes = ByteString.wrap(bigIntegerValue.toByteArray());
+        LargeInteger largeIntegerValue = (LargeInteger) value;
+        ByteString bytes = ByteString.wrap(largeIntegerValue.toByteArray());
         return new StoredContentAccess(bytes);
     }
 
     @Override
     public String assuredClazzName() {
-        return BigInteger.class.getName();
+        return LargeInteger.class.getName();
     }
     
 }

@@ -1,6 +1,5 @@
 package hu.webarticum.miniconnect.jdbc;
 
-import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -15,6 +14,7 @@ import hu.webarticum.miniconnect.impl.result.StoredColumnHeader;
 import hu.webarticum.miniconnect.impl.result.StoredResultSet;
 import hu.webarticum.miniconnect.impl.result.StoredResultSetData;
 import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.translator.BigintTranslator;
 
 public abstract class AbstractJdbcStatement implements Statement {
@@ -30,7 +30,7 @@ public abstract class AbstractJdbcStatement implements Statement {
     
     private volatile SQLWarning currentWarningHead = null; // NOSONAR
     
-    private volatile BigInteger lastInsertedId = null;
+    private volatile LargeInteger lastInsertedId = null;
 
     
     AbstractJdbcStatement(MiniJdbcConnection connection) {

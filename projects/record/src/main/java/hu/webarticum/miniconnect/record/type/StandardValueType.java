@@ -1,7 +1,6 @@
 package hu.webarticum.miniconnect.record.type;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,6 +11,7 @@ import java.util.function.Function;
 
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 import hu.webarticum.miniconnect.record.lob.BlobValue;
 import hu.webarticum.miniconnect.record.lob.ClobValue;
@@ -59,7 +59,7 @@ public enum StandardValueType implements ValueType {
     
     DOUBLE(ByteString.of("DBL"), Double.class, DoubleTranslator.instance()),
     
-    BIGINT(ByteString.of("BNT"), BigInteger.class, BigintTranslator.instance()),
+    BIGINT(ByteString.of("BNT"), LargeInteger.class, BigintTranslator.instance()),
     
     DECIMAL(ByteString.of("DEC"), BigDecimal.class, DecimalTranslator.instance()),
     

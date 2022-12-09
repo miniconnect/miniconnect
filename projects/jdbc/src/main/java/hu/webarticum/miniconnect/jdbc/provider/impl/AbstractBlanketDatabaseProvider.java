@@ -16,6 +16,7 @@ import hu.webarticum.miniconnect.jdbc.provider.ParameterValue;
 import hu.webarticum.miniconnect.jdbc.provider.PreparedStatementProvider;
 import hu.webarticum.miniconnect.jdbc.provider.TransactionIsolationLevel;
 import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.ResultRecord;
 import hu.webarticum.miniconnect.record.ResultTable;
 
@@ -124,9 +125,9 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
     }
 
     @Override
-    public BigInteger getLastInsertedId(MiniSession session) {
+    public LargeInteger getLastInsertedId(MiniSession session) {
         String sql = "CALL IDENTITY()";
-        return extractSingleField(checkResult(session.execute(sql)), BigInteger.class);
+        return extractSingleField(checkResult(session.execute(sql)), LargeInteger.class);
     }
     
     @Override
@@ -144,7 +145,11 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
         Object value = parameterValue.value();
         if (value == null) {
             return "NULL";
-        } else if (value instanceof Integer || value instanceof Long || value instanceof BigInteger) {
+        } else if (
+                value instanceof Integer ||
+                value instanceof Long ||
+                value instanceof LargeInteger ||
+                value instanceof BigInteger) {
             return value.toString();
         }
         

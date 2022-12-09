@@ -23,6 +23,7 @@ import hu.webarticum.miniconnect.api.MiniColumnHeader;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.lob.BlobValue;
 import hu.webarticum.miniconnect.record.lob.ClobValue;
 
@@ -40,6 +41,7 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
         TYPE_MAPPING.put(Long.class.getName(), JDBCType.BIGINT);
         TYPE_MAPPING.put(Float.class.getName(), JDBCType.REAL);
         TYPE_MAPPING.put(Double.class.getName(), JDBCType.DOUBLE);
+        TYPE_MAPPING.put(LargeInteger.class.getName(), JDBCType.NUMERIC);
         TYPE_MAPPING.put(BigInteger.class.getName(), JDBCType.NUMERIC);
         TYPE_MAPPING.put(BigDecimal.class.getName(), JDBCType.DECIMAL);
         TYPE_MAPPING.put(ByteString.class.getName(), JDBCType.LONGVARBINARY);
@@ -202,7 +204,7 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
             return 7;
         } else if (clazz == Double.class) {
             return 15;
-        } else if (clazz == BigInteger.class || clazz == BigDecimal.class) {
+        } else if (clazz == LargeInteger.class || clazz == BigInteger.class || clazz == BigDecimal.class) {
             return 30; // FIXME
         } else {
             return 0; // TODO
