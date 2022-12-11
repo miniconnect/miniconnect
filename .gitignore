@@ -1,7 +1,18 @@
+### gradle: ###
+/build/
 /.gradle/
-/.metadata/
-/.settings/
 
+### maven: ###
+/target/
+
+### eclipse: ###
+/bin/
+/.settings/
+/.classpath
 /.project
 
-/build
+### idea: ###
+/.idea/
+
+### vscode: ###
+/.vscode/
