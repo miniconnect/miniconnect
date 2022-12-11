@@ -1,0 +1,74 @@
+digraph {
+edge ["dir"="forward"]
+graph ["dpi"="100","label"="miniconnect","labelloc"="t","fontsize"="35"]
+node ["style"="filled"]
+":api" ["fillcolor"="#FF7043"]
+":lang" ["fillcolor"="#FF7043"]
+":impl" ["fillcolor"="#FF7043"]
+":jdbc" ["shape"="rectangle","fillcolor"="#FF7043"]
+":messenger" ["fillcolor"="#FF7043"]
+":record" ["fillcolor"="#FF7043"]
+":util" ["fillcolor"="#FF7043"]
+":server" ["fillcolor"="#FF7043"]
+":transfer" ["fillcolor"="#FF7043"]
+":jdbc-adapter" ["fillcolor"="#FF7043"]
+":lang-jackson" ["shape"="rectangle","fillcolor"="#FF7043"]
+":rdbms-framework" ["shape"="rectangle","fillcolor"="#FF7043"]
+":repl" ["fillcolor"="#FF7043"]
+":rest" ["fillcolor"="#FF7043"]
+{
+edge ["dir"="none"]
+graph ["rank"="same"]
+":jdbc"
+":lang-jackson"
+":rdbms-framework"
+}
+":api" -> ":lang"
+":impl" -> ":api"
+":impl" -> ":lang"
+":jdbc" -> ":api"
+":jdbc" -> ":lang"
+":jdbc" -> ":impl" ["style"="dotted"]
+":jdbc" -> ":messenger" ["style"="dotted"]
+":jdbc" -> ":record" ["style"="dotted"]
+":jdbc" -> ":server" ["style"="dotted"]
+":jdbc" -> ":util" ["style"="dotted"]
+":messenger" -> ":api"
+":messenger" -> ":lang"
+":messenger" -> ":impl" ["style"="dotted"]
+":messenger" -> ":record" ["style"="dotted"]
+":messenger" -> ":util" ["style"="dotted"]
+":record" -> ":api"
+":record" -> ":lang"
+":record" -> ":impl" ["style"="dotted"]
+":record" -> ":util" ["style"="dotted"]
+":util" -> ":lang"
+":server" -> ":lang"
+":server" -> ":messenger"
+":server" -> ":transfer" ["style"="dotted"]
+":server" -> ":util" ["style"="dotted"]
+":transfer" -> ":lang"
+":jdbc-adapter" -> ":api"
+":jdbc-adapter" -> ":lang"
+":jdbc-adapter" -> ":impl" ["style"="dotted"]
+":jdbc-adapter" -> ":record" ["style"="dotted"]
+":lang-jackson" -> ":lang"
+":rdbms-framework" -> ":api"
+":rdbms-framework" -> ":lang"
+":rdbms-framework" -> ":impl" ["style"="dotted"]
+":rdbms-framework" -> ":record" ["style"="dotted"]
+":rdbms-framework" -> ":util" ["style"="dotted"]
+":rdbms-framework" -> ":repl" ["style"="dotted"]
+":repl" -> ":api"
+":repl" -> ":lang"
+":repl" -> ":impl" ["style"="dotted"]
+":repl" -> ":record" ["style"="dotted"]
+":repl" -> ":messenger" ["style"="dotted"]
+":repl" -> ":server" ["style"="dotted"]
+":rest" -> ":api" ["style"="dotted"]
+":rest" -> ":messenger" ["style"="dotted"]
+":rest" -> ":record" ["style"="dotted"]
+":rest" -> ":server" ["style"="dotted"]
+":rest" -> ":jdbc-adapter" ["style"="dotted"]
+":rest" -> ":impl" ["style"="dotted"]
+}

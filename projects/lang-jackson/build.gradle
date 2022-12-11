@@ -5,7 +5,7 @@ plugins {
 description "Jackson support for essential value types"
 
 java {
-    registerFeature('runtimeDependencies') {
+    registerFeature('malleableDependencies') {
         usingSourceSet(sourceSets.main)
     }
 }
@@ -13,6 +13,6 @@ java {
 dependencies {
     api project(':lang')
     
-    runtimeDependenciesImplementation 'com.fasterxml.jackson.core:jackson-core:2.13.3'
-    runtimeDependenciesImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
+    malleableDependenciesImplementation 'com.fasterxml.jackson.core:jackson-core:2.13.3'
+    malleableDependenciesImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
 }

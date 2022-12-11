@@ -12,17 +12,14 @@ dependencies {
     implementation project(':messenger')
     implementation project(':record')
     implementation project(':server')
-    implementation 'org.apache.commons:commons-lang3:3.0'
-    implementation 'jakarta.annotation:jakarta.annotation-api'
-    implementation 'io.micronaut:micronaut-http-client'
-    implementation 'io.micronaut:micronaut-jackson-databind'
-    implementation 'io.micronaut:micronaut-runtime'
-    implementation 'io.micronaut:micronaut-validation'
+    runtimeOnly 'io.micronaut:micronaut-http-client'
+    runtimeOnly 'io.micronaut:micronaut-jackson-databind'
+    runtimeOnly 'io.micronaut:micronaut-runtime'
+    runtimeOnly 'io.micronaut:micronaut-validation'
     
     // FIXME
     implementation project(':jdbc-adapter')
     implementation project(':impl')
-	implementation 'com.h2database:h2:1.4.200'
     
     runtimeOnly 'ch.qos.logback:logback-classic'
 
