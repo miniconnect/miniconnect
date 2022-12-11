@@ -5,7 +5,7 @@ TASK_NAME='execLab'
 
 
 if [ "$#" -ne 2 ]; then
-    echo "Usage: ./gradle-exec.sh <projectName> <mainClass>"
+    echo "Usage: ./exec-lab.sh <projectName> <mainClass>"
     exit 1
 fi
 
