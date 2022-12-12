@@ -5,8 +5,8 @@ plugins {
 description "Lightweight and transparent MiniConnect server and client"
 
 dependencies {
-    api project(':lang')
     api project(':messenger')
+    api "hu.webarticum.miniconnect.api:api:${miniConnectApiVersion}"
     
     implementation project(':transfer')
     implementation project(':util')

@@ -11,12 +11,11 @@ java {
 }
 
 dependencies {
-    api project(':api')
-    api project(':lang')
+    api project(':record')
+    api "hu.webarticum.miniconnect.api:api:${miniConnectApiVersion}"
     
     implementation project(':impl')
     implementation project(':messenger')
-    implementation project(':record')
     implementation project(':server')
     implementation project(':util')
     implementation 'commons-io:commons-io:2.11.0'

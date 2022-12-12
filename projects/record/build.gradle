@@ -17,8 +17,7 @@ configurations {
 }
 
 dependencies {
-    api project(':api')
-    api project(':lang')
+    api "hu.webarticum.miniconnect.api:api:${miniConnectApiVersion}"
     
     implementation project(':impl')
     implementation project(':util')

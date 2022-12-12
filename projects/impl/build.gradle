@@ -5,8 +5,7 @@ plugins {
 description "Obvious implementations of some api pieces"
 
 dependencies {
-    api project(':api')
-    api project(':lang')
+    api "hu.webarticum.miniconnect.api:api:${miniConnectApiVersion}"
     
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.1'

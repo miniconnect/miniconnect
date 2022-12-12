@@ -8,10 +8,10 @@ description "Simple REST service for MiniConnect"
 dependencies {
     annotationProcessor 'io.micronaut:micronaut-http-validation'
     
-    implementation project(':api')
     implementation project(':messenger')
     implementation project(':record')
     implementation project(':server')
+    implementation "hu.webarticum.miniconnect.api:api:${miniConnectApiVersion}"
     runtimeOnly 'io.micronaut:micronaut-http-client'
     runtimeOnly 'io.micronaut:micronaut-jackson-databind'
     runtimeOnly 'io.micronaut:micronaut-runtime'
