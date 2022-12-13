@@ -53,4 +53,9 @@ public final class StoredResultSet implements MiniResultSet, Serializable {
         // nothing to do
     }
 
+    @Override
+    public boolean isClosed() {
+        return false;
+    }
+    
 }

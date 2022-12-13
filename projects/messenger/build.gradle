@@ -28,5 +28,5 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.7.1'
     testImplementation 'org.assertj:assertj-core:3.19.0'
-	testRuntimeOnly 'com.h2database:h2:1.4.200'
+    testRuntimeOnly 'com.h2database:h2:1.4.200'
 }

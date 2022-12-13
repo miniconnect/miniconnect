@@ -46,6 +46,11 @@ public class MockSession implements MiniSession {
         // nothing to do
     }
     
+    @Override
+    public boolean isClosed() {
+        return false;
+    }
+    
     
     @FunctionalInterface
     public interface PutLargeDataFunction {

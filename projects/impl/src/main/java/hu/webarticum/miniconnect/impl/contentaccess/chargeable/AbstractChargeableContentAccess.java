@@ -147,8 +147,6 @@ public abstract class AbstractChargeableContentAccess implements ChargeableConte
         IndexEntry containerEntry = index.floor(new IndexEntry(start, end));
         return (containerEntry != null && !containerEntry.pending && containerEntry.end >= end);
     }
-
-    protected abstract void checkClosed();
     
     @Override
     public boolean isCompleted() {

@@ -37,8 +37,7 @@ public class MessengerResultSetCharger {
     
     private final Consumer<Response> consumerReference;
     
-    private final Map<Long, Map<Integer, List<ResultSetValuePartResponse>>> unhandledParts =
-            new HashMap<>();
+    private final Map<Long, Map<Integer, List<ResultSetValuePartResponse>>> unhandledParts = new HashMap<>();
     
     private final Map<CellPosition, ChargeableContentAccess> chargeables = new HashMap<>();
 
@@ -57,6 +56,11 @@ public class MessengerResultSetCharger {
     }
     
     public synchronized void accept(ResultSetRowsResponse rowsResponse) {
+        if (resultSet.closed) {
+            unhandledParts.clear();
+            return;
+        }
+        
         long rowIndex = rowsResponse.rowOffset();
         for (ImmutableList<CellData> rowData : rowsResponse.rows()) {
             acceptRow(rowIndex, rowData);
@@ -213,6 +217,8 @@ public class MessengerResultSetCharger {
         
         private volatile boolean finished = false;
         
+        private volatile boolean closed = false;
+        
         
         public MessengerResultSet(ImmutableList<MiniColumnHeader> columnHeaders) {
             this.columnHeaders = columnHeaders;
@@ -299,7 +305,13 @@ public class MessengerResultSetCharger {
 
         @Override
         public void close() {
+            closed = true;
             closeCurrentRow();
+        }
+        
+        @Override
+        public boolean isClosed() {
+            return closed;
         }
 
     }

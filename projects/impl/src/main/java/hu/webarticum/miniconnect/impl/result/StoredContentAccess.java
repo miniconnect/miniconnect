@@ -72,5 +72,10 @@ public final class StoredContentAccess implements MiniContentAccess, Serializabl
     public void close() {
         // nothing to do
     }
+
+    @Override
+    public boolean isClosed() {
+        return false;
+    }
     
 }

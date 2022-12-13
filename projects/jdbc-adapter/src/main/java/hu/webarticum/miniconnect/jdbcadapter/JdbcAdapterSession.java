@@ -77,4 +77,13 @@ public class JdbcAdapterSession implements MiniSession {
         }
     }
 
+    @Override
+    public boolean isClosed() {
+        try {
+            return jdbcConnection.isClosed();
+        } catch (SQLException e) {
+            throw new UncheckedIOException(new IOException("Database access error", e));
+        }
+    }
+
 }

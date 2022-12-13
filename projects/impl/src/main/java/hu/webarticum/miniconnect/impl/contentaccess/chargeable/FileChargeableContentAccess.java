@@ -110,13 +110,6 @@ public class FileChargeableContentAccess extends AbstractChargeableContentAccess
     }
 
     @Override
-    protected void checkClosed() {
-        if (closed) {
-            throw new IllegalArgumentException("This LOB access was already closed");
-        }
-    }
-    
-    @Override
     public void close() {
         synchronized (closeLock) {
             if (closed) {
@@ -133,6 +126,11 @@ public class FileChargeableContentAccess extends AbstractChargeableContentAccess
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+    
+    @Override
+    public boolean isClosed() {
+        return closed;
     }
     
 }

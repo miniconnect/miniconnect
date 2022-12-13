@@ -252,5 +252,14 @@ public class JdbcAdapterResultSet implements MiniResultSet {
             throw new UncheckedIOException(new IOException("Unexpected SQLException", e));
         }
     }
+    
+    @Override
+    public boolean isClosed() {
+        try {
+            return jdbcResultSet.isClosed();
+        } catch (SQLException e) {
+            throw new UncheckedIOException(new IOException("Database access error", e));
+        }
+    }
 
 }

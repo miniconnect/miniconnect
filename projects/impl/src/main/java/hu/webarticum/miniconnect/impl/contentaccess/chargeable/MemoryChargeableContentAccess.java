@@ -37,10 +37,10 @@ public class MemoryChargeableContentAccess extends AbstractChargeableContentAcce
     protected void savePart(long start, ByteString part) {
         part.extractTo(content, (int) start, 0, part.length());
     }
-
+    
     @Override
-    protected void checkClosed() {
-        // nothing to do
+    public boolean isClosed() {
+        return false;
     }
     
 }

@@ -53,6 +53,8 @@ public class MessengerSession implements MiniSession {
     private final CompletableFuture<Long> sessionIdFuture = new CompletableFuture<>();
     
     private final AtomicInteger exchangeIdCounter = new AtomicInteger();
+    
+    private volatile boolean closed = false;
 
     
     public MessengerSession(Messenger messenger) {
@@ -219,6 +221,11 @@ public class MessengerSession implements MiniSession {
 
     @Override
     public MiniLargeDataSaveResult putLargeData(String variableName, long length, InputStream dataSource) {
+        if (closed) {
+            return new StoredLargeDataSaveResult(
+                    false, new StoredError(6, SQLSTATE_CONNECTIONERROR, "Closed connection"));
+        }
+        
         int exchangeId = exchangeIdCounter.incrementAndGet();
         
         CompletableFuture<Response> responseFuture = new CompletableFuture<>();
@@ -262,13 +269,9 @@ public class MessengerSession implements MiniSession {
                         largeDataSaveResponse.sqlState(),
                         largeDataSaveResponse.errorMessage()));
         } else if (response == null) {
-            return new StoredLargeDataSaveResult(
-                    false,
-                    new StoredError(4, SQLSTATE_CONNECTIONERROR, "No response"));
+            return new StoredLargeDataSaveResult(false, new StoredError(4, SQLSTATE_CONNECTIONERROR, "No response"));
         } else {
-            return new StoredLargeDataSaveResult(
-                    false,
-                    new StoredError(5, SQLSTATE_CONNECTIONERROR, "Bad response"));
+            return new StoredLargeDataSaveResult(false, new StoredError(5, SQLSTATE_CONNECTIONERROR, "Bad response"));
         }
     }
     
@@ -282,12 +285,18 @@ public class MessengerSession implements MiniSession {
     
     @Override
     public void close() {
+        closed = true;
         long sessionId = sessionId();
         int exchangeId = exchangeIdCounter.incrementAndGet();
         Request sessionCloseRequest = new SessionCloseRequest(sessionId, exchangeId);
         CompletableFuture<SessionCloseResponse> closeFuture = new CompletableFuture<>();
         messenger.accept(sessionCloseRequest, r -> acceptSessionCloseResponse(r, closeFuture));
         waitForFutureSilently(closeFuture);
+    }
+    
+    @Override
+    public boolean isClosed() {
+        return closed;
     }
 
     private void acceptSessionCloseResponse(
