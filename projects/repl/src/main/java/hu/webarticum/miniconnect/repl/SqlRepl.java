@@ -11,6 +11,8 @@ import java.util.regex.Pattern;
 
 import hu.webarticum.regexbee.Bee;
 import hu.webarticum.regexbee.BeeFragment;
+import hu.webarticum.regexbee.Greediness;
+import hu.webarticum.regexbee.character.CharacterRangeFragment;
 import hu.webarticum.miniconnect.api.MiniError;
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
@@ -26,13 +28,15 @@ public class SqlRepl implements Repl {
     
     private static final BeeFragment TERMINATOR_FRAGMENT = Bee
             .then(Bee.WHITESPACE.any())
-            .then(Bee.fixed(";"));
+            .then(Bee.fixedChar(';'))
+            ;
 
-    private static final BeeFragment BRACKETS_FRAGMENT = Bee
+    private static final BeeFragment PARENTHESES_FRAGMENT = Bee
             .then(Bee.WHITESPACE.any())
-            .then(Bee.fixed("("))
+            .then(Bee.fixedChar('('))
             .then(Bee.WHITESPACE.any())
-            .then(Bee.fixed(")"));
+            .then(Bee.fixedChar(')'))
+            ;
 
     private static final BeeFragment DATA_FRAGMENT = Bee
             .then(Bee.WHITESPACE.any())
@@ -44,36 +48,34 @@ public class SqlRepl implements Repl {
                     .then(Bee.simple("[^\\)\\\\]|\\\\.").more() // TODO: use range/or?
                     .as("source")))
             .then(TERMINATOR_FRAGMENT.optional())
-            .then(Bee.WHITESPACE.any());
+            .then(Bee.WHITESPACE.any())
+            ;
     
     private static final BeeFragment HELP_FRAGMENT = Bee
             .then(Bee.WHITESPACE.any())
             .then(Bee.fixed("help"))
-            .then(BRACKETS_FRAGMENT.optional())
+            .then(PARENTHESES_FRAGMENT.optional())
             .then(TERMINATOR_FRAGMENT.optional())
-            .then(Bee.WHITESPACE.any());
+            .then(Bee.WHITESPACE.any())
+            ;
     
     private static final BeeFragment QUIT_FRAGMENT = Bee
             .then(Bee.WHITESPACE.any())
             .then(Bee.oneFixedOf("exit", "quit"))
-            .then(BRACKETS_FRAGMENT.optional())
+            .then(PARENTHESES_FRAGMENT.optional())
             .then(TERMINATOR_FRAGMENT.optional())
-            .then(Bee.WHITESPACE.any());
+            .then(Bee.WHITESPACE.any())
+            ;
     
-    private static final BeeFragment QUERY_FRAGMENT = Bee.ANYTHING;
-    
-    /*
     private static final BeeFragment QUERY_FRAGMENT = Bee
-            .then(Bee.simple("[^'\"`\\\\;]").more(Greediness.POSSESSIVE) // TODO: range?
-                    .or(Bee.fixed("\\").then(Bee.CHAR))
-                    .or(Bee.oneCharOf("'\"`").as("quote")
-                            .then(Bee.fixed("\\").or(Bee.ref("quote")).then(Bee.ref("quote"))
-                                    .or(Bee.lookAheadNot(Bee.ref("quote")))
-                                    .more(Greediness.POSSESSIVE))
-                            .then(Bee.ref("quote"))
-                    ))
-            .then(TERMINATOR_FRAGMENT.optional())
-            .then(Bee.WHITESPACE.any());*/
+            .then(new CharacterRangeFragment(false, "'\"`;").more(Greediness.POSSESSIVE)
+                    .or(Bee.quoted('\'', '\\'))
+                    .or(Bee.quoted('"', '\\'))
+                    .or(Bee.quoted('`', '`'))
+                    .more())
+            .then(TERMINATOR_FRAGMENT)
+            .then(Bee.WHITESPACE.any())
+            ;
     
     private static final Pattern DATA_PATTERN = DATA_FRAGMENT.toPattern(Pattern.CASE_INSENSITIVE);
     
@@ -129,7 +131,8 @@ public class SqlRepl implements Repl {
         out.appendAnsi(AnsiUtil.formatAsHeader("exit") + ", " + AnsiUtil.formatAsHeader("quit"));
         out.append("           quits this program\n    ");
         out.appendAnsi(AnsiUtil.formatAsParameter("<any SQL>"));
-        out.append("            will be executed in the session\n\n");
+        out.append("            will be executed in the session\n");
+        out.append("                         must be terminated with semicolon (;)\n\n");
     }
 
     
@@ -237,7 +240,6 @@ public class SqlRepl implements Repl {
 
         out.append('\n');
     }
-
 
     private void putLargeData(String name, String source, AnsiAppendable out) throws IOException {
         long length;
