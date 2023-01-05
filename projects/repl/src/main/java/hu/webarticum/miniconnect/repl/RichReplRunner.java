@@ -2,7 +2,6 @@ package hu.webarticum.miniconnect.repl;
 
 import java.io.IOException;
 
-import org.jline.reader.History;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.UserInterruptException;
@@ -67,12 +66,10 @@ public class RichReplRunner implements ReplRunner {
     }
 
     private LineReader createLineReader(Terminal terminal) {
-        DefaultParser parser = new DefaultParser();
-        History history = new DefaultHistory();
         return LineReaderBuilder.builder()
                 .terminal(terminal)
-                .parser(parser)
-                .history(history)
+                .parser(new DefaultParser())
+                .history(new DefaultHistory())
                 .variable(LineReader.BLINK_MATCHING_PAREN, 0)
                 .build();
     }
