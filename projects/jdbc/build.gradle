@@ -19,7 +19,7 @@ dependencies {
     implementation project(':server')
     implementation project(':util')
     implementation 'commons-io:commons-io:2.11.0'
-    implementation 'hu.webarticum:regexbee:0.3.0'
+    implementation 'hu.webarticum:regexbee:0.4.0'
     
     hibernateSupportImplementation 'org.hibernate:hibernate-core:5.4.31.Final'
     
