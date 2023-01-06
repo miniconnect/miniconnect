@@ -8,13 +8,10 @@ MiniConnect consists of several separated components:
 
 | Subproject | Description |
 | ---------- | ----------- |
-| :green_circle: `api` | MiniConnect API definition |
 | :minidisc: `impl` | Obvious implementations of some api pieces |
 | :old_key: `jdbc` | JDBC driver backed by MiniConnect |
 | :electric_plug: `jdbc-adapter` | MiniConnect implementation backed by JDBC |
-| :books: `lang` | Essential value types |
 | :envelope: `messenger` | Default solution for messaging with message definitions |
-| :building_construction: `rdbms-framework` | Incubator for MiniBase (see below) |
 | :fast_forward: `record` | Easy-to-use wrapper for result sets |
 | :postbox: `rest` | Simple REST service for MiniConnect |
 | :desktop_computer: `server` | Lightweight and transparent MiniConnect server and client |
@@ -23,21 +20,14 @@ MiniConnect consists of several separated components:
 
 These gradle sub-projects can be found in the projects directory.
 
-From a user perspective, `api` is the most interesting.
+## Getting started with the API
 
-It's planned to separate some of the sub-projects into their own repositories.
-
-| Subproject | Planned Repository | Description |
-| ---------- | ------------ | ------------|
-| `rdbms-framework` | `minibase` | RDBMS framework built over MiniConnect |
-| `api`, `lang` | `miniconnect-api` | MiniConnect API |
+[MiniConnect API](https://github.com/miniconnect/miniconnect-api) is in its own repository.
 
 The biggest advantage of API decoupling is that
 it makes it very easy to create transparent components
 (proxies, loggers, mocks, and other wrappers),
 all that's needed is a fairly stable dependency.
-
-## Getting started with the API
 
 The session API is an alternative to JDBC.
 The philosophy is, that a minimalistic database access API should
