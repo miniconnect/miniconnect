@@ -79,12 +79,11 @@ This is the `ResultTable` version of the example above, extended with retrieving
 
 ```java
 try (MiniSession session = connectionFactory.connect()) {
-    MiniResult result = session.execute("SELECT name FROM employees");
+    MiniResult result = session.execute("SELECT id, name FROM employees");
     try (MiniResultSet resultSet = result.resultSet()) {
         for (ResultRecord row : new ResultTable(resultSet)) {
-            ResultField field = row.get(0);
-            int id = field.as(Integer.class);
-            String name = field.as(String.class);
+            int id = row.get(0).as(Integer.class);
+            String name = row.get(1).as(String.class);
             System.out.println("id: " + id + ", name: " + name);
         }
     }
