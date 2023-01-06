@@ -16,7 +16,6 @@ MiniConnect consists of several separated components:
 | :envelope: `messenger` | Default solution for messaging with message definitions |
 | :building_construction: `rdbms-framework` | Incubator for MiniBase (see below) |
 | :fast_forward: `record` | Easy-to-use wrapper for result sets |
-| :repeat: `repl` | MiniConnect REPL |
 | :postbox: `rest` | Simple REST service for MiniConnect |
 | :desktop_computer: `server` | Lightweight and transparent MiniConnect server and client |
 | :truck: `transfer` | Simple networking framework |
