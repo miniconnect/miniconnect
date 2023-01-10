@@ -1,10 +1,27 @@
 # Changelog
 
+## Version 0.4.0
+
+Released on *2023-01-11*
+
+###Removed:
+
+- `api` and `lang` were moved to the new `miniconnect-api` repo
+- `repl` were moved to the new `miniconnect-client` repo
+- `rdbms-framework` were moved to the new `minibase` repo
+
+### Improved:
+
+- `BigInteger` was replaced by `LargeInteger` anywhere
+- Unified and improved error messages
+- Improved gradle build
+- Some incorrect unit tests were fixed
+
 ## Version 0.3.0
 
 Released on *2022-12-04*
 
-**Added:**
+### Added:
 
 - Improved REPL with colored output
 - Unique constraint
@@ -16,12 +33,12 @@ Released on *2022-12-04*
 - NULLS FIRST and NULLS LAST clauses in SQL
 - Support for unicode letters in unquoted identifiers
 
-**Improved:**
+### Improved:
 
 - Improved gradle build
 - More improvements in SQL execution
 
-**Fixed:**
+### Fixed:
 
 - Ensure full java8 compatibility
 
@@ -29,14 +46,14 @@ Released on *2022-12-04*
 
 Released on *2022-08-10*
 
-**Added:**
+### Added:
 
 - AUTO_INCREMENT columns
 - User variables in SQL
 - Storing LOBs in user variables
 - Blanket adapters (e.g. for JDBC)
 
-**Improved:**
+### Improved:
 
 - MiniConnect API
 - JDBC/Hibernate support
@@ -45,7 +62,7 @@ Released on *2022-08-10*
 - NULL handling in SQL
 - `lang` project
 
-**Fixed:**
+### Fixed:
 
 - Prevented freezing by introducing timeouts
 - Fixed LOB response handling
@@ -56,7 +73,7 @@ Released on *2022-08-10*
 
 Released on *2022-04-19*
 
-**Added:**
+### Added:
 
 - MiniConnect API (minimalistic)
 - User-friendly result set wrapper
