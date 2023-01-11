@@ -4,7 +4,7 @@
 
 Released on *2023-01-11*
 
-###Removed:
+### Removed:
 
 - `api` and `lang` were moved to the new `miniconnect-api` repo
 - `repl` were moved to the new `miniconnect-client` repo
