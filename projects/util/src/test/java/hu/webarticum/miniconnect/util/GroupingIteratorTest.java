@@ -12,13 +12,17 @@ import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Test;
 
+import hu.webarticum.miniconnect.lang.LargeInteger;
+
 class GroupingIteratorTest {
 
     @Test
     void testWhenEverythingIsEmpty() {
         Iterator<Integer> baseIterator = Collections.emptyIterator();
         GroupingIterator<Integer, String> groupingIterator = new GroupingIterator<>(
-                baseIterator, Comparator.naturalOrder(), (Iterator<Integer> i) -> Collections.emptyIterator());
+                baseIterator,
+                Comparator.naturalOrder(),
+                (Iterator<Integer> i, LargeInteger p) -> Collections.emptyIterator());
         assertThat(iterableOf(groupingIterator)).isEmpty();
     }
 
@@ -34,7 +38,9 @@ class GroupingIteratorTest {
     void testEraseNonEmpty() {
         Iterator<Integer> baseIterator = Arrays.asList(1, 2, 3).iterator();
         GroupingIterator<Integer, String> groupingIterator = new GroupingIterator<>(
-                baseIterator, Comparator.naturalOrder(), (Iterator<Integer> i) -> Collections.emptyIterator());
+                baseIterator,
+                Comparator.naturalOrder(),
+                (Iterator<Integer> i, LargeInteger p) -> Collections.emptyIterator());
         assertThat(iterableOf(groupingIterator)).isEmpty();
     }
 
@@ -78,8 +84,18 @@ class GroupingIteratorTest {
                 baseIterator, (a, b) -> Integer.valueOf(a / 3).compareTo(b / 3), this::reverseIntegerList);
         assertThat(iterableOf(groupingIterator)).containsExactly(2, 2, 1, 3, 2, 5, 5, 5, 4, 6);
     }
+
+    @Test
+    void testAbort() {
+        Iterator<Integer> baseIterator = Arrays.asList(1, 2, 2, 3, 2, 2, 4, 5, 5, 5, 6).iterator();
+        GroupingIterator<Integer, Integer> groupingIterator = new GroupingIterator<>(
+                baseIterator,
+                Comparator.naturalOrder(),
+                (Iterator<Integer> i, LargeInteger p) -> p.isLessThan(LargeInteger.of(5)) ? i : null);
+        assertThat(iterableOf(groupingIterator)).containsExactly(1, 2, 2, 3, 2, 2);
+    }
     
-    private Iterator<Integer> countIterator(Iterator<?> iterator) {
+    private Iterator<Integer> countIterator(Iterator<?> iterator, LargeInteger position) {
         int result = 0;
         while (iterator.hasNext()) {
             iterator.next();
@@ -88,7 +104,7 @@ class GroupingIteratorTest {
         return Arrays.asList(result).iterator();
     }
     
-    private List<Integer> reverseIntegerList(List<Integer> originalList) {
+    private List<Integer> reverseIntegerList(List<Integer> originalList, LargeInteger position) {
         List<Integer> result = new ArrayList<>(originalList);
         Collections.reverse(result);
         return result;
@@ -104,7 +120,7 @@ class GroupingIteratorTest {
         private Iterator<Integer> baseIterator;
         
         
-        private DecorateIntegersIterator(Iterator<Integer> baseIterator) {
+        private DecorateIntegersIterator(Iterator<Integer> baseIterator, LargeInteger position) {
             this.baseIterator = baseIterator;
         }
 

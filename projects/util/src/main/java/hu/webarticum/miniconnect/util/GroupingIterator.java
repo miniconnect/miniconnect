@@ -5,7 +5,9 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.function.Function;
+import java.util.function.BiFunction;
+
+import hu.webarticum.miniconnect.lang.LargeInteger;
 
 public class GroupingIterator<T, U> implements Iterator<U> {
 
@@ -19,6 +21,10 @@ public class GroupingIterator<T, U> implements Iterator<U> {
     
     private T nextElement = null;
     
+    private LargeInteger position = LargeInteger.ZERO;
+    
+    private boolean aborted = false;
+    
 
     public GroupingIterator(
             Iterator<T> baseIterator,
@@ -29,13 +35,21 @@ public class GroupingIterator<T, U> implements Iterator<U> {
     
     private static <T, U> IteratorRowTransformator<T, U> toIteratorRowTransformator(
             ListRowTransformator<T, U> listRowTransformator) {
-        return t -> listRowTransformator.apply(collectIterator(t)).iterator();
+        return (t, p) -> nullableIteratorOf(listRowTransformator.apply(collectIterator(t), p));
     }
     
     private static <T> List<T> collectIterator(Iterator<T> iterator) {
         List<T> result = new ArrayList<>();
         iterator.forEachRemaining(result::add);
         return result;
+    }
+    
+    private static <T> Iterator<T> nullableIteratorOf(List<T> list) {
+        if (list == null) {
+            return null;
+        }
+        
+        return list.iterator();
     }
     
     public GroupingIterator(
@@ -64,7 +78,7 @@ public class GroupingIterator<T, U> implements Iterator<U> {
     }
     
     private void ensureNextIterator() {
-        if (nextIterator != null && nextIterator.hasNext()) {
+        if (aborted || (nextIterator != null && nextIterator.hasNext())) {
             return;
         }
         
@@ -78,8 +92,11 @@ public class GroupingIterator<T, U> implements Iterator<U> {
             return;
         }
         
-        Iterator<T> nextInnerIterator = new InnerGroupIterator();
-        nextIterator = rowTransformator.apply(nextInnerIterator);
+        InnerGroupIterator nextInnerIterator = new InnerGroupIterator();
+        nextIterator = rowTransformator.apply(nextInnerIterator, position);
+        if (nextIterator == null) {
+            aborted = true;
+        }
     }
 
     private void ensureNextElement() {
@@ -90,12 +107,12 @@ public class GroupingIterator<T, U> implements Iterator<U> {
     
     
     @FunctionalInterface
-    public interface IteratorRowTransformator<T, U> extends Function<Iterator<T>, Iterator<U>> {
+    public interface IteratorRowTransformator<T, U> extends BiFunction<Iterator<T>, LargeInteger, Iterator<U>> {
     }
     
 
     @FunctionalInterface
-    public interface ListRowTransformator<T, U> extends Function<List<T>, List<U>> {
+    public interface ListRowTransformator<T, U> extends BiFunction<List<T>, LargeInteger, List<U>> {
     }
     
     
@@ -127,6 +144,7 @@ public class GroupingIterator<T, U> implements Iterator<U> {
                 throw new NoSuchElementException();
             }
             
+            position = position.increment();
             T result = nextElement;
             nextElement = null;
             return result;
