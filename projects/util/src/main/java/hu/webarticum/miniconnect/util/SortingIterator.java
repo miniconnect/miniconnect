@@ -20,7 +20,8 @@ public class SortingIterator<T> implements Iterator<T> {
             result.add(baseIterator.next());
         }
         result.sort(comparator);
-        return result;    }
+        return result;
+    }
     
     
     @Override
