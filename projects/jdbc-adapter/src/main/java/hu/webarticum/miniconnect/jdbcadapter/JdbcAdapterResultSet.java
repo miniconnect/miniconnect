@@ -21,9 +21,10 @@ import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
 import hu.webarticum.miniconnect.impl.result.StoredColumnHeader;
-import hu.webarticum.miniconnect.impl.result.StoredValue;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableList;
+import hu.webarticum.miniconnect.record.converter.Converter;
+import hu.webarticum.miniconnect.record.converter.DefaultConverter;
 import hu.webarticum.miniconnect.record.type.StandardValueType;
 import hu.webarticum.miniconnect.record.type.ValueType;
 
@@ -127,15 +128,14 @@ public class JdbcAdapterResultSet implements MiniResultSet {
             ResultSetMetaData jdbcMetaData, int c) throws SQLException {
         int jdbcTypeNumber = jdbcMetaData.getColumnType(c);
         JDBCType jdbcType = JDBCType.valueOf(jdbcTypeNumber);
-
-        if (!TYPE_MAPPING.containsKey(jdbcType)) {
-            return StandardValueType.BINARY;
+        
+        if (jdbcType == JDBCType.DECIMAL && jdbcMetaData.getScale(c) == 0) {
+            return StandardValueType.BIGINT;
         }
         
-        return TYPE_MAPPING.get(jdbcType);
+        return TYPE_MAPPING.getOrDefault(jdbcType, StandardValueType.BINARY);
     }
     
-
     private static ImmutableList<MiniColumnHeader> extractColumnHeaders(
             ResultSet jdbcResultSet, ImmutableList<ValueType> valueTypes) {
         try {
@@ -195,22 +195,41 @@ public class JdbcAdapterResultSet implements MiniResultSet {
     }
 
     private MiniValue extractValue(int i) {
-        try {
-            return extractValueThrowing(i);
-        } catch (Exception e) {
-            // FIXME: log?
-            return new StoredValue();
-        }
-    }
-    
-    private MiniValue extractValueThrowing(int i) throws SQLException {
-        int c = i + 1;
         ValueType valueType = valueTypes.get(i);
         Class<?> mappingType = valueType.clazz();
-        Class<?> jdbcMappingType = jdbcMappingTypeOf(mappingType);
-        Object jdbcValue = jdbcResultSet.getObject(c, jdbcMappingType);
-        Object value = convertJdbcValue(mappingType, jdbcValue);
+        Object value = getValue(i, mappingType);
         return valueType.defaultTranslator().encodeFully(value);
+    }
+    
+    private Object getValue(int i, Class<?> mappingType) {
+        int c = i + 1;
+        Class<?> jdbcMappingType = jdbcMappingTypeOf(mappingType);
+        
+        // TODO: handle precision/scale, use LargeInteger in case of DECIMAL(-1, 0)
+        
+        try {
+            return convertJdbcValue(mappingType, jdbcResultSet.getObject(c, jdbcMappingType));
+        } catch (SQLException e) {
+            // TODO: log?
+        }
+        
+        Object value;
+        try {
+            value = jdbcResultSet.getObject(c);
+        } catch (SQLException e) {
+            return null;
+        }
+
+        if (mappingType.isInstance(value)) {
+            return value;
+        }
+        
+        Converter converter = new DefaultConverter();
+        try {
+            return converter.convert(value, mappingType);
+        } catch (Exception e) {
+            return value;
+        }
     }
     
     private Class<?> jdbcMappingTypeOf(Class<?> mappingType) {
