@@ -73,7 +73,7 @@ public class DynamicCharWidthClobValue implements ClobValue {
         }
 
         try (Reader remainingReader = new InputStreamReader(
-                contentAccess.inputStream(lastKnownBytePos, remainingByteLength))) {
+                contentAccess.inputStream(lastKnownBytePos, remainingByteLength), charset)) {
             generateRemainingIndex(remainingReader, lastKnownCharPos, lastKnownBytePos);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -134,7 +134,7 @@ public class DynamicCharWidthClobValue implements ClobValue {
         long endBytePos = findBytePos(
                 end, beforeEndEntry.getKey(), beforeEndEntry.getValue(), afterEndBytePos);
         long byteLength = endBytePos - startBytePos;
-        return new InputStreamReader(contentAccess.inputStream(startBytePos, byteLength));
+        return new InputStreamReader(contentAccess.inputStream(startBytePos, byteLength), charset);
     }
     
     private long nextKnownBytePos(long charPos) {
@@ -154,7 +154,7 @@ public class DynamicCharWidthClobValue implements ClobValue {
 
         long byteLength = afterBytePos - beforeBytePos;
         try (Reader reader = new InputStreamReader(
-                contentAccess.inputStream(beforeBytePos, byteLength))) {
+                contentAccess.inputStream(beforeBytePos, byteLength), charset)) {
             return generateIndexTo(reader, beforeCharPos, beforeBytePos, charPos);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
