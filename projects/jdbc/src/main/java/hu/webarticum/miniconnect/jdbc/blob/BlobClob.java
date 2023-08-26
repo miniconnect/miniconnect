@@ -165,7 +165,7 @@ public class BlobClob implements NClob {
         long zeroBasedPos = pos - 1;
         long until = zeroBasedPos + length;
         Reader reader = new LongBoundedReader(
-                new InputStreamReader(blob.getBinaryStream()), until);
+                new InputStreamReader(blob.getBinaryStream(), blobCharset), until);
         try {
             reader.skip(zeroBasedPos);
         } catch (IOException e) {
