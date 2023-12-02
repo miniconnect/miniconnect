@@ -1,5 +1,7 @@
 package hu.webarticum.miniconnect.jdbc.hibernate;
 
+import java.lang.reflect.Method;
+
 import org.hibernate.boot.MetadataBuilder;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.spi.MetadataBuilderInitializer;
@@ -17,8 +19,22 @@ public class BlanketHibernateMetadataBuilderInitializer implements MetadataBuild
         DialectResolver dialectResolver = serviceRegistry.getService(DialectResolver.class);
 
         if ((dialectResolver instanceof DialectResolverSet)) {
-            ((DialectResolverSet) dialectResolver).addResolver(
-                    BlanketHibernateMetadataBuilderInitializer::resolveDialect);
+            DialectResolverSet dialectResolverSet = (DialectResolverSet) dialectResolver;
+            DialectResolver dialectResolverItem = BlanketHibernateMetadataBuilderInitializer::resolveDialect;
+            try {
+                dialectResolverSet.addResolver(dialectResolverItem);
+            } catch (NoSuchMethodError e) {
+                try {
+                    // FIXME: this is for hibernate 6, but it requires java 11
+                    Method method = dialectResolverSet.getClass().getDeclaredMethod(
+                            "addResolver", DialectResolver[].class);
+                    method.invoke(
+                            dialectResolverSet,
+                            new Object[] { new DialectResolver[] { dialectResolverItem } }); // NOSONAR
+                } catch (ReflectiveOperationException ee) {
+                    throw new IllegalArgumentException(ee);
+                }
+            }
         }
     }
 
