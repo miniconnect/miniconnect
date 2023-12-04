@@ -24,17 +24,21 @@ public class BlanketHibernateMetadataBuilderInitializer implements MetadataBuild
             try {
                 dialectResolverSet.addResolver(dialectResolverItem);
             } catch (NoSuchMethodError e) {
-                try {
-                    // FIXME: this is for hibernate 6, but it requires java 11
-                    Method method = dialectResolverSet.getClass().getDeclaredMethod(
-                            "addResolver", DialectResolver[].class);
-                    method.invoke(
-                            dialectResolverSet,
-                            new Object[] { new DialectResolver[] { dialectResolverItem } }); // NOSONAR
-                } catch (ReflectiveOperationException ee) {
-                    throw new IllegalArgumentException(ee);
-                }
+                addResolverForHibernate6(dialectResolverSet, dialectResolverItem);
             }
+        }
+    }
+    
+    // FIXME this is for hibernate 6 (which requires java 11 at runtime, so can't be the default)
+    private void addResolverForHibernate6(DialectResolverSet dialectResolverSet, DialectResolver dialectResolverItem) {
+        try {
+            Method method = dialectResolverSet.getClass().getDeclaredMethod(
+                    "addResolver", DialectResolver[].class);
+            method.invoke(
+                    dialectResolverSet,
+                    new Object[] { new DialectResolver[] { dialectResolverItem } }); // NOSONAR
+        } catch (ReflectiveOperationException ee) {
+            throw new IllegalArgumentException(ee);
         }
     }
 
