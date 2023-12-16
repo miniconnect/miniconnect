@@ -1,5 +1,22 @@
 # Changelog
 
+## Version 0.5.0
+
+Released on *2023-12-16*
+
+### Fixed:
+
+- Fixed issues with implicit character encoding in BLOB and CLOB implementations
+
+### Added:
+
+- Added SPI support for Hibernate 6
+- Extended iterator types
+
+### Improved:
+
+- Added module definition and utf-8 encoding explicitly
+
 ## Version 0.4.0
 
 Released on *2023-01-11*
