@@ -11,8 +11,8 @@ import hu.webarticum.miniconnect.impl.result.StoredValueDefinition;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
+import hu.webarticum.miniconnect.lang.ToStringBuilder;
 import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
-import hu.webarticum.miniconnect.util.ToStringBuilder;
 
 public final class ResultResponse implements Response, ExchangeMessage {
 

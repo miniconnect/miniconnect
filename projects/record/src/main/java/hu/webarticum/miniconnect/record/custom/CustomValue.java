@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
-import hu.webarticum.miniconnect.util.ToStringBuilder;
+import hu.webarticum.miniconnect.lang.ToStringBuilder;
 
 public class CustomValue {
     

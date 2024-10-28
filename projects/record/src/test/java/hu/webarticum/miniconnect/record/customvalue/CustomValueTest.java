@@ -15,8 +15,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
+import hu.webarticum.miniconnect.lang.ToStringBuilder;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
-import hu.webarticum.miniconnect.util.ToStringBuilder;
 
 class CustomValueTest {
 

@@ -1,7 +1,7 @@
 package hu.webarticum.miniconnect.messenger.message.response;
 
+import hu.webarticum.miniconnect.lang.ToStringBuilder;
 import hu.webarticum.miniconnect.messenger.message.SessionMessage;
-import hu.webarticum.miniconnect.util.ToStringBuilder;
 
 public final class SessionInitResponse implements Response, SessionMessage {
 

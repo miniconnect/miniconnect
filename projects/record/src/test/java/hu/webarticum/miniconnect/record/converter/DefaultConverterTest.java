@@ -10,8 +10,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import hu.webarticum.miniconnect.lang.ImmutableMap;
+import hu.webarticum.miniconnect.lang.ToStringBuilder;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
-import hu.webarticum.miniconnect.util.ToStringBuilder;
 
 class DefaultConverterTest {
 

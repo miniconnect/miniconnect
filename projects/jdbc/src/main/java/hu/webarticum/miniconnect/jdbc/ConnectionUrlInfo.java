@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import hu.webarticum.miniconnect.lang.ImmutableMap;
-import hu.webarticum.miniconnect.util.ToStringBuilder;
+import hu.webarticum.miniconnect.lang.ToStringBuilder;
 import hu.webarticum.regexbee.Bee;
 import hu.webarticum.regexbee.BeeFragment;
 

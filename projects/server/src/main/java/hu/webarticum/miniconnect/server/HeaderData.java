@@ -2,10 +2,10 @@ package hu.webarticum.miniconnect.server;
 
 import java.util.Objects;
 
+import hu.webarticum.miniconnect.lang.ToStringBuilder;
 import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 import hu.webarticum.miniconnect.messenger.message.Message;
 import hu.webarticum.miniconnect.messenger.message.SessionMessage;
-import hu.webarticum.miniconnect.util.ToStringBuilder;
 
 public class HeaderData {
 
