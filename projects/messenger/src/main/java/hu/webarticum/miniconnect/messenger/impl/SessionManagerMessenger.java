@@ -21,6 +21,9 @@ import hu.webarticum.miniconnect.messenger.message.response.Response;
 import hu.webarticum.miniconnect.messenger.message.response.SessionInitResponse;
 
 public class SessionManagerMessenger implements Messenger {
+
+    private static final int MAX_THREAD_COUNT = 64;
+    
     
     private final MiniSessionManager sessionManager;
     
@@ -30,7 +33,7 @@ public class SessionManagerMessenger implements Messenger {
             Collections.synchronizedMap(new HashMap<>());
     
     private final ExecutorService sessionInitExecutorService =
-            new ThreadPoolExecutor(0, 10, 1L, TimeUnit.SECONDS, new SynchronousQueue<>());
+            new ThreadPoolExecutor(0, MAX_THREAD_COUNT, 1L, TimeUnit.SECONDS, new SynchronousQueue<>());
     
     
     public SessionManagerMessenger(MiniSessionManager sessionManager) {
