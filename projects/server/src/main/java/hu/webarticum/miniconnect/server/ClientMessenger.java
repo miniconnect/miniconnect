@@ -47,27 +47,33 @@ public class ClientMessenger implements Messenger, Closeable {
     
 
     public ClientMessenger(String host, int port) {
-        this(openSocket(host, port));
+        this(openSocket(host, port), null);
+    }
+
+    public ClientMessenger(String host, int port, Consumer<Throwable> errorHandler) {
+        this(openSocket(host, port), errorHandler);
     }
     
-    public ClientMessenger(Socket socket) {
-        this(socket, new DefaultMessageTranslator());
+    public ClientMessenger(Socket socket, Consumer<Throwable> errorHandler) {
+        this(socket, new DefaultMessageTranslator(), errorHandler);
     }
 
-    public ClientMessenger(String host, int port, MessageTranslator translator) {
-        this(openSocket(host, port), translator);
+    public ClientMessenger(String host, int port, MessageTranslator translator, Consumer<Throwable> errorHandler) {
+        this(openSocket(host, port), translator, errorHandler);
     }
     
-    public ClientMessenger(Socket socket, MessageTranslator translator) {
-        this(socket, translator, translator);
+    public ClientMessenger(Socket socket, MessageTranslator translator, Consumer<Throwable> errorHandler) {
+        this(socket, translator, translator, errorHandler);
     }
 
-    public ClientMessenger(String host, int port, MessageDecoder decoder, MessageEncoder encoder) {
-        this(openSocket(host, port), decoder, encoder);
+    public ClientMessenger(
+            String host, int port, MessageDecoder decoder, MessageEncoder encoder, Consumer<Throwable> errorHandler) {
+        this(openSocket(host, port), decoder, encoder, errorHandler);
     }
 
-    public ClientMessenger(Socket socket, MessageDecoder decoder, MessageEncoder encoder) {
-        this.socketClient = new SocketClient(socket, this::acceptResponsePacket);
+    public ClientMessenger(
+            Socket socket, MessageDecoder decoder, MessageEncoder encoder, Consumer<Throwable> errorHandler) {
+        this.socketClient = new SocketClient(socket, this::acceptResponsePacket, errorHandler);
         this.decoder = decoder;
         this.encoder = encoder;
     }
