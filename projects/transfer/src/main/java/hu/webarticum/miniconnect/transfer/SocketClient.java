@@ -16,14 +16,21 @@ public class SocketClient implements Closeable {
     
     private final Consumer<Packet> consumer;
     
+    private final Consumer<Throwable> errorHandler;
+    
     private final Thread socketThread;
     
     private volatile boolean closed = false;
     
-    
+
     public SocketClient(Socket socket, Consumer<Packet> consumer) {
+        this(socket, consumer, null);
+    }
+    
+    public SocketClient(Socket socket, Consumer<Packet> consumer, Consumer<Throwable> errorHandler) {
         this.socket = socket;
         this.consumer = consumer;
+        this.errorHandler = errorHandler;
         this.socketThread = new Thread(this::run);
         this.socketThread.start();
     }
@@ -47,6 +54,16 @@ public class SocketClient implements Closeable {
     }
 
     private void run() {
+        try {
+            runThrowing();
+        } catch (Throwable e) {
+            if (errorHandler != null) {
+                errorHandler.accept(e);
+            }
+        }
+    }
+
+    private void runThrowing() {
         SocketPacketFetcher fetcher = new SocketPacketFetcher(socket);
         while (!closed) {
             Packet packet = fetcher.fetch();
