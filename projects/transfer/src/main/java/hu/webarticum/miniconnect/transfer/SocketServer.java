@@ -62,6 +62,7 @@ public class SocketServer implements Closeable {
         Socket clientSocket;
         try {
             clientSocket = serverSocket.accept();
+            clientSocket.setTcpNoDelay(true);
         } catch (IOException e) {
             if (closed) {
                 return;

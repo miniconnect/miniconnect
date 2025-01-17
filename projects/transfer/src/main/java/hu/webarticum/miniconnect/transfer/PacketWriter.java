@@ -22,6 +22,7 @@ public class PacketWriter {
         dataOut.write(TransferConstants.MAGIC_BYTE);
         writeSizedPart(packet.header(), dataOut);
         writeSizedPart(packet.payload(), dataOut);
+        dataOut.flush();
     }
     
     private void writeSizedPart(ByteString content, DataOutputStream dataOut) throws IOException {
