@@ -3,6 +3,7 @@ package hu.webarticum.miniconnect.transfer;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.invoke.MethodHandles;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -16,7 +17,13 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class SocketServer implements Closeable {
+
+    private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    
     
     private static final int MIN_THREAD_COUNT = 1;
     
@@ -133,6 +140,7 @@ public class SocketServer implements Closeable {
     private void registerClientSocket(Socket clientSocket) {
         synchronized (clientSocketsLock) {
             clientSockets.add(clientSocket);
+            logger.info("Client accepted: {}", clientSocket);
         }
     }
     
