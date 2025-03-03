@@ -12,8 +12,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -25,20 +24,14 @@ public class SocketServer implements Closeable {
     private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     
     
-    private static final int MIN_THREAD_COUNT = 1;
-    
-    private static final int MAX_THREAD_COUNT = 64;
-    
-    private static final int THREAD_TIMEOUT_SECONDS = 60;
-    
     private static final int CLOSE_TIMEOUT_SECONDS = 20;
     
 
     private final ServerSocket serverSocket;
     
-    private final ExecutorService executorService;
-    
     private final Supplier<PacketExchanger> exchangerFactory;
+    
+    private final ExecutorService executorService = Executors.newCachedThreadPool();
     
     private final Set<Socket> clientSockets = Collections.newSetFromMap(new IdentityHashMap<>());
     
@@ -49,12 +42,6 @@ public class SocketServer implements Closeable {
     
     public SocketServer(ServerSocket serverSocket, Supplier<PacketExchanger> exchangerFactory) {
         this.serverSocket = serverSocket;
-        this.executorService = new ThreadPoolExecutor(
-                MIN_THREAD_COUNT,
-                MAX_THREAD_COUNT,
-                THREAD_TIMEOUT_SECONDS,
-                TimeUnit.SECONDS,
-                new SynchronousQueue<>());
         this.exchangerFactory = exchangerFactory;
     }
     
