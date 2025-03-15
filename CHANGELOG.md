@@ -1,5 +1,21 @@
 # Changelog
 
+
+## Version 0.6.0
+
+Released on *2025-03-15*
+
+### Improved:
+
+- Removed all restrictions on executor services
+- Improved logging
+- Improved error handling
+
+## Development:
+
+- Upgrade to gradle 8
+
+
 ## Version 0.5.0
 
 Released on *2023-12-16*
@@ -17,6 +33,7 @@ Released on *2023-12-16*
 
 - Added module definition and utf-8 encoding explicitly
 
+
 ## Version 0.4.0
 
 Released on *2023-01-11*
@@ -33,6 +50,7 @@ Released on *2023-01-11*
 - Unified and improved error messages
 - Improved gradle build
 - Some incorrect unit tests were fixed
+
 
 ## Version 0.3.0
 
@@ -58,6 +76,7 @@ Released on *2022-12-04*
 ### Fixed:
 
 - Ensure full java8 compatibility
+
 
 ## Version 0.2.0
 
@@ -85,6 +104,7 @@ Released on *2022-08-10*
 - Fixed LOB response handling
 - Fixed some problems with NULL values in SQLs
 - Prevented NPE on JDBC statement close
+
 
 ## Version 0.1.0
 
