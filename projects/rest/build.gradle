@@ -1,0 +1,44 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.1.1'
+    id 'io.micronaut.application' version '3.2.2'
+}
+
+description "Simple REST service for MiniConnect"
+
+dependencies {
+    annotationProcessor 'io.micronaut:micronaut-http-validation'
+    
+    implementation project(':messenger')
+    implementation project(':record')
+    implementation project(':server')
+    implementation "hu.webarticum.miniconnect.api:api:${miniConnectApiVersion}"
+    runtimeOnly 'io.micronaut:micronaut-http-client'
+    runtimeOnly 'io.micronaut:micronaut-jackson-databind'
+    runtimeOnly 'io.micronaut:micronaut-runtime'
+    runtimeOnly 'io.micronaut:micronaut-validation'
+    
+    // FIXME
+    implementation project(':jdbc-adapter')
+    implementation project(':impl')
+    
+    runtimeOnly 'ch.qos.logback:logback-classic'
+
+    testImplementation 'org.assertj:assertj-core'
+}
+
+application {
+    mainClass = "hu.webarticum.miniconnect.rest.Application"
+}
+
+graalvmNative.toolchainDetection = false
+micronaut {
+    version '3.2.2'
+    runtime("netty")
+    testRuntime("junit5")
+    processing {
+        incremental(true)
+        annotations("com.example.*")
+    }
+}
+
+

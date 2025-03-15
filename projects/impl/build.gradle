@@ -1,0 +1,14 @@
+plugins {
+    id 'java-library'
+}
+
+description "Obvious implementations of some api pieces"
+
+dependencies {
+    api "hu.webarticum.miniconnect.api:api:${miniConnectApiVersion}"
+    
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.7.1'
+    testImplementation 'org.assertj:assertj-core:3.24.2'
+}

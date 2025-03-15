@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="100mm"
+   height="100mm"
+   viewBox="0 0 100 100"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   sodipodi:docname="logo.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     width="100mm"
+     inkscape:zoom="0.70710678"
+     inkscape:cx="533.86562"
+     inkscape:cy="149.90664"
+     inkscape:window-width="1920"
+     inkscape:window-height="1025"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     inkscape:snap-text-baseline="false" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Réteg 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="path159"
+       style="fill:#916f6f;fill-rule:evenodd;stroke-width:0.238471"
+       d="M 50.07371,5.1206177 A 37.248089,37.248089 0 0 0 12.825195,42.368667 37.248089,37.248089 0 0 0 50.07371,79.616715 37.248089,37.248089 0 0 0 87.321758,42.368667 37.248089,37.248089 0 0 0 50.07371,5.1206177 Z m 0,5.6548363 A 31.472927,31.592909 0 0 1 81.546289,42.368667 31.472927,31.592909 0 0 1 50.07371,73.961414 31.472927,31.592909 0 0 1 18.600665,42.368667 31.472927,31.592909 0 0 1 50.07371,10.775454 Z" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.023px;line-height:1.25;font-family:'Kumbh Sans';-inkscape-font-specification:'Kumbh Sans, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#916f6f;fill-opacity:1;stroke:none;stroke-width:0.300574"
+       id="text1863"
+       y="93.711586"
+       x="-0.082040414"><tspan
+         sodipodi:role="line"
+         id="tspan1861"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.023px;font-family:'Kumbh Sans';-inkscape-font-specification:'Kumbh Sans, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#916f6f;stroke-width:0.300574"
+         x="-0.082040414"
+         y="93.711586">m i n i c o n n e c t</tspan></text>
+  </g>
+</svg>

@@ -1,0 +1,12 @@
+plugins {
+    id 'java-library'
+}
+
+description "MiniConnect implementation backed by JDBC"
+
+dependencies {
+    api project(':record')
+    api "hu.webarticum.miniconnect.api:api:${miniConnectApiVersion}"
+    
+    implementation project(':impl')
+}

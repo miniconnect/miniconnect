@@ -1,0 +1,33 @@
+plugins {
+    id 'java-library'
+}
+
+description "JDBC driver backed by MiniConnect"
+
+java {
+    registerFeature('hibernateSupport') {
+        usingSourceSet(sourceSets.main)
+    }
+}
+
+dependencies {
+    api project(':record')
+    api "hu.webarticum.miniconnect.api:api:${miniConnectApiVersion}"
+    
+    implementation project(':impl')
+    implementation project(':messenger')
+    implementation project(':server')
+    implementation project(':util')
+    implementation 'commons-io:commons-io:2.11.0'
+    implementation 'hu.webarticum:regexbee:0.4.0'
+    
+    hibernateSupportImplementation 'org.hibernate:hibernate-core:5.4.31.Final'
+    
+    testImplementation project(':jdbc-adapter')
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.7.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.7.1'
+    testImplementation 'org.assertj:assertj-core:3.24.2'
+    testRuntimeOnly 'com.h2database:h2:1.4.200'
+}
