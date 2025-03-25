@@ -38,7 +38,7 @@ allprojects {
     group 'hu.webarticum.miniconnect'
     version automaticVersion
     
-    ext.miniConnectApiVersion = '0.3.0'
+    ext.miniConnectApiVersion = '0.3.1-SNAPSHOT'
     
     repositories {
         mavenCentral()
