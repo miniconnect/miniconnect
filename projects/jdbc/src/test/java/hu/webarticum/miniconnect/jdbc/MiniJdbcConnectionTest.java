@@ -169,7 +169,7 @@ class MiniJdbcConnectionTest {
     }
 
     private Connection createInMemoryConnection() throws SQLException {
-        return DriverManager.getConnection("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
+        return DriverManager.getConnection("jdbc:h2:mem:test;MODE=LEGACY;DB_CLOSE_DELAY=-1");
     }
 
 }

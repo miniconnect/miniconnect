@@ -126,7 +126,7 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
 
     @Override
     public LargeInteger getLastInsertedId(MiniSession session) {
-        String sql = "CALL IDENTITY()";
+        String sql = "CALL IDENTITY()"; // FIXME: needs MODE=LEGACY when using H2
         return extractSingleField(checkResult(session.execute(sql)), LargeInteger.class);
     }
     

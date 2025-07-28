@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description "Default solution for messaging with message definitions"
+description = "Default solution for messaging with message definitions"
 
 sourceSets {
     lab {
@@ -24,9 +24,9 @@ dependencies {
     implementation project(':util')
 
     testImplementation project(':jdbc-adapter')
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.1'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.7.1'
-    testImplementation 'org.assertj:assertj-core:3.24.2'
-    testRuntimeOnly 'com.h2database:h2:1.4.200'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.13.4'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.13.4'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.13.4'
+    testImplementation 'org.assertj:assertj-core:3.27.3'
+    testRuntimeOnly 'com.h2database:h2:2.3.232'
 }

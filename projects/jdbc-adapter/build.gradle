@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 
-description "MiniConnect implementation backed by JDBC"
+description = "MiniConnect implementation backed by JDBC"
 
 dependencies {
     api project(':record')
