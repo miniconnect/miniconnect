@@ -1,6 +1,9 @@
 package hu.webarticum.miniconnect.jdbc.provider.impl;
 
 import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -151,9 +154,13 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
                 value instanceof LargeInteger ||
                 value instanceof BigInteger) {
             return value.toString();
+        } else if (value instanceof Timestamp) {
+            return quoteLocalDateTime(((Timestamp) value).toLocalDateTime());
+        } else if (value instanceof LocalDateTime) {
+            return quoteLocalDateTime((LocalDateTime) value);
+        } else {
+            return quoteString(value.toString());
         }
-        
-        return quoteString(value.toString());
     }
     
     
@@ -182,6 +189,10 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
             }
         }
         return ImmutableList.fromCollection(resultBuilder);
+    }
+    
+    protected String quoteLocalDateTime(LocalDateTime value) {
+        return quoteString(value.format(DateTimeFormatter.ISO_DATE_TIME));
     }
 
 }
