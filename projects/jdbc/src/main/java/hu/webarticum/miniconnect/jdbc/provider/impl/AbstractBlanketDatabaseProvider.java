@@ -22,6 +22,7 @@ import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.ResultRecord;
 import hu.webarticum.miniconnect.record.ResultTable;
+import hu.webarticum.miniconnect.record.converter.typed.standard.ToStringConverter;
 
 public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvider {
 
@@ -148,18 +149,8 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
         Object value = parameterValue.value();
         if (value == null) {
             return "NULL";
-        } else if (
-                value instanceof Integer ||
-                value instanceof Long ||
-                value instanceof LargeInteger ||
-                value instanceof BigInteger) {
-            return value.toString();
-        } else if (value instanceof Timestamp) {
-            return quoteLocalDateTime(((Timestamp) value).toLocalDateTime());
-        } else if (value instanceof LocalDateTime) {
-            return quoteLocalDateTime((LocalDateTime) value);
         } else {
-            return quoteString(value.toString());
+            return quoteString(new ToStringConverter().convert(value));
         }
     }
     
@@ -192,7 +183,7 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
     }
     
     protected String quoteLocalDateTime(LocalDateTime value) {
-        return quoteString(value.format(DateTimeFormatter.ISO_DATE_TIME));
+        return quoteString(value.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
     }
 
 }

@@ -1,5 +1,6 @@
 package hu.webarticum.miniconnect.record.converter.typed.standard;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,6 +25,8 @@ public class ToLocalDateConverter implements TypedConverter<LocalDate> {
             return ((LocalDateTime) source).toLocalDate();
         } else if (source instanceof OffsetDateTime) {
             return ((OffsetDateTime) source).toLocalDate();
+        } else if (source instanceof Timestamp) {
+            return convert(((Timestamp) source).toLocalDateTime().toLocalDate());
         } else if (source instanceof Instant) {
             return LocalDateTime.ofInstant((Instant) source, ZoneOffset.UTC).toLocalDate();
         } else if (source instanceof Number) {

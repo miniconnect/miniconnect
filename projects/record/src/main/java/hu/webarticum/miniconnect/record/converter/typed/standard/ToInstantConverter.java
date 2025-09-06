@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.record.converter.typed.standard;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,6 +23,8 @@ public class ToInstantConverter implements TypedConverter<Instant> {
     public Instant convert(Object source) {
         if (source instanceof Instant) {
             return (Instant) source;
+        } else if (source instanceof Timestamp) {
+            return ((Timestamp) source).toInstant();
         } else if (source instanceof OffsetDateTime) {
             return ((OffsetDateTime) source).toInstant();
         } else if (source instanceof LocalDateTime) {

@@ -1,9 +1,6 @@
 package hu.webarticum.miniconnect.record.converter.typed.standard;
 
-import java.math.BigDecimal;
-
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
-import hu.webarticum.miniconnect.record.custom.CustomValue;
 
 public class ToShortConverter implements TypedConverter<Short> {
     
@@ -22,10 +19,8 @@ public class ToShortConverter implements TypedConverter<Short> {
             return ((boolean) source) ? (short) 1 : (short) 0;
         } else if (source instanceof Character) {
             return ((short) (char) source);
-        } else if (source instanceof CustomValue) {
-            return convert(((CustomValue) source).get());
         } else {
-            return new BigDecimal(source.toString()).toBigInteger().shortValueExact();
+            return new ToLongConverter().convert(source).shortValue();
         }
     }
 
