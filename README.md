@@ -8,15 +8,15 @@ MiniConnect consists of several separated components:
 
 | Subproject | Description |
 | ---------- | ----------- |
-| :minidisc: &nbsp; `impl` | Obvious implementations of some api pieces |
-| :old_key: &nbsp; `jdbc` | JDBC driver backed by MiniConnect |
-| :electric_plug: &nbsp; `jdbc-adapter` | MiniConnect implementation backed by JDBC |
-| :envelope: &nbsp; `messenger` | Default solution for messaging with message definitions |
-| :fast_forward: &nbsp; `record` | Easy-to-use wrapper for result sets |
-| :postbox: &nbsp; `rest` | Simple REST service for MiniConnect |
-| :desktop_computer: &nbsp; `server` | Lightweight and transparent MiniConnect server and client |
-| :truck: &nbsp; `transfer` | Simple networking framework |
-| :hammer_and_wrench: &nbsp; `util` | Common utilities |
+| :minidisc:&nbsp; `impl` | Obvious implementations of some api pieces |
+| :old_key:&nbsp; `jdbc` | JDBC driver backed by MiniConnect |
+| :electric_plug:&nbsp; `jdbc-adapter` | MiniConnect implementation backed by JDBC |
+| :envelope:&nbsp; `messenger` | Default solution for messaging with message definitions |
+| :fast_forward:&nbsp; `record` | Easy-to-use wrapper for result sets |
+| :postbox:&nbsp; `rest` | Simple REST service for MiniConnect |
+| :desktop_computer:&nbsp; `server` | Lightweight and transparent MiniConnect server and client |
+| :truck:&nbsp; `transfer` | Simple networking framework |
+| :hammer_and_wrench:&nbsp; `util` | Common utilities |
 
 These gradle sub-projects can be found in the projects directory.
 
