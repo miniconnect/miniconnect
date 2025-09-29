@@ -1,6 +1,7 @@
 package hu.webarticum.miniconnect.record.converter.typed.standard;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -29,6 +30,8 @@ public class ToOffsetTimeConverter implements TypedConverter<OffsetTime> {
             return ((LocalDateTime) source).toLocalTime().atOffset(ZoneOffset.UTC);
         } else if (source instanceof OffsetDateTime) {
             return ((OffsetDateTime) source).toOffsetTime();
+        } else if (source instanceof Timestamp) {
+            return ((Timestamp) source).toInstant().atOffset(ZoneOffset.UTC).toOffsetTime();
         } else if (source instanceof Instant) {
             return ((Instant) source).atOffset(ZoneOffset.UTC).toOffsetTime();
         } else if (source instanceof Number) {

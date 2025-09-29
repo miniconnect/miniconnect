@@ -1,6 +1,9 @@
 package hu.webarticum.miniconnect.jdbc.provider.impl;
 
 import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -19,6 +22,7 @@ import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.ResultRecord;
 import hu.webarticum.miniconnect.record.ResultTable;
+import hu.webarticum.miniconnect.record.converter.typed.standard.ToStringConverter;
 
 public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvider {
 
@@ -126,7 +130,7 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
 
     @Override
     public LargeInteger getLastInsertedId(MiniSession session) {
-        String sql = "CALL IDENTITY()";
+        String sql = "CALL IDENTITY()"; // FIXME: needs MODE=LEGACY when using H2
         return extractSingleField(checkResult(session.execute(sql)), LargeInteger.class);
     }
     
@@ -145,15 +149,9 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
         Object value = parameterValue.value();
         if (value == null) {
             return "NULL";
-        } else if (
-                value instanceof Integer ||
-                value instanceof Long ||
-                value instanceof LargeInteger ||
-                value instanceof BigInteger) {
-            return value.toString();
+        } else {
+            return quoteString(new ToStringConverter().convert(value));
         }
-        
-        return quoteString(value.toString());
     }
     
     
@@ -182,6 +180,10 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
             }
         }
         return ImmutableList.fromCollection(resultBuilder);
+    }
+    
+    protected String quoteLocalDateTime(LocalDateTime value) {
+        return quoteString(value.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
     }
 
 }

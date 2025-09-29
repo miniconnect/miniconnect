@@ -11,7 +11,7 @@ public class BlanketIdentityColumnSupport extends IdentityColumnSupportImpl {
 
     @Override
     public String getIdentitySelectString(String table, String column, int type) {
-        return "CALL IDENTITY()"; // h2 compatible version
+        return "CALL IDENTITY()"; // FIXME: needs MODE=LEGACY when using H2
     }
 
     @Override

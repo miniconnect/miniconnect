@@ -44,7 +44,7 @@ public class ToLongConverter implements TypedConverter<Long> {
         } else if (source instanceof CustomValue) {
             return convert(((CustomValue) source).get());
         } else {
-            return new BigDecimal(source.toString()).toBigInteger().longValueExact();
+            return new ToLargeIntegerConverter().convert(source).longValue();
         }
     }
 

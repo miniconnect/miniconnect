@@ -2,6 +2,7 @@ package hu.webarticum.miniconnect.record.converter.typed.standard;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -45,6 +46,8 @@ public class ToLargeIntegerConverter implements TypedConverter<LargeInteger> {
             return LargeInteger.of(((LocalDateTime) source).toEpochSecond(ZoneOffset.UTC));
         } else if (source instanceof OffsetDateTime) {
             return convert(((OffsetDateTime) source).toInstant());
+        } else if (source instanceof Timestamp) {
+            return convert(((Timestamp) source).toInstant());
         } else if (source instanceof Instant) {
             return LargeInteger.of(((Instant) source).getEpochSecond());
         } else if (source instanceof CustomValue) {

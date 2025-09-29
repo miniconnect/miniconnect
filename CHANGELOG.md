@@ -1,6 +1,19 @@
 # Changelog
 
 
+## Version 0.7.0
+
+Released on *2025-09-29*
+
+### Improved:
+
+- Improved date/time handling
+
+### Development:
+
+- Improved project tools
+
+
 ## Version 0.6.0
 
 Released on *2025-03-15*
@@ -11,7 +24,7 @@ Released on *2025-03-15*
 - Improved logging
 - Improved error handling
 
-## Development:
+### Development:
 
 - Upgrade to gradle 8
 

@@ -1,5 +1,6 @@
 package hu.webarticum.miniconnect.record.converter.typed.standard;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -44,15 +45,17 @@ public class ToByteStringConverter implements TypedConverter<ByteString> {
             }
             return contentAccess.get();
         } else if (source instanceof LocalDate) {
-            return ByteString.of(((LocalDate) source).format(DateTimeFormatter.ISO_DATE));
+            return ByteString.of(((LocalDate) source).format(DateTimeFormatter.ISO_LOCAL_DATE));
         } else if (source instanceof LocalTime) {
-            return ByteString.of(((LocalTime) source).format(DateTimeFormatter.ISO_DATE));
-        } else if (source instanceof OffsetTime) {
-            return ByteString.of(((OffsetTime) source).format(DateTimeFormatter.ISO_DATE));
+            return ByteString.of(((LocalTime) source).format(DateTimeFormatter.ISO_LOCAL_DATE));
         } else if (source instanceof LocalDateTime) {
-            return ByteString.of(((LocalDateTime) source).format(DateTimeFormatter.ISO_DATE));
+            return ByteString.of(((LocalDateTime) source).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        } else if (source instanceof OffsetTime) {
+            return ByteString.of(((OffsetTime) source).format(DateTimeFormatter.ISO_OFFSET_TIME));
         } else if (source instanceof OffsetDateTime) {
-            return ByteString.of(((OffsetDateTime) source).format(DateTimeFormatter.ISO_DATE));
+            return ByteString.of(((OffsetDateTime) source).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+        } else if (source instanceof Timestamp) {
+            return convert(((Timestamp) source).toInstant());
         } else if (source instanceof Instant) {
             return ByteString.of(((Instant) source).toString());
         } else {

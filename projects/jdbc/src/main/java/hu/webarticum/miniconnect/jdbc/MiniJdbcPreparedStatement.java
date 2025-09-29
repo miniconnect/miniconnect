@@ -517,7 +517,16 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     
 
     private Blob blobOf(InputStream inputStream, long length) throws SQLException {
-        return blobOf(new BoundedInputStream(inputStream, length));
+        InputStream boundedInputStream = createBoundedInputStream(inputStream, length);
+        return blobOf(boundedInputStream);
+    }
+    
+    private InputStream createBoundedInputStream(InputStream inputStream, long length) throws SQLException {
+        try {
+            return BoundedInputStream.builder().setInputStream(inputStream).setMaxCount(length).get();
+        } catch (IOException e) {
+            throw new SQLException(e);
+        }
     }
     
     private Blob blobOf(InputStream inputStream) throws SQLException {
