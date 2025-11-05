@@ -1,8 +1,8 @@
 package hu.webarticum.miniconnect.record.custom.schema;
 
 import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -21,11 +21,20 @@ public final class StreamUtil {
     
 
     public static byte read(InputStream in) {
+        return (byte) readUnsigned(in);
+    }
+    
+    private static int readUnsigned(InputStream in) {
+        int b;
         try {
-            return new DataInputStream(in).readByte();
+            b = in.read();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+        if (b == -1) {
+            throw new UncheckedIOException(new EOFException());
+        }
+        return b;
     }
     
     public static void write(OutputStream out, byte byteValue) {
@@ -37,11 +46,11 @@ public final class StreamUtil {
     }
     
     public static int readInt(InputStream in) {
-        try {
-            return new DataInputStream(in).readInt();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        int b1 = readUnsigned(in);
+        int b2 = readUnsigned(in);
+        int b3 = readUnsigned(in);
+        int b4 = readUnsigned(in);
+        return ((b1 << 24) | (b2 << 16) | (b3 << 8) | b4);
     }
 
     public static void writeInt(OutputStream out, int intValue) {
@@ -53,13 +62,26 @@ public final class StreamUtil {
     }
 
     public static ByteString readFixedBytes(InputStream in, int length) {
-        byte[] bytes = new byte[length];
+        byte[] byteArray;
         try {
-            new DataInputStream(in).readFully(bytes);
+            byteArray = readByteArray(in, length);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        return ByteString.wrap(bytes);
+        return ByteString.wrap(byteArray);
+    }
+
+    private static byte[] readByteArray(InputStream in, int length) throws IOException {
+        byte[] result = new byte[length];
+        int pos = 0;
+        while (pos < length) {
+            int count = in.read(result, pos, length - pos);
+            if (count < 0) {
+                throw new EOFException();
+            }
+            pos += count;
+        }
+        return result;
     }
 
     public static ByteString readBytes(InputStream in) {

@@ -1,7 +1,5 @@
 package hu.webarticum.miniconnect.jdbc.provider.impl;
 
-import java.math.BigInteger;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;

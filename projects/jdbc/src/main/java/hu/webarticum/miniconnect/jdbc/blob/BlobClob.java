@@ -176,12 +176,18 @@ public class BlobClob implements NClob {
 
     @Override
     public InputStream getAsciiStream() throws SQLException {
+        InputStream blobInputStream = blob.getBinaryStream();
         if (blobCharset == targetCharset) {
-            return blob.getBinaryStream();
-        } else {
-            return new ReaderInputStream(
-                    new InputStreamReader(blob.getBinaryStream(), blobCharset),
-                    targetCharset);
+            return blobInputStream;
+        }
+        
+        try {
+            return ReaderInputStream.builder()
+                    .setReader(new InputStreamReader(blobInputStream, blobCharset))
+                    .setCharset(targetCharset)
+                    .get();
+        } catch (IOException e) {
+            throw new SQLException(e);
         }
     }
 
@@ -211,13 +217,18 @@ public class BlobClob implements NClob {
     @Override
     public OutputStream setAsciiStream(long pos) throws SQLException {
         long bytePos = findBytePos(pos);
+        OutputStream blobOutputStream = blob.setBinaryStream(bytePos);
         if (blobCharset == targetCharset) {
-            return blob.setBinaryStream(bytePos);
-        } else {
-            OutputStream byteStream = blob.setBinaryStream(bytePos);
-            return new WriterOutputStream(
-                    new OutputStreamWriter(byteStream, blobCharset),
-                    targetCharset);
+            return blobOutputStream;
+        }
+        
+        try {
+            return WriterOutputStream.builder()
+                    .setWriter(new OutputStreamWriter(blobOutputStream, blobCharset))
+                    .setCharset(targetCharset)
+                    .get();
+        } catch (IOException e) {
+            throw new SQLException(e);
         }
     }
 

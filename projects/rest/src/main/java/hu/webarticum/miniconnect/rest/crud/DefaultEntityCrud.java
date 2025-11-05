@@ -14,8 +14,7 @@ public class DefaultEntityCrud implements EntityCrud {
     private final ImmutableList<String> primaryKey;
     
 
-    public DefaultEntityCrud(
-            MiniSession session, String tableName, ImmutableList<String> primaryKey) {
+    public DefaultEntityCrud(MiniSession session, String tableName, ImmutableList<String> primaryKey) {
         this.session = session;
         this.tableName = tableName;
         this.primaryKey = primaryKey;
@@ -31,8 +30,8 @@ public class DefaultEntityCrud implements EntityCrud {
     @Override
     public MiniResult read(ImmutableList<String> key) {
         // FIXME
-        // TODO: add support for select specific fields
-        return session.execute("SELECT * FROM " + quoteIdentifier(tableName) + " LIMIT 1");
+        String condition = String.join(" AND ", primaryKey.map((i, v) -> quoteIdentifier(v) + " = " + quoteValue(key.get(i))));
+        return session.execute("SELECT * FROM " + quoteIdentifier(tableName) + " WHERE " + condition + " LIMIT 1");
     }
 
     @Override
@@ -50,6 +49,11 @@ public class DefaultEntityCrud implements EntityCrud {
     // FIXME
     private String quoteIdentifier(String name) {
         return "`" + name.replace("`", "``") + "`";
+    }
+
+    // FIXME
+    private String quoteValue(String name) {
+        return "'" + name.replace("'", "\\'") + "'";
     }
 
 }

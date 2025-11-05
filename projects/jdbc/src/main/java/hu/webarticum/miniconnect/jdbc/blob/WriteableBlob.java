@@ -299,9 +299,8 @@ public class WriteableBlob implements Blob {
             
             try {
                 randomAccessFile.seek(pos - 1);
-                InputStream innerStream =
-                        Channels.newInputStream(randomAccessFile.getChannel()); // NOSONAR
-                return new BoundedInputStream(innerStream, length);
+                InputStream innerStream = Channels.newInputStream(randomAccessFile.getChannel()); // NOSONAR
+                return BoundedInputStream.builder().setInputStream(innerStream).setMaxCount(length).get();
             } catch (IOException e) {
                 throw new SQLException(e);
             }
