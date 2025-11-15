@@ -26,7 +26,7 @@ public class ToOffsetDateTimeConverter implements TypedConverter<OffsetDateTime>
         } else if (source instanceof LocalDateTime) {
             return ((LocalDateTime) source).atOffset(ZoneOffset.UTC);
         } else if (source instanceof LocalDate) {
-            return ((LocalDate) source).atStartOfDay().atOffset(ZoneOffset.UTC);
+            return ((LocalDate) source).atStartOfDay(ZoneOffset.UTC).toOffsetDateTime();
         } else if (source instanceof Timestamp) {
             return ((Timestamp) source).toInstant().atOffset(ZoneOffset.UTC);
         } else if (source instanceof Instant) {

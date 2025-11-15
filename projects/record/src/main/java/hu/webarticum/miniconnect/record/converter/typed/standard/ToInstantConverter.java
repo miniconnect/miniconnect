@@ -30,7 +30,7 @@ public class ToInstantConverter implements TypedConverter<Instant> {
         } else if (source instanceof LocalDateTime) {
             return ((LocalDateTime) source).toInstant(ZoneOffset.UTC);
         } else if (source instanceof LocalDate) {
-            return ((LocalDate) source).atStartOfDay().toInstant(ZoneOffset.UTC);
+            return ((LocalDate) source).atStartOfDay(ZoneOffset.UTC).toInstant();
         } else if (source instanceof Number) {
             BigDecimal bigDecimalValue = Numbers.toBigDecimal((Number) source, 9);
             long secondsSinceEpoch = bigDecimalValue.toBigInteger().longValueExact();
