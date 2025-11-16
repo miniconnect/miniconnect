@@ -1,5 +1,6 @@
 package hu.webarticum.miniconnect.record.lob;
 
+import static hu.webarticum.miniconnect.lang.assertj.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
