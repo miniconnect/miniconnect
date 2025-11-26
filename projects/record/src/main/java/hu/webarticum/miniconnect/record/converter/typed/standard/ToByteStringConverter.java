@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
@@ -54,6 +55,8 @@ public class ToByteStringConverter implements TypedConverter<ByteString> {
             return ByteString.of(((OffsetTime) source).format(DateTimeFormatter.ISO_OFFSET_TIME));
         } else if (source instanceof OffsetDateTime) {
             return ByteString.of(((OffsetDateTime) source).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+        } else if (source instanceof ZonedDateTime) {
+            return ByteString.of(((ZonedDateTime) source).format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
         } else if (source instanceof Timestamp) {
             return convert(((Timestamp) source).toInstant());
         } else if (source instanceof Instant) {

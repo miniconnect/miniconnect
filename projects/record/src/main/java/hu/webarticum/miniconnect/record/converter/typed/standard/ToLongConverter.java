@@ -1,13 +1,17 @@
 package hu.webarticum.miniconnect.record.converter.typed.standard;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.Period;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
+import hu.webarticum.miniconnect.lang.DateTimeDelta;
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 
@@ -38,8 +42,17 @@ public class ToLongConverter implements TypedConverter<Long> {
             return ((LocalDateTime) source).toEpochSecond(ZoneOffset.UTC);
         } else if (source instanceof OffsetDateTime) {
             return convert(((OffsetDateTime) source).toInstant());
+        } else if (source instanceof ZonedDateTime) {
+            return convert(((OffsetDateTime) source).toInstant());
         } else if (source instanceof Instant) {
             return ((Instant) source).getEpochSecond();
+        } else if (source instanceof DateTimeDelta) {
+            return ((DateTimeDelta) source).toDuration().getSeconds();
+        } else if (source instanceof Duration) {
+            return ((Duration) source).getSeconds();
+        } else if (source instanceof Period) {
+            Period period = (Period) source;
+            return (period.getYears() * 365L) + (period.getMonths() * 30L) + (period.getDays());
         } else if (source instanceof CustomValue) {
             return convert(((CustomValue) source).get());
         } else {

@@ -3,14 +3,18 @@ package hu.webarticum.miniconnect.record.converter.typed.standard;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.Period;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
+import hu.webarticum.miniconnect.lang.DateTimeDelta;
 import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
@@ -50,12 +54,27 @@ public class ToBigDecimalConverter implements TypedConverter<BigDecimal> {
             return BigDecimal.valueOf(secondsSinceEpoch + fragmentOfSecond);
         } else if (source instanceof OffsetDateTime) {
             return convert(((OffsetDateTime) source).toInstant());
+        } else if (source instanceof ZonedDateTime) {
+            return convert(((ZonedDateTime) source).toInstant());
         } else if (source instanceof Timestamp) {
             return convert(((Timestamp) source).toInstant());
         } else if (source instanceof Instant) {
             long secondsSinceEpoch = ((Instant) source).getEpochSecond();
             double fragmentOfSecond = ((Instant) source).getNano() / 1_000_000_000d;
             return BigDecimal.valueOf(secondsSinceEpoch + fragmentOfSecond);
+        } else if (source instanceof DateTimeDelta) {
+            Duration duration = ((DateTimeDelta) source).toDuration();
+            BigDecimal bigDecimalSeconds = BigDecimal.valueOf(duration.getSeconds());
+            return bigDecimalSeconds.add(new BigDecimal(BigInteger.valueOf(duration.getNano()), 9));
+        } else if (source instanceof Duration) {
+            Duration duration = (Duration) source;
+            BigDecimal bigDecimalSeconds = BigDecimal.valueOf(duration.getSeconds());
+            return bigDecimalSeconds.add(new BigDecimal(BigInteger.valueOf(duration.getNano()), 9));
+        } else if (source instanceof Period) {
+            Period period = (Period) source;
+            return BigDecimal.valueOf(period.getYears() * 365)
+                    .add(BigDecimal.valueOf(period.getMonths() * 30))
+                    .add(BigDecimal.valueOf(period.getDays()));
         } else if (source instanceof CustomValue) {
             return convert(((CustomValue) source).get());
         } else {

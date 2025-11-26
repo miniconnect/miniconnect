@@ -8,6 +8,8 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAmount;
 
 import hu.webarticum.miniconnect.record.converter.UnsupportedConversionException;
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
@@ -30,6 +32,8 @@ public class ToLocalTimeConverter implements TypedConverter<LocalTime> {
             return ((LocalDateTime) source).toLocalTime();
         } else if (source instanceof OffsetDateTime) {
             return ((OffsetDateTime) source).toLocalTime();
+        } else if (source instanceof ZonedDateTime) {
+            return ((ZonedDateTime) source).toLocalTime();
         } else if (source instanceof Timestamp) {
             return ((Timestamp) source).toLocalDateTime().toLocalTime();
         } else if (source instanceof Instant) {
@@ -45,6 +49,8 @@ public class ToLocalTimeConverter implements TypedConverter<LocalTime> {
             } else {
                 return LocalTime.parse(timeString);
             }
+        } else if (source instanceof TemporalAmount) {
+            return LocalDateTime.MIN.plus((TemporalAmount) source).toLocalTime();
         } else {
             throw new UnsupportedConversionException(source, targetClazz());
         }

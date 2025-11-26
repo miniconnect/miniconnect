@@ -3,14 +3,18 @@ package hu.webarticum.miniconnect.record.converter.typed.standard;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.Period;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
+import hu.webarticum.miniconnect.lang.DateTimeDelta;
 import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
@@ -46,10 +50,21 @@ public class ToBigIntegerConverter implements TypedConverter<BigInteger> {
             return BigInteger.valueOf(((LocalDateTime) source).toEpochSecond(ZoneOffset.UTC));
         } else if (source instanceof OffsetDateTime) {
             return convert(((OffsetDateTime) source).toInstant());
+        } else if (source instanceof ZonedDateTime) {
+            return convert(((ZonedDateTime) source).toInstant());
         } else if (source instanceof Timestamp) {
             return convert(((Timestamp) source).toInstant());
         } else if (source instanceof Instant) {
             return BigInteger.valueOf(((Instant) source).getEpochSecond());
+        } else if (source instanceof DateTimeDelta) {
+            return BigInteger.valueOf(((DateTimeDelta) source).toDuration().getSeconds());
+        } else if (source instanceof Duration) {
+            return BigInteger.valueOf(((Duration) source).getSeconds());
+        } else if (source instanceof Period) {
+            Period period = (Period) source;
+            return BigInteger.valueOf(period.getYears() * 365)
+                    .add(BigInteger.valueOf(period.getMonths() * 30))
+                    .add(BigInteger.valueOf(period.getDays()));
         } else if (source instanceof CustomValue) {
             return convert(((CustomValue) source).get());
         } else {

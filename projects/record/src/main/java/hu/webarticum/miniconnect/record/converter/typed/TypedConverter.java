@@ -32,6 +32,7 @@ import hu.webarticum.miniconnect.record.converter.typed.standard.ToOffsetDateTim
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToOffsetTimeConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToShortConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToStringConverter;
+import hu.webarticum.miniconnect.record.converter.typed.standard.ToZonedDateTimeConverter;
 
 public interface TypedConverter<T> {
 
@@ -61,6 +62,7 @@ public interface TypedConverter<T> {
                 new ToLocalDateConverter(),
                 new ToLocalDateTimeConverter(),
                 new ToOffsetDateTimeConverter(),
+                new ToZonedDateTimeConverter(),
                 new ToInstantConverter(),
                 new ToBlobValueConverter(),
                 new ToClobValueConverter(),

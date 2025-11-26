@@ -5,8 +5,12 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAmount;
 
 import hu.webarticum.miniconnect.record.converter.UnsupportedConversionException;
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
@@ -27,10 +31,16 @@ public class ToLocalDateTimeConverter implements TypedConverter<LocalDateTime> {
             return ((LocalDate) source).atStartOfDay();
         } else if (source instanceof OffsetDateTime) {
             return ((OffsetDateTime) source).toLocalDateTime();
+        } else if (source instanceof ZonedDateTime) {
+            return ((ZonedDateTime) source).toLocalDateTime();
         } else if (source instanceof Timestamp) {
             return convert(((Timestamp) source).toLocalDateTime());
         } else if (source instanceof Instant) {
             return LocalDateTime.ofInstant((Instant) source, ZoneOffset.UTC);
+        } else if (source instanceof LocalTime) {
+            return ((LocalTime) source).atDate(LocalDate.ofEpochDay(0));
+        } else if (source instanceof OffsetTime) {
+            return ((OffsetTime) source).toLocalTime().atDate(LocalDate.ofEpochDay(0));
         } else if (source instanceof Number) {
             BigDecimal bigDecimalValue = Numbers.toBigDecimal((Number) source, 9);
             long secondsSinceEpoch = bigDecimalValue.toBigInteger().longValueExact();
@@ -44,6 +54,8 @@ public class ToLocalDateTimeConverter implements TypedConverter<LocalDateTime> {
             } else {
                 return LocalDateTime.parse(dateTimeString);
             }
+        } else if (source instanceof TemporalAmount) {
+            return LocalDateTime.MIN.plus((TemporalAmount) source);
         } else {
             throw new UnsupportedConversionException(source, targetClazz());
         }
