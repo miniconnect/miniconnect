@@ -126,6 +126,11 @@ public enum StandardValueType implements ValueType {
                 return Optional.of(member);
             }
         }
+        for (StandardValueType member : values()) {
+            if (member.clazz.isAssignableFrom(clazz)) {
+                return Optional.of(member);
+            }
+        }
         return Optional.empty();
     }
     
