@@ -55,7 +55,7 @@ public class ToFloatConverter implements TypedConverter<Float> {
             float fragmentOfSecond = ((Instant) source).getNano() / 1_000_000_000f;
             return secondsSinceEpoch + fragmentOfSecond;
         } else if (source instanceof DateTimeDelta) {
-            Duration duration = ((DateTimeDelta) source).toDuration();
+            Duration duration = ((DateTimeDelta) source).toCollapsedDuration();
             return duration.getSeconds() + (0.000_000_001f * duration.getNano());
         } else if (source instanceof Duration) {
             Duration duration = (Duration) source;

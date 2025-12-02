@@ -57,7 +57,7 @@ public class ToLargeIntegerConverter implements TypedConverter<LargeInteger> {
         } else if (source instanceof Instant) {
             return LargeInteger.of(((Instant) source).getEpochSecond());
         } else if (source instanceof DateTimeDelta) {
-            return LargeInteger.of(((DateTimeDelta) source).toDuration().getSeconds());
+            return LargeInteger.of(((DateTimeDelta) source).toCollapsedDuration().getSeconds());
         } else if (source instanceof Duration) {
             return LargeInteger.of(((Duration) source).getSeconds());
         } else if (source instanceof Period) {

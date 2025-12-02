@@ -57,7 +57,7 @@ public class ToBigIntegerConverter implements TypedConverter<BigInteger> {
         } else if (source instanceof Instant) {
             return BigInteger.valueOf(((Instant) source).getEpochSecond());
         } else if (source instanceof DateTimeDelta) {
-            return BigInteger.valueOf(((DateTimeDelta) source).toDuration().getSeconds());
+            return BigInteger.valueOf(((DateTimeDelta) source).toCollapsedDuration().getSeconds());
         } else if (source instanceof Duration) {
             return BigInteger.valueOf(((Duration) source).getSeconds());
         } else if (source instanceof Period) {

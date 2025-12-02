@@ -47,7 +47,7 @@ public class ToLongConverter implements TypedConverter<Long> {
         } else if (source instanceof Instant) {
             return ((Instant) source).getEpochSecond();
         } else if (source instanceof DateTimeDelta) {
-            return ((DateTimeDelta) source).toDuration().getSeconds();
+            return ((DateTimeDelta) source).toCollapsedDuration().getSeconds();
         } else if (source instanceof Duration) {
             return ((Duration) source).getSeconds();
         } else if (source instanceof Period) {

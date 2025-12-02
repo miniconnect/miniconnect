@@ -63,7 +63,7 @@ public class ToBigDecimalConverter implements TypedConverter<BigDecimal> {
             double fragmentOfSecond = ((Instant) source).getNano() / 1_000_000_000d;
             return BigDecimal.valueOf(secondsSinceEpoch + fragmentOfSecond);
         } else if (source instanceof DateTimeDelta) {
-            Duration duration = ((DateTimeDelta) source).toDuration();
+            Duration duration = ((DateTimeDelta) source).toCollapsedDuration();
             BigDecimal bigDecimalSeconds = BigDecimal.valueOf(duration.getSeconds());
             return bigDecimalSeconds.add(new BigDecimal(BigInteger.valueOf(duration.getNano()), 9));
         } else if (source instanceof Duration) {
