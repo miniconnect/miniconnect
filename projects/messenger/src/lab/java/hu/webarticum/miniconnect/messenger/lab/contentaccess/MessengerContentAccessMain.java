@@ -10,19 +10,19 @@ import hu.webarticum.miniconnect.lang.ByteString;
 public class MessengerContentAccessMain {
 
     private static final int SUPPLIER_SLEEP_MILLIS = 1000;
-    
+
     private static final int[] SUPPLIER_ORDER = new int[] { 3, 2, 0, 6, 1, 5, 4, 8, 7 };
-    
+
     private static final int SUPPLIER_CHUNK_SIZE = 7;
-    
+
     private static final int CONSUMER_CHUNK_SIZE = 10;
-    
-    
+
+
     public static void main(String[] args) throws IOException, InterruptedException {
         long fullLength = ((long) SUPPLIER_CHUNK_SIZE) * SUPPLIER_ORDER.length;
         try (FileChargeableContentAccess contentAccess =
             new FileChargeableContentAccess(fullLength, Files.createTempFile("LOB_", ".bin").toFile())) {
-            
+
             Thread supplierThread = new Thread(() -> {
                 for (int n : SUPPLIER_ORDER) {
                     try {
@@ -48,7 +48,7 @@ public class MessengerContentAccessMain {
                     }
                 }
             });
-            
+
             supplierThread.start();
 
             try (InputStream in = contentAccess.inputStream()) {
@@ -58,14 +58,14 @@ public class MessengerContentAccessMain {
                     if (r == (-1)) {
                         break;
                     }
-                    
+
                     String part = new String(buffer, 0, r);
                     System.out.println(" Fetched: " + part);
                 }
             }
-            
+
             supplierThread.join();
         }
     }
-    
+
 }

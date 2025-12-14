@@ -12,27 +12,27 @@ public class DateTranslator implements ValueTranslator {
 
 
     private static final DateTranslator INSTANCE = new DateTranslator();
-    
-    
+
+
     private DateTranslator() {
         // singleton
     }
-    
+
     public static DateTranslator instance() {
         return INSTANCE;
     }
-    
+
 
     @Override
     public String name() {
         return NAME;
     }
-    
+
     @Override
     public int length() {
         return Long.BYTES;
     }
-    
+
     @Override
     public Object decode(MiniContentAccess contentAccess) {
         ByteString.Reader reader = contentAccess.get().reader();
@@ -52,5 +52,5 @@ public class DateTranslator implements ValueTranslator {
     public String assuredClazzName() {
         return LocalDate.class.getName();
     }
-    
+
 }

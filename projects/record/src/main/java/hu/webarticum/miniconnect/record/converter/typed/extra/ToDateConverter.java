@@ -6,7 +6,7 @@ import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToInstantConverter;
 
 public class ToDateConverter implements TypedConverter<Date> {
-    
+
     @Override
     public Class<Date> targetClazz() {
         return Date.class;

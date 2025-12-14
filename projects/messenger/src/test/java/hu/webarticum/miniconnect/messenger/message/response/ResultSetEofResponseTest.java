@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 
 class ResultSetEofResponseTest {
-    
+
     @Test
     void testHashCodeAndEquals() {
         ResultSetEofResponse instance1 = new ResultSetEofResponse(5L, 9, 12L);

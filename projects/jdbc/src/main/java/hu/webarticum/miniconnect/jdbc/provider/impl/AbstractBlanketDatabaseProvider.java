@@ -34,8 +34,8 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
         mapBuilder.put(TransactionIsolationLevel.SERIALIZABLE, "SERIALIZABLE");
         TRANSACTION_ISOLATION_LEVEL_NAME_MAP = Collections.unmodifiableMap(mapBuilder);
     }
-    
-    
+
+
     @Override
     public int getDatabaseMajorVersion(MiniSession session) {
         String fullVersion = getDatabaseFullVersion(session);
@@ -77,7 +77,7 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
             throw new UnsupportedOperationException("Read-only mode can not be changed");
         }
     }
-    
+
     @Override
     public String getSchema(MiniSession session) {
         String sql = "SELECT CURRENT_SCHEMA";
@@ -88,7 +88,6 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
     public ImmutableList<String> getSchemas(MiniSession session) {
         String sql = "SHOW SCHEMAS";
         return extractSingleColumn(checkResult(session.execute(sql)), String.class);
-        
     }
 
     @Override
@@ -131,17 +130,17 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
         String sql = "CALL IDENTITY()"; // FIXME: needs MODE=LEGACY when using H2
         return extractSingleField(checkResult(session.execute(sql)), LargeInteger.class);
     }
-    
+
     @Override
     public String quoteString(String text) {
         return "'" + text.replace("'", "''") + "'";
     }
-    
+
     @Override
     public String quoteIdentifier(String identifier) {
         return "`" + identifier.replace("`", "``") + "`";
     }
-    
+
     @Override
     public String stringifyValue(ParameterValue parameterValue) {
         Object value = parameterValue.value();
@@ -151,16 +150,16 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
             return quoteString(new ToStringConverter().convert(value));
         }
     }
-    
-    
+
+
     protected MiniResult checkResult(MiniResult result) {
         if (!result.success()) {
             throw new MiniErrorException(result.error());
         }
-        
+
         return result;
     }
-    
+
     protected <T> T extractSingleField(MiniResult result, Class<T> clazz) {
         try (MiniResultSet resultSet = result.resultSet()) {
             ResultTable resultTable = new ResultTable(resultSet);
@@ -179,7 +178,7 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
         }
         return ImmutableList.fromCollection(resultBuilder);
     }
-    
+
     protected String quoteLocalDateTime(LocalDateTime value) {
         return quoteString(value.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
     }

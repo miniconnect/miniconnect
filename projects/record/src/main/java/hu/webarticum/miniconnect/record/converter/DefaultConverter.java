@@ -10,43 +10,43 @@ import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 
 public class DefaultConverter implements Converter {
-    
+
     private final Map<Class<?>, TypedConverter<?>> typedConvertersByClazz;
-    
+
     private Object cachedObjectMapper = null;
-    
+
 
     public DefaultConverter() {
         this(TypedConverter.defaultConverters());
     }
-    
+
     public DefaultConverter(Collection<TypedConverter<?>> typedConverters) {
         typedConvertersByClazz = new HashMap<>(typedConverters.size());
         for (TypedConverter<?> typedConverter : typedConverters) {
             typedConvertersByClazz.put(typedConverter.targetClazz(), typedConverter);
         }
     }
-    
-    
+
+
     @Override
     public Object convert(Object source, Class<?> targetClazz) {
         if (source == null) {
             return null;
         }
-        
+
         if (targetClazz.isInstance(source)) {
             return source;
         }
-        
+
         TypedConverter<?> typedConverter = typedConvertersByClazz.get(targetClazz);
         if (typedConverter != null) {
             return typedConverter.convert(source);
         }
-        
+
         if (source instanceof CustomValue) {
             return tryToConvertWithJackson(source, targetClazz);
         }
-        
+
         throw new UnsupportedConversionException(
                 "No converter for target class: " + targetClazz,
                 source,
@@ -72,7 +72,7 @@ public class DefaultConverter implements Converter {
                     e);
         }
     }
-    
+
     private synchronized Object requireJacksonObjectMapper() throws
             ClassNotFoundException,
             InstantiationException,
@@ -98,7 +98,7 @@ public class DefaultConverter implements Converter {
         Class<?> clazz = Class.forName("com.fasterxml.jackson.databind.ObjectMapper");
         cachedObjectMapper = clazz.getDeclaredConstructor().newInstance();
     }
-    
+
     private Object invokeConvertValue(
             Object objectMapper, Object source, Class<?> targetClazz) throws
             NoSuchMethodException,
@@ -110,5 +110,5 @@ public class DefaultConverter implements Converter {
         Method method = clazz.getMethod("convertValue", Object.class, Class.class);
         return method.invoke(objectMapper, source, targetClazz);
     }
-    
+
 }

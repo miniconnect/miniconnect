@@ -3,17 +3,17 @@ package hu.webarticum.miniconnect.jdbc.provider;
 import java.sql.Types;
 
 public class ParameterValue {
-    
+
     private final Class<?> type;
-    
+
     private final Object value;
-    
+
     private final int sqlType;
-    
+
     private final String typeName;
-    
+
     private final Object modifier;
-    
+
     private final boolean managed;
 
 
@@ -24,7 +24,7 @@ public class ParameterValue {
     public ParameterValue(Class<?> type, Object value, Object modifier) {
         this(type, value, Types.OTHER, null, modifier);
     }
-    
+
     public ParameterValue(
             Class<?> type,
             Object value,
@@ -73,5 +73,5 @@ public class ParameterValue {
     public boolean managed() {
         return managed;
     }
-    
+
 }

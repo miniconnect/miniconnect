@@ -11,14 +11,14 @@ public final class StoredValue implements MiniValue, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    
+
     public static final StoredValueDefinition DEFAULT_DEFINITION =
             new StoredValueDefinition(ByteString.class.getName());
-    
+
 
 
     private final StoredValueDefinition definition;
-    
+
     private final boolean isNull;
 
     private final MiniContentAccess contentAccess; // NOSONAR by default its serializable
@@ -35,7 +35,7 @@ public final class StoredValue implements MiniValue, Serializable {
     public StoredValue(boolean isNull, ByteString content) {
         this(DEFAULT_DEFINITION, isNull, content);
     }
-    
+
     public StoredValue(MiniValueDefinition definition, boolean isNull, ByteString content) {
         this(definition, isNull, new StoredContentAccess(content));
     }
@@ -57,7 +57,7 @@ public final class StoredValue implements MiniValue, Serializable {
             throw new IllegalArgumentException(
                     "Content is too large to store in memory");
         }
-        
+
         return new StoredValue(
                 StoredValueDefinition.of(value.definition()),
                 value.isNull(),

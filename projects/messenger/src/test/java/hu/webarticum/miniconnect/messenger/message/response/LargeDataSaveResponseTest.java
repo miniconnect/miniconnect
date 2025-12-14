@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 
 class LargeDataSaveResponseTest {
-    
+
     @Test
     void testHashCodeAndEquals() {
         LargeDataSaveResponse instance1 =

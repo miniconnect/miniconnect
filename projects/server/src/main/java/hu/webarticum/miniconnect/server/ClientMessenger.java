@@ -29,22 +29,22 @@ import hu.webarticum.miniconnect.util.GlobalIdGenerator;
 public class ClientMessenger implements Messenger, Closeable {
 
     private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    
-    
+
+
     private final SocketClient socketClient;
 
     private final MessageDecoder decoder;
-    
+
     private final MessageEncoder encoder;
 
     private final Map<Consumer<Response>, ExchangeIdentity> exchangeResponseConsumers = new WeakHashMap<>();
-    
+
     private final Object exchangeResponseConsumersLock = new Object();
 
     private final Map<Consumer<Response>, Instant> sessionInitConsumers = new WeakHashMap<>();
-    
+
     private final Object sessionInitConsumersLock = new Object();
-    
+
 
     public ClientMessenger(String host, int port) {
         this(openSocket(host, port), null);
@@ -53,7 +53,7 @@ public class ClientMessenger implements Messenger, Closeable {
     public ClientMessenger(String host, int port, Consumer<Throwable> errorHandler) {
         this(openSocket(host, port), errorHandler);
     }
-    
+
     public ClientMessenger(Socket socket, Consumer<Throwable> errorHandler) {
         this(socket, new DefaultMessageTranslator(), errorHandler);
     }
@@ -61,7 +61,7 @@ public class ClientMessenger implements Messenger, Closeable {
     public ClientMessenger(String host, int port, MessageTranslator translator, Consumer<Throwable> errorHandler) {
         this(openSocket(host, port), translator, errorHandler);
     }
-    
+
     public ClientMessenger(Socket socket, MessageTranslator translator, Consumer<Throwable> errorHandler) {
         this(socket, translator, translator, errorHandler);
     }
@@ -91,7 +91,7 @@ public class ClientMessenger implements Messenger, Closeable {
     @Override
     public void accept(Request request, Consumer<Response> responseConsumer) {
         logger.trace("Request accepted: {}", request);
-        
+
         if (responseConsumer == null) {
             // nothing to do
         } else if (request instanceof ExchangeMessage) {
@@ -108,14 +108,14 @@ public class ClientMessenger implements Messenger, Closeable {
         }
         socketClient.send(encoder.encode(request));
     }
-    
+
     public void acceptResponsePacket(Packet packet) {
         String logId = GlobalIdGenerator.generate(logger.isTraceEnabled());
         logger.trace("[{}] Response packet accepted", logId);
-        
+
         Response response = (Response) decoder.decode(packet);
         logger.trace("[{}] Response parsed: {}", logId, response);
-        
+
         if (response instanceof SessionMessage) {
             if (response instanceof ExchangeMessage) {
                 logger.trace("[{}] Response is an ExchangeMessage", logId);
@@ -139,7 +139,7 @@ public class ClientMessenger implements Messenger, Closeable {
             logger.debug("[{}] Unknown response type, skip", logId);
         }
     }
-    
+
     private void acceptSessionInitResponse(Response response) {
         Consumer<Response> oldestConsumer = null;
         synchronized (sessionInitConsumersLock) {
@@ -159,7 +159,7 @@ public class ClientMessenger implements Messenger, Closeable {
             oldestConsumer.accept(response);
         }
     }
-    
+
     private Consumer<Response> findResponseConsumer(ExchangeIdentity exchangeIdentity) {
         synchronized (exchangeResponseConsumersLock) {
             for (Map.Entry<Consumer<Response>, ExchangeIdentity> entry : exchangeResponseConsumers.entrySet()) {
@@ -175,21 +175,21 @@ public class ClientMessenger implements Messenger, Closeable {
     public void close() {
         socketClient.close();
     }
-    
-    
+
+
     private class ExchangeIdentity {
-        
+
         private final long sessionId;
-        
+
         private final int exchangeId;
-        
-        
+
+
         public ExchangeIdentity(long sessionId, int exchangeId) {
             this.sessionId = sessionId;
             this.exchangeId = exchangeId;
         }
-        
-        
+
+
         @Override
         public int hashCode() {
             return Objects.hash(sessionId, exchangeId);
@@ -204,11 +204,11 @@ public class ClientMessenger implements Messenger, Closeable {
             } else if (!(other instanceof ExchangeIdentity)) {
                 return false;
             }
-            
+
             ExchangeIdentity otherExchangeIdentity = (ExchangeIdentity) other;
             return (sessionId == otherExchangeIdentity.sessionId) && (exchangeId == otherExchangeIdentity.exchangeId);
         }
-        
+
     }
 
 }

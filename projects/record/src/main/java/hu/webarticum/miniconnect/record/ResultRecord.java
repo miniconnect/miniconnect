@@ -13,15 +13,15 @@ import hu.webarticum.miniconnect.record.converter.Converter;
 import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 
 public class ResultRecord {
-    
+
     private final ImmutableList<MiniColumnHeader> columnHeaders;
 
     private final ImmutableList<MiniValue> row;
-    
+
     private final ImmutableList<ValueTranslator> valueTranslators;
-    
+
     private final Converter converter;
-    
+
 
     public ResultRecord(
             ImmutableList<MiniColumnHeader> columnHeaders,
@@ -33,7 +33,7 @@ public class ResultRecord {
         this.valueTranslators = valueTranslators;
         this.converter = converter;
     }
-    
+
 
     public ImmutableList<MiniValue> row() {
         return row;
@@ -43,7 +43,7 @@ public class ResultRecord {
     public ImmutableMap<String, Object> rowMap() {
         return columnHeaders.map(MiniColumnHeader::name).assign(k -> get(k).get());
     }
-    
+
     public ImmutableList<ResultField> getAll() {
         int size = row.size();
         List<ResultField> resultBuilder = new ArrayList<>(size);
@@ -52,7 +52,7 @@ public class ResultRecord {
         }
         return ImmutableList.fromCollection(resultBuilder);
     }
-    
+
     public ResultField get(int zeroBasedIndex) {
         MiniValue value = row.get(zeroBasedIndex);
         ValueTranslator translator = valueTranslators.get(zeroBasedIndex);

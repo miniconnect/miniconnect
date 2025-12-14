@@ -17,7 +17,7 @@ import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 public final class ResultResponse implements Response, ExchangeMessage {
 
     private static final long serialVersionUID = 7658254363809128415L;
-    
+
 
     private final long sessionId;
 
@@ -50,7 +50,7 @@ public final class ResultResponse implements Response, ExchangeMessage {
         this.hasResultSet = hasResultSet;
         this.columnHeaders = Objects.requireNonNull(columnHeaders);
     }
-    
+
     public static ResultResponse of(MiniResult result, long sessionId, int exchangeId) {
         MiniError error = result.error();
         return new ResultResponse(
@@ -109,7 +109,7 @@ public final class ResultResponse implements Response, ExchangeMessage {
         } else if (!(other instanceof ResultResponse)) {
             return false;
         }
-        
+
         ResultResponse otherResultResponse = (ResultResponse) other;
         return
                 sessionId == otherResultResponse.sessionId &&
@@ -138,7 +138,7 @@ public final class ResultResponse implements Response, ExchangeMessage {
     public static class ColumnHeaderData implements Serializable {
 
         private static final long serialVersionUID = 3633453818107632307L;
-        
+
 
         private final String name;
 
@@ -163,7 +163,7 @@ public final class ResultResponse implements Response, ExchangeMessage {
             this.type = Objects.requireNonNull(type);
             this.properties = Objects.requireNonNull(properties);
         }
-        
+
         public static ColumnHeaderData of(MiniColumnHeader header) {
             return new ColumnHeaderData(
                     header.name(),
@@ -193,7 +193,7 @@ public final class ResultResponse implements Response, ExchangeMessage {
         public ImmutableMap<String, ByteString> properties() {
             return properties;
         }
-        
+
         public MiniColumnHeader toMiniColumnHeader() {
             return new StoredColumnHeader(
                     name, isNullable, new StoredValueDefinition(type, length, properties));
@@ -213,7 +213,7 @@ public final class ResultResponse implements Response, ExchangeMessage {
             } else if (!(other instanceof ColumnHeaderData)) {
                 return false;
             }
-            
+
             ColumnHeaderData otherColumnHeaderData = (ColumnHeaderData) other;
             return
                     name.equals(otherColumnHeaderData.name) &&
@@ -233,12 +233,12 @@ public final class ResultResponse implements Response, ExchangeMessage {
         }
 
     }
-    
+
 
     public static class ErrorData implements Serializable {
 
         private static final long serialVersionUID = -124457092978280102L;
-        
+
 
         private final int code;
 
@@ -246,18 +246,18 @@ public final class ResultResponse implements Response, ExchangeMessage {
 
         private final String message;
 
-        
+
         public ErrorData(int code, String sqlState, String message) {
             this.code = code;
             this.sqlState = Objects.requireNonNull(sqlState);
             this.message = Objects.requireNonNull(message);
         }
-        
+
         public static ErrorData of(MiniError error) {
             return new ErrorData(error.code(), error.sqlState(), error.message());
         }
-        
-        
+
+
         public int code() {
             return code;
         }
@@ -284,7 +284,7 @@ public final class ResultResponse implements Response, ExchangeMessage {
             } else if (!(other instanceof ErrorData)) {
                 return false;
             }
-            
+
             ErrorData otherErrorData = (ErrorData) other;
             return
                     code == otherErrorData.code &&

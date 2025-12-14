@@ -13,7 +13,7 @@ public final class StoredResultSet implements MiniResultSet, Serializable {
 
 
     private final StoredResultSetData data;
-    
+
     private int position = 0;
 
 
@@ -43,7 +43,7 @@ public final class StoredResultSet implements MiniResultSet, Serializable {
 
         return result;
     }
-    
+
     public ImmutableList<ImmutableList<MiniValue>> rows() {
         return data.rows();
     }
@@ -57,5 +57,5 @@ public final class StoredResultSet implements MiniResultSet, Serializable {
     public boolean isClosed() {
         return false;
     }
-    
+
 }

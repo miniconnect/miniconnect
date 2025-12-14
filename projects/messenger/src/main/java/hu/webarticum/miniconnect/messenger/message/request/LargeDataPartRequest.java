@@ -9,7 +9,7 @@ import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 public final class LargeDataPartRequest implements Request, ExchangeMessage {
 
     private static final long serialVersionUID = 4207615629289430723L;
-    
+
 
     private final long sessionId;
 
@@ -60,7 +60,7 @@ public final class LargeDataPartRequest implements Request, ExchangeMessage {
         } else if (!(other instanceof LargeDataPartRequest)) {
             return false;
         }
-        
+
         LargeDataPartRequest otherLargeDataPartRequest = (LargeDataPartRequest) other;
         return
                 sessionId == otherLargeDataPartRequest.sessionId &&

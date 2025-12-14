@@ -9,7 +9,7 @@ import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 public final class ResultSetValuePartResponse implements Response, ExchangeMessage {
 
     private static final long serialVersionUID = 2355321848416930316L;
-    
+
 
     private final long sessionId;
 
@@ -80,7 +80,7 @@ public final class ResultSetValuePartResponse implements Response, ExchangeMessa
         } else if (!(other instanceof ResultSetValuePartResponse)) {
             return false;
         }
-        
+
         ResultSetValuePartResponse otherResultSetValuePartResponse =
                 (ResultSetValuePartResponse) other;
         return

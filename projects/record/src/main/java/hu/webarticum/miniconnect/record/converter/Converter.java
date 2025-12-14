@@ -4,5 +4,5 @@ package hu.webarticum.miniconnect.record.converter;
 public interface Converter {
 
     public Object convert(Object source, Class<?> targetClazz);
-    
+
 }

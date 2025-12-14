@@ -14,10 +14,10 @@ import hu.webarticum.regexbee.Bee;
 import hu.webarticum.regexbee.BeeFragment;
 
 public class ConnectionUrlInfo {
-    
+
     public static final String URL_PREFIX = "jdbc:miniconnect://";
-    
-    
+
+
     private static final String HOST_GROUPNAME = "host";
 
     private static final String PORT_GROUPNAME = "port";
@@ -29,18 +29,18 @@ public class ConnectionUrlInfo {
     private static final String KEY_GROUPNAME = "key";
 
     private static final String VALUE_GROUPNAME = "value";
-    
+
     private static final Pattern URL_PROPERTY_GROUPED_PATTERN = Bee
             .then(Bee.checked("[^&=]+").as(KEY_GROUPNAME))
             .then(Bee.fixedChar('='))
             .then(Bee.checked("[^&]*").as(VALUE_GROUPNAME))
             .toPattern();
-    
+
     private static final BeeFragment URL_PROPERTY_FRAGMENT = Bee
             .then(Bee.checked("[^&=]+"))
             .then(Bee.fixedChar('='))
             .then(Bee.checked("[^&]*"));
-    
+
     private static final Pattern URL_PATTERN = Bee
             .then(Bee.BEGIN)
             .then(Bee.fixed(URL_PREFIX))
@@ -59,21 +59,21 @@ public class ConnectionUrlInfo {
                     ).optional())
             .then(Bee.END)
             .toPattern();
-    
+
 
     private final String host;
-    
+
     private final int port;
 
     private final String schema;
 
     private final ImmutableMap<String, String> properties;
-    
+
 
     public static boolean isUrlSupported(String url) {
         return url.startsWith(URL_PREFIX);
     }
-    
+
 
     private ConnectionUrlInfo(String host, int port, String schema, ImmutableMap<String, String> properties) {
         this.host = host;
@@ -81,18 +81,18 @@ public class ConnectionUrlInfo {
         this.schema = schema;
         this.properties = properties;
     }
-    
-    
+
+
     public static ConnectionUrlInfo parse(String url) {
         return parse(url, null);
     }
-    
+
     public static ConnectionUrlInfo parse(String url, Map<?, ?> properties) {
         Matcher matcher = URL_PATTERN.matcher(url);
         if (!matcher.find()) {
             throw new IllegalArgumentException("Invalid connection url");
         }
-        
+
         String host = matcher.group(HOST_GROUPNAME);
         int port = Integer.parseInt(matcher.group(PORT_GROUPNAME));
         String schema = matcher.group(SCHEMA_GROUPNAME);
@@ -111,7 +111,7 @@ public class ConnectionUrlInfo {
         }
         return new ConnectionUrlInfo(host, port, schema, ImmutableMap.fromMap(propertiesBuilder));
     }
-    
+
     private static String urldecode(String value) {
         try {
             return URLDecoder.decode(value, StandardCharsets.UTF_8.name());
@@ -120,16 +120,16 @@ public class ConnectionUrlInfo {
             return value;
         }
     }
-    
+
 
     public String host() {
         return host;
     }
-    
+
     public int port() {
         return port;
     }
-    
+
     public String schema() {
         return schema;
     }
@@ -137,7 +137,7 @@ public class ConnectionUrlInfo {
     public ImmutableMap<String, String> properties() {
         return properties;
     }
-    
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)
@@ -147,5 +147,5 @@ public class ConnectionUrlInfo {
                 .add("properties", properties)
                 .build();
     }
-    
+
 }

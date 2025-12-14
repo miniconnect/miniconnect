@@ -10,18 +10,18 @@ import hu.webarticum.miniconnect.impl.result.StoredError;
 import hu.webarticum.miniconnect.impl.result.StoredLargeDataSaveResult;
 
 public class SimpleJdbcLargeDataPutter implements JdbcLargeDataPutter {
-    
+
     private static final String DEFAULT_SQL_STATE = "00000";
-    
-    
+
+
     private final String setterStatementFormat;
-    
-    
+
+
     public SimpleJdbcLargeDataPutter(String setterStatementFormat) {
         this.setterStatementFormat = setterStatementFormat;
     }
-    
-    
+
+
     @Override
     public MiniLargeDataSaveResult putLargeData(
             Connection jdbcConnection, String variableName, long length, InputStream dataSource) {

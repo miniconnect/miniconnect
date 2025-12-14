@@ -42,25 +42,25 @@ import hu.webarticum.miniconnect.record.ResultTable;
 import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 
 public class MiniJdbcResultSet implements ResultSet {
-    
+
     private final Statement statement;
-    
+
     private final ResultTable resultTable;
-    
+
     private final MiniJdbcResultSetMetaData metaData;
-    
+
     private final int columnCount;
-    
-    
+
+
     private volatile ResultRecord currentRecord = null; // NOSONAR
-    
+
     private volatile boolean wasNull = false;
 
 
     private final Object closeLock = new Object();
-    
+
     private volatile boolean closed = false;
-    
+
 
     public MiniJdbcResultSet(Statement statement, MiniResultSet miniResultSet) {
         this.statement = statement;
@@ -69,8 +69,8 @@ public class MiniJdbcResultSet implements ResultSet {
                 getMiniColumnHeaders(), getValueTranslators().map(ValueTranslator::assuredClazzName));
         this.columnCount = miniResultSet.columnHeaders().size();
     }
-    
-    
+
+
     // --- METADATA ---
     // [start]
 
@@ -96,7 +96,7 @@ public class MiniJdbcResultSet implements ResultSet {
         if (!isWrapperFor(type)) {
             throw new SQLException(String.format("Unable to convert %s to %s", getClass(), type));
         }
-        
+
         @SuppressWarnings("unchecked")
         T result = (T) this;
         return result;
@@ -136,7 +136,7 @@ public class MiniJdbcResultSet implements ResultSet {
                 return i + 1;
             }
         }
-        
+
         throw new SQLException(String.format("No column with label '%s'", columnLabel));
     }
 
@@ -156,8 +156,8 @@ public class MiniJdbcResultSet implements ResultSet {
     }
 
     // [end]
-    
-    
+
+
     // --- SETTINGS --
     // [start]
 
@@ -184,7 +184,7 @@ public class MiniJdbcResultSet implements ResultSet {
     }
 
     // [end]
-    
+
 
     // --- NAVIGATION ---
     // [start]
@@ -244,7 +244,7 @@ public class MiniJdbcResultSet implements ResultSet {
         if (rows == 1) {
             return next();
         }
-        
+
         throw createForwardOnlyException();
     }
 
@@ -255,7 +255,7 @@ public class MiniJdbcResultSet implements ResultSet {
             currentRecord = null;
             return false;
         }
-        
+
         currentRecord = iterator.next();
         return true;
     }
@@ -264,10 +264,10 @@ public class MiniJdbcResultSet implements ResultSet {
     public boolean previous() throws SQLException {
         throw createForwardOnlyException();
     }
-    
+
     // [end]
-    
-    
+
+
     // --- GET ---
     // [start]
 
@@ -637,16 +637,16 @@ public class MiniJdbcResultSet implements ResultSet {
     public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
         ResultField resultField = getResultField(columnIndex);
         Object value = resultField.get();
-        
+
         if (value == null || type.isAssignableFrom(value.getClass())) {
             return (T) value;
         }
-        
+
         T jdbcTypeResult = tryConvertToJdbcType(columnIndex, type);
         if (jdbcTypeResult != null) {
             return jdbcTypeResult;
         }
-        
+
         return resultField.as(type);
     }
 
@@ -684,15 +684,15 @@ public class MiniJdbcResultSet implements ResultSet {
         if (columnIndex < 1 || columnIndex > columnCount) {
             throw new SQLException(String.format("Invalid column index: %d", columnIndex));
         }
-        
+
         return currentRecord.row().get(columnIndex - 1);
     }
-    
+
     public ResultField getResultField(int columnIndex) throws SQLException {
         if (columnIndex < 1 || columnIndex > columnCount) {
             throw new SQLException(String.format("Invalid column index: %d", columnIndex));
         }
-        
+
         return currentRecord.get(columnIndex - 1);
     }
 
@@ -702,8 +702,8 @@ public class MiniJdbcResultSet implements ResultSet {
     }
 
     // [end]
-    
-    
+
+
     // --- UPDATE ---
     // [start]
 
@@ -1118,11 +1118,11 @@ public class MiniJdbcResultSet implements ResultSet {
     }
 
     // [end]
-    
-    
+
+
     // --- ROW MANIPULATION ---
     // [start]
-    
+
     @Override
     public void insertRow() throws SQLException {
         throw new SQLFeatureNotSupportedException();
@@ -1175,10 +1175,10 @@ public class MiniJdbcResultSet implements ResultSet {
 
     // [end]
 
-    
+
     // --- ROW ID ---
     // [start]
-    
+
     @Override
     public RowId getRowId(int columnIndex) throws SQLException {
         throw new SQLFeatureNotSupportedException();
@@ -1200,8 +1200,8 @@ public class MiniJdbcResultSet implements ResultSet {
     }
 
     // [end]
-    
-    
+
+
     // --- CLOSE ---
     // [start]
 
@@ -1227,10 +1227,10 @@ public class MiniJdbcResultSet implements ResultSet {
     public boolean isClosed() throws SQLException {
         return closed;
     }
-    
+
     // [end]
 
-    
+
 
     private SQLException createForwardOnlyException() {
         return new SQLException("This result set is FORWARD_ONLY");

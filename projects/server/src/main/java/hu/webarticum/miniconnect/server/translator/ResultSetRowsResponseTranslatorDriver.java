@@ -32,7 +32,7 @@ class ResultSetRowsResponseTranslatorDriver implements TranslatorDriver {
     rowsSize
     columnsSize
     <cellDatas>
-    
+
     CellData:
     [isNull] (if nullable)
     [partial] (if not isNull and not fixedSize)
@@ -40,7 +40,7 @@ class ResultSetRowsResponseTranslatorDriver implements TranslatorDriver {
     [contentLength] (if not isNull and not fixedSize)
     content
     */
-    
+
     @Override
     public Message decode(HeaderData headerData, ByteString payload) {
         ByteString.Reader reader = payload.reader();
@@ -56,7 +56,7 @@ class ResultSetRowsResponseTranslatorDriver implements TranslatorDriver {
                 fixedSizes,
                 rows);
     }
-    
+
     private ImmutableList<Integer> readNullables(ByteString.Reader reader) {
         int nullablesSize = reader.readInt();
         List<Integer> nullablesBuilder = new ArrayList<>(nullablesSize);
@@ -76,7 +76,7 @@ class ResultSetRowsResponseTranslatorDriver implements TranslatorDriver {
         }
         return ImmutableMap.fromMap(fixedSizesBuilder);
     }
-    
+
     private ImmutableList<ImmutableList<CellData>> readRows(
             ByteString.Reader reader,
             ImmutableList<Integer> nullables,
@@ -129,7 +129,7 @@ class ResultSetRowsResponseTranslatorDriver implements TranslatorDriver {
         byte[] content = reader.read(contentLength);
         return new CellData(false, fullLength, ByteString.wrap(content));
     }
-    
+
     @Override
     public Packet encode(Message message) {
         ResultSetRowsResponse resultSetRowsResponse = (ResultSetRowsResponse) message;

@@ -13,21 +13,21 @@ import hu.webarticum.miniconnect.messenger.message.response.Response;
 import hu.webarticum.miniconnect.messenger.message.response.SessionCloseResponse;
 
 public class SessionMessenger implements Messenger {
-    
+
     private final MiniSession session;
-    
+
     private final QueryPartial queryPartial;
-    
+
     private final LargeDataPartial largeDataPartial;
-    
-    
+
+
     public SessionMessenger(long sessionId, MiniSession session) {
         this.session = session;
         this.queryPartial = new QueryPartial(sessionId, session);
         this.largeDataPartial = new LargeDataPartial(sessionId, session);
     }
-    
-    
+
+
     @Override
     public synchronized void accept(Request request, Consumer<Response> responseConsumer) {
         if (request instanceof QueryRequest) {
@@ -61,5 +61,5 @@ public class SessionMessenger implements Messenger {
             responseConsumer.accept(new SessionCloseResponse(sessionId, exchangeId));
         }
     }
-    
+
 }

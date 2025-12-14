@@ -16,13 +16,13 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 import hu.webarticum.miniconnect.record.type.ValueType;
 
 public class ResultTable implements Iterable<ResultRecord> {
-    
+
     private final MiniResultSet resultSet;
-    
+
     private final ImmutableList<ValueTranslator> valueTranslators;
-    
+
     private final Converter converter;
-    
+
 
     public ResultTable(MiniResultSet resultSet) {
         this(
@@ -30,7 +30,7 @@ public class ResultTable implements Iterable<ResultRecord> {
                 resultSet.columnHeaders().map(ResultTable::defaultTranslatorFor),
                 new DefaultConverter());
     }
-    
+
     public ResultTable(
             MiniResultSet resultSet,
             ImmutableList<ValueTranslator> valueTranslators,
@@ -39,7 +39,7 @@ public class ResultTable implements Iterable<ResultRecord> {
         this.valueTranslators = valueTranslators;
         this.converter = converter;
     }
-    
+
     private static ValueTranslator defaultTranslatorFor(MiniColumnHeader columnHeader) {
         MiniValueDefinition valueDefinition = columnHeader.valueDefinition();
         String typeName = valueDefinition.type();
@@ -49,7 +49,7 @@ public class ResultTable implements Iterable<ResultRecord> {
         ValueType valueType = StandardValueType.valueOf(typeName);
         return valueType.translatorFor(valueDefinition.properties());
     }
-    
+
 
     public ImmutableList<ValueTranslator> valueTranslators() {
         return valueTranslators;
@@ -63,8 +63,8 @@ public class ResultTable implements Iterable<ResultRecord> {
     public Iterator<ResultRecord> iterator() {
         return new ResultTableIterator();
     }
-    
-    
+
+
     private class ResultTableIterator implements Iterator<ResultRecord> {
 
         private boolean nextRowFetched = false;
@@ -77,7 +77,7 @@ public class ResultTable implements Iterable<ResultRecord> {
             if (!nextRowFetched) {
                 fetchNextRow();
             }
-            
+
             return nextRow != null;
         }
 
@@ -86,7 +86,7 @@ public class ResultTable implements Iterable<ResultRecord> {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            
+
             ResultRecord result = buildResultRecord();
             invalidate();
             return result;
@@ -96,16 +96,16 @@ public class ResultTable implements Iterable<ResultRecord> {
             nextRow = resultSet.fetch();
             nextRowFetched = true;
         }
-        
+
         private ResultRecord buildResultRecord() {
             return new ResultRecord(resultSet.columnHeaders(), nextRow, valueTranslators, converter);
         }
-        
+
         private void invalidate() {
             nextRow = null;
             nextRowFetched = false;
         }
-        
+
     }
-    
+
 }

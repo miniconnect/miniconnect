@@ -7,30 +7,30 @@ import hu.webarticum.miniconnect.record.lob.BlobValue;
 public class BlobTranslator implements ValueTranslator {
 
     public static final String NAME = "BLOB"; // NOSONAR same name is OK
-    
+
 
     private static final BlobTranslator INSTANCE = new BlobTranslator();
-    
-    
+
+
     private BlobTranslator() {
         // singleton
     }
-    
+
     public static BlobTranslator instance() {
         return INSTANCE;
     }
-    
+
 
     @Override
     public String name() {
         return NAME;
     }
-    
+
     @Override
     public int length() {
         return MiniValueDefinition.DYNAMIC_LENGTH;
     }
-    
+
     @Override
     public Object decode(MiniContentAccess contentAccess) {
         return BlobValue.of(contentAccess);
@@ -46,5 +46,5 @@ public class BlobTranslator implements ValueTranslator {
     public String assuredClazzName() {
         return BlobValue.class.getName();
     }
-    
+
 }

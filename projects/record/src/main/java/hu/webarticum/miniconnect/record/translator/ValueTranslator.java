@@ -22,7 +22,7 @@ public interface ValueTranslator {
     public default String assuredClazzName() {
         return Object.class.getName();
     }
-    
+
     public default ImmutableMap<String, ByteString> properties() {
         return ImmutableMap.empty();
     }
@@ -30,7 +30,7 @@ public interface ValueTranslator {
     public default MiniValueDefinition definition() {
         return new StoredValueDefinition(name(), length(), properties());
     }
-    
+
     public default MiniValue encodeFully(Object value) {
         ImmutableMap<String, ByteString> properties = properties();
         boolean isNull = (value == null);
@@ -38,5 +38,5 @@ public interface ValueTranslator {
         MiniValueDefinition valueDefinition = new StoredValueDefinition(name(), length(), properties);
         return new StoredValue(valueDefinition, isNull, contentAccess);
     }
-    
+
 }

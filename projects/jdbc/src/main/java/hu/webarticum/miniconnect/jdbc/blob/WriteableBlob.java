@@ -20,11 +20,11 @@ import hu.webarticum.miniconnect.lang.ByteString;
 public class WriteableBlob implements Blob {
 
     private static final long MAX_MEMORY_SIZE = 10 * 1024L;
-    
-    
+
+
     private Storage storage;
-    
-    
+
+
     public WriteableBlob() {
         this(false);
     }
@@ -32,8 +32,8 @@ public class WriteableBlob implements Blob {
     public WriteableBlob(boolean forceFileStorage) {
         storage = forceFileStorage ? new FileStorage() : new MemoryStorage();
     }
-    
-    
+
+
     @Override
     public synchronized long length() throws SQLException {
         return storage.length();
@@ -91,34 +91,34 @@ public class WriteableBlob implements Blob {
     public synchronized void free() throws SQLException {
         storage.free();
     }
-    
+
     private void ensureStorageForWrite(long pos, int len) throws SQLException {
         if (storage instanceof FileStorage) {
             return;
         }
-        
+
         long targetLength = pos - 1 + len;
         if (targetLength <= MAX_MEMORY_SIZE) {
             return;
         }
-        
+
         byte[] content = storage.getBytes(1L, (int) storage.length());
         Storage newStorage = new FileStorage();
         storage.setBytes(1L, content, 0, content.length);
         storage = newStorage;
     }
-    
+
 
     private class WriteableBlobOutputStream extends OutputStream {
 
         private long oneBasedPosition;
-        
-        
+
+
         public WriteableBlobOutputStream(long oneBasedPosition) {
             this.oneBasedPosition = oneBasedPosition;
         }
-        
-        
+
+
         @Override
         public void write(int b) throws IOException {
             write(new byte[] { (byte) b });
@@ -138,18 +138,18 @@ public class WriteableBlob implements Blob {
             }
             oneBasedPosition += len;
         }
-        
+
     }
 
-    
+
     private interface Storage {
-        
+
         public long length() throws SQLException;
-        
+
         public byte[] getBytes(long pos, int length) throws SQLException;
-        
+
         public InputStream getBinaryStream() throws SQLException;
-        
+
         public InputStream getBinaryStream(long pos, long length) throws SQLException;
 
         public int setBytes(long pos, byte[] bytes, int offset, int len) throws SQLException;
@@ -157,15 +157,15 @@ public class WriteableBlob implements Blob {
         public void truncate(long len) throws SQLException;
 
         public void free() throws SQLException;
-        
+
     }
-    
-    
+
+
     private static class MemoryStorage implements Storage {
-        
+
         private ByteString.Builder content = ByteString.builder();
-        
-        
+
+
         @Override
         public long length() throws SQLException {
             return content.length();
@@ -198,7 +198,7 @@ public class WriteableBlob implements Blob {
                 content.append(bytes, offset, len);
                 return len;
             }
-            
+
             ByteString currentByteString = content.build();
             ByteString.Builder newContent = ByteString.builder();
             newContent.append(currentByteString, 0, Math.toIntExact(pos - 1));
@@ -210,7 +210,7 @@ public class WriteableBlob implements Blob {
                 newContent.append(tail);
             }
             content = newContent;
-            
+
             return len;
         }
 
@@ -219,7 +219,7 @@ public class WriteableBlob implements Blob {
             if (len >= length()) {
                 return;
             }
-            
+
             ByteString newByteString = content.build().substringLength(0, Math.toIntExact(len));
             content = ByteString.builder();
             content.append(newByteString);
@@ -229,20 +229,20 @@ public class WriteableBlob implements Blob {
         public void free() throws SQLException {
             content = ByteString.builder();
         }
-        
+
     }
-    
-    
+
+
     private static class FileStorage implements Storage {
 
         private static final String FILE_ACCESS_MODE = "rw";
-        
+
 
         private final File file;
-        
+
         private final RandomAccessFile randomAccessFile;
-        
-        
+
+
         private FileStorage() {
             this.file = createTemporaryFile();
             this.randomAccessFile = createRandomAccessFile(file);
@@ -257,7 +257,7 @@ public class WriteableBlob implements Blob {
                 throw new UncheckedIOException(e);
             }
         }
-        
+
         private static RandomAccessFile createRandomAccessFile(File file) {
             try {
                 return new RandomAccessFile(file, FILE_ACCESS_MODE);
@@ -296,7 +296,7 @@ public class WriteableBlob implements Blob {
                 throw new SQLException(String.format(
                         "Out of bounds, requested end: %d, but length is: %d", end, fullLength));
             }
-            
+
             try {
                 randomAccessFile.seek(pos - 1);
                 InputStream innerStream = Channels.newInputStream(randomAccessFile.getChannel()); // NOSONAR
@@ -332,7 +332,7 @@ public class WriteableBlob implements Blob {
             if (len >= length()) {
                 return;
             }
-            
+
             try {
                 randomAccessFile.setLength(len);
             } catch (Exception e) {
@@ -349,7 +349,7 @@ public class WriteableBlob implements Blob {
                 throw new SQLException(e);
             }
         }
-        
+
     }
 
 }

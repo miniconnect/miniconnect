@@ -14,27 +14,27 @@ public class DateTimeTranslator implements ValueTranslator {
 
 
     private static final DateTimeTranslator INSTANCE = new DateTimeTranslator();
-    
-    
+
+
     private DateTimeTranslator() {
         // singleton
     }
-    
+
     public static DateTimeTranslator instance() {
         return INSTANCE;
     }
-    
+
 
     @Override
     public String name() {
         return NAME;
     }
-    
+
     @Override
     public int length() {
         return Long.BYTES * 2;
     }
-    
+
     @Override
     public Object decode(MiniContentAccess contentAccess) {
         ByteString.Reader reader = contentAccess.get().reader();
@@ -59,5 +59,5 @@ public class DateTimeTranslator implements ValueTranslator {
     public String assuredClazzName() {
         return LocalDateTime.class.getName();
     }
-    
+
 }

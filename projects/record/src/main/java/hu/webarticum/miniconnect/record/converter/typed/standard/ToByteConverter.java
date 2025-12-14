@@ -6,7 +6,7 @@ import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 
 public class ToByteConverter implements TypedConverter<Byte> {
-    
+
     @Override
     public Class<Byte> targetClazz() {
         return Byte.class;

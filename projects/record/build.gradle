@@ -18,11 +18,11 @@ configurations {
 
 dependencies {
     api "hu.webarticum.miniconnect.api:api:${miniConnectApiVersion}"
-    
+
     implementation project(':impl')
     implementation project(':util')
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.19.2'
-    
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.13.4'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.13.4'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.13.4'
@@ -30,6 +30,6 @@ dependencies {
     testImplementation "hu.webarticum.miniconnect.api:lang-assertj:${miniConnectApiVersion}"
     testImplementation 'commons-io:commons-io:2.20.0'
     testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.19.2'
-    
+
     labImplementation 'com.fasterxml.jackson.core:jackson-databind:2.19.2'
 }

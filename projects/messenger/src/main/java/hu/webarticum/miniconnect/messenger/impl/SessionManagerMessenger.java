@@ -21,20 +21,20 @@ import hu.webarticum.miniconnect.messenger.message.response.SessionInitResponse;
 public class SessionManagerMessenger implements Messenger {
 
     private final MiniSessionManager sessionManager;
-    
+
     private final AtomicLong sessionIdCounter = new AtomicLong(0L);
 
     private final Map<Long, SessionMessenger> sessionMessengers =
             Collections.synchronizedMap(new HashMap<>());
-    
+
     private final ExecutorService sessionInitExecutorService = Executors.newCachedThreadPool();
-    
-    
+
+
     public SessionManagerMessenger(MiniSessionManager sessionManager) {
         this.sessionManager = sessionManager;
     }
-    
-    
+
+
     @Override
     public void accept(Request request, Consumer<Response> responseConsumer) {
         if (request instanceof SessionInitRequest) {
@@ -59,7 +59,7 @@ public class SessionManagerMessenger implements Messenger {
             // FIXME: log?
         }
     }
-    
+
     private void invokeOpenSession(Consumer<Response> responseConsumer) {
         long sessionId = sessionIdCounter.incrementAndGet();
         MiniSession session = sessionManager.openSession();

@@ -31,7 +31,7 @@ class BlobClobTest {
         writer.close();
         assertThat(clob.length()).isEqualTo(3L);
         assertThat(clob.getSubString(1L, 3)).isEqualTo("uvw");
-        
+
         Writer updateWriter = clob.setCharacterStream(3L);
         updateWriter.write("nmop");
         updateWriter.close();
@@ -75,8 +75,8 @@ class BlobClobTest {
         assertThat(IOUtils.toString(clob.getCharacterStream())).isEqualTo("\u00E1bcd\u00E9fg");
         assertThat(IOUtils.toString(clob.getCharacterStream(4L, 3))).isEqualTo("d\u00E9f");
     }
-    
-    
+
+
     static Stream<Arguments> provideArguments() {
         return Stream.of(
                 Arguments.of(clobOf(StandardCharsets.ISO_8859_1, 1, StandardCharsets.ISO_8859_1)),

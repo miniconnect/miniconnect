@@ -3,7 +3,7 @@ package hu.webarticum.miniconnect.record.converter.typed.standard;
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 
 public class ToShortConverter implements TypedConverter<Short> {
-    
+
     @Override
     public Class<Short> targetClazz() {
         return Short.class;

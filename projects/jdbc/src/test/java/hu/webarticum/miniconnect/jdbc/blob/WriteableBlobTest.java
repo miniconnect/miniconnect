@@ -17,14 +17,14 @@ class WriteableBlobTest {
     void testSetGetBytes(WriteableBlob blob) throws Exception {
         Charset charset = StandardCharsets.ISO_8859_1;
         String content = "abcdef";
-        
+
         blob.setBytes(1, content.getBytes(charset));
 
         assertThat(blob.length()).isEqualTo(6L);
         assertThat(blob.getBytes(1L, 6)).asString(charset).isEqualTo("abcdef");
         assertThat(blob.getBytes(1L, 3)).asString(charset).isEqualTo("abc");
         assertThat(blob.getBytes(3L, 2)).asString(charset).isEqualTo("cd");
-        
+
         blob.free();
     }
 
@@ -34,7 +34,7 @@ class WriteableBlobTest {
         Charset charset = StandardCharsets.ISO_8859_1;
         String content = "abcdef";
         String updateContent = "1234567";
-        
+
         blob.setBytes(1, content.getBytes(charset));
         blob.setBytes(4, updateContent.getBytes(charset));
 
@@ -50,7 +50,7 @@ class WriteableBlobTest {
         Charset charset = StandardCharsets.ISO_8859_1;
         String content = "abcdef";
         String updateContent = "1234567";
-        
+
         blob.setBinaryStream(1).write(content.getBytes(charset));
 
         assertThat(blob.length()).isEqualTo(6L);
@@ -77,7 +77,7 @@ class WriteableBlobTest {
 
         assertThat(blob.getBinaryStream(2, 3)).hasBinaryContent("bcd".getBytes(charset));
         assertThat(blob.getBinaryStream(2, 3)).hasBinaryContent("bcd".getBytes(charset));
-        
+
         blob.free();
     }
 
@@ -86,7 +86,7 @@ class WriteableBlobTest {
     void testTruncate(WriteableBlob blob) throws Exception {
         Charset charset = StandardCharsets.ISO_8859_1;
         String content = "abcdef";
-        
+
         blob.setBytes(1, content.getBytes(charset));
         blob.truncate(4);
 
@@ -102,5 +102,5 @@ class WriteableBlobTest {
                 Arguments.of(new WriteableBlob()),
                 Arguments.of(new WriteableBlob(true)));
     }
-    
+
 }

@@ -42,9 +42,9 @@ class SortedLimitingIteratorTest {
     private <T> Iterable<T> iterableOf(Iterator<T> iterator) {
         return () -> iterator;
     }
-    
+
     private Comparator<Integer> comparator() {
         return (a, b) -> Integer.compare(a, b);
     }
-    
+
 }

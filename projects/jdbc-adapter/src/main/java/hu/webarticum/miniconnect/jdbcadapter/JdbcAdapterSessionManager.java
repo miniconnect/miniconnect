@@ -12,11 +12,11 @@ import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniSessionManager;
 
 public class JdbcAdapterSessionManager implements MiniSessionManager {
-    
+
     private final ConnectionFactory connectionFactory;
-    
+
     private final Supplier<JdbcLargeDataPutter> largeDataPutterFactory;
-    
+
 
     public JdbcAdapterSessionManager(String connectionUrl) {
         this(() -> DriverManager.getConnection(connectionUrl));
@@ -51,7 +51,7 @@ public class JdbcAdapterSessionManager implements MiniSessionManager {
             Supplier<JdbcLargeDataPutter> largeDataPutterFactory) {
         this(connectionFactoryOf(connectionUrl, properties), largeDataPutterFactory);
     }
-    
+
     public JdbcAdapterSessionManager(ConnectionFactory connectionFactory) {
         this(connectionFactory, null);
     }
@@ -64,14 +64,14 @@ public class JdbcAdapterSessionManager implements MiniSessionManager {
                 largeDataPutterFactory :
                 () -> null;
     }
-    
+
     private static ConnectionFactory connectionFactoryOf(String connectionUrl, Map<?, ?> data) {
         Properties properties = new Properties();
         properties.putAll(data);
         return () -> DriverManager.getConnection(connectionUrl, properties);
     }
-    
-    
+
+
     @Override
     public MiniSession openSession() {
         Connection connection;
@@ -83,13 +83,13 @@ public class JdbcAdapterSessionManager implements MiniSessionManager {
         JdbcLargeDataPutter largeDataPutter = largeDataPutterFactory.get();
         return new JdbcAdapterSession(connection, largeDataPutter);
     }
-    
-    
+
+
     @FunctionalInterface
     public interface ConnectionFactory {
-        
+
         public Connection openConnection() throws SQLException;
-        
+
     }
 
 }

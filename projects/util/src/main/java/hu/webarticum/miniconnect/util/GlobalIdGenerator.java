@@ -8,15 +8,15 @@ import java.util.concurrent.atomic.AtomicLong;
  * @see #generate()
  */
 public class GlobalIdGenerator {
-    
+
     private static final int ID_LENGTH = Long.toUnsignedString(-1L, 16).length();
-    
+
     private static final long PRIME_FACTOR = 6904825739060485001L;
-    
+
 
     private static final AtomicLong counter = new AtomicLong(System.currentTimeMillis());
 
-    
+
     /**
      * Conditionally returns with a generated id
      * 
@@ -27,7 +27,7 @@ public class GlobalIdGenerator {
     public static String generate(boolean enabled) {
         return enabled ? generate() : "";
     }
-    
+
     /**
      * Returns with a generated id.
      * 
@@ -54,7 +54,7 @@ public class GlobalIdGenerator {
         if (length == ID_LENGTH) {
             return stringValue;
         }
-        
+
         StringBuilder resultBuilder = new StringBuilder();
         for (int i = length; i < ID_LENGTH; i++) {
             resultBuilder.append('0');

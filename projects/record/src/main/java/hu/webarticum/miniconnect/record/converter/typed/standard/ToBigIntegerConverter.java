@@ -20,7 +20,7 @@ import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 
 public class ToBigIntegerConverter implements TypedConverter<BigInteger> {
-    
+
     @Override
     public Class<BigInteger> targetClazz() {
         return BigInteger.class;

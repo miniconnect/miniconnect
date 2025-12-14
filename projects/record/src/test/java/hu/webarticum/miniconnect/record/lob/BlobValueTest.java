@@ -33,5 +33,5 @@ class BlobValueTest {
         assertThat(blobValue.inputStream(0L, 4L)).hasBinaryContent(ByteString.of("1234").extract());
         assertThat(blobValue.inputStream(5L, 3L)).hasBinaryContent(ByteString.of("678").extract());
     }
-    
+
 }

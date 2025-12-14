@@ -10,33 +10,33 @@ public class FloatTranslator implements ValueTranslator {
 
 
     private static final FloatTranslator INSTANCE = new FloatTranslator();
-    
-    
+
+
     private FloatTranslator() {
         // singleton
     }
-    
+
     public static FloatTranslator instance() {
         return INSTANCE;
     }
-    
+
 
     @Override
     public String name() {
         return NAME;
     }
-    
+
     @Override
     public int length() {
         return Float.BYTES;
     }
-    
+
     @Override
     public Object decode(MiniContentAccess contentAccess) {
         if (contentAccess.length() < Float.BYTES) {
             return Float.valueOf(0f);
         }
-        
+
         return contentAccess.get(0, Float.BYTES).asBuffer().getFloat();
     }
 
@@ -50,5 +50,5 @@ public class FloatTranslator implements ValueTranslator {
     public String assuredClazzName() {
         return Float.class.getName();
     }
-    
+
 }

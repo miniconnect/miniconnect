@@ -25,5 +25,5 @@ public class HeaderDecoder {
         int exchangeId = reader.readInt();
         return HeaderData.of(messageType, sessionId, exchangeId);
     }
-    
+
 }

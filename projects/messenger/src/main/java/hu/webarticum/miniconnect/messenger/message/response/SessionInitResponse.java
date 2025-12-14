@@ -6,8 +6,8 @@ import hu.webarticum.miniconnect.messenger.message.SessionMessage;
 public final class SessionInitResponse implements Response, SessionMessage {
 
     private static final long serialVersionUID = -3866586038374504295L;
-    
-    
+
+
     private final long sessionId;
 
 
@@ -35,7 +35,7 @@ public final class SessionInitResponse implements Response, SessionMessage {
         } else if (!(other instanceof SessionInitResponse)) {
             return false;
         }
-        
+
         SessionInitResponse otherLargeDataSaveResponse = (SessionInitResponse) other;
         return sessionId == otherLargeDataSaveResponse.sessionId;
     }

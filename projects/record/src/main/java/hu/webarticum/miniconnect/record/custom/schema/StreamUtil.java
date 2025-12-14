@@ -14,16 +14,16 @@ import java.nio.charset.StandardCharsets;
 import hu.webarticum.miniconnect.lang.ByteString;
 
 public final class StreamUtil {
-    
+
     private StreamUtil() {
         // utility class
     }
-    
+
 
     public static byte read(InputStream in) {
         return (byte) readUnsigned(in);
     }
-    
+
     private static int readUnsigned(InputStream in) {
         int b;
         try {
@@ -36,7 +36,7 @@ public final class StreamUtil {
         }
         return b;
     }
-    
+
     public static void write(OutputStream out, byte byteValue) {
         try {
             new DataOutputStream(out).writeByte(byteValue);
@@ -44,7 +44,7 @@ public final class StreamUtil {
             throw new UncheckedIOException(e);
         }
     }
-    
+
     public static int readInt(InputStream in) {
         int b1 = readUnsigned(in);
         int b2 = readUnsigned(in);
@@ -111,7 +111,7 @@ public final class StreamUtil {
     public static void writeString(OutputStream out, String stringValue) {
         writeBytes(out, ByteString.of(stringValue));
     }
-    
+
     public static Object readObject(InputStream in) {
         ByteString bytes = StreamUtil.readBytes(in);
         try {
@@ -133,5 +133,5 @@ public final class StreamUtil {
         ByteString bytes = ByteString.wrap(buffer.toByteArray());
         writeBytes(out, bytes);
     }
-    
+
 }

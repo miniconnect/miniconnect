@@ -8,7 +8,7 @@ import java.io.UncheckedIOException;
 import hu.webarticum.miniconnect.lang.ByteString;
 
 public class PacketReader {
-    
+
     public Packet read(InputStream in) {
         try {
             return readInternal(in);
@@ -27,13 +27,13 @@ public class PacketReader {
         if (firstByte != TransferConstants.MAGIC_BYTE) {
             throw new IOException(String.format("Invalid first byte: 0x%02X", firstByte));
         }
-        
+
         DataInputStream dataIn = new DataInputStream(in);
         ByteString header = readSizedPart(dataIn);
         ByteString payload = readSizedPart(dataIn);
         return Packet.of(header, payload);
     }
-    
+
     private ByteString readSizedPart(DataInputStream dataIn) throws IOException {
         int size = dataIn.readInt();
         byte[] bytes = new byte[size];
@@ -45,5 +45,5 @@ public class PacketReader {
         }
         return ByteString.wrap(bytes);
     }
-    
+
 }

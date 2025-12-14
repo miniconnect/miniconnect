@@ -6,11 +6,11 @@ import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 
 public class ToBooleanConverter implements TypedConverter<Boolean> {
-    
+
     public static final Pattern FALSE_PATTERN = Pattern.compile(
             "f|false|off|n|no|disabled|0|0?\\.0+|\\s*",
             Pattern.CASE_INSENSITIVE);
-    
+
 
     @Override
     public Class<Boolean> targetClazz() {

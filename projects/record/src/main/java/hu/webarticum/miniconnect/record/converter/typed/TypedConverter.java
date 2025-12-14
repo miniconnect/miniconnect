@@ -37,10 +37,10 @@ import hu.webarticum.miniconnect.record.converter.typed.standard.ToZonedDateTime
 public interface TypedConverter<T> {
 
     public Class<T> targetClazz();
-    
+
     public T convert(Object source);
-    
-    
+
+
     public static Collection<TypedConverter<?>> defaultConverters() { // NOSONAR wildcard is OK
         return new ArrayList<>(Arrays.asList(new TypedConverter<?>[] { // NOSONAR for trailing comma
                 new ToNullConverter(),
@@ -74,5 +74,5 @@ public interface TypedConverter<T> {
                 new ToReaderConverter(),
                 }));
     }
-    
+
 }

@@ -16,14 +16,14 @@ import hu.webarticum.miniconnect.record.translator.NullTranslator;
 import hu.webarticum.miniconnect.record.translator.StringTranslator;
 
 public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
-    
+
     private final MiniJdbcConnection connection;
-    
+
 
     public MiniJdbcDatabaseMetaData(MiniJdbcConnection connection) {
         this.connection = connection;
     }
-    
+
 
     @Override
     public MiniJdbcConnection getConnection() throws SQLException {
@@ -35,7 +35,7 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
         if (!isWrapperFor(type)) {
             throw new SQLException(String.format("Unable to convert %s to %s", getClass(), type));
         }
-        
+
         @SuppressWarnings("unchecked")
         T result = (T) this;
         return result;
@@ -49,7 +49,7 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
 
     // --- DRIVER ---
     // [start]
-    
+
     @Override
     public int getJDBCMajorVersion() throws SQLException {
         return MiniJdbcDriver.JDBC_MAJOR_VERSION;
@@ -79,13 +79,13 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
     public int getDriverMinorVersion() {
         return MiniJdbcDriver.DRIVER_MINOR_VERSION;
     }
-    
+
     // [end]
 
 
     // --- DATABASE ---
     // [start]
-    
+
     @Override
     public String getDatabaseProductName() throws SQLException {
         return connection.getDatabaseProvider().getDatabaseProductName(connection.getMiniSession());
@@ -111,7 +111,7 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
 
     // --- CONNECTION ---
     // [start]
-    
+
     @Override
     public String getURL() throws SQLException {
         return connection.getConnectionUrl();
@@ -613,7 +613,7 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
     public boolean generatedKeyAlwaysReturned() throws SQLException {
         return true; // FIXME: most likely guess
     }
-    
+
     // [end]
 
 
@@ -1015,7 +1015,7 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
             ) throws SQLException {
         return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
     }
-    
+
     // [end]
-    
+
 }

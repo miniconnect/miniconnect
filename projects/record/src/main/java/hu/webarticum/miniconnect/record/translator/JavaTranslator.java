@@ -12,18 +12,18 @@ import hu.webarticum.miniconnect.impl.contentaccess.dynamic.DynamicContentAccess
 public class JavaTranslator implements ValueTranslator {
 
     public static final String NAME = "JAVA"; // NOSONAR same name is OK
-    
+
 
     private static final JavaTranslator UNBOUND_INSTANCE = new JavaTranslator(null);
-    
-    
+
+
     private final String assuredClazzName;
-    
+
 
     private JavaTranslator(String assuredClazzName) {
         this.assuredClazzName = assuredClazzName;
     }
-    
+
     public static JavaTranslator unboundInstance() {
         return UNBOUND_INSTANCE;
     }
@@ -35,18 +35,18 @@ public class JavaTranslator implements ValueTranslator {
     public static JavaTranslator of(Class<?> assuredClazz) {
         return new JavaTranslator(assuredClazz.getName());
     }
-    
+
 
     @Override
     public String name() {
         return NAME;
     }
-    
+
     @Override
     public int length() {
         return MiniValueDefinition.DYNAMIC_LENGTH;
     }
-    
+
     @Override
     public Object decode(MiniContentAccess contentAccess) {
         Object value;
@@ -68,7 +68,7 @@ public class JavaTranslator implements ValueTranslator {
                 .writing(out -> new ObjectOutputStream(out).writeObject(value))
                 .build();
     }
-    
+
     private void checkAssuredType(Object value) {
         if (assuredClazzName == null || value == null) {
             return;
@@ -80,7 +80,7 @@ public class JavaTranslator implements ValueTranslator {
         } catch (ClassNotFoundException e) {
             throw new UncheckedIOException("Unknown type: " + assuredClazzName, new IOException(e));
         }
-        
+
         Class<?> actualClazz = value.getClass();
         if (!expectedClazz.isAssignableFrom(actualClazz)) {
             throw new IllegalArgumentException(String.format(
@@ -94,5 +94,5 @@ public class JavaTranslator implements ValueTranslator {
     public String assuredClazzName() {
         return assuredClazzName == null ? Object.class.getName() : assuredClazzName;
     }
-    
+
 }

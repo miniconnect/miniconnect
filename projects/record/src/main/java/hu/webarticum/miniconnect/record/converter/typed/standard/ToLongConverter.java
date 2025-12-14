@@ -16,7 +16,7 @@ import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 
 public class ToLongConverter implements TypedConverter<Long> {
-    
+
     @Override
     public Class<Long> targetClazz() {
         return Long.class;

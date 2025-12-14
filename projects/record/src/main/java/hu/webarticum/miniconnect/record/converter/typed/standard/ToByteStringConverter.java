@@ -19,7 +19,7 @@ import hu.webarticum.miniconnect.record.lob.ClobValue;
 
 
 public class ToByteStringConverter implements TypedConverter<ByteString> {
-    
+
     @Override
     public Class<ByteString> targetClazz() {
         return ByteString.class;

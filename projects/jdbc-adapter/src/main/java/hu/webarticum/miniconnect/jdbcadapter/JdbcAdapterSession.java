@@ -14,21 +14,21 @@ import hu.webarticum.miniconnect.impl.result.StoredError;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
 
 public class JdbcAdapterSession implements MiniSession {
-    
+
     private final Connection jdbcConnection;
-    
+
     private final JdbcLargeDataPutter jdbcLargeDataPutter;
-    
-    
+
+
     public JdbcAdapterSession(Connection jdbcConnection) {
         this(jdbcConnection, null);
     }
-    
+
     public JdbcAdapterSession(Connection jdbcConnection, JdbcLargeDataPutter jdbcLargeDataPutter) {
         this.jdbcConnection = jdbcConnection;
         this.jdbcLargeDataPutter = jdbcLargeDataPutter;
     }
-    
+
 
     @Override
     public MiniResult execute(String query) {
@@ -41,14 +41,14 @@ public class JdbcAdapterSession implements MiniSession {
         } catch (Exception e) {
             return errorResult(e);
         }
-        
+
         try {
             return new JdbcAdapterResult(jdbcStatement);
         } catch (Exception e) {
             return errorResult(e);
         }
     }
-    
+
     private MiniResult errorResult(Exception e) {
         String message = e.getMessage();
         if (message == null) {
@@ -60,11 +60,11 @@ public class JdbcAdapterSession implements MiniSession {
     @Override
     public MiniLargeDataSaveResult putLargeData(
             String variableName, long length, InputStream dataSource) {
-        
+
         if (jdbcLargeDataPutter == null) {
             throw new UnsupportedOperationException();
         }
-        
+
         return jdbcLargeDataPutter.putLargeData(jdbcConnection, variableName, length, dataSource);
     }
 

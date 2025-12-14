@@ -5,11 +5,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 public final class FutureUtil {
-    
+
     private FutureUtil() {
         // utility class
     }
-    
+
 
     public static <T> Optional<T> getSilently(Future<T> future, long timeout, TimeUnit unit) {
         try {
@@ -18,5 +18,5 @@ public final class FutureUtil {
             return Optional.empty();
         }
     }
-    
+
 }

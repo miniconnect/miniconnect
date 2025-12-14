@@ -15,10 +15,10 @@ public interface Schema {
     public void writeTo(OutputStream out);
 
     public Object readValueFrom(InputStream in);
-    
+
     public void writeValueTo(Object value, OutputStream out);
 
-    
+
     public static Schema readFrom(InputStream in) {
         try {
             MetaType metaType = MetaType.ofFlag((byte) in.read());
@@ -27,26 +27,26 @@ public interface Schema {
             throw new UncheckedIOException(e);
         }
     }
-    
+
     public static Schema buildAdHocFor(Object value) {
         if (value instanceof ImmutableList) {
             return new ListSchema(AnySchema.instance());
         } else if (value instanceof ImmutableMap) {
             return new MapSchema(AnySchema.instance(), AnySchema.instance());
         }
-        
+
         for (StandardValueType valueType : StandardValueType.values()) {
             if (valueType.clazz().isAssignableFrom(value.getClass())) {
                 return new StandardSchema(valueType);
             }
         }
-        
+
         if (value instanceof Serializable) {
             return JavaSchema.instance();
         }
-        
+
         throw new IllegalArgumentException(
                 "Unencodable type given: " + value.getClass().getCanonicalName());
     }
-    
+
 }

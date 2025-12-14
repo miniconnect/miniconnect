@@ -3,7 +3,7 @@ package hu.webarticum.miniconnect.record.converter.typed.standard;
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 
 public class ToIntegerConverter implements TypedConverter<Integer> {
-    
+
     @Override
     public Class<Integer> targetClazz() {
         return Integer.class;

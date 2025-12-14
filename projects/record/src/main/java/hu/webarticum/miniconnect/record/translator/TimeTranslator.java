@@ -12,27 +12,27 @@ public class TimeTranslator implements ValueTranslator {
 
 
     private static final TimeTranslator INSTANCE = new TimeTranslator();
-    
-    
+
+
     private TimeTranslator() {
         // singleton
     }
-    
+
     public static TimeTranslator instance() {
         return INSTANCE;
     }
-    
+
 
     @Override
     public String name() {
         return NAME;
     }
-    
+
     @Override
     public int length() {
         return Long.BYTES;
     }
-    
+
     @Override
     public Object decode(MiniContentAccess contentAccess) {
         ByteString.Reader reader = contentAccess.get().reader();
@@ -52,5 +52,5 @@ public class TimeTranslator implements ValueTranslator {
     public String assuredClazzName() {
         return LocalTime.class.getName();
     }
-    
+
 }

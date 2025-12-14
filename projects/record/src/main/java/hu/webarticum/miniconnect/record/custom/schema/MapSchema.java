@@ -8,20 +8,20 @@ import java.util.Map;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
 
 public class MapSchema implements Schema {
-    
+
     public static final byte FLAG = (byte) 'M';
-    
-    
+
+
     private final Schema keySchema;
-    
+
     private final Schema valueSchema;
-    
+
 
     public MapSchema(Schema keySchema, Schema valueSchema) {
         this.keySchema = keySchema;
         this.valueSchema = valueSchema;
     }
-    
+
 
     public static MapSchema readMainFrom(InputStream in) {
         Schema keySchema = Schema.readFrom(in);
@@ -29,7 +29,7 @@ public class MapSchema implements Schema {
         return new MapSchema(keySchema, valueSchema);
     }
 
-    
+
     @Override
     public void writeTo(OutputStream out) {
         StreamUtil.write(out, FLAG);

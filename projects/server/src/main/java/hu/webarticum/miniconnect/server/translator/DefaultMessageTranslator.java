@@ -57,8 +57,8 @@ public class DefaultMessageTranslator implements MessageTranslator {
             }
         }
     }
-    
-    
+
+
     @Override
     public Message decode(Packet packet) {
         HeaderData header = new HeaderDecoder().decode(packet.header());
@@ -66,7 +66,7 @@ public class DefaultMessageTranslator implements MessageTranslator {
         TranslatorDriver driver = drivers.get(messageType);
         return driver.decode(header, packet.payload());
     }
-    
+
     @Override
     public Packet encode(Message message) {
         MessageType messageType = MessageType.ofMessage(message);

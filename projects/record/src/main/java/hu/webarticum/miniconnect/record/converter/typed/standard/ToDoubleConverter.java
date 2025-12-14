@@ -18,7 +18,7 @@ import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 
 public class ToDoubleConverter implements TypedConverter<Double> {
-    
+
     @Override
     public Class<Double> targetClazz() {
         return Double.class;

@@ -16,27 +16,27 @@ public class OffsetDateTimeTranslator implements ValueTranslator {
 
 
     private static final OffsetDateTimeTranslator INSTANCE = new OffsetDateTimeTranslator();
-    
-    
+
+
     private OffsetDateTimeTranslator() {
         // singleton
     }
-    
+
     public static OffsetDateTimeTranslator instance() {
         return INSTANCE;
     }
-    
+
 
     @Override
     public String name() {
         return NAME;
     }
-    
+
     @Override
     public int length() {
         return (Long.BYTES * 2) + Integer.BYTES;
     }
-    
+
     @Override
     public Object decode(MiniContentAccess contentAccess) {
         ByteString.Reader reader = contentAccess.get().reader();
@@ -68,5 +68,5 @@ public class OffsetDateTimeTranslator implements ValueTranslator {
     public String assuredClazzName() {
         return LocalDateTime.class.getName();
     }
-    
+
 }

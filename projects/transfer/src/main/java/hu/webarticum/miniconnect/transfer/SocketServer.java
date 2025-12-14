@@ -22,36 +22,36 @@ import org.slf4j.LoggerFactory;
 public class SocketServer implements Closeable {
 
     private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    
-    
+
+
     private static final int CLOSE_TIMEOUT_SECONDS = 20;
-    
+
 
     private final ServerSocket serverSocket;
-    
+
     private final Supplier<PacketExchanger> exchangerFactory;
-    
+
     private final ExecutorService executorService = Executors.newCachedThreadPool();
-    
+
     private final Set<Socket> clientSockets = Collections.newSetFromMap(new IdentityHashMap<>());
-    
+
     private final Object clientSocketsLock = new Object();
-    
+
     private volatile boolean closed = false;
-    
-    
+
+
     public SocketServer(ServerSocket serverSocket, Supplier<PacketExchanger> exchangerFactory) {
         this.serverSocket = serverSocket;
         this.exchangerFactory = exchangerFactory;
     }
-    
-    
+
+
     public void listen() {
         while (!closed) {
             acceptNextClient();
         }
     }
-    
+
     private void acceptNextClient() {
         Socket clientSocket;
         try {
@@ -83,7 +83,7 @@ public class SocketServer implements Closeable {
             if (packet == null) {
                 break;
             }
-            
+
             PacketExchanger exchanger = exchangerFactory.get();
             PacketTarget responseTarget = new SocketPacketTarget(clientSocket);
             exchanger.handle(packet, responseTarget);
@@ -109,7 +109,7 @@ public class SocketServer implements Closeable {
         } catch (Exception e) {
             // nothing to do
         }
-        
+
         executorService.shutdownNow();
         try {
             executorService.awaitTermination(CLOSE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
@@ -118,7 +118,7 @@ public class SocketServer implements Closeable {
         } catch (Exception e) {
             // nothing to do
         }
-        
+
         if (serverSocketCloseException != null) {
             throw new UncheckedIOException(serverSocketCloseException);
         }
@@ -130,7 +130,7 @@ public class SocketServer implements Closeable {
             logger.info("Client accepted: {}", clientSocket);
         }
     }
-    
+
     private void closeAllRegisteredClientSockets() {
         List<Socket> clientSocketsToClose;
         synchronized (clientSocketsLock) {

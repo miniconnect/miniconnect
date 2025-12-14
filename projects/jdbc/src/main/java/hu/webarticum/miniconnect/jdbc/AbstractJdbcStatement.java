@@ -18,33 +18,33 @@ import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.translator.BigintTranslator;
 
 public abstract class AbstractJdbcStatement implements Statement {
-    
+
     private static final Pattern INSERT_PATTERN = Pattern.compile("^\\s*INSERT\\b", Pattern.CASE_INSENSITIVE);
-    
-    
+
+
     private final MiniJdbcConnection connection;
-    
+
     private volatile boolean escapeProcessing = false;
-    
+
     private volatile ResultHolder currentResultHolder = null; // NOSONAR
-    
+
     private volatile SQLWarning currentWarningHead = null; // NOSONAR
-    
+
     private volatile LargeInteger lastInsertedId = null;
 
-    
+
     AbstractJdbcStatement(MiniJdbcConnection connection) {
         this.connection = connection;
         connection.registerActiveStatement(this);
     }
-    
+
 
     @Override
     public <T> T unwrap(Class<T> type) throws SQLException {
         if (!isWrapperFor(type)) {
             throw new SQLException(String.format("Unable to convert %s to %s", getClass(), type));
         }
-        
+
         @SuppressWarnings("unchecked")
         T result = (T) this;
         return result;
@@ -212,12 +212,12 @@ public abstract class AbstractJdbcStatement implements Statement {
             lastInsertedId = null;
         }
     }
-    
+
     private SQLWarning wrapWarnings(ImmutableList<MiniError> miniWarnings) {
         if (miniWarnings.isEmpty()) {
             return null;
         }
-        
+
         SQLWarning headWarning = wrapWarning(miniWarnings.get(0));
         SQLWarning parentWarning = headWarning;
         int length = miniWarnings.size();
@@ -228,7 +228,7 @@ public abstract class AbstractJdbcStatement implements Statement {
         }
         return headWarning;
     }
-    
+
     private SQLWarning wrapWarning(MiniError miniWarning) {
         return new SQLWarning(miniWarning.message(), miniWarning.sqlState(), miniWarning.code());
     }
@@ -237,14 +237,14 @@ public abstract class AbstractJdbcStatement implements Statement {
         return new SQLException("This result set is FORWARD_ONLY");
     }
 
-    
+
     protected static class ResultHolder {
-        
+
         protected final MiniResult result;
-        
+
         protected final MiniJdbcResultSet jdbcResultSet;
-        
-        
+
+
         protected ResultHolder(MiniResult result, MiniJdbcResultSet jdbcResultSet) {
             this.result = result;
             this.jdbcResultSet = jdbcResultSet;

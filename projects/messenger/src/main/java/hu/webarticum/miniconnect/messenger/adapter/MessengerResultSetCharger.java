@@ -29,19 +29,19 @@ import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsRespons
 import hu.webarticum.miniconnect.messenger.util.ExceptionUtil;
 
 public class MessengerResultSetCharger {
-    
+
     private static final int MAX_MEMORY_CONTENT_SIZE = 10 * 1024 * 1024;
-    
+
 
     private final MessengerResultSet resultSet;
-    
+
     private final Consumer<Response> consumerReference;
-    
+
     private final Map<Long, Map<Integer, List<ResultSetValuePartResponse>>> unhandledParts = new HashMap<>();
-    
+
     private final Map<CellPosition, ChargeableContentAccess> chargeables = new HashMap<>();
 
-    
+
     public MessengerResultSetCharger(
             ResultResponse resultResponse,
             Consumer<Response> consumerReference) {
@@ -50,17 +50,17 @@ public class MessengerResultSetCharger {
         this.consumerReference = consumerReference;
     }
 
-    
+
     public MiniResultSet resultSet() {
         return resultSet;
     }
-    
+
     public synchronized void accept(ResultSetRowsResponse rowsResponse) {
         if (resultSet.closed) {
             unhandledParts.clear();
             return;
         }
-        
+
         long rowIndex = rowsResponse.rowOffset();
         for (ImmutableList<CellData> rowData : rowsResponse.rows()) {
             acceptRow(rowIndex, rowData);
@@ -68,23 +68,23 @@ public class MessengerResultSetCharger {
         }
         new Blackhole().consume(consumerReference);
     }
-    
+
     private void acceptRow(long rowIndex, ImmutableList<CellData> rowData) {
         ImmutableList<MiniValue> row = rowData.map(
                 (columnIndex, cellData) -> createValue(rowIndex, columnIndex, cellData));
         unhandledParts.remove(rowIndex);
-        
+
         try {
             resultSet.rowQueue.put(row);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     }
-    
+
     private MiniValue createValue(long rowIndex, int columnIndex, CellData cellData) {
         long fullLength = cellData.fullLength();
         ByteString content = cellData.content();
-        
+
         MiniContentAccess contentAccess;
         if (fullLength == content.length()) {
             contentAccess = new StoredContentAccess(content);
@@ -95,21 +95,21 @@ public class MessengerResultSetCharger {
             chargeables.put(new CellPosition(rowIndex, columnIndex), chargeable);
             contentAccess = chargeable;
         }
-        
+
         MiniValueDefinition valueDefinition =
                 resultSet.columnHeaders.get(columnIndex).valueDefinition();
-        
+
         return new MessengerValue(valueDefinition, cellData.isNull(), contentAccess);
     }
-    
+
     private void processUnhandledParts(
             long rowIndex, int columnIndex, ChargeableContentAccess chargeable) {
-        
+
         Map<Integer, List<ResultSetValuePartResponse>> unhandledRow = unhandledParts.get(rowIndex);
         if (unhandledRow == null) {
             return;
         }
-        
+
         List<ResultSetValuePartResponse> unhandledCell = unhandledRow.get(columnIndex);
         if (unhandledCell == null) {
             return;
@@ -132,7 +132,7 @@ public class MessengerResultSetCharger {
         long rowIndex = partResponse.rowIndex();
         int columnIndex = partResponse.columnIndex();
         CellPosition cellPosition = new CellPosition(rowIndex, columnIndex);
-        
+
         ChargeableContentAccess chargeable = chargeables.get(cellPosition);
         if (chargeable != null) {
             chargeable.accept(partResponse.offset(), partResponse.content());
@@ -145,7 +145,7 @@ public class MessengerResultSetCharger {
             // ignored
         }
     }
-    
+
     private void storeUnhandledPart(ResultSetValuePartResponse partResponse) {
         Map<Integer, List<ResultSetValuePartResponse>> unhandledRow =
                 unhandledParts.computeIfAbsent(
@@ -157,7 +157,7 @@ public class MessengerResultSetCharger {
                         k -> new ArrayList<>());
         unhandledCell.add(partResponse);
     }
-    
+
     public void acceptEof() {
         try {
             resultSet.rowQueue.put(MessengerResultSet.eofRow());
@@ -166,25 +166,25 @@ public class MessengerResultSetCharger {
         }
     }
 
-    
+
     private static class CellPosition {
-        
+
         final long rowIndex;
-        
+
         final int columnIndex;
-        
-        
+
+
         CellPosition(long rowIndex, int columnIndex) {
             this.rowIndex = rowIndex;
             this.columnIndex = columnIndex;
         }
-        
+
 
         @Override
         public int hashCode() {
             return Objects.hash(rowIndex, columnIndex);
         }
-        
+
         @Override
         public boolean equals(Object other) {
             if (this == other) {
@@ -194,52 +194,52 @@ public class MessengerResultSetCharger {
             } else if (!(other instanceof CellPosition)) {
                 return false;
             }
-            
+
             CellPosition otherCellIndex = (CellPosition) other;
             return (
                     otherCellIndex.rowIndex == rowIndex &&
                     otherCellIndex.columnIndex == columnIndex);
         }
-        
+
     }
-    
-    
+
+
     private static class MessengerResultSet implements MiniResultSet {
-        
+
         private final ImmutableList<MiniColumnHeader> columnHeaders;
-        
+
         private final BlockingQueue<ImmutableList<MiniValue>> rowQueue =
                 new LinkedBlockingQueue<>();
-        
+
         private volatile long currentRowIndex = -1;
-        
+
         private volatile ImmutableList<MiniValue> currentRow = null; // NOSONAR
-        
+
         private volatile boolean finished = false;
-        
+
         private volatile boolean closed = false;
-        
-        
+
+
         public MessengerResultSet(ImmutableList<MiniColumnHeader> columnHeaders) {
             this.columnHeaders = columnHeaders;
         }
-    
-        
+
+
         @Override
         public ImmutableList<MiniColumnHeader> columnHeaders() {
             return columnHeaders;
         }
-        
+
         @Override
         public synchronized ImmutableList<MiniValue> fetch() {
             if (finished) {
                 return null;
             }
-            
+
             closeCurrentRow();
             fetchNextRow();
             handleEof();
-            
+
             return currentRow;
         }
 
@@ -255,7 +255,7 @@ public class MessengerResultSetCharger {
 
             currentRowIndex++; // NOSONAR
         }
-        
+
         private RuntimeException closeImplicitly(RuntimeException existingException) {
             try {
                 close();
@@ -264,29 +264,29 @@ public class MessengerResultSetCharger {
             }
             return existingException;
         }
-        
+
         private void handleEof() {
             if (isEofRow(currentRow)) {
                 currentRow = null;
                 finished = true;
             }
         }
-        
+
         private void closeCurrentRow() {
             if (currentRow == null) {
                 return;
             }
-            
+
             for (MiniValue value : currentRow) {
                 closeValue(value);
             }
         }
-        
+
         private void closeValue(MiniValue value) {
             if (!(value instanceof MessengerValue)) {
                 return;
             }
-            
+
             MessengerValue messengerValue = (MessengerValue) value;
             try {
                 messengerValue.close();
@@ -308,7 +308,7 @@ public class MessengerResultSetCharger {
             closed = true;
             closeCurrentRow();
         }
-        
+
         @Override
         public boolean isClosed() {
             return closed;

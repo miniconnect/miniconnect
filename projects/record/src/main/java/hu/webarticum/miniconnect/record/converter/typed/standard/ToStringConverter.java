@@ -17,7 +17,7 @@ import hu.webarticum.miniconnect.record.lob.BlobValue;
 import hu.webarticum.miniconnect.record.lob.ClobValue;
 
 public class ToStringConverter implements TypedConverter<String> {
-    
+
     @Override
     public Class<String> targetClazz() {
         return String.class;

@@ -14,21 +14,21 @@ import hu.webarticum.miniconnect.record.translator.ValueTranslator;
 import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class StandardSchema implements Schema {
-    
+
     public static final byte FLAG = (byte) 1;
-    
-    
+
+
     private final StandardValueType valueType;
-    
+
     private final ImmutableMap<String, ByteString> properties;
-    
+
     private final ValueTranslator translator;
-    
+
 
     public StandardSchema(StandardValueType valueType) {
         this(valueType, ImmutableMap.empty());
     }
-    
+
     public StandardSchema(
             StandardValueType valueType,
             ImmutableMap<String, ByteString> properties) {
@@ -36,7 +36,7 @@ public class StandardSchema implements Schema {
         this.properties = properties;
         this.translator = valueType.translatorFor(properties);
     }
-    
+
 
     public static StandardSchema readMainFrom(InputStream in) {
         ByteString standardFlag = StreamUtil.readFixedBytes(in, StandardValueType.FLAG_LENGTH);
@@ -52,7 +52,7 @@ public class StandardSchema implements Schema {
         return new StandardSchema(valueType, properties);
     }
 
-    
+
     @Override
     public void writeTo(OutputStream out) {
         StreamUtil.write(out, FLAG);

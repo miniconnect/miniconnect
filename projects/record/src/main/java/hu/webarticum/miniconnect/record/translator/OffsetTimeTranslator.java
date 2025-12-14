@@ -14,27 +14,27 @@ public class OffsetTimeTranslator implements ValueTranslator {
 
 
     private static final OffsetTimeTranslator INSTANCE = new OffsetTimeTranslator();
-    
-    
+
+
     private OffsetTimeTranslator() {
         // singleton
     }
-    
+
     public static OffsetTimeTranslator instance() {
         return INSTANCE;
     }
-    
+
 
     @Override
     public String name() {
         return NAME;
     }
-    
+
     @Override
     public int length() {
         return Long.BYTES + Integer.BYTES;
     }
-    
+
     @Override
     public Object decode(MiniContentAccess contentAccess) {
         ByteString.Reader reader = contentAccess.get().reader();
@@ -61,5 +61,5 @@ public class OffsetTimeTranslator implements ValueTranslator {
     public String assuredClazzName() {
         return OffsetTime.class.getName();
     }
-    
+
 }

@@ -19,28 +19,28 @@ import hu.webarticum.miniconnect.server.ClientMessenger;
 public class MiniJdbcDriver implements Driver {
 
     public static final int JDBC_MAJOR_VERSION = 4;
-    
+
     public static final int JDBC_MINOR_VERSION = 2;
-    
+
     public static final String DRIVER_NAME = "MiniConnect JDBC";
-    
+
     public static final int DRIVER_MAJOR_VERSION = 0;
-    
+
     public static final int DRIVER_MINOR_VERSION = 1;
-    
+
     public static final String DRIVER_VERSION = DRIVER_MAJOR_VERSION + "." + DRIVER_MINOR_VERSION;
-    
+
     public static final String PROPERTY_USER = "user";
-    
+
     public static final String PROPERTY_PASSWORD = "password";
-    
+
     public static final String PROPERTY_PROVIDER = "provider";
-    
+
     public static final String PROVIDER_BLANKET = "blanket";
-    
+
     public static final String PROVIDER_H2 = "h2";
-    
-    
+
+
     @Override
     public boolean acceptsURL(String url) {
         return ConnectionUrlInfo.isUrlSupported(url);
@@ -76,12 +76,12 @@ public class MiniJdbcDriver implements Driver {
         ConnectionUrlInfo urlInfo = ConnectionUrlInfo.parse(url, info);
         ImmutableMap<String, String> properties = urlInfo.properties();
         String schema = urlInfo.schema();
-        
+
         ClientMessenger clientMessenger = new ClientMessenger(urlInfo.host(), urlInfo.port());
         MiniSession session = new MessengerSessionManager(clientMessenger).openSession();
         String providerName = properties.getOrDefault(PROPERTY_PROVIDER, PROVIDER_BLANKET);
         DatabaseProvider databaseProvider = createProviderFor(providerName);
-        
+
         Connection connection = new MiniJdbcConnection(session, databaseProvider, url, clientMessenger::close);
         if (schema != null) {
             try {
@@ -91,10 +91,10 @@ public class MiniJdbcDriver implements Driver {
                 throw e;
             }
         }
-        
+
         return connection;
     }
-    
+
     private DatabaseProvider createProviderFor(String providerName) {
         if (providerName.equals(PROVIDER_BLANKET)) {
             return new BlanketDatabaseProvider();

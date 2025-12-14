@@ -16,7 +16,7 @@ public class PacketWriter {
             throw new UncheckedIOException(e);
         }
     }
-    
+
     public void writeInternal(Packet packet, OutputStream out) throws IOException {
         DataOutputStream dataOut = new DataOutputStream(out);
         dataOut.write(TransferConstants.MAGIC_BYTE);
@@ -24,10 +24,10 @@ public class PacketWriter {
         writeSizedPart(packet.payload(), dataOut);
         dataOut.flush();
     }
-    
+
     private void writeSizedPart(ByteString content, DataOutputStream dataOut) throws IOException {
         dataOut.writeInt(content.length());
         content.writeTo(dataOut);
     }
-    
+
 }

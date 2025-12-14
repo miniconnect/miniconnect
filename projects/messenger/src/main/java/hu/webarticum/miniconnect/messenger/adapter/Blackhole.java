@@ -10,11 +10,11 @@ import java.util.Random;
 public class Blackhole {
 
     public volatile Object obj1; // NOSONAR
-    
+
     public int tlr; // NOSONAR
-    
+
     public volatile int tlrMask; // NOSONAR
-    
+
 
     public Blackhole() {
         Random random = new Random(System.nanoTime());
@@ -22,8 +22,8 @@ public class Blackhole {
         tlrMask = 1;
         obj1 = new Object();
     }
-    
-    
+
+
     public final void consume(Object obj) {
         int ntlr = (this.tlr = (this.tlr * 1664525 + 1013904223));
         if ((ntlr & tlrMask) == 0) {
@@ -31,5 +31,5 @@ public class Blackhole {
             this.tlrMask = (tlrMask << 1) + 1;
         }
     }
-    
+
 }

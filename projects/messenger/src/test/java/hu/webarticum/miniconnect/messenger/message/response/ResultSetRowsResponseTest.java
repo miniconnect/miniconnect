@@ -15,7 +15,7 @@ import hu.webarticum.miniconnect.messenger.message.response.ResultResponse.Colum
 import hu.webarticum.miniconnect.messenger.message.response.ResultResponse.ErrorData;
 
 class ResultSetRowsResponseTest {
-    
+
     @Test
     void testHashCodeAndEquals() {
         ResultResponse instance1 = buildResultResponse1();

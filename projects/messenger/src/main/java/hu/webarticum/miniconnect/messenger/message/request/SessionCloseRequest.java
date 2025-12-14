@@ -8,7 +8,7 @@ import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 public final class SessionCloseRequest implements Request, ExchangeMessage {
 
     private static final long serialVersionUID = -7193819981812764503L;
-    
+
 
     private final long sessionId;
 
@@ -45,7 +45,7 @@ public final class SessionCloseRequest implements Request, ExchangeMessage {
         } else if (!(other instanceof SessionCloseRequest)) {
             return false;
         }
-        
+
         SessionCloseRequest otherSessionCloseRequest = (SessionCloseRequest) other;
         return
                 sessionId == otherSessionCloseRequest.sessionId &&

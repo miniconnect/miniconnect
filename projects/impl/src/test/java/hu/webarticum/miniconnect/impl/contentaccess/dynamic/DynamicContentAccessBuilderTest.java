@@ -13,7 +13,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 
 class DynamicContentAccessBuilderTest {
-    
+
     @Test
     void testNoWrite() {
         MiniContentAccess contentAccess = DynamicContentAccessBuilder.open()

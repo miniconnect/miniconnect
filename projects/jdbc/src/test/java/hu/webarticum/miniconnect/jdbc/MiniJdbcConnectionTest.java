@@ -34,30 +34,30 @@ import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 class MiniJdbcConnectionTest {
-    
+
     @Test
     void testResultSetWithDummyMessenger() throws Exception {
         MiniSessionManager sessionManager = new MockSessionManager(this::mockResult);
         try (
                 Connection connection = new MiniJdbcConnection(sessionManager.openSession(), null);
                 Statement selectStatement = connection.createStatement()) {
-            
+
             boolean executeResult = selectStatement.execute("SELECT * FROM data");
             assertThat(executeResult).isTrue();
-            
+
             try (ResultSet resultSet = selectStatement.getResultSet()) {
                 assertThat(resultSet.findColumn("id")).isEqualTo(1);
                 assertThat(resultSet.findColumn("label")).isEqualTo(2);
                 assertThat(resultSet.findColumn("description")).isEqualTo(3);
                 assertThatThrownBy(() -> resultSet.findColumn("xxxxx"))
                         .isInstanceOf(SQLException.class);
-                
+
                 ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
                 assertThat(resultSetMetaData.getColumnCount()).isEqualTo(3);
                 assertThat(resultSetMetaData.getColumnLabel(1)).isEqualTo("id");
                 assertThat(resultSetMetaData.getColumnLabel(2)).isEqualTo("label");
                 assertThat(resultSetMetaData.getColumnLabel(3)).isEqualTo("description");
-                
+
                 boolean next1Result = resultSet.next();
                 assertThat(next1Result).isTrue();
                 assertThat(resultSet.getInt(1)).isEqualTo(1);
@@ -69,19 +69,19 @@ class MiniJdbcConnectionTest {
                 assertThat(resultSet.getInt(1)).isEqualTo(2);
                 assertThat(resultSet.getString(2)).isEqualTo("second");
                 assertThat(resultSet.getString(3)).isEqualTo("lorem ipsum");
-                
+
                 boolean next3Result = resultSet.next();
                 assertThat(next3Result).isTrue();
                 assertThat(resultSet.getInt(1)).isEqualTo(3);
                 assertThat(resultSet.getString(2)).isEqualTo("third");
                 assertThat(resultSet.getString(3)).isEqualTo("xxx yyy");
-                
+
                 boolean next4Result = resultSet.next();
                 assertThat(next4Result).isFalse();
             }
         }
     }
-    
+
     private MiniResult mockResult(String sql) {
         MiniValueDefinition intDefinition = new StoredValueDefinition(
                 StandardValueType.INT.name());
@@ -106,11 +106,11 @@ class MiniJdbcConnectionTest {
                 asMiniValue("xxx yyy")));
         return new StoredResult(new StoredResultSetData(columnHeaders, rows));
     }
-    
+
     private MiniValue asMiniValue(Object value) {
         return new StoredValue(asByteString(value));
     }
-    
+
     private ByteString asByteString(Object value) {
         if (value instanceof Integer) {
             return ByteString.ofInt((int) value);
@@ -146,7 +146,7 @@ class MiniJdbcConnectionTest {
             }
             try (PreparedStatement selectPreparedStatement = connection.prepareStatement(
                     "SELECT label FROM data WHERE id = ?")) {
-                
+
                 selectPreparedStatement.setInt(1, 1);
                 try (ResultSet resultSet = selectPreparedStatement.executeQuery()) {
                     assertThat(resultSet.next()).isTrue();

@@ -7,5 +7,5 @@ import hu.webarticum.miniconnect.transfer.Packet;
 public interface MessageDecoder {
 
     public Message decode(Packet packet);
-    
+
 }

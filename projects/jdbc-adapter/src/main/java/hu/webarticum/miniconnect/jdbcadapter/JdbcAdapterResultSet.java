@@ -29,7 +29,7 @@ import hu.webarticum.miniconnect.record.type.StandardValueType;
 import hu.webarticum.miniconnect.record.type.ValueType;
 
 public class JdbcAdapterResultSet implements MiniResultSet {
-    
+
     private static final Map<JDBCType, ValueType> TYPE_MAPPING =
             Collections.synchronizedMap(new EnumMap<>(JDBCType.class));
     static {
@@ -58,16 +58,16 @@ public class JdbcAdapterResultSet implements MiniResultSet {
         TYPE_MAPPING.put(JDBCType.TIME, StandardValueType.TIME);
         TYPE_MAPPING.put(JDBCType.DATE, StandardValueType.DATE);
         TYPE_MAPPING.put(JDBCType.TIMESTAMP, StandardValueType.TIMESTAMP);
-        
+
         // FIXME: use some blob wrapper
         TYPE_MAPPING.put(JDBCType.BLOB, StandardValueType.BINARY);
         TYPE_MAPPING.put(JDBCType.CLOB, StandardValueType.STRING);
         TYPE_MAPPING.put(JDBCType.NCLOB, StandardValueType.STRING);
 
         /*
-        
+
         // TODO: support more types
-        
+
         TIME_WITH_TIMEZONE
         TIMESTAMP_WITH_TIMEZONE
         JAVA_OBJECT
@@ -80,31 +80,31 @@ public class JdbcAdapterResultSet implements MiniResultSet {
         REF
         DATALINK
         REF_CURSOR
-        
+
         etc.
-        
+
         settings, encodings etc.
         */
-        
+
     }
 
 
     private final ImmutableList<ValueType> valueTypes;
-    
+
     private final ImmutableList<MiniColumnHeader> columnHeaders;
-    
+
     private final Statement jdbcStatement;
-    
+
     private final ResultSet jdbcResultSet;
-    
-    
+
+
     public JdbcAdapterResultSet(Statement jdbcStatement, ResultSet jdbcResultSet) {
         this.jdbcStatement = jdbcStatement;
         this.jdbcResultSet = jdbcResultSet;
         this.valueTypes = extractValueTypes(jdbcResultSet);
         this.columnHeaders = extractColumnHeaders(jdbcResultSet, valueTypes);
     }
-    
+
     private static ImmutableList<ValueType> extractValueTypes(ResultSet jdbcResultSet) {
         try {
             return extractValueTypesThrowing(jdbcResultSet);
@@ -112,7 +112,7 @@ public class JdbcAdapterResultSet implements MiniResultSet {
             throw new UncheckedSqlException(e);
         }
     }
-    
+
     private static ImmutableList<ValueType> extractValueTypesThrowing(
             ResultSet jdbcResultSet) throws SQLException {
         ResultSetMetaData jdbcMetaData = jdbcResultSet.getMetaData();
@@ -123,19 +123,19 @@ public class JdbcAdapterResultSet implements MiniResultSet {
         }
         return ImmutableList.fromCollection(resultBuilder);
     }
-    
+
     private static ValueType extractValueTypeThrowing(
             ResultSetMetaData jdbcMetaData, int c) throws SQLException {
         int jdbcTypeNumber = jdbcMetaData.getColumnType(c);
         JDBCType jdbcType = JDBCType.valueOf(jdbcTypeNumber);
-        
+
         if (jdbcType == JDBCType.DECIMAL && jdbcMetaData.getScale(c) == 0) {
             return StandardValueType.BIGINT;
         }
-        
+
         return TYPE_MAPPING.getOrDefault(jdbcType, StandardValueType.BINARY);
     }
-    
+
     private static ImmutableList<MiniColumnHeader> extractColumnHeaders(
             ResultSet jdbcResultSet, ImmutableList<ValueType> valueTypes) {
         try {
@@ -144,7 +144,7 @@ public class JdbcAdapterResultSet implements MiniResultSet {
             throw new UncheckedSqlException(e);
         }
     }
-    
+
     private static ImmutableList<MiniColumnHeader> extractColumnHeadersThrowing(
             ResultSet jdbcResultSet, ImmutableList<ValueType> valueTypes) throws SQLException {
         ResultSetMetaData jdbcMetaData = jdbcResultSet.getMetaData();
@@ -160,7 +160,7 @@ public class JdbcAdapterResultSet implements MiniResultSet {
         }
         return ImmutableList.fromCollection(resultBuilder);
     }
-    
+
 
     @Override
     public ImmutableList<MiniColumnHeader> columnHeaders() {
@@ -180,10 +180,10 @@ public class JdbcAdapterResultSet implements MiniResultSet {
         if (!jdbcResultSet.next()) {
             return null;
         }
-        
+
         return extractRowThrowing();
     }
-    
+
     private ImmutableList<MiniValue> extractRowThrowing() throws SQLException {
         int columnCount = jdbcResultSet.getMetaData().getColumnCount();
         List<MiniValue> resultBuilder = new ArrayList<>(columnCount);
@@ -200,19 +200,19 @@ public class JdbcAdapterResultSet implements MiniResultSet {
         Object value = getValue(i, mappingType);
         return valueType.defaultTranslator().encodeFully(value);
     }
-    
+
     private Object getValue(int i, Class<?> mappingType) {
         int c = i + 1;
         Class<?> jdbcMappingType = jdbcMappingTypeOf(mappingType);
-        
+
         // TODO: handle precision/scale, use LargeInteger in case of DECIMAL(-1, 0)
-        
+
         try {
             return convertJdbcValue(mappingType, jdbcResultSet.getObject(c, jdbcMappingType));
         } catch (SQLException e) {
             // TODO: log?
         }
-        
+
         Object value;
         try {
             value = jdbcResultSet.getObject(c);
@@ -223,7 +223,7 @@ public class JdbcAdapterResultSet implements MiniResultSet {
         if (mappingType.isInstance(value)) {
             return value;
         }
-        
+
         Converter converter = new DefaultConverter();
         try {
             return converter.convert(value, mappingType);
@@ -231,7 +231,7 @@ public class JdbcAdapterResultSet implements MiniResultSet {
             return value;
         }
     }
-    
+
     private Class<?> jdbcMappingTypeOf(Class<?> mappingType) {
         if (mappingType == LocalTime.class) {
             return java.sql.Time.class;
@@ -245,7 +245,7 @@ public class JdbcAdapterResultSet implements MiniResultSet {
             return mappingType;
         }
     }
-    
+
     private Object convertJdbcValue(Class<?> mappingType, Object jdbcValue) {
         if (jdbcValue == null) {
             return null;
@@ -271,7 +271,7 @@ public class JdbcAdapterResultSet implements MiniResultSet {
             throw new UncheckedIOException(new IOException("Unexpected SQLException", e));
         }
     }
-    
+
     @Override
     public boolean isClosed() {
         try {

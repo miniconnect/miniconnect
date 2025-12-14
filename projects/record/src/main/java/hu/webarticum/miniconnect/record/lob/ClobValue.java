@@ -7,14 +7,14 @@ import java.nio.charset.StandardCharsets;
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 
 public interface ClobValue {
-    
+
     public static ClobValue of(MiniContentAccess contentAccess) {
         return of(
                 contentAccess,
                 StandardCharsets.UTF_8,
                 CharsetCharWidthDetector.DYNAMIC_CHAR_WIDTH);
     }
-    
+
     public static ClobValue of(MiniContentAccess contentAccess, Charset charset) {
         return of(contentAccess, charset, new CharsetCharWidthDetector().detectCharWidth(charset));
     }
@@ -27,13 +27,13 @@ public interface ClobValue {
         }
     }
 
-    
+
     public MiniContentAccess contentAccess();
 
     public Charset charset();
 
     public long length();
-    
+
     public String get(long start, int length);
 
     public Reader reader();

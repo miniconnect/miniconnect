@@ -7,16 +7,16 @@ import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.api.MiniValueDefinition;
 
 public class MessengerValue implements MiniValue, Closeable {
-    
+
     private final MiniValueDefinition definition;
-    
+
     private final boolean isNull;
-    
+
     private final MiniContentAccess contentAccess;
-    
-    
+
+
     private boolean wasContentAccessKeepRequested;
-    
+
 
     public MessengerValue(
             MiniValueDefinition definition,
@@ -26,13 +26,13 @@ public class MessengerValue implements MiniValue, Closeable {
         this.isNull = isNull;
         this.contentAccess = contentAccess;
     }
-    
-    
+
+
     @Override
     public MiniValueDefinition definition() {
         return definition;
     }
-    
+
     @Override
     public boolean isNull() {
         return isNull;
@@ -43,7 +43,7 @@ public class MessengerValue implements MiniValue, Closeable {
         wasContentAccessKeepRequested |= keep;
         return contentAccess;
     }
-    
+
     @Override
     public void close() {
         if (!wasContentAccessKeepRequested) {

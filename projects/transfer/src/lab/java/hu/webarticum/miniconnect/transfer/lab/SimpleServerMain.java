@@ -13,10 +13,10 @@ import hu.webarticum.miniconnect.transfer.PacketTarget;
 import hu.webarticum.miniconnect.transfer.SocketServer;
 
 public class SimpleServerMain {
-    
+
     private static final int DEFAULT_PORT = 54321;
-    
-    
+
+
     public static void main(String[] args) throws IOException {
         int port = readPort(args);
 
@@ -29,10 +29,10 @@ public class SimpleServerMain {
         SocketServer server = new SocketServer(serverSocket, exchanger);
         Thread serverThread = new Thread(server::listen);
         serverThread.start();
-        
+
         System.in.read();
         server.close();
-        
+
         System.out.println("Server stopped");
     }
 
@@ -49,7 +49,7 @@ public class SimpleServerMain {
         System.out.print(prompt);
         return new BufferedReader(new InputStreamReader(System.in)).readLine();
     }
-    
+
     private static void handlePacket(Packet request, PacketTarget responseTarget) {
         String input = request.payload().toString();
         String output = input.toUpperCase().replace(' ', '_');
@@ -57,5 +57,5 @@ public class SimpleServerMain {
         Packet response = Packet.of(ByteString.empty(), ByteString.of(output));
         responseTarget.receive(response);
     }
-    
+
 }

@@ -13,10 +13,10 @@ import org.junit.jupiter.api.Test;
 import hu.webarticum.miniconnect.lang.ByteString;
 
 class PacketReaderTest {
-    
+
     private PacketReader packetReader;
 
-    
+
     @BeforeEach
     void init() {
         packetReader = new PacketReader();
@@ -67,5 +67,5 @@ class PacketReaderTest {
                 TransferConstants.MAGIC_BYTE, 0, 0, 0, 2, 52, 50, 0, 0, 0, 3, 120, 121, 122 });
         assertThat(packetReader.read(in)).isEqualTo(expected);
     }
-    
+
 }

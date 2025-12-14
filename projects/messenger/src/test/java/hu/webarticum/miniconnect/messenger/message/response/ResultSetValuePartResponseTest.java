@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import hu.webarticum.miniconnect.lang.ByteString;
 
 class ResultSetValuePartResponseTest {
-    
+
     @Test
     void testHashCodeAndEquals() {
         ResultSetValuePartResponse instance1 = 

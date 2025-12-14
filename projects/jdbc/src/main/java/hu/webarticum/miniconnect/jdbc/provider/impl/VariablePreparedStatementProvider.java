@@ -13,20 +13,20 @@ import hu.webarticum.miniconnect.lang.ImmutableList;
 public class VariablePreparedStatementProvider implements PreparedStatementProvider {
 
     private static final String VARIABLE_NAME_PREFIX = "mini_jdbc_param_";
-    
+
 
     private final DatabaseProvider databaseProvider;
 
     private final MiniSession session;
-    
+
     private final String generatedSql;
 
     private final ImmutableList<ParameterDefinition> parameters;
 
     private final ImmutableList<String> parameterVariableNames;
-    
+
     private final ParameterValue[] parameterValues;
-    
+
 
     public VariablePreparedStatementProvider(DatabaseProvider databaseProvider, MiniSession session, String sql) {
         this.databaseProvider = databaseProvider;
@@ -45,7 +45,7 @@ public class VariablePreparedStatementProvider implements PreparedStatementProvi
         String normalizedUuidString = uuidString.replace('-', '_');
         return VARIABLE_NAME_PREFIX + hash + "_" + (i + 1) + "_" + normalizedUuidString;
     }
-    
+
     private static String generateQuery(String[] sqlParts, ImmutableList<String> parameterVariableNames) {
         StringBuilder resultBuilder = new StringBuilder();
         int i = 0;
@@ -57,8 +57,8 @@ public class VariablePreparedStatementProvider implements PreparedStatementProvi
         resultBuilder.append(sqlParts[i]);
         return resultBuilder.toString();
     }
-    
-    
+
+
     @Override
     public String sql() {
         return generatedSql;
@@ -76,7 +76,7 @@ public class VariablePreparedStatementProvider implements PreparedStatementProvi
         PreparedStatementUtil.closeIfNecessary(parameterValues[zeroBasedIndex]);
         parameterValues[zeroBasedIndex] = parameterValue;
     }
-    
+
     @Override
     public void clearParameterValues() {
         int i = 0;
@@ -87,7 +87,7 @@ public class VariablePreparedStatementProvider implements PreparedStatementProvi
             i++;
         }
     }
-    
+
     @Override
     public MiniResult execute() {
         return session.execute(generatedSql);

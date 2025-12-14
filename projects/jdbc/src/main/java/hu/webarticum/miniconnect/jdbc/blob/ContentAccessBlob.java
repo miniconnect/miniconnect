@@ -9,14 +9,14 @@ import java.sql.SQLFeatureNotSupportedException;
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 
 public class ContentAccessBlob implements Blob {
-    
+
     private final MiniContentAccess contentAccess;
-    
-    
+
+
     public ContentAccessBlob(MiniContentAccess contentAccess) {
         this.contentAccess = contentAccess;
     }
-    
+
 
     @Override
     public long length() throws SQLException {
@@ -27,7 +27,7 @@ public class ContentAccessBlob implements Blob {
     public byte[] getBytes(long pos, int length) throws SQLException {
         return contentAccess.get(pos - 1, length).extract();
     }
-    
+
     @Override
     public InputStream getBinaryStream() throws SQLException {
         return contentAccess.inputStream();
@@ -72,10 +72,10 @@ public class ContentAccessBlob implements Blob {
     public void free() throws SQLException {
         contentAccess.close();
     }
-    
-    
+
+
     private SQLException createReadOnlyException() {
         return new SQLException("This BLOB is read-only");
     }
-    
+
 }

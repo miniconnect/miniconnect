@@ -10,27 +10,27 @@ public class NullTranslator implements ValueTranslator {
 
 
     private static final NullTranslator INSTANCE = new NullTranslator();
-    
-    
+
+
     private NullTranslator() {
         // singleton
     }
-    
+
     public static NullTranslator instance() {
         return INSTANCE;
     }
-    
+
 
     @Override
     public String name() {
         return NAME;
     }
-    
+
     @Override
     public int length() {
         return 0;
     }
-    
+
     @Override
     public Object decode(MiniContentAccess contentAccess) {
         return null;
@@ -45,5 +45,5 @@ public class NullTranslator implements ValueTranslator {
     public String assuredClazzName() {
         return Void.class.getName();
     }
-    
+
 }

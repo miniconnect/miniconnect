@@ -37,5 +37,5 @@ class FilteringIteratorTest {
     private <T> Iterable<T> iterableOf(Iterator<T> iterator) {
         return () -> iterator;
     }
-    
+
 }

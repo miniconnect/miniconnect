@@ -59,7 +59,7 @@ public final class StoredResult implements MiniResult, Serializable {
         if (result instanceof StoredResult) {
             return (StoredResult) result;
         }
-        
+
         return new StoredResult(
                 result.success(),
                 StoredError.of(result.error()),

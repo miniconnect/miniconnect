@@ -7,12 +7,12 @@ import java.math.RoundingMode;
 import hu.webarticum.miniconnect.lang.LargeInteger;
 
 public final class Numbers {
-    
+
     private Numbers() {
         // utility class
     }
-    
-    
+
+
     public static BigDecimal toBigDecimal(Number number, int scale) {
         BigDecimal rawValue;
         if (number instanceof BigDecimal) {
@@ -30,7 +30,7 @@ public final class Numbers {
         } else {
             rawValue = BigDecimal.valueOf(number.doubleValue());
         }
-        
+
         return rawValue.setScale(scale, RoundingMode.HALF_UP);
     }
 

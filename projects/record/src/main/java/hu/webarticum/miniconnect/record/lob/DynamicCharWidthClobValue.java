@@ -13,28 +13,28 @@ import hu.webarticum.miniconnect.api.MiniContentAccess;
 public class DynamicCharWidthClobValue implements ClobValue {
 
     public static final int DYNAMIC_CHAR_WIDTH = -1;
-    
+
 
     private static final int DEFAULT_BUFFER_SIZE = 4096;
-    
+
     private static final long UNSPECIFIED_LENGTH = -1;
 
-    
+
     private final MiniContentAccess contentAccess;
-    
+
     private final Charset charset;
-    
+
     private final int bufferSize;
-    
+
     private volatile long cachedLength = UNSPECIFIED_LENGTH;
-    
+
     private final TreeMap<Long, Long> positionIndex = new TreeMap<>();
-    
+
 
     public DynamicCharWidthClobValue(MiniContentAccess contentAccess, Charset charset) {
         this(contentAccess, charset, DEFAULT_BUFFER_SIZE);
     }
-    
+
     public DynamicCharWidthClobValue(
             MiniContentAccess contentAccess, Charset charset, int bufferSize) {
         this.contentAccess = contentAccess;
@@ -43,7 +43,7 @@ public class DynamicCharWidthClobValue implements ClobValue {
         this.positionIndex.put(0L, 0L);
     }
 
-    
+
     @Override
     public MiniContentAccess contentAccess() {
         return contentAccess;
@@ -59,7 +59,7 @@ public class DynamicCharWidthClobValue implements ClobValue {
         if (cachedLength == UNSPECIFIED_LENGTH) {
             cachedLength = calculateLength();
         }
-        
+
         return cachedLength;
     }
 
@@ -78,10 +78,10 @@ public class DynamicCharWidthClobValue implements ClobValue {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        
+
         return positionIndex.lastKey();
     }
-    
+
     private void generateRemainingIndex(
             Reader remainingReader, long startingCharPos, long startingBytePos)
             throws IOException {
@@ -105,7 +105,7 @@ public class DynamicCharWidthClobValue implements ClobValue {
             throw new UncheckedIOException(e);
         }
     }
-    
+
     private String getThrowing(long start, int length) throws IOException {
         StringBuilder resultBuilder = new StringBuilder();
         Reader subReader = reader(start, length);
@@ -136,16 +136,16 @@ public class DynamicCharWidthClobValue implements ClobValue {
         long byteLength = endBytePos - startBytePos;
         return new InputStreamReader(contentAccess.inputStream(startBytePos, byteLength), charset);
     }
-    
+
     private long nextKnownBytePos(long charPos) {
         Map.Entry<Long, Long> afterEntry = positionIndex.ceilingEntry(charPos);
         if (afterEntry == null) {
             return contentAccess.length();
         }
-        
+
         return afterEntry.getValue();
     }
-    
+
     private long findBytePos(
             long charPos, long beforeCharPos, long beforeBytePos, long afterBytePos) {
         if (beforeCharPos == charPos) {

@@ -8,30 +8,30 @@ import hu.webarticum.miniconnect.lang.ByteString;
 public class BinaryTranslator implements ValueTranslator {
 
     public static final String NAME = "BINARY"; // NOSONAR same name is OK
-    
+
 
     private static final BinaryTranslator INSTANCE = new BinaryTranslator();
-    
-    
+
+
     private BinaryTranslator() {
         // singleton
     }
-    
+
     public static BinaryTranslator instance() {
         return INSTANCE;
     }
-    
+
 
     @Override
     public String name() {
         return NAME;
     }
-    
+
     @Override
     public int length() {
         return MiniValueDefinition.DYNAMIC_LENGTH;
     }
-    
+
     @Override
     public Object decode(MiniContentAccess contentAccess) {
         return contentAccess.get();
@@ -46,5 +46,5 @@ public class BinaryTranslator implements ValueTranslator {
     public String assuredClazzName() {
         return ByteString.class.getName();
     }
-    
+
 }

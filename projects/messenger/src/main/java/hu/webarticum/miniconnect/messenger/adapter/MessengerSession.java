@@ -40,23 +40,23 @@ public class MessengerSession implements MiniSession {
 
     // TODO: make these configurable
     private static final String SQLSTATE_CONNECTIONERROR = "08006";
-    
+
     private static final int DATA_SEND_CHUNK_SIZE = 4096;
-    
+
     private static final int RESULT_TIMEOUT_VALUE = 60;
-    
+
     private static final TimeUnit RESULT_TIMEOUT_UNIT = TimeUnit.SECONDS;
 
-    
+
     private final Messenger messenger;
-    
+
     private final CompletableFuture<Long> sessionIdFuture = new CompletableFuture<>();
-    
+
     private final AtomicInteger exchangeIdCounter = new AtomicInteger();
-    
+
     private volatile boolean closed = false;
 
-    
+
     public MessengerSession(Messenger messenger) {
         this.messenger = messenger;
         loadSessionIdAsync(messenger, sessionIdFuture);
@@ -65,19 +65,19 @@ public class MessengerSession implements MiniSession {
     private static void loadSessionIdAsync(Messenger messenger, CompletableFuture<Long> future) {
         new Thread(() -> loadSessionId(messenger, future)).start();
     }
-    
+
     private static void loadSessionId(Messenger messenger, CompletableFuture<Long> future) {
         Consumer<Response> responseConsumer = r -> acceptSessionInitResponse(r, future);
         messenger.accept(new SessionInitRequest(), responseConsumer);
         waitForFutureSilently(future);
         new Blackhole().consume(responseConsumer);
     }
-    
+
     private static void acceptSessionInitResponse(Response response, CompletableFuture<Long> future) {
         if (!(response instanceof SessionInitResponse)) {
             return;
         }
-        
+
         SessionInitResponse sessionInitResponse = (SessionInitResponse) response;
         // TODO: store the entire response and handle potential errors
         future.complete(sessionInitResponse.sessionId());
@@ -94,19 +94,19 @@ public class MessengerSession implements MiniSession {
             throw new IllegalStateException("No session id was obtained", e);
         }
     }
-    
+
     @Override
     public MiniResult execute(String query) {
         int exchangeId = exchangeIdCounter.incrementAndGet();
-        
+
         OrderAligningQueue<Response> responseQueue = new OrderAligningQueue<>(
                 MessengerSession::checkNextResultResponse);
 
         CompletableFuture<MessengerResultSetCharger> resultSetFuture = new CompletableFuture<>();
-        
+
         long sessionId = sessionId();
         QueryRequest queryRequest = new QueryRequest(sessionId, exchangeId, query);
-        
+
         Consumer<Response> responseConsumer =
                 r -> receiveResponse(r, resultSetFuture, responseQueue);
         messenger.accept(queryRequest, responseConsumer);
@@ -124,7 +124,7 @@ public class MessengerSession implements MiniSession {
             return new StoredResult(new StoredError(
                     2, SQLSTATE_CONNECTIONERROR, "Timeout reached while waiting for results"));
         }
-        
+
         if (!(firstResponse instanceof ResultResponse)) {
             resultSetFuture.cancel(true);
             return new StoredResult(new StoredError(3, SQLSTATE_CONNECTIONERROR, "Bad response"));
@@ -139,15 +139,15 @@ public class MessengerSession implements MiniSession {
                     errorData.sqlState(),
                     errorData.message()));
         }
-        
+
         MessengerResultSetCharger resultSet =
                 new MessengerResultSetCharger(resultResponse, responseConsumer);
         resultSetFuture.complete(resultSet);
         new Thread(() -> pollResponseQueue(responseQueue, resultSet)).start();
-        
+
         return new MessengerResult(resultResponse, resultSet);
     }
-    
+
     private void receiveResponse(
             Response response,
             CompletableFuture<MessengerResultSetCharger> resultSetFuture,
@@ -159,14 +159,14 @@ public class MessengerSession implements MiniSession {
             responseQueue.add(response);
         }
     }
-    
+
     // TODO: error handling
     private void pollResponseQueue(OrderAligningQueue<Response> responseQueue, MessengerResultSetCharger resultSet) {
         while (fetchResponseQueue(responseQueue, resultSet)) {
             // nothing to do
         }
     }
-        
+
     private boolean fetchResponseQueue(OrderAligningQueue<Response> responseQueue, MessengerResultSetCharger resultSet) {
         Response response;
         try {
@@ -185,7 +185,7 @@ public class MessengerSession implements MiniSession {
 
         return true;
     }
-    
+
     private static boolean checkNextResultResponse(Response previousResponse, Response response) {
         if (response instanceof ResultResponse) {
             return previousResponse == null;
@@ -201,7 +201,7 @@ public class MessengerSession implements MiniSession {
             return false;
         }
     }
-    
+
     private static boolean checkNextOffset(Response previousResponse, long nextOffset) {
         if (nextOffset == 0L) {
             return true;
@@ -209,13 +209,13 @@ public class MessengerSession implements MiniSession {
         if (!(previousResponse instanceof ResultSetRowsResponse)) {
             return false;
         }
-        
+
         ResultSetRowsResponse previousResultSetRowsResponse =
                 (ResultSetRowsResponse) previousResponse;
         long previousRowOffset = previousResultSetRowsResponse.rowOffset();
         int previousRowCount = previousResultSetRowsResponse.rows().size();
         long previousEndOffset = previousRowOffset + previousRowCount;
-        
+
         return nextOffset == previousEndOffset;
     }
 
@@ -225,9 +225,9 @@ public class MessengerSession implements MiniSession {
             return new StoredLargeDataSaveResult(
                     false, new StoredError(6, SQLSTATE_CONNECTIONERROR, "Closed connection"));
         }
-        
+
         int exchangeId = exchangeIdCounter.incrementAndGet();
-        
+
         CompletableFuture<Response> responseFuture = new CompletableFuture<>();
         Consumer<Response> responseConsumer = responseFuture::complete;
 
@@ -247,10 +247,10 @@ public class MessengerSession implements MiniSession {
             messenger.accept(largeDataPartRequest);
             offset += readSize;
         }
-        
+
         // we must be sure that responseConsumer is reachable until this point
         new Blackhole().consume(responseConsumer);
-        
+
         Response response = null;
         try {
             response = responseFuture.get(RESULT_TIMEOUT_VALUE, RESULT_TIMEOUT_UNIT);
@@ -274,7 +274,7 @@ public class MessengerSession implements MiniSession {
             return new StoredLargeDataSaveResult(false, new StoredError(5, SQLSTATE_CONNECTIONERROR, "Bad response"));
         }
     }
-    
+
     private int readStream(InputStream in, byte[] buffer) {
         try {
             return in.read(buffer);
@@ -282,7 +282,7 @@ public class MessengerSession implements MiniSession {
             throw new UncheckedIOException(e);
         }
     }
-    
+
     @Override
     public void close() {
         closed = true;
@@ -293,7 +293,7 @@ public class MessengerSession implements MiniSession {
         messenger.accept(sessionCloseRequest, r -> acceptSessionCloseResponse(r, closeFuture));
         waitForFutureSilently(closeFuture);
     }
-    
+
     @Override
     public boolean isClosed() {
         return closed;
@@ -307,7 +307,7 @@ public class MessengerSession implements MiniSession {
         SessionCloseResponse sessionCloseResponse = (SessionCloseResponse) response;
         future.complete(sessionCloseResponse);
     }
-    
+
     private static void waitForFutureSilently(Future<?> future) {
         try {
             future.get(RESULT_TIMEOUT_VALUE, RESULT_TIMEOUT_UNIT);

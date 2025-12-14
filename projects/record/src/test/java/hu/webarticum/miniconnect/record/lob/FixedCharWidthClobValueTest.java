@@ -24,7 +24,7 @@ class FixedCharWidthClobValueTest {
         assertThat(emptyClob.get(0L, 0)).isEmpty();
         assertThat(IOUtils.toString(emptyClob.reader())).isEmpty();
     }
-    
+
     @Test
     void testAscii() throws IOException {
         Charset charset = StandardCharsets.US_ASCII;
@@ -52,5 +52,5 @@ class FixedCharWidthClobValueTest {
         assertThat(IOUtils.toString(asciiClob.reader(2L, 3L))).isEqualTo("víz");
         assertThat(IOUtils.toString(asciiClob.reader())).isEqualTo("árvíztűrő");
     }
-    
+
 }

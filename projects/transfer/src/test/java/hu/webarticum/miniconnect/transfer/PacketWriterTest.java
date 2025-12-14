@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
 import hu.webarticum.miniconnect.lang.ByteString;
 
 class PacketWriterTest {
-    
+
     private PacketWriter packetWriter;
 
-    
+
     @BeforeEach
     void init() {
         packetWriter = new PacketWriter();
@@ -63,5 +63,5 @@ class PacketWriterTest {
                 0, 0, 0, 3,
                 115, 105, 116);
     }
-    
+
 }

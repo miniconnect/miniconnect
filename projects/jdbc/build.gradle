@@ -7,17 +7,17 @@ description = "JDBC driver backed by MiniConnect"
 dependencies {
     api project(':record')
     api "hu.webarticum.miniconnect.api:api:${miniConnectApiVersion}"
-    
+
     implementation project(':impl')
     implementation project(':messenger')
     implementation project(':server')
     implementation project(':util')
     implementation 'commons-io:commons-io:2.20.0'
     implementation 'hu.webarticum:regexbee:0.4.0'
-    
+
     // TODO: provide separate drivers for newer hibernate major versions
     compileOnly 'org.hibernate:hibernate-core:5.4.31.Final'
-    
+
     testImplementation project(':jdbc-adapter')
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.13.4'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.13.4'

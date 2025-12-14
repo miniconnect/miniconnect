@@ -29,5 +29,5 @@ public interface Messenger {
     public default void accept(Request request) {
         accept(request, null);
     }
-    
+
 }

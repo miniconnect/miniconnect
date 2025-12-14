@@ -6,12 +6,12 @@ import java.io.UncheckedIOException;
 import java.net.Socket;
 
 public class SocketPacketFetcher {
-    
+
     private final PacketReader packetReader = new PacketReader();
-    
+
     private final Socket socket;
-    
-    
+
+
     public SocketPacketFetcher(Socket socket) {
         this.socket = socket;
     }
@@ -26,14 +26,14 @@ public class SocketPacketFetcher {
             throw new UncheckedIOException(e);
         }
     }
-    
+
     private Packet fetchThrowing() throws IOException {
         InputStream in = socket.getInputStream();
         int optionalControlByte = in.read();
         if (optionalControlByte == -1) {
             throw new IOException("Unexpected end of input stream");
         }
-        
+
         byte controlByte = (byte) optionalControlByte;
         if (controlByte == TransferConstants.PACKET_BYTE) {
             return packetReader.read(in);

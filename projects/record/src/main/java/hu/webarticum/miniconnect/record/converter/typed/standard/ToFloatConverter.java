@@ -18,7 +18,7 @@ import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 
 public class ToFloatConverter implements TypedConverter<Float> {
-    
+
     @Override
     public Class<Float> targetClazz() {
         return Float.class;

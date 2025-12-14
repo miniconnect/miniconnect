@@ -10,33 +10,33 @@ public class DoubleTranslator implements ValueTranslator {
 
 
     private static final DoubleTranslator INSTANCE = new DoubleTranslator();
-    
-    
+
+
     private DoubleTranslator() {
         // singleton
     }
-    
+
     public static DoubleTranslator instance() {
         return INSTANCE;
     }
-    
+
 
     @Override
     public String name() {
         return NAME;
     }
-    
+
     @Override
     public int length() {
         return Double.BYTES;
     }
-    
+
     @Override
     public Object decode(MiniContentAccess contentAccess) {
         if (contentAccess.length() < Double.BYTES) {
             return Double.valueOf(0f);
         }
-        
+
         return contentAccess.get(0, Double.BYTES).asBuffer().getDouble();
     }
 
@@ -50,5 +50,5 @@ public class DoubleTranslator implements ValueTranslator {
     public String assuredClazzName() {
         return Double.class.getName();
     }
-    
+
 }

@@ -33,7 +33,7 @@ class CustomValueTest {
         assertThat(instance2)
                 .isNotEqualTo(instance3);
     }
-    
+
     @Test
     void testCustomValueBinding() {
         ImmutableMap<String, Object> data = ImmutableMap.of(
@@ -49,15 +49,15 @@ class CustomValueTest {
                 new MappableSubValue("DOLOR", 3));
         assertThat(actual).isEqualTo(expected);
     }
-    
-    
+
+
     private static class MappableValue {
 
         private final List<String> hello;
-        
+
         private final MappableSubValue sub;
-        
-        
+
+
         @JsonCreator
         public MappableValue(
                 @JsonProperty("hello") List<String> hello,
@@ -65,13 +65,13 @@ class CustomValueTest {
             this.hello = new ArrayList<>(hello);
             this.sub = sub;
         }
-        
-        
+
+
         @Override
         public int hashCode() {
             return Objects.hash(hello, sub);
         }
-        
+
         @Override
         public boolean equals(Object other) {
             if (this == other) {
@@ -81,13 +81,13 @@ class CustomValueTest {
             } else if (!(other instanceof MappableValue)) {
                 return false;
             }
-            
+
             MappableValue otherValue = (MappableValue) other;
             return
                     hello.equals(otherValue.hello) &&
                     sub.equals(otherValue.sub);
         }
-        
+
         @Override
         public String toString() {
             return new ToStringBuilder(this)
@@ -95,15 +95,15 @@ class CustomValueTest {
                     .add("sub", sub)
                     .build();
         }
-        
+
     }
-    
+
     private static class MappableSubValue {
-        
+
         private final String lorem;
-        
+
         private final int ipsum;
-        
+
 
         @JsonCreator
         public MappableSubValue(
@@ -112,13 +112,13 @@ class CustomValueTest {
             this.lorem = lorem;
             this.ipsum = ipsum;
         }
-        
-        
+
+
         @Override
         public int hashCode() {
             return Objects.hash(lorem, ipsum);
         }
-        
+
         @Override
         public boolean equals(Object other) {
             if (this == other) {
@@ -128,7 +128,7 @@ class CustomValueTest {
             } else if (!(other instanceof MappableSubValue)) {
                 return false;
             }
-            
+
             MappableSubValue otherSubValue = (MappableSubValue) other;
             return
                     lorem.equals(otherSubValue.lorem) &&
@@ -142,7 +142,7 @@ class CustomValueTest {
                     .add("ipsum", ipsum)
                     .build();
         }
-        
+
     }
-    
+
 }
