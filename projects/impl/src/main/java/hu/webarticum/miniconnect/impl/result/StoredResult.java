@@ -50,7 +50,7 @@ public final class StoredResult implements MiniResult, Serializable {
             StoredResultSetData resultSetData) {
         this.success = success;
         this.error = error;
-        this.warnings = warnings.map(StoredError::of);
+        this.warnings = warnings.map(w -> StoredError.of(w));
         this.hasResultSet = hasResultSet;
         this.resultSetData = resultSetData;
     }
@@ -63,7 +63,7 @@ public final class StoredResult implements MiniResult, Serializable {
         return new StoredResult(
                 result.success(),
                 StoredError.of(result.error()),
-                result.warnings().map(StoredError::of),
+                result.warnings(),
                 result.hasResultSet(),
                 StoredResultSetData.of(result));
     }
