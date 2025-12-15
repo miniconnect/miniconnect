@@ -169,7 +169,7 @@ public abstract class AbstractJdbcStatement implements Statement {
     @Override
     public ResultSet getGeneratedKeys() throws SQLException {
         BigintTranslator bigintTranslator = BigintTranslator.instance();
-        MiniColumnHeader columnHeader = new StoredColumnHeader("GENERATED_KEYS", false, bigintTranslator.definition());
+        MiniColumnHeader columnHeader = StoredColumnHeader.from("GENERATED_KEYS", false, bigintTranslator.definition());
         ImmutableList<ImmutableList<MiniValue>> rows;
         if (lastInsertedId != null) {
             MiniValue resultValue = bigintTranslator.encodeFully(lastInsertedId);
@@ -177,8 +177,8 @@ public abstract class AbstractJdbcStatement implements Statement {
         } else {
             rows = ImmutableList.empty();
         }
-        StoredResultSetData data = new StoredResultSetData(ImmutableList.of(columnHeader), rows);
-        return new MiniJdbcResultSet(this, new StoredResultSet(data)); // NOSONAR will be automatically closed
+        StoredResultSetData data = StoredResultSetData.from(ImmutableList.of(columnHeader), rows);
+        return new MiniJdbcResultSet(this, StoredResultSet.of(data)); // NOSONAR will be automatically closed
     }
 
     @Override

@@ -42,7 +42,7 @@ public class BoolTranslator implements ValueTranslator {
     public MiniContentAccess encode(Object value) {
         byte b = (value == Boolean.TRUE) ? (byte) 1 : (byte) 0;
         ByteString bytes = ByteString.of(new byte[] { b });
-        return new StoredContentAccess(bytes);
+        return StoredContentAccess.of(bytes);
     }
 
     @Override

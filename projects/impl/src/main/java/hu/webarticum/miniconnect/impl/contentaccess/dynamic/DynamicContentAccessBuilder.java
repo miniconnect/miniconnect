@@ -52,7 +52,7 @@ public class DynamicContentAccessBuilder {
                 writer.write(out);
                 computedBytes = ByteString.wrap(out.toByteArray());
             }
-            return new StoredContentAccess(computedBytes);
+            return StoredContentAccess.of(computedBytes);
         }
 
     }

@@ -24,7 +24,7 @@ public class ToClobValueConverter implements TypedConverter<ClobValue> {
             return convert(((CustomValue) source).get());
         } else {
             ByteString bytes = new ToByteStringConverter().convert(source);
-            return ClobValue.of(new StoredContentAccess(bytes));
+            return ClobValue.of(StoredContentAccess.of(bytes));
         }
     }
 

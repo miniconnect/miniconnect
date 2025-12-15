@@ -33,7 +33,7 @@ public class JdbcAdapterResult implements MiniResult {
     public JdbcAdapterResult(Statement jdbcStatement) {
         this(
                 true,
-                new StoredError(0, "00000", ""),
+                StoredError.of(0, "00000", ""),
                 extractWarnings(jdbcStatement),
                 jdbcStatement,
                 extractResultSet(jdbcStatement));
@@ -60,7 +60,7 @@ public class JdbcAdapterResult implements MiniResult {
     }
 
     private static MiniError convertWarning(SQLWarning jdbcWarning) {
-        return new StoredError(
+        return StoredError.of(
                 jdbcWarning.getErrorCode(),
                 jdbcWarning.getSQLState(),
                 jdbcWarning.getMessage());
@@ -69,7 +69,7 @@ public class JdbcAdapterResult implements MiniResult {
     public JdbcAdapterResult(SQLException jdbcException) {
         this(
                 false,
-                new StoredError(
+                StoredError.of(
                         jdbcException.getErrorCode(),
                         jdbcException.getSQLState(),
                         jdbcException.getMessage()),
@@ -101,7 +101,7 @@ public class JdbcAdapterResult implements MiniResult {
 
     private static MiniResultSet asMiniResultSet(Statement jdbcStatement, ResultSet jdbcResultSet) {
         if (jdbcResultSet == null) {
-            return new StoredResultSet();
+            return StoredResultSet.empty();
         }
 
         return new JdbcAdapterResultSet(jdbcStatement, jdbcResultSet);

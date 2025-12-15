@@ -38,7 +38,7 @@ public class NullTranslator implements ValueTranslator {
 
     @Override
     public MiniContentAccess encode(Object value) {
-        return new StoredContentAccess(ByteString.empty());
+        return StoredContentAccess.of(ByteString.empty());
     }
 
     @Override

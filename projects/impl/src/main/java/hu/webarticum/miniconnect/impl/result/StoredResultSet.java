@@ -17,12 +17,16 @@ public final class StoredResultSet implements MiniResultSet, Serializable {
     private int position = 0;
 
 
-    public StoredResultSet() {
-        this(new StoredResultSetData());
+    private StoredResultSet(StoredResultSetData data) {
+        this.data = data;
     }
 
-    public StoredResultSet(StoredResultSetData data) {
-        this.data = data;
+    public static StoredResultSet of(StoredResultSetData data) {
+        return new StoredResultSet(data);
+    }
+
+    public static StoredResultSet empty() {
+        return of(StoredResultSetData.empty());
     }
 
 
@@ -42,6 +46,10 @@ public final class StoredResultSet implements MiniResultSet, Serializable {
         position++;
 
         return result;
+    }
+
+    public StoredResultSetData data() {
+        return data;
     }
 
     public ImmutableList<ImmutableList<MiniValue>> rows() {

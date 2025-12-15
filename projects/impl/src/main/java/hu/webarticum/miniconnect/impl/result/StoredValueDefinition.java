@@ -18,32 +18,30 @@ public final class StoredValueDefinition implements MiniValueDefinition, Seriali
     private final ImmutableMap<String, ByteString> properties;
 
 
-    public StoredValueDefinition(String type) {
-        this(type, MiniValueDefinition.DYNAMIC_LENGTH);
-    }
-
-    public StoredValueDefinition(String type, int length) {
-        this(type, length, ImmutableMap.empty());
-    }
-
-    public StoredValueDefinition(
-            String type,
-            int length,
-            ImmutableMap<String, ByteString> properties) {
+    private StoredValueDefinition(String type, int length, ImmutableMap<String, ByteString> properties) {
         this.type = type;
         this.length = length;
         this.properties = properties;
     }
 
-    public static StoredValueDefinition of(MiniValueDefinition valueDefinition) {
+    public static StoredValueDefinition of(String type, int length, ImmutableMap<String, ByteString> properties) {
+        return new StoredValueDefinition(type, length, properties);
+    }
+
+    public static StoredValueDefinition of(String type, int length) {
+        return of(type, length, ImmutableMap.empty());
+    }
+
+    public static StoredValueDefinition of(String type) {
+        return of(type, MiniValueDefinition.DYNAMIC_LENGTH);
+    }
+
+    public static StoredValueDefinition from(MiniValueDefinition valueDefinition) {
         if (valueDefinition instanceof StoredValueDefinition) {
             return (StoredValueDefinition) valueDefinition;
         }
 
-        return new StoredValueDefinition(
-                valueDefinition.type(),
-                valueDefinition.length(),
-                valueDefinition.properties());
+        return of(valueDefinition.type(), valueDefinition.length(), valueDefinition.properties());
     }
 
 

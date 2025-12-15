@@ -71,7 +71,7 @@ public class StandardSchema implements Schema {
             length = StreamUtil.readInt(in);
         }
         ByteString valueBytes = StreamUtil.readFixedBytes(in, length);
-        return translator.decode(new StoredContentAccess(valueBytes));
+        return translator.decode(StoredContentAccess.of(valueBytes));
     }
 
     @Override

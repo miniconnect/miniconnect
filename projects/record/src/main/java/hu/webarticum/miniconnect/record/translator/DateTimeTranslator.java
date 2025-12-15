@@ -52,7 +52,7 @@ public class DateTimeTranslator implements ValueTranslator {
         builder.appendLong(localDateTimeValue.toLocalDate().toEpochDay());
         builder.appendLong(localDateTimeValue.toLocalTime().toNanoOfDay());
         ByteString bytes = builder.build();
-        return new StoredContentAccess(bytes);
+        return StoredContentAccess.of(bytes);
     }
 
     @Override

@@ -16,59 +16,77 @@ public final class StoredResultSetData implements Iterable<ImmutableList<MiniVal
     private static final long serialVersionUID = 1L;
 
 
-    private final ImmutableList<MiniColumnHeader> columnHeaders;
+    private final ImmutableList<StoredColumnHeader> columnHeaders;
 
-    private final ImmutableList<ImmutableList<MiniValue>> rows;
+    private final ImmutableList<ImmutableList<StoredValue>> rows;
 
 
-    public StoredResultSetData() {
-        this(ImmutableList.empty(), ImmutableList.empty());
+    private StoredResultSetData(ImmutableList<StoredColumnHeader> columnHeaders, ImmutableList<ImmutableList<StoredValue>> rows) {
+        this.columnHeaders = columnHeaders;
+        this.rows = rows;
     }
 
-    public StoredResultSetData(
+    public static StoredResultSetData of(
+            ImmutableList<StoredColumnHeader> columnHeaders,
+            ImmutableList<ImmutableList<StoredValue>> rows) {
+        return new StoredResultSetData(columnHeaders, rows);
+    }
+
+    public static StoredResultSetData empty() {
+        return of(ImmutableList.empty(), ImmutableList.empty());
+    }
+
+    public static StoredResultSetData from(
             List<? extends MiniColumnHeader> columnHeaders,
             List<? extends List<? extends MiniValue>> rows) {
-        this.columnHeaders = columnHeaders.stream()
-                .map(StoredColumnHeader::of)
-                .collect(ImmutableList.createCollector());
-        this.rows = rows.stream()
-                .map(row -> row.stream()
-                        .map(value -> (MiniValue) StoredValue.of(value))
-                        .collect(ImmutableList.createCollector()))
-                .collect(ImmutableList.createCollector());
+        return of(
+                columnHeaders.stream()
+                        .map(header -> StoredColumnHeader.from(header))
+                        .collect(ImmutableList.createCollector()),
+                rows.stream()
+                        .map(row -> row.stream()
+                                .map(value -> StoredValue.from(value))
+                                .collect(ImmutableList.createCollector()))
+                        .collect(ImmutableList.createCollector()));
     }
 
-    public StoredResultSetData(
+    public static StoredResultSetData from(
             ImmutableList<? extends MiniColumnHeader> columnHeaders,
             ImmutableList<? extends ImmutableList<? extends MiniValue>> rows) {
-        this.columnHeaders = columnHeaders.map(StoredColumnHeader::of);
-        this.rows = rows.map(row -> row.map(
-                value -> (MiniValue) StoredValue.of(value)));
+        return of(
+                columnHeaders.map(StoredColumnHeader::from),
+                rows.map(row -> row.map(value -> StoredValue.from(value))));
     }
 
-    public static StoredResultSetData of(MiniResult result) {
-        MiniResultSet resultSet = result.resultSet();
-        List<MiniColumnHeader> headers = resultSet.columnHeaders().asList();
-        List<List<MiniValue>> rows = new ArrayList<>();
+    public static StoredResultSetData from(MiniResultSet resultSet) {
+        if (resultSet instanceof StoredResultSet) {
+            return ((StoredResultSet) resultSet).data();
+        }
+
+        List<ImmutableList<StoredValue>> storedRows = new ArrayList<>();
         ImmutableList<MiniValue> row;
         while ((row = resultSet.fetch()) != null) {
-            rows.add(row.asList());
+            storedRows.add(row.map(value -> StoredValue.from(value)));
         }
-        return new StoredResultSetData(headers, rows);
+
+        return of(resultSet.columnHeaders().map(StoredColumnHeader::from), ImmutableList.fromCollection(storedRows));
     }
 
 
+    @SuppressWarnings("unchecked")
     public ImmutableList<MiniColumnHeader> columnHeaders() {
-        return columnHeaders;
+        return (ImmutableList<MiniColumnHeader>) (ImmutableList<?>) columnHeaders;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Iterator<ImmutableList<MiniValue>> iterator() {
-        return rows.iterator();
+        return (Iterator<ImmutableList<MiniValue>>) (Iterator<?>) rows.iterator();
     }
 
+    @SuppressWarnings("unchecked")
     public ImmutableList<ImmutableList<MiniValue>> rows() {
-        return rows;
+        return (ImmutableList<ImmutableList<MiniValue>>) (ImmutableList<?>) rows;
     }
 
 }

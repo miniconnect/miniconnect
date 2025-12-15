@@ -14,8 +14,22 @@ public final class StoredContentAccess implements MiniContentAccess, Serializabl
     private final ByteString content;
 
 
-    public StoredContentAccess(ByteString content) {
+    private StoredContentAccess(ByteString content) {
         this.content = content;
+    }
+
+    public static StoredContentAccess of(ByteString content) {
+        return new StoredContentAccess(content);
+    }
+
+    public static StoredContentAccess from(MiniContentAccess contentAccess) {
+        if (contentAccess instanceof StoredContentAccess) {
+            return (StoredContentAccess) contentAccess;
+        } else if (contentAccess.isLarge()) {
+            throw new IllegalArgumentException("Content is too large to store in memory");
+        }
+
+        return of(contentAccess.get());
     }
 
 

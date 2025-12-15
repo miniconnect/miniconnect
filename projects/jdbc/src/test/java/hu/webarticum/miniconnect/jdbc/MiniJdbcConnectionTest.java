@@ -83,14 +83,12 @@ class MiniJdbcConnectionTest {
     }
 
     private MiniResult mockResult(String sql) {
-        MiniValueDefinition intDefinition = new StoredValueDefinition(
-                StandardValueType.INT.name());
-        MiniValueDefinition stringDefinition = new StoredValueDefinition(
-                StandardValueType.STRING.name());
+        MiniValueDefinition intDefinition = StoredValueDefinition.of(StandardValueType.INT.name());
+        MiniValueDefinition stringDefinition = StoredValueDefinition.of(StandardValueType.STRING.name());
         List<MiniColumnHeader> columnHeaders = new ArrayList<>();
-        columnHeaders.add(new StoredColumnHeader("id", false, intDefinition));
-        columnHeaders.add(new StoredColumnHeader("label", false, stringDefinition));
-        columnHeaders.add(new StoredColumnHeader("description", false, stringDefinition));
+        columnHeaders.add(StoredColumnHeader.from("id", false, intDefinition));
+        columnHeaders.add(StoredColumnHeader.from("label", false, stringDefinition));
+        columnHeaders.add(StoredColumnHeader.from("description", false, stringDefinition));
         List<List<MiniValue>> rows = new ArrayList<>();
         rows.add(Arrays.asList(
                 asMiniValue(1),
@@ -104,11 +102,11 @@ class MiniJdbcConnectionTest {
                 asMiniValue(3),
                 asMiniValue("third"),
                 asMiniValue("xxx yyy")));
-        return new StoredResult(new StoredResultSetData(columnHeaders, rows));
+        return StoredResult.of(StoredResultSetData.from(columnHeaders, rows));
     }
 
     private MiniValue asMiniValue(Object value) {
-        return new StoredValue(asByteString(value));
+        return StoredValue.of(asByteString(value));
     }
 
     private ByteString asByteString(Object value) {

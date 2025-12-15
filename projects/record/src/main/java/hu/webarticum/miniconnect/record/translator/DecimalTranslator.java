@@ -50,7 +50,7 @@ public class DecimalTranslator implements ValueTranslator {
         builder.appendInt(bigDecimalValue.scale());
         builder.append(bigDecimalValue.unscaledValue().toByteArray());
         ByteString bytes = builder.build();
-        return new StoredContentAccess(bytes);
+        return StoredContentAccess.of(bytes);
     }
 
     @Override

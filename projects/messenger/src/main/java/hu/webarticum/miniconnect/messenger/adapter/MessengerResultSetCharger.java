@@ -87,7 +87,7 @@ public class MessengerResultSetCharger {
 
         MiniContentAccess contentAccess;
         if (fullLength == content.length()) {
-            contentAccess = new StoredContentAccess(content);
+            contentAccess = StoredContentAccess.of(content);
         } else {
             ChargeableContentAccess chargeable = createChargeable(fullLength);
             chargeable.accept(0L, content);

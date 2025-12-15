@@ -838,7 +838,7 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public ResultSet getClientInfoProperties() throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
@@ -846,82 +846,82 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
         ImmutableList<String> schemas = connection.getDatabaseProvider().getSchemas(connection.getMiniSession());
         StringTranslator stringTranslator = StringTranslator.utf8Instance();
         NullTranslator nullTranslator = NullTranslator.instance();
-        MiniColumnHeader schemaHeader = new StoredColumnHeader("TABLE_SCHEM", false, stringTranslator.definition());
-        MiniColumnHeader catalogHeader = new StoredColumnHeader("TABLE_CATALOG", false, nullTranslator.definition());
+        MiniColumnHeader schemaHeader = StoredColumnHeader.from("TABLE_SCHEM", false, stringTranslator.definition());
+        MiniColumnHeader catalogHeader = StoredColumnHeader.from("TABLE_CATALOG", false, nullTranslator.definition());
         ImmutableList<ImmutableList<MiniValue>> rows = schemas.map(
                 s -> ImmutableList.of(stringTranslator.encodeFully(s), nullTranslator.encodeFully(null)));
-        StoredResultSetData data = new StoredResultSetData(ImmutableList.of(schemaHeader, catalogHeader), rows);
-        return new MiniJdbcResultSet(null, new StoredResultSet(data)); // NOSONAR: not closing is OK
+        StoredResultSetData data = StoredResultSetData.from(ImmutableList.of(schemaHeader, catalogHeader), rows);
+        return new MiniJdbcResultSet(null, StoredResultSet.of(data)); // NOSONAR: not closing is OK
     }
 
     @Override
     public ResultSet getCatalogs() throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
     public ResultSet getTables(
             String catalog, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
     public ResultSet getTableTypes() throws SQLException {
         // FIXME: most common types
         StringTranslator stringTranslator = StringTranslator.utf8Instance();
-        MiniColumnHeader header = new StoredColumnHeader("TABLE_TYPE", false, stringTranslator.definition());
+        MiniColumnHeader header = StoredColumnHeader.from("TABLE_TYPE", false, stringTranslator.definition());
         ImmutableList<ImmutableList<MiniValue>> rows = ImmutableList.of(
                 ImmutableList.of(stringTranslator.encodeFully("TABLE")),
                 ImmutableList.of(stringTranslator.encodeFully("VIEW")),
                 ImmutableList.of(stringTranslator.encodeFully("SYSTEM TABLE")));
-        StoredResultSetData data = new StoredResultSetData(ImmutableList.of(header), rows);
-        return new MiniJdbcResultSet(null, new StoredResultSet(data)); // NOSONAR: not closing is OK
+        StoredResultSetData data = StoredResultSetData.from(ImmutableList.of(header), rows);
+        return new MiniJdbcResultSet(null, StoredResultSet.of(data)); // NOSONAR: not closing is OK
     }
 
     @Override
     public ResultSet getColumns(
             String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern
             ) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
     public ResultSet getColumnPrivileges(
             String catalog, String schema, String table, String columnNamePattern) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
     public ResultSet getTablePrivileges(
             String catalog, String schemaPattern, String tableNamePattern) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
     public ResultSet getBestRowIdentifier(
             String catalog, String schema, String table, int scope, boolean nullable
             ) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
     public ResultSet getVersionColumns(String catalog, String schema, String table) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
     public ResultSet getPrimaryKeys(String catalog, String schema, String table) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
     public ResultSet getImportedKeys(String catalog, String schema, String table) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
     public ResultSet getExportedKeys(String catalog, String schema, String table) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
@@ -933,36 +933,36 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
             String foreignSchema,
             String foreignTable
             ) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
     public ResultSet getTypeInfo() throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
     public ResultSet getIndexInfo(
             String catalog, String schema, String table, boolean unique, boolean approximate) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
     public ResultSet getUDTs(
             String catalog, String schemaPattern, String typeNamePattern, int[] types) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
     public ResultSet getSuperTypes(
             String catalog, String schemaPattern, String typeNamePattern) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
     public ResultSet getSuperTables(
             String catalog, String schemaPattern, String tableNamePattern) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
@@ -972,31 +972,31 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
             String typeNamePattern,
             String attributeNamePattern
             ) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
     public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
     public ResultSet getProcedures(
             String catalog, String schemaPattern, String procedureNamePattern) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
     public ResultSet getProcedureColumns(
             String catalog, String schemaPattern, String procedureNamePattern, String columnNamePattern
             ) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
     public ResultSet getFunctions(
             String catalog, String schemaPattern, String functionNamePattern) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
@@ -1006,14 +1006,14 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
             String functionNamePattern,
             String columnNamePattern
             ) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     @Override
     public ResultSet getPseudoColumns(
             String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern
             ) throws SQLException {
-        return new MiniJdbcResultSet(null, new StoredResultSet()); // FIXME: currently not supported
+        return new MiniJdbcResultSet(null, StoredResultSet.empty()); // FIXME: currently not supported
     }
 
     // [end]

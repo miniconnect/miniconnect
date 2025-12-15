@@ -16,8 +16,8 @@ class DynamicCharWidthClobValueTest {
     @Test
     void testEmpty() throws IOException {
         DynamicCharWidthClobValue emptyClob = new DynamicCharWidthClobValue(
-                        new StoredContentAccess(ByteString.empty()),
-                        StandardCharsets.UTF_8);
+                StoredContentAccess.of(ByteString.empty()),
+                StandardCharsets.UTF_8);
         assertThat(emptyClob.length()).isZero();
         assertThat(emptyClob.get(0L, 0)).isEmpty();
         assertThat(IOUtils.toString(emptyClob.reader())).isEmpty();
@@ -65,7 +65,7 @@ class DynamicCharWidthClobValueTest {
 
     private DynamicCharWidthClobValue createUtf8Clob(String content) {
         return new DynamicCharWidthClobValue(
-                new StoredContentAccess(ByteString.of("árvíztűrő", StandardCharsets.UTF_8)),
+                StoredContentAccess.of(ByteString.of("árvíztűrő", StandardCharsets.UTF_8)),
                 StandardCharsets.UTF_8,
                 3);
     }

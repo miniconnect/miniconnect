@@ -195,8 +195,7 @@ public final class ResultResponse implements Response, ExchangeMessage {
         }
 
         public MiniColumnHeader toMiniColumnHeader() {
-            return new StoredColumnHeader(
-                    name, isNullable, new StoredValueDefinition(type, length, properties));
+            return StoredColumnHeader.of(name, isNullable, StoredValueDefinition.of(type, length, properties));
         }
 
         @Override

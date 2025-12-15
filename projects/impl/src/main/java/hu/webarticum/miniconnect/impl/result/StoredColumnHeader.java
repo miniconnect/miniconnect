@@ -17,24 +17,26 @@ public final class StoredColumnHeader implements MiniColumnHeader, Serializable 
     private final StoredValueDefinition valueDefinition;
 
 
-    public StoredColumnHeader(
-            String name,
-            boolean isNullable,
-            MiniValueDefinition valueDefinition) {
+    private StoredColumnHeader(String name, boolean isNullable, StoredValueDefinition valueDefinition) {
         this.name = name;
         this.isNullable = isNullable;
-        this.valueDefinition = StoredValueDefinition.of(valueDefinition);
+        this.valueDefinition = valueDefinition;
     }
 
-    public static StoredColumnHeader of(MiniColumnHeader columnHeader) {
+    public static StoredColumnHeader of(String name, boolean isNullable, StoredValueDefinition valueDefinition) {
+        return new StoredColumnHeader(name, isNullable, valueDefinition);
+    }
+
+    public static StoredColumnHeader from(String name, boolean isNullable, MiniValueDefinition valueDefinition) {
+        return of(name, isNullable, StoredValueDefinition.from(valueDefinition));
+    }
+
+    public static StoredColumnHeader from(MiniColumnHeader columnHeader) {
         if (columnHeader instanceof StoredColumnHeader) {
             return (StoredColumnHeader) columnHeader;
         }
 
-        return new StoredColumnHeader(
-                columnHeader.name(),
-                columnHeader.isNullable(),
-                columnHeader.valueDefinition());
+        return from(columnHeader.name(), columnHeader.isNullable(), columnHeader.valueDefinition());
     }
 
 

@@ -45,7 +45,7 @@ public class TimeTranslator implements ValueTranslator {
         LocalTime localTimeValue = (LocalTime) value;
         long nanoOfDay = localTimeValue.toNanoOfDay();
         ByteString bytes = ByteString.ofLong(nanoOfDay);
-        return new StoredContentAccess(bytes);
+        return StoredContentAccess.of(bytes);
     }
 
     @Override

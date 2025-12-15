@@ -54,7 +54,7 @@ public class OffsetTimeTranslator implements ValueTranslator {
                 .appendLong(nanoOfDay)
                 .appendInt(offsetSeconds)
                 .build();
-        return new StoredContentAccess(bytes);
+        return StoredContentAccess.of(bytes);
     }
 
     @Override

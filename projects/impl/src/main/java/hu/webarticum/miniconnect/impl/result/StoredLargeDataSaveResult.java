@@ -15,17 +15,25 @@ public final class StoredLargeDataSaveResult implements MiniLargeDataSaveResult,
     private final StoredError error;
 
 
-    public StoredLargeDataSaveResult() {
-        this(true, null);
-    }
-
-    public StoredLargeDataSaveResult(MiniError error) {
-        this(false, StoredError.of(error));
-    }
-
-    public StoredLargeDataSaveResult(boolean success, StoredError error) {
+    private StoredLargeDataSaveResult(boolean success, StoredError error) {
         this.success = success;
         this.error = error;
+    }
+
+    public static StoredLargeDataSaveResult of(boolean success, StoredError error) {
+        return new StoredLargeDataSaveResult(success, error);
+    }
+
+    public static StoredLargeDataSaveResult ofSuccess() {
+        return of(true, StoredError.PLACEHOLDER);
+    }
+
+    public static StoredLargeDataSaveResult ofError(StoredError error) {
+        return new StoredLargeDataSaveResult(false, error);
+    }
+
+    public static StoredLargeDataSaveResult fromError(MiniError error) {
+        return of(false, StoredError.from(error));
     }
 
 

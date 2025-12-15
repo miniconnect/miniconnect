@@ -54,7 +54,7 @@ public class JdbcAdapterSession implements MiniSession {
         if (message == null) {
             message = "Unexpected " + e.getClass().getName();
         }
-        return new StoredResult(new StoredError(1, "00001", message));
+        return StoredResult.ofError(StoredError.of(1, "00001", message));
     }
 
     @Override

@@ -20,22 +20,26 @@ public final class StoredError implements MiniError, Serializable {
     private final String message;
 
 
-    public StoredError(int code, String sqlState, String message) {
+    private StoredError(int code, String sqlState, String message) {
         this.code = code;
         this.sqlState = sqlState;
         this.message = message;
     }
 
-    public static StoredError of(MiniError error) {
+    public static StoredError of(int code, String sqlState, String message) {
+        return new StoredError(code, sqlState, message);
+    }
+
+    public static StoredError from(MiniError error) {
         if (error instanceof StoredError) {
             return (StoredError) error;
         }
 
-        return new StoredError(error.code(), error.sqlState(), error.message());
+        return of(error.code(), error.sqlState(), error.message());
     }
 
-    public static StoredError of(MiniErrorException exception) {
-        return new StoredError(exception.code(), exception.sqlState(), exception.message());
+    public static StoredError from(MiniErrorException exception) {
+        return of(exception.code(), exception.sqlState(), exception.message());
     }
 
 

@@ -156,7 +156,7 @@ public class JdbcAdapterResultSet implements MiniResultSet {
             boolean isNullable = (jdbcMetaData.isNullable(c) != ResultSetMetaData.columnNoNulls);
             MiniValueDefinition valueDefinition =
                     valueTypes.get(i).defaultTranslator().definition();
-            resultBuilder.add(new StoredColumnHeader(name, isNullable, valueDefinition));
+            resultBuilder.add(StoredColumnHeader.from(name, isNullable, valueDefinition));
         }
         return ImmutableList.fromCollection(resultBuilder);
     }

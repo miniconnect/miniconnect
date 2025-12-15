@@ -48,7 +48,7 @@ public class TimestampTranslator implements ValueTranslator {
         builder.appendLong(instantValue.getEpochSecond());
         builder.appendInt(instantValue.getNano());
         ByteString bytes = builder.build();
-        return new StoredContentAccess(bytes);
+        return StoredContentAccess.of(bytes);
     }
 
     @Override

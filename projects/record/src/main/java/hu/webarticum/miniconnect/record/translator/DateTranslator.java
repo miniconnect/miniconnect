@@ -45,7 +45,7 @@ public class DateTranslator implements ValueTranslator {
         LocalDate localDateValue = (LocalDate) value;
         long daysSinceEpoch = localDateValue.toEpochDay();
         ByteString bytes = ByteString.ofLong(daysSinceEpoch);
-        return new StoredContentAccess(bytes);
+        return StoredContentAccess.of(bytes);
     }
 
     @Override

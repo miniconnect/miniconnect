@@ -42,7 +42,7 @@ public class BigintTranslator implements ValueTranslator {
     public MiniContentAccess encode(Object value) {
         LargeInteger largeIntegerValue = (LargeInteger) value;
         ByteString bytes = ByteString.wrap(largeIntegerValue.toByteArray());
-        return new StoredContentAccess(bytes);
+        return StoredContentAccess.of(bytes);
     }
 
     @Override

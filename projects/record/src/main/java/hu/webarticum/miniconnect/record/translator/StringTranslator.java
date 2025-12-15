@@ -73,7 +73,7 @@ public class StringTranslator implements ValueTranslator {
     @Override
     public MiniContentAccess encode(Object value) {
         ByteString bytes = ByteString.of(value.toString(), charset);
-        return new StoredContentAccess(bytes);
+        return StoredContentAccess.of(bytes);
     }
 
     @Override

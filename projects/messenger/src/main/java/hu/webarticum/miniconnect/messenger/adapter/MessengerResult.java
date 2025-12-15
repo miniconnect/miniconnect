@@ -23,9 +23,9 @@ public class MessengerResult implements MiniResult {
     public MessengerResult(ResultResponse resultResponse, MessengerResultSetCharger charger) {
         ResultResponse.ErrorData errorData = resultResponse.error();
         this.success = resultResponse.success();
-        this.error = new StoredError(errorData.code(), errorData.sqlState(), errorData.message());
+        this.error = StoredError.of(errorData.code(), errorData.sqlState(), errorData.message());
         this.warnings = resultResponse.warnings().map(
-                e -> new StoredError(e.code(), e.sqlState(), e.message()));
+                e -> StoredError.of(e.code(), e.sqlState(), e.message()));
         this.hasResultSet = resultResponse.hasResultSet();
         this.charger = charger;
     }

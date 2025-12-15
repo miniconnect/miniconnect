@@ -117,27 +117,22 @@ public class MessengerSession implements MiniSession {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             resultSetFuture.cancel(true);
-            return new StoredResult(new StoredError(
-                    1, SQLSTATE_CONNECTIONERROR, "Interrupt occured while waiting for results"));
+            return StoredResult.ofError(StoredError.of(1, SQLSTATE_CONNECTIONERROR, "Interrupt occured while waiting for results"));
         } catch (TimeoutException e) {
             resultSetFuture.cancel(true);
-            return new StoredResult(new StoredError(
-                    2, SQLSTATE_CONNECTIONERROR, "Timeout reached while waiting for results"));
+            return StoredResult.ofError(StoredError.of(2, SQLSTATE_CONNECTIONERROR, "Timeout reached while waiting for results"));
         }
 
         if (!(firstResponse instanceof ResultResponse)) {
             resultSetFuture.cancel(true);
-            return new StoredResult(new StoredError(3, SQLSTATE_CONNECTIONERROR, "Bad response"));
+            return StoredResult.ofError(StoredError.of(3, SQLSTATE_CONNECTIONERROR, "Bad response"));
         }
 
         ResultResponse resultResponse = (ResultResponse) firstResponse;
         if (!resultResponse.success()) {
             resultSetFuture.cancel(true);
             ResultResponse.ErrorData errorData = resultResponse.error();
-            return new StoredResult(new StoredError(
-                    errorData.code(),
-                    errorData.sqlState(),
-                    errorData.message()));
+            return StoredResult.ofError(StoredError.of(errorData.code(), errorData.sqlState(), errorData.message()));
         }
 
         MessengerResultSetCharger resultSet =
@@ -222,8 +217,7 @@ public class MessengerSession implements MiniSession {
     @Override
     public MiniLargeDataSaveResult putLargeData(String variableName, long length, InputStream dataSource) {
         if (closed) {
-            return new StoredLargeDataSaveResult(
-                    false, new StoredError(6, SQLSTATE_CONNECTIONERROR, "Closed connection"));
+            return StoredLargeDataSaveResult.ofError(StoredError.of(6, SQLSTATE_CONNECTIONERROR, "Closed connection"));
         }
 
         int exchangeId = exchangeIdCounter.incrementAndGet();
@@ -262,16 +256,16 @@ public class MessengerSession implements MiniSession {
 
         if (response instanceof LargeDataSaveResponse) {
             LargeDataSaveResponse largeDataSaveResponse = (LargeDataSaveResponse) response;
-            return new StoredLargeDataSaveResult(
+            return StoredLargeDataSaveResult.of(
                     largeDataSaveResponse.success(),
-                    new StoredError(
+                    StoredError.of(
                         largeDataSaveResponse.errorCode(),
                         largeDataSaveResponse.sqlState(),
                         largeDataSaveResponse.errorMessage()));
         } else if (response == null) {
-            return new StoredLargeDataSaveResult(false, new StoredError(4, SQLSTATE_CONNECTIONERROR, "No response"));
+            return StoredLargeDataSaveResult.ofError(StoredError.of(4, SQLSTATE_CONNECTIONERROR, "No response"));
         } else {
-            return new StoredLargeDataSaveResult(false, new StoredError(5, SQLSTATE_CONNECTIONERROR, "Bad response"));
+            return StoredLargeDataSaveResult.ofError(StoredError.of(5, SQLSTATE_CONNECTIONERROR, "Bad response"));
         }
     }
 
