@@ -846,7 +846,7 @@ public class MiniJdbcDatabaseMetaData implements DatabaseMetaData {
         ImmutableList<String> schemas = connection.getDatabaseProvider().getSchemas(connection.getMiniSession());
         StringTranslator stringTranslator = StringTranslator.utf8Instance();
         NullTranslator nullTranslator = NullTranslator.instance();
-        MiniColumnHeader schemaHeader = StoredColumnHeader.from("TABLE_SCHEM", false, stringTranslator.definition());
+        MiniColumnHeader schemaHeader = StoredColumnHeader.from("TABLE_SCHEMA", false, stringTranslator.definition());
         MiniColumnHeader catalogHeader = StoredColumnHeader.from("TABLE_CATALOG", false, nullTranslator.definition());
         ImmutableList<ImmutableList<MiniValue>> rows = schemas.map(
                 s -> ImmutableList.of(stringTranslator.encodeFully(s), nullTranslator.encodeFully(null)));
