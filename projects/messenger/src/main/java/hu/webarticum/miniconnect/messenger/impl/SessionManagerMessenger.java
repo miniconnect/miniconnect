@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniSessionManager;
+import hu.webarticum.miniconnect.lang.ReachabilityGuard;
 import hu.webarticum.miniconnect.messenger.Messenger;
 import hu.webarticum.miniconnect.messenger.message.SessionMessage;
 import hu.webarticum.miniconnect.messenger.message.request.Request;
@@ -36,7 +37,7 @@ public class SessionManagerMessenger implements Messenger {
 
 
     @Override
-    public void accept(Request request, Consumer<Response> responseConsumer) {
+    public ReachabilityGuard accept(Request request, Consumer<Response> responseConsumer) {
         if (request instanceof SessionInitRequest) {
             sessionInitExecutorService.submit(() -> invokeOpenSession(responseConsumer));
         } else if (request instanceof SessionMessage) {
@@ -58,6 +59,7 @@ public class SessionManagerMessenger implements Messenger {
         } else {
             // FIXME: log?
         }
+        return ReachabilityGuard.of(responseConsumer);
     }
 
     private void invokeOpenSession(Consumer<Response> responseConsumer) {

@@ -10,7 +10,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 import hu.webarticum.miniconnect.api.MiniLargeDataSaveResult;
 import hu.webarticum.miniconnect.api.MiniResult;
@@ -19,6 +18,7 @@ import hu.webarticum.miniconnect.impl.result.StoredError;
 import hu.webarticum.miniconnect.impl.result.StoredLargeDataSaveResult;
 import hu.webarticum.miniconnect.impl.result.StoredResult;
 import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.lang.ReachabilityGuard;
 import hu.webarticum.miniconnect.messenger.Messenger;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataHeadRequest;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataPartRequest;
@@ -67,10 +67,10 @@ public class MessengerSession implements MiniSession {
     }
 
     private static void loadSessionId(Messenger messenger, CompletableFuture<Long> future) {
-        Consumer<Response> responseConsumer = r -> acceptSessionInitResponse(r, future);
-        messenger.accept(new SessionInitRequest(), responseConsumer);
-        waitForFutureSilently(future);
-        new Blackhole().consume(responseConsumer);
+        try (@SuppressWarnings("unused") ReachabilityGuard guard =
+                messenger.accept(new SessionInitRequest(), r -> acceptSessionInitResponse(r, future))) {
+            waitForFutureSilently(future);
+        }
     }
 
     private static void acceptSessionInitResponse(Response response, CompletableFuture<Long> future) {
@@ -107,9 +107,7 @@ public class MessengerSession implements MiniSession {
         long sessionId = sessionId();
         QueryRequest queryRequest = new QueryRequest(sessionId, exchangeId, query);
 
-        Consumer<Response> responseConsumer =
-                r -> receiveResponse(r, resultSetFuture, responseQueue);
-        messenger.accept(queryRequest, responseConsumer);
+        ReachabilityGuard guard = messenger.accept(queryRequest, r -> receiveResponse(r, resultSetFuture, responseQueue));
 
         Response firstResponse;
         try {
@@ -135,8 +133,7 @@ public class MessengerSession implements MiniSession {
             return StoredResult.ofError(StoredError.of(errorData.code(), errorData.sqlState(), errorData.message()));
         }
 
-        MessengerResultSetCharger resultSet =
-                new MessengerResultSetCharger(resultResponse, responseConsumer);
+        MessengerResultSetCharger resultSet = new MessengerResultSetCharger(resultResponse, guard);
         resultSetFuture.complete(resultSet);
         new Thread(() -> pollResponseQueue(responseQueue, resultSet)).start();
 
@@ -223,27 +220,21 @@ public class MessengerSession implements MiniSession {
         int exchangeId = exchangeIdCounter.incrementAndGet();
 
         CompletableFuture<Response> responseFuture = new CompletableFuture<>();
-        Consumer<Response> responseConsumer = responseFuture::complete;
-
         long sessionId = sessionId();
-        LargeDataHeadRequest largeDataHeadRequest =
-                new LargeDataHeadRequest(sessionId, exchangeId, variableName, length);
-        messenger.accept(largeDataHeadRequest, responseConsumer);
-
-        byte[] buffer = new byte[DATA_SEND_CHUNK_SIZE];
-        int readSize = 0;
-        long offset = 0;
-        while ((readSize = readStream(dataSource, buffer)) != -1) {
-            // TODO: check for error
-            ByteString content = ByteString.wrap(Arrays.copyOf(buffer, readSize));
-            LargeDataPartRequest largeDataPartRequest =
-                    new LargeDataPartRequest(sessionId, exchangeId, offset, content);
-            messenger.accept(largeDataPartRequest);
-            offset += readSize;
+        LargeDataHeadRequest largeDataHeadRequest = new LargeDataHeadRequest(sessionId, exchangeId, variableName, length);
+        try (@SuppressWarnings("unused") ReachabilityGuard guard = messenger.accept(largeDataHeadRequest, responseFuture::complete)) {
+            byte[] buffer = new byte[DATA_SEND_CHUNK_SIZE];
+            int readSize = 0;
+            long offset = 0;
+            while ((readSize = readStream(dataSource, buffer)) != -1) {
+                // TODO: check for error
+                ByteString content = ByteString.wrap(Arrays.copyOf(buffer, readSize));
+                LargeDataPartRequest largeDataPartRequest =
+                        new LargeDataPartRequest(sessionId, exchangeId, offset, content);
+                messenger.accept(largeDataPartRequest);
+                offset += readSize;
+            }
         }
-
-        // we must be sure that responseConsumer is reachable until this point
-        new Blackhole().consume(responseConsumer);
 
         Response response = null;
         try {
@@ -284,8 +275,10 @@ public class MessengerSession implements MiniSession {
         int exchangeId = exchangeIdCounter.incrementAndGet();
         Request sessionCloseRequest = new SessionCloseRequest(sessionId, exchangeId);
         CompletableFuture<SessionCloseResponse> closeFuture = new CompletableFuture<>();
-        messenger.accept(sessionCloseRequest, r -> acceptSessionCloseResponse(r, closeFuture));
-        waitForFutureSilently(closeFuture);
+        try (@SuppressWarnings("unused") ReachabilityGuard guard =
+                messenger.accept(sessionCloseRequest, r -> acceptSessionCloseResponse(r, closeFuture))) {
+            waitForFutureSilently(closeFuture);
+        }
     }
 
     @Override

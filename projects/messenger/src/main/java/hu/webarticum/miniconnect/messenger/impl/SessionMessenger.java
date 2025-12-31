@@ -3,6 +3,7 @@ package hu.webarticum.miniconnect.messenger.impl;
 import java.util.function.Consumer;
 
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.lang.ReachabilityGuard;
 import hu.webarticum.miniconnect.messenger.Messenger;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataHeadRequest;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataPartRequest;
@@ -29,7 +30,7 @@ public class SessionMessenger implements Messenger {
 
 
     @Override
-    public synchronized void accept(Request request, Consumer<Response> responseConsumer) {
+    public synchronized ReachabilityGuard accept(Request request, Consumer<Response> responseConsumer) {
         if (request instanceof QueryRequest) {
             queryPartial.acceptQueryRequest((QueryRequest) request, responseConsumer);
         } else if (request instanceof LargeDataHeadRequest) {
@@ -43,6 +44,7 @@ public class SessionMessenger implements Messenger {
                     "Unsupported request type: %s",
                     request.getClass().getSimpleName()));
         }
+        return ReachabilityGuard.of(responseConsumer);
     }
 
     private void handleClose(

@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import hu.webarticum.miniconnect.api.MiniColumnHeader;
-import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniResultSet;
 import hu.webarticum.miniconnect.api.MiniValue;
 import hu.webarticum.miniconnect.lang.ImmutableList;

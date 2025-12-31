@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import hu.webarticum.miniconnect.lang.ReachabilityGuard;
 import hu.webarticum.miniconnect.messenger.Messenger;
 import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 import hu.webarticum.miniconnect.messenger.message.SessionMessage;
@@ -89,7 +90,7 @@ public class ClientMessenger implements Messenger, Closeable {
 
 
     @Override
-    public void accept(Request request, Consumer<Response> responseConsumer) {
+    public ReachabilityGuard accept(Request request, Consumer<Response> responseConsumer) {
         logger.trace("Request accepted: {}", request);
 
         if (responseConsumer == null) {
@@ -107,6 +108,8 @@ public class ClientMessenger implements Messenger, Closeable {
             }
         }
         socketClient.send(encoder.encode(request));
+
+        return ReachabilityGuard.of(responseConsumer);
     }
 
     public void acceptResponsePacket(Packet packet) {

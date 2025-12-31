@@ -2,6 +2,7 @@ package hu.webarticum.miniconnect.messenger;
 
 import java.util.function.Consumer;
 
+import hu.webarticum.miniconnect.lang.ReachabilityGuard;
 import hu.webarticum.miniconnect.messenger.message.request.Request;
 import hu.webarticum.miniconnect.messenger.message.response.Response;
 
@@ -21,7 +22,7 @@ public interface Messenger {
      * or requires any finalization process,
      * these must be handled by the caller.</p>
      */
-    public void accept(Request request, Consumer<Response> responseConsumer);
+    public ReachabilityGuard accept(Request request, Consumer<Response> responseConsumer);
 
     /**
      * Accepts a request, doesn't listen for responses.
