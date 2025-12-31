@@ -9,13 +9,13 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * Queue variant for aligning ordering anomalies
- * 
+ *
  * It must be possible to decide on each incoming item,
  * that it is the next (possibly the first) element or not.
  * If an item is detected as next,
  * then it will be appended to the queue;
  * if not, then it will be stored to check again later.
- * 
+ *
  * @param <T> any type
  */
 public class OrderAligningQueue<T> {

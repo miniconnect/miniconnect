@@ -4,7 +4,7 @@ import java.util.Random;
 
 /**
  * Helper class for ensuring that an object is reachable.
- * 
+ *
  * <p>Inspired by JMH's Blackhole class.</p>
  */
 public class Blackhole {

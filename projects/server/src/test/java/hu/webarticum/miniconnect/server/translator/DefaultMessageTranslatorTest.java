@@ -129,7 +129,7 @@ class DefaultMessageTranslatorTest {
     }
 
     private Message createResultSetEofResponse() {
-        return new ResultSetEofResponse(2L, 12, 54L);   
+        return new ResultSetEofResponse(2L, 12, 54L);
     }
 
     private Message createLargeDataSaveResponse() {

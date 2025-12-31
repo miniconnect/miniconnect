@@ -10,11 +10,11 @@ class ResultSetValuePartResponseTest {
 
     @Test
     void testHashCodeAndEquals() {
-        ResultSetValuePartResponse instance1 = 
+        ResultSetValuePartResponse instance1 =
                 new ResultSetValuePartResponse(3L, 7, 7L, 2, 0L, ByteString.of("111"));
-        ResultSetValuePartResponse instance2 = 
+        ResultSetValuePartResponse instance2 =
                 new ResultSetValuePartResponse(5L, 2, 9L, 0, 1L, ByteString.of("222"));
-        ResultSetValuePartResponse instance3 = 
+        ResultSetValuePartResponse instance3 =
                 new ResultSetValuePartResponse(3L, 7, 7L, 2, 0L, ByteString.of("111"));
 
         assertThat(instance1)

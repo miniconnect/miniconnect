@@ -28,7 +28,7 @@ public class GroupingIterator<T, U> implements Iterator<U> {
 
     public GroupingIterator(
             Iterator<T> baseIterator,
-            Comparator<T> groupComparator, 
+            Comparator<T> groupComparator,
             ListRowTransformator<T, U> rowTransformator) {
         this(baseIterator, groupComparator, toIteratorRowTransformator(rowTransformator));
     }
@@ -54,7 +54,7 @@ public class GroupingIterator<T, U> implements Iterator<U> {
 
     public GroupingIterator(
             Iterator<T> baseIterator,
-            Comparator<T> groupComparator, 
+            Comparator<T> groupComparator,
             IteratorRowTransformator<T, U> rowTransformator) {
         this.baseIterator = baseIterator;
         this.groupComparator = groupComparator;

@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Global id generator for generating unique but varied ids fast.
- * 
+ *
  * @see #generate()
  */
 public class GlobalIdGenerator {
@@ -19,7 +19,7 @@ public class GlobalIdGenerator {
 
     /**
      * Conditionally returns with a generated id
-     * 
+     *
      * @see #generate()
      * @param enabled
      * @return generated id if {@code enabled} is  {@code true}, 0 otherwise
@@ -30,17 +30,17 @@ public class GlobalIdGenerator {
 
     /**
      * Returns with a generated id.
-     * 
+     *
      * <p>This generator id is based on a counter
      * starting from the unix timestamp at initialization.
      * It is confuscated by a prime factor to make it
      * easily distinguishable.</p>
-     * 
+     *
      * <p>The resulting id is unique until the long range is
      * fully traversed (which is unlikely).
      * The id is vary and probably unique between
      * different JVM runs (because of the timestamp based start value).</p>
-     * 
+     *
      * @return the generated id
      */
     public static String generate() {

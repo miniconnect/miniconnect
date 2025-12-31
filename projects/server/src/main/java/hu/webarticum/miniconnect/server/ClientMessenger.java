@@ -96,7 +96,7 @@ public class ClientMessenger implements Messenger, Closeable {
             // nothing to do
         } else if (request instanceof ExchangeMessage) {
             ExchangeMessage exchangeMessage = (ExchangeMessage) request;
-            ExchangeIdentity exchangeIdentity = 
+            ExchangeIdentity exchangeIdentity =
                     new ExchangeIdentity(exchangeMessage.sessionId(), exchangeMessage.exchangeId());
             synchronized (exchangeResponseConsumersLock) {
                 exchangeResponseConsumers.put(responseConsumer, exchangeIdentity);
