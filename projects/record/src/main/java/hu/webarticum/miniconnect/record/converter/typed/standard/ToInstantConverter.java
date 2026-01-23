@@ -49,7 +49,7 @@ public class ToInstantConverter implements TypedConverter<Instant> {
         } else if (source instanceof String) {
             return Instant.parse((String) source);
         } else if (source instanceof TemporalAmount) {
-            return LocalDateTime.MIN.plus((TemporalAmount) source).toInstant(ZoneOffset.UTC);
+            return LocalDate.ofEpochDay(0).atStartOfDay().plus((TemporalAmount) source).toInstant(ZoneOffset.UTC);
         } else {
             throw new UnsupportedConversionException(source, targetClazz());
         }

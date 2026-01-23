@@ -66,7 +66,7 @@ public class OffsetDateTimeTranslator implements ValueTranslator {
 
     @Override
     public String assuredClazzName() {
-        return LocalDateTime.class.getName();
+        return OffsetDateTime.class.getName();
     }
 
 }

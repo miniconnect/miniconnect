@@ -3,6 +3,7 @@ package hu.webarticum.miniconnect.record.converter.typed.standard;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -45,7 +46,7 @@ public class ToOffsetTimeConverter implements TypedConverter<OffsetTime> {
         } else if (source instanceof String) {
             return OffsetTime.parse((String) source);
         } else if (source instanceof TemporalAmount) {
-            return LocalDateTime.MIN.plus((TemporalAmount) source).atOffset(ZoneOffset.UTC).toOffsetTime();
+            return LocalDate.ofEpochDay(0).atStartOfDay().plus((TemporalAmount) source).atOffset(ZoneOffset.UTC).toOffsetTime();
         } else {
             throw new UnsupportedConversionException(source, targetClazz());
         }

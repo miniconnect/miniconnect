@@ -55,7 +55,7 @@ public class ToLocalDateTimeConverter implements TypedConverter<LocalDateTime> {
                 return LocalDateTime.parse(dateTimeString);
             }
         } else if (source instanceof TemporalAmount) {
-            return LocalDateTime.MIN.plus((TemporalAmount) source);
+            return LocalDate.ofEpochDay(0).atStartOfDay().plus((TemporalAmount) source);
         } else {
             throw new UnsupportedConversionException(source, targetClazz());
         }

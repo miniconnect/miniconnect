@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.util.Optional;
 import java.util.function.Function;
@@ -75,7 +76,7 @@ public enum StandardValueType implements ValueType {
 
     DATETIME(ByteString.of("DTM"), LocalDateTime.class, DateTimeTranslator.instance()),
 
-    OFFSETDATETIME(ByteString.of("ODT"), OffsetTime.class, OffsetDateTimeTranslator.instance()),
+    OFFSETDATETIME(ByteString.of("ODT"), OffsetDateTime.class, OffsetDateTimeTranslator.instance()),
 
     TIMESTAMP(ByteString.of("TSP"), Instant.class, TimestampTranslator.instance()),
 

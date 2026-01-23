@@ -43,7 +43,7 @@ public class ToOffsetDateTimeConverter implements TypedConverter<OffsetDateTime>
         } else if (source instanceof String) {
             return OffsetDateTime.parse((String) source);
         } else if (source instanceof TemporalAmount) {
-            return LocalDateTime.MIN.plus((TemporalAmount) source).atOffset(ZoneOffset.UTC);
+            return LocalDate.ofEpochDay(0).atStartOfDay().plus((TemporalAmount) source).atOffset(ZoneOffset.UTC);
         } else {
             throw new UnsupportedConversionException(source, targetClazz());
         }

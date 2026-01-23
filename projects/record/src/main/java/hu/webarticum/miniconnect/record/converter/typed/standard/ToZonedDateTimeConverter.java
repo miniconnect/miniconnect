@@ -43,7 +43,7 @@ public class ToZonedDateTimeConverter implements TypedConverter<ZonedDateTime> {
         } else if (source instanceof String) {
             return ZonedDateTime.parse((String) source);
         } else if (source instanceof TemporalAmount) {
-            return LocalDateTime.MIN.plus((TemporalAmount) source).atZone(ZoneOffset.UTC);
+            return LocalDate.ofEpochDay(0).atStartOfDay().plus((TemporalAmount) source).atZone(ZoneOffset.UTC);
         } else {
             throw new UnsupportedConversionException(source, targetClazz());
         }
