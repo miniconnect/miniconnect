@@ -16,6 +16,7 @@ import hu.webarticum.miniconnect.record.converter.UnsupportedConversionException
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 import hu.webarticum.miniconnect.record.lob.BlobValue;
+import hu.webarticum.miniconnect.record.lob.ClobValue;
 
 public class ToDateTimeDeltaConverter implements TypedConverter<DateTimeDelta> {
 
@@ -54,6 +55,8 @@ public class ToDateTimeDeltaConverter implements TypedConverter<DateTimeDelta> {
                 nanos = (int) ((doubleSeconds - seconds) * 1_000_000_000.0);
             }
             return DateTimeDelta.of(0, 0, 0, seconds, nanos);
+        } else if (source instanceof Temporal) {
+            return DateTimeDelta.between(LocalDate.ofEpochDay(0).atStartOfDay(ZoneOffset.UTC), (Temporal) source);
         } else if (source instanceof ByteString) {
             ByteString.Reader reader = ((ByteString) source).reader();
             int years = reader.readInt();
@@ -66,8 +69,8 @@ public class ToDateTimeDeltaConverter implements TypedConverter<DateTimeDelta> {
             return convert(((BlobValue) source).contentAccess().get());
         } else if (source instanceof String) {
             return DateTimeDelta.parse((String) source);
-        } else if (source instanceof Temporal) {
-            return DateTimeDelta.between(LocalDate.ofEpochDay(0).atStartOfDay(ZoneOffset.UTC), (Temporal) source);
+        } else if (source instanceof ClobValue) {
+            return DateTimeDelta.parse(((ClobValue) source).toString());
         } else if (source instanceof Boolean) {
             return (Boolean) source ? DateTimeDelta.of(0, 0, 0, 1, 0) : DateTimeDelta.ZERO;
         } else if (source instanceof CustomValue) {

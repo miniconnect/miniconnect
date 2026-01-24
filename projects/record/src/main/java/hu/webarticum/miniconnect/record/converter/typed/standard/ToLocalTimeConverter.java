@@ -19,7 +19,9 @@ import hu.webarticum.miniconnect.record.converter.UnsupportedConversionException
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 import hu.webarticum.miniconnect.record.lob.BlobValue;
+import hu.webarticum.miniconnect.record.lob.ClobValue;
 import hu.webarticum.miniconnect.record.util.Numbers;
+import hu.webarticum.miniconnect.record.util.Temporals;
 
 public class ToLocalTimeConverter implements TypedConverter<LocalTime> {
 
@@ -69,12 +71,9 @@ public class ToLocalTimeConverter implements TypedConverter<LocalTime> {
         } else if (source instanceof BlobValue) {
             return LocalTime.ofNanoOfDay(((BlobValue) source).contentAccess().get().reader().readLong());
         } else if (source instanceof String) {
-            String timeString = (String) source;
-            if (timeString.indexOf('Z', 5) >= 0 || timeString.indexOf('+', 5) >= 0 || timeString.indexOf('-', 5) >= 0) {
-                return OffsetTime.parse(timeString).toLocalTime();
-            } else {
-                return LocalTime.parse(timeString);
-            }
+            return convert(Temporals.parse((String) source));
+        } else if (source instanceof ClobValue) {
+            return convert(Temporals.parse(((ClobValue) source).toString()));
         } else if (source instanceof TemporalAmount) {
             return LocalDate.ofEpochDay(0).atStartOfDay().plus((TemporalAmount) source).toLocalTime();
         } else if (source instanceof Boolean) {

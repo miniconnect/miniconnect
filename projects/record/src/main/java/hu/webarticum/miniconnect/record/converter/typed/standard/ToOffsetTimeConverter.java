@@ -19,7 +19,9 @@ import hu.webarticum.miniconnect.record.converter.UnsupportedConversionException
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 import hu.webarticum.miniconnect.record.lob.BlobValue;
+import hu.webarticum.miniconnect.record.lob.ClobValue;
 import hu.webarticum.miniconnect.record.util.Numbers;
+import hu.webarticum.miniconnect.record.util.Temporals;
 
 public class ToOffsetTimeConverter implements TypedConverter<OffsetTime> {
 
@@ -72,7 +74,9 @@ public class ToOffsetTimeConverter implements TypedConverter<OffsetTime> {
         } else if (source instanceof BlobValue) {
             return convert(((BlobValue) source).contentAccess().get());
         } else if (source instanceof String) {
-            return OffsetTime.parse((String) source);
+            return convert(Temporals.parse((String) source));
+        } else if (source instanceof ClobValue) {
+            return convert(Temporals.parse(((ClobValue) source).toString()));
         } else if (source instanceof TemporalAmount) {
             return LocalDate.ofEpochDay(0).atStartOfDay().plus((TemporalAmount) source).atOffset(ZoneOffset.UTC).toOffsetTime();
         } else if (source instanceof Boolean) {

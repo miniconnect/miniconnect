@@ -21,7 +21,9 @@ import hu.webarticum.miniconnect.record.converter.UnsupportedConversionException
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 import hu.webarticum.miniconnect.record.lob.BlobValue;
+import hu.webarticum.miniconnect.record.lob.ClobValue;
 import hu.webarticum.miniconnect.record.util.Numbers;
+import hu.webarticum.miniconnect.record.util.Temporals;
 
 public class ToZonedDateTimeConverter implements TypedConverter<ZonedDateTime> {
 
@@ -82,7 +84,9 @@ public class ToZonedDateTimeConverter implements TypedConverter<ZonedDateTime> {
         } else if (source instanceof BlobValue) {
             return convert(((BlobValue) source).contentAccess().get());
         } else if (source instanceof String) {
-            return ZonedDateTime.parse((String) source);
+            return convert(Temporals.parse((String) source));
+        } else if (source instanceof ClobValue) {
+            return convert(Temporals.parse(((ClobValue) source).toString()));
         } else if (source instanceof Boolean) {
             return Instant.ofEpochSecond((Boolean) source ? 1 : 0).atZone(ZoneOffset.UTC);
         } else if (source instanceof CustomValue) {

@@ -74,7 +74,12 @@ public class ToLargeIntegerConverter implements TypedConverter<LargeInteger> {
         } else if (source instanceof CustomValue) {
             return convert(((CustomValue) source).get());
         } else {
-            return LargeInteger.of(source.toString());
+            String stringValue = source.toString();
+            if (stringValue.indexOf('.') == -1) {
+                return LargeInteger.of(stringValue);
+            } else {
+                return LargeInteger.of(new BigDecimal(stringValue).toBigInteger());
+            }
         }
     }
 

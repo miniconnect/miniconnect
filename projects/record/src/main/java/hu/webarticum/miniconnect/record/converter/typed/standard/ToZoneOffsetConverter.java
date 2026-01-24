@@ -14,6 +14,7 @@ import hu.webarticum.miniconnect.record.converter.UnsupportedConversionException
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 import hu.webarticum.miniconnect.record.lob.BlobValue;
+import hu.webarticum.miniconnect.record.lob.ClobValue;
 
 public class ToZoneOffsetConverter implements TypedConverter<ZoneOffset> {
 
@@ -47,6 +48,8 @@ public class ToZoneOffsetConverter implements TypedConverter<ZoneOffset> {
             return ZoneOffset.ofTotalSeconds(((BlobValue) source).contentAccess().get().reader().readInt());
         } else if (source instanceof String) {
             return ZoneOffset.of((String) source);
+        } else if (source instanceof ClobValue) {
+            return ZoneOffset.of(((ClobValue) source).toString());
         } else if (source instanceof DateTimeDelta) {
             return ZoneOffset.ofTotalSeconds((int) ((DateTimeDelta) source).toCollapsedDuration().getSeconds());
         } else if (source instanceof Duration) {
