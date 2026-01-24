@@ -14,10 +14,12 @@ import java.time.Period;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
+import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.DateTimeDelta;
 import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
+import hu.webarticum.miniconnect.record.lob.BlobValue;
 
 public class ToLargeIntegerConverter implements TypedConverter<LargeInteger> {
 
@@ -38,6 +40,10 @@ public class ToLargeIntegerConverter implements TypedConverter<LargeInteger> {
             return LargeInteger.of(((Number) source).longValue());
         } else if (source instanceof Boolean) {
             return ((boolean) source) ? LargeInteger.ONE: LargeInteger.ZERO;
+        } else if (source instanceof ByteString) {
+            return LargeInteger.of(((ByteString) source).extract());
+        } else if (source instanceof BlobValue) {
+            return LargeInteger.of(((BlobValue) source).contentAccess().get().extract());
         } else if (source instanceof Character) {
             return LargeInteger.of((long) (char) source); // NOSONAR it's better to be explicit
         } else if (source instanceof LocalDate) {
@@ -56,6 +62,8 @@ public class ToLargeIntegerConverter implements TypedConverter<LargeInteger> {
             return convert(((Timestamp) source).toInstant());
         } else if (source instanceof Instant) {
             return LargeInteger.of(((Instant) source).getEpochSecond());
+        } else if (source instanceof ZoneOffset) {
+            return LargeInteger.of(((ZoneOffset) source).getTotalSeconds());
         } else if (source instanceof DateTimeDelta) {
             return LargeInteger.of(((DateTimeDelta) source).toCollapsedDuration().getSeconds());
         } else if (source instanceof Duration) {

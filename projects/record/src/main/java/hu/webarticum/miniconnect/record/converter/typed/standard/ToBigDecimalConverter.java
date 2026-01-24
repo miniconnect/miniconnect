@@ -14,10 +14,12 @@ import java.time.Period;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
+import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.DateTimeDelta;
 import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
+import hu.webarticum.miniconnect.record.lob.BlobValue;
 
 public class ToBigDecimalConverter implements TypedConverter<BigDecimal> {
 
@@ -40,6 +42,16 @@ public class ToBigDecimalConverter implements TypedConverter<BigDecimal> {
             return BigDecimal.valueOf(((Number) source).doubleValue());
         } else if (source instanceof Boolean) {
             return ((boolean) source) ? BigDecimal.ONE: BigDecimal.ZERO;
+        } else if (source instanceof ByteString) {
+            ByteString.Reader reader = ((ByteString) source).reader();
+            int scale = reader.readInt();
+            BigInteger bigIntegerValue = new BigInteger(reader.readRemaining());
+            return new BigDecimal(bigIntegerValue, scale);
+        } else if (source instanceof BlobValue) {
+            ByteString.Reader reader = ((BlobValue) source).contentAccess().get().reader();
+            int scale = reader.readInt();
+            BigInteger bigIntegerValue = new BigInteger(reader.readRemaining());
+            return new BigDecimal(bigIntegerValue, scale);
         } else if (source instanceof Character) {
             return BigDecimal.valueOf((long) (char) source); // NOSONAR it's better to be explicit
         } else if (source instanceof LocalTime) {
@@ -62,6 +74,8 @@ public class ToBigDecimalConverter implements TypedConverter<BigDecimal> {
             long secondsSinceEpoch = ((Instant) source).getEpochSecond();
             double fragmentOfSecond = ((Instant) source).getNano() / 1_000_000_000d;
             return BigDecimal.valueOf(secondsSinceEpoch + fragmentOfSecond);
+        } else if (source instanceof ZoneOffset) {
+            return BigDecimal.valueOf(((ZoneOffset) source).getTotalSeconds());
         } else if (source instanceof DateTimeDelta) {
             Duration duration = ((DateTimeDelta) source).toCollapsedDuration();
             BigDecimal bigDecimalSeconds = BigDecimal.valueOf(duration.getSeconds());

@@ -11,8 +11,11 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
 
+import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.record.converter.UnsupportedConversionException;
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
+import hu.webarticum.miniconnect.record.custom.CustomValue;
+import hu.webarticum.miniconnect.record.lob.BlobValue;
 
 public class ToLocalDateConverter implements TypedConverter<LocalDate> {
 
@@ -39,12 +42,22 @@ public class ToLocalDateConverter implements TypedConverter<LocalDate> {
             return LocalDate.ofEpochDay(0);
         } else if (source instanceof OffsetTime) {
             return LocalDate.ofEpochDay(0);
-        } else if (source instanceof Number) {
-            return LocalDate.ofEpochDay(((Number) source).longValue());
-        } else if (source instanceof String) {
-            return LocalDate.parse((String) source);
+        } else if (source instanceof ZoneOffset) {
+            return LocalDate.ofEpochDay(0);
         } else if (source instanceof TemporalAmount) {
             return LocalDate.ofEpochDay(0).atStartOfDay().plus((TemporalAmount) source).toLocalDate();
+        } else if (source instanceof Number) {
+            return LocalDate.ofEpochDay(((Number) source).longValue());
+        } else if (source instanceof ByteString) {
+            return LocalDate.ofEpochDay(((ByteString) source).reader().readLong());
+        } else if (source instanceof BlobValue) {
+            return LocalDate.ofEpochDay(((BlobValue) source).contentAccess().get().reader().readLong());
+        } else if (source instanceof String) {
+            return LocalDate.parse((String) source);
+        } else if (source instanceof Boolean) {
+            return LocalDate.ofEpochDay((Boolean) source ? 1 : 0);
+        } else if (source instanceof CustomValue) {
+            return convert(((CustomValue) source).get());
         } else {
             throw new UnsupportedConversionException(source, targetClazz());
         }

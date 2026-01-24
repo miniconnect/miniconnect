@@ -7,10 +7,13 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.function.Function;
 
 import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.lang.DateTimeDelta;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
@@ -30,6 +33,7 @@ import hu.webarticum.miniconnect.record.translator.DecimalTranslator;
 import hu.webarticum.miniconnect.record.translator.DoubleTranslator;
 import hu.webarticum.miniconnect.record.translator.FloatTranslator;
 import hu.webarticum.miniconnect.record.translator.IntTranslator;
+import hu.webarticum.miniconnect.record.translator.IntervalTranslator;
 import hu.webarticum.miniconnect.record.translator.LongTranslator;
 import hu.webarticum.miniconnect.record.translator.NullTranslator;
 import hu.webarticum.miniconnect.record.translator.OffsetDateTimeTranslator;
@@ -38,7 +42,9 @@ import hu.webarticum.miniconnect.record.translator.ShortTranslator;
 import hu.webarticum.miniconnect.record.translator.StringTranslator;
 import hu.webarticum.miniconnect.record.translator.TimeTranslator;
 import hu.webarticum.miniconnect.record.translator.TimestampTranslator;
+import hu.webarticum.miniconnect.record.translator.TimezoneTranslator;
 import hu.webarticum.miniconnect.record.translator.ValueTranslator;
+import hu.webarticum.miniconnect.record.translator.ZonedDateTimeTranslator;
 
 public enum StandardValueType implements ValueType {
 
@@ -78,7 +84,13 @@ public enum StandardValueType implements ValueType {
 
     OFFSETDATETIME(ByteString.of("ODT"), OffsetDateTime.class, OffsetDateTimeTranslator.instance()),
 
+    ZONEDDATETIME(ByteString.of("ZDT"), ZonedDateTime.class, ZonedDateTimeTranslator.instance()),
+
     TIMESTAMP(ByteString.of("TSP"), Instant.class, TimestampTranslator.instance()),
+
+    TIMEZONE(ByteString.of("TMZ"), ZoneOffset.class, TimezoneTranslator.instance()),
+
+    INTERVAL(ByteString.of("ITV"), DateTimeDelta.class, IntervalTranslator.instance()),
 
     BLOB(ByteString.of("BLB"), BlobValue.class, BlobTranslator.instance()),
 

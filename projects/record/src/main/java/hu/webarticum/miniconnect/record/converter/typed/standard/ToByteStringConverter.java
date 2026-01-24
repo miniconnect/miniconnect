@@ -1,17 +1,24 @@
 package hu.webarticum.miniconnect.record.converter.typed.standard;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.Period;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
 import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.lang.DateTimeDelta;
+import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 import hu.webarticum.miniconnect.record.lob.BlobValue;
@@ -31,8 +38,6 @@ public class ToByteStringConverter implements TypedConverter<ByteString> {
             return (ByteString) source;
         } else if (source instanceof String) {
             return ByteString.of((String) source);
-        } else if (source instanceof CustomValue) {
-            return convert(((CustomValue) source).get());
         } else if (source instanceof BlobValue) {
             MiniContentAccess contentAccess = ((BlobValue) source).contentAccess();
             if (contentAccess.isLarge()) {
@@ -45,22 +50,80 @@ public class ToByteStringConverter implements TypedConverter<ByteString> {
                 throw new IllegalArgumentException("Too large CLOB");
             }
             return contentAccess.get();
+        } else if (source instanceof Boolean) {
+            return ByteString.ofByte((boolean) source ? (byte) 1 : (byte) 0);
+        } else if (source instanceof Byte) {
+            return ByteString.ofByte((Byte) source);
+        } else if (source instanceof Short) {
+            return ByteString.ofShort((Short) source);
+        } else if (source instanceof Integer) {
+            return ByteString.ofInt((Integer) source);
+        } else if (source instanceof Long) {
+            return ByteString.ofLong((Long) source);
+        } else if (source instanceof LargeInteger) {
+            return ByteString.of(((LargeInteger) source).toByteArray());
+        } else if (source instanceof BigInteger) {
+            return ByteString.of(((BigInteger) source).toByteArray());
         } else if (source instanceof LocalDate) {
-            return ByteString.of(((LocalDate) source).format(DateTimeFormatter.ISO_LOCAL_DATE));
+            return ByteString.ofFloat((Float) source);
+        } else if (source instanceof Double) {
+            return ByteString.ofDouble((Double) source);
+        } else if (source instanceof BigDecimal) {
+            BigDecimal bigDecimal = (BigDecimal) source;
+            return ByteString.builder().appendInt(bigDecimal.scale()).append(bigDecimal.unscaledValue().toByteArray()).build();
+        } else if (source instanceof LocalDate) {
+            return ByteString.ofLong(((LocalDate) source).toEpochDay());
         } else if (source instanceof LocalTime) {
-            return ByteString.of(((LocalTime) source).format(DateTimeFormatter.ISO_LOCAL_DATE));
+            return ByteString.ofLong(((LocalTime) source).toNanoOfDay());
         } else if (source instanceof LocalDateTime) {
-            return ByteString.of(((LocalDateTime) source).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            LocalDateTime localDateTime = (LocalDateTime) source;
+            return ByteString.builder()
+                    .appendLong(localDateTime.toLocalDate().toEpochDay())
+                    .appendLong(localDateTime.toLocalTime().toNanoOfDay())
+                    .build();
         } else if (source instanceof OffsetTime) {
-            return ByteString.of(((OffsetTime) source).format(DateTimeFormatter.ISO_OFFSET_TIME));
+            OffsetTime offsetTime = (OffsetTime) source;
+            return ByteString.builder()
+                    .appendLong(offsetTime.toLocalTime().toNanoOfDay())
+                    .appendInt(offsetTime.getOffset().getTotalSeconds())
+                    .build();
         } else if (source instanceof OffsetDateTime) {
-            return ByteString.of(((OffsetDateTime) source).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+            OffsetDateTime offsetDateTime = (OffsetDateTime) source;
+            LocalDateTime localDateTime = offsetDateTime.toLocalDateTime();
+            return ByteString.builder()
+                    .appendLong(localDateTime.toLocalDate().toEpochDay())
+                    .appendLong(localDateTime.toLocalTime().toNanoOfDay())
+                    .appendInt(offsetDateTime.getOffset().getTotalSeconds())
+                    .build();
         } else if (source instanceof ZonedDateTime) {
-            return ByteString.of(((ZonedDateTime) source).format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
+            ZonedDateTime zonedDateTimeValue = (ZonedDateTime) source;
+            LocalDateTime localDateTime = zonedDateTimeValue.toLocalDateTime();
+            return ByteString.builder()
+                    .appendLong(localDateTime.toLocalDate().toEpochDay())
+                    .appendLong(localDateTime.toLocalTime().toNanoOfDay())
+                    .appendInt(zonedDateTimeValue.getOffset().getTotalSeconds())
+                    .append(zonedDateTimeValue.getZone().getId().getBytes(StandardCharsets.UTF_8))
+                    .build();
         } else if (source instanceof Timestamp) {
             return convert(((Timestamp) source).toInstant());
         } else if (source instanceof Instant) {
-            return ByteString.of(((Instant) source).toString());
+            Instant instant = (Instant) source;
+            return ByteString.builder().appendLong(instant.getEpochSecond()).appendInt(instant.getNano()).build();
+        } else if (source instanceof ZoneOffset) {
+            return ByteString.ofInt(((ZoneOffset) source).getTotalSeconds());
+        } else if (source instanceof DateTimeDelta) {
+            DateTimeDelta delta = (DateTimeDelta) source;
+            Period period = delta.getPeriod();
+            Duration duration = delta.getDuration();
+            return ByteString.builder()
+                    .appendInt(period.getYears())
+                    .appendInt(period.getMonths())
+                    .appendInt(period.getDays())
+                    .appendLong(duration.getSeconds())
+                    .appendInt(duration.getNano())
+                    .build();
+        } else if (source instanceof CustomValue) {
+            return convert(((CustomValue) source).get());
         } else {
             return ByteString.of(source.toString());
         }
