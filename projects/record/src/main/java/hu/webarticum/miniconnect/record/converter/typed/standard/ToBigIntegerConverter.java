@@ -49,7 +49,7 @@ public class ToBigIntegerConverter implements TypedConverter<BigInteger> {
         } else if (source instanceof LocalDate) {
             return BigInteger.valueOf(((LocalDate) source).toEpochDay());
         } else if (source instanceof LocalTime) {
-            return BigInteger.valueOf(((LocalTime) source).getSecond());
+            return BigInteger.valueOf(((LocalTime) source).toSecondOfDay());
         } else if (source instanceof OffsetTime) {
             return convert(((OffsetTime) source).toLocalTime());
         } else if (source instanceof LocalDateTime) {
