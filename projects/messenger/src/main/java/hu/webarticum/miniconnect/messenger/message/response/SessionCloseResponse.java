@@ -8,7 +8,7 @@ import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 public final class SessionCloseResponse implements Response, ExchangeMessage {
 
     private static final long serialVersionUID = 2580416468973712490L;
-    
+
 
     private final long sessionId;
 
@@ -45,7 +45,7 @@ public final class SessionCloseResponse implements Response, ExchangeMessage {
         } else if (!(other instanceof SessionCloseResponse)) {
             return false;
         }
-        
+
         SessionCloseResponse otherLargeDataSaveResponse = (SessionCloseResponse) other;
         return
                 sessionId == otherLargeDataSaveResponse.sessionId &&

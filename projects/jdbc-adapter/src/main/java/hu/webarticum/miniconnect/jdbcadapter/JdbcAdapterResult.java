@@ -15,25 +15,25 @@ import hu.webarticum.miniconnect.impl.result.StoredResultSet;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 
 public class JdbcAdapterResult implements MiniResult {
-    
+
     private static final int MAX_WARNINGS = 1000;
-    
-    
+
+
     private final boolean success;
-    
+
     private final MiniError error;
-    
+
     private final ImmutableList<MiniError> warnings;
-    
+
     private final boolean hasResultSet;
-    
+
     private final MiniResultSet resultSet;
-    
-    
+
+
     public JdbcAdapterResult(Statement jdbcStatement) {
         this(
                 true,
-                new StoredError(0, "00000", ""),
+                StoredError.of(0, "00000", ""),
                 extractWarnings(jdbcStatement),
                 jdbcStatement,
                 extractResultSet(jdbcStatement));
@@ -46,7 +46,7 @@ public class JdbcAdapterResult implements MiniResult {
             return ImmutableList.empty();
         }
     }
-    
+
     private static ImmutableList<MiniError> extractWarningsThrows(
             Statement jdbcStatement) throws SQLException {
         List<MiniError> resultBuilder = new ArrayList<>();
@@ -58,9 +58,9 @@ public class JdbcAdapterResult implements MiniResult {
         }
         return ImmutableList.fromCollection(resultBuilder);
     }
-    
+
     private static MiniError convertWarning(SQLWarning jdbcWarning) {
-        return new StoredError(
+        return StoredError.of(
                 jdbcWarning.getErrorCode(),
                 jdbcWarning.getSQLState(),
                 jdbcWarning.getMessage());
@@ -69,7 +69,7 @@ public class JdbcAdapterResult implements MiniResult {
     public JdbcAdapterResult(SQLException jdbcException) {
         this(
                 false,
-                new StoredError(
+                StoredError.of(
                         jdbcException.getErrorCode(),
                         jdbcException.getSQLState(),
                         jdbcException.getMessage()),
@@ -90,7 +90,7 @@ public class JdbcAdapterResult implements MiniResult {
         this.hasResultSet = (jdbcResultSet != null);
         this.resultSet = asMiniResultSet(jdbcStatement, jdbcResultSet);
     }
-    
+
     private static ResultSet extractResultSet(Statement jdbcStatement) {
         try {
             return jdbcStatement.getResultSet();
@@ -98,15 +98,15 @@ public class JdbcAdapterResult implements MiniResult {
             throw new UncheckedSqlException(e);
         }
     }
-    
+
     private static MiniResultSet asMiniResultSet(Statement jdbcStatement, ResultSet jdbcResultSet) {
         if (jdbcResultSet == null) {
-            return new StoredResultSet();
+            return StoredResultSet.empty();
         }
-        
+
         return new JdbcAdapterResultSet(jdbcStatement, jdbcResultSet);
     }
-    
+
 
     @Override
     public boolean success() {

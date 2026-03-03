@@ -27,29 +27,29 @@ import hu.webarticum.miniconnect.messenger.util.OrderAligningQueue;
 class LargeDataPartial implements Closeable {
 
     private static final long PART_REQUEST_TIMEOUT_SECONDS = 300;
-    
+
     private static final long RESULT_TIMEOUT_SECONDS = 300;
-    
+
     private static final String SQLSTATE_CONNECTIONERROR = "08006";
-    
-    
+
+
     private final long sessionId;
-    
+
     private final MiniSession session;
-    
+
     private final ExecutorService putLargeDataInvokerExecutorService = Executors.newCachedThreadPool();
-    
+
     private final ExecutorService largeDataPartExecutorService = Executors.newCachedThreadPool();
-    
+
     private final Map<Integer, OrderAligningQueue<LargeDataPartRequest>> largeDataPartRequests = new HashMap<>();
-    
+
 
     public LargeDataPartial(long sessionId, MiniSession session) {
         this.sessionId = sessionId;
         this.session = session;
     }
-    
-    
+
+
     public void acceptLargeDataHeadRequest(LargeDataHeadRequest headRequest, Consumer<Response> responseConsumer) {
         int exchangeId = headRequest.exchangeId();
         OrderAligningQueue<LargeDataPartRequest> partQueue = requireLargeDataPartQueue(exchangeId);
@@ -61,7 +61,7 @@ class LargeDataPartial implements Closeable {
         OrderAligningQueue<LargeDataPartRequest> partQueue = requireLargeDataPartQueue(exchangeId);
         partQueue.add(partRequest);
     }
-    
+
     private OrderAligningQueue<LargeDataPartRequest> requireLargeDataPartQueue(int exchangeId) {
         return largeDataPartRequests.computeIfAbsent(
                 exchangeId,
@@ -72,7 +72,7 @@ class LargeDataPartial implements Closeable {
         if (previous == null) {
             return (next.offset() == 0L);
         }
-        
+
         long leftOffset = previous.offset() + previous.content().length();
         return (next.offset() == leftOffset);
     }
@@ -94,17 +94,17 @@ class LargeDataPartial implements Closeable {
                     SQLSTATE_CONNECTIONERROR,
                     e.getMessage());
             responseConsumer.accept(response);
-            
+
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
             }
         }
-        
+
         synchronized (this) {
             largeDataPartRequests.remove(exchangeId);
         }
     }
-    
+
     private void invokePutLargeDataThrowing(
             LargeDataHeadRequest headRequest,
             Consumer<Response> responseConsumer,
@@ -117,7 +117,7 @@ class LargeDataPartial implements Closeable {
         PipedInputStream in = new PipedInputStream();
         Future<MiniLargeDataSaveResult> resultFuture = largeDataPartExecutorService.submit(
                 () -> session.putLargeData(variableName, fullLength, in));
-        
+
         try (PipedOutputStream out = new PipedOutputStream(in)) {
             long writtenOffset = 0L;
             while (writtenOffset < fullLength) {
@@ -127,9 +127,9 @@ class LargeDataPartial implements Closeable {
                 writtenOffset += content.length();
             }
         }
-        
+
         MiniLargeDataSaveResult result = resultFuture.get(RESULT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        
+
         MiniError error = result.error();
         LargeDataSaveResponse response = new LargeDataSaveResponse(
                 sessionId,
@@ -140,7 +140,7 @@ class LargeDataPartial implements Closeable {
                 error != null ? error.message() : "");
         responseConsumer.accept(response);
     }
-    
+
     @Override
     public void close() {
         putLargeDataInvokerExecutorService.shutdownNow();

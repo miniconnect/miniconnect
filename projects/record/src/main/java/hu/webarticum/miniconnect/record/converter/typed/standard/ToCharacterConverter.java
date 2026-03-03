@@ -4,7 +4,7 @@ import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
 
 public class ToCharacterConverter implements TypedConverter<Character> {
-    
+
     @Override
     public Class<Character> targetClazz() {
         return Character.class;

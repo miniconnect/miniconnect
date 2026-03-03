@@ -94,7 +94,7 @@ class GroupingIteratorTest {
                 (Iterator<Integer> i, LargeInteger p) -> p.isLessThan(LargeInteger.of(5)) ? i : null);
         assertThat(iterableOf(groupingIterator)).containsExactly(1, 2, 2, 3, 2, 2);
     }
-    
+
     private Iterator<Integer> countIterator(Iterator<?> iterator, LargeInteger position) {
         int result = 0;
         while (iterator.hasNext()) {
@@ -103,23 +103,23 @@ class GroupingIteratorTest {
         }
         return Arrays.asList(result).iterator();
     }
-    
+
     private List<Integer> reverseIntegerList(List<Integer> originalList, LargeInteger position) {
         List<Integer> result = new ArrayList<>(originalList);
         Collections.reverse(result);
         return result;
     }
-    
+
     private <T> Iterable<T> iterableOf(Iterator<T> iterator) {
         return () -> iterator;
     }
-    
-    
+
+
     private static class DecorateIntegersIterator implements Iterator<String> {
-        
+
         private Iterator<Integer> baseIterator;
-        
-        
+
+
         private DecorateIntegersIterator(Iterator<Integer> baseIterator, LargeInteger position) {
             this.baseIterator = baseIterator;
         }
@@ -135,10 +135,10 @@ class GroupingIteratorTest {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            
+
             return "[" + baseIterator.next() + "]";
         }
-        
+
     }
 
 }

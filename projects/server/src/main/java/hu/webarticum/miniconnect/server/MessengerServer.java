@@ -23,25 +23,25 @@ public class MessengerServer implements Closeable {
 
     private static final Logger logger =
             LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    
-    
+
+
     private final Messenger messenger;
-    
+
     private final MessageDecoder decoder;
-    
+
     private final MessageEncoder encoder;
-    
+
     private final SocketServer socketServer;
-    
+
 
     public MessengerServer(Messenger messenger) {
         this(messenger, openServerSocket());
     }
-    
+
     public MessengerServer(Messenger messenger, int serverPort) {
         this(messenger, openServerSocket(serverPort));
     }
-    
+
     public MessengerServer(Messenger messenger, ServerSocket serverSocket) {
         this(messenger, new DefaultMessageTranslator(), serverSocket);
     }
@@ -53,7 +53,7 @@ public class MessengerServer implements Closeable {
     public MessengerServer(Messenger messenger, MessageTranslator translator, int serverPort) {
         this(messenger, translator, openServerSocket(serverPort));
     }
-    
+
     public MessengerServer(
             Messenger messenger,
             MessageTranslator translator,
@@ -87,7 +87,7 @@ public class MessengerServer implements Closeable {
     private static ServerSocket openServerSocket() {
         return openServerSocket(ServerConstants.DEFAULT_PORT);
     }
-    
+
     private static ServerSocket openServerSocket(int serverPort) {
         logger.debug("Open server socket on port {}", serverPort);
         try {
@@ -106,7 +106,7 @@ public class MessengerServer implements Closeable {
             logger.error("Stop listening due error", e);
         }
     }
-    
+
     private PacketExchanger createExchanger() {
         return this::handle;
     }
@@ -120,7 +120,7 @@ public class MessengerServer implements Closeable {
                 request,
                 response -> receiveResponse(response, responseTarget, logId));
     }
-    
+
     private void receiveResponse(Response response, PacketTarget responseTarget, String logId) {
         logger.trace("[{}] Response received: {}", logId, response);
         responseTarget.receive(encoder.encode(response));
@@ -131,5 +131,5 @@ public class MessengerServer implements Closeable {
         logger.info("Close server");
         socketServer.close();
     }
-    
+
 }

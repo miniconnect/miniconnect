@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 
 class QueryRequestTest {
-    
+
     @Test
     void testHashCodeAndEquals() {
         QueryRequest instance1 = new QueryRequest(77L, 13, "SELECT 1");

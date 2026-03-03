@@ -2,19 +2,25 @@ package hu.webarticum.miniconnect.record.converter.typed.standard;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.Period;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
+import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.lang.DateTimeDelta;
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
+import hu.webarticum.miniconnect.record.lob.BlobValue;
 
 public class ToDoubleConverter implements TypedConverter<Double> {
-    
+
     @Override
     public Class<Double> targetClazz() {
         return Double.class;
@@ -42,12 +48,29 @@ public class ToDoubleConverter implements TypedConverter<Double> {
             return secondsSinceEpoch + fragmentOfSecond;
         } else if (source instanceof OffsetDateTime) {
             return convert(((OffsetDateTime) source).toInstant());
+        } else if (source instanceof ZonedDateTime) {
+            return convert(((ZonedDateTime) source).toInstant());
         } else if (source instanceof Timestamp) {
             return convert(((Timestamp) source).toInstant());
         } else if (source instanceof Instant) {
             long secondsSinceEpoch = ((Instant) source).getEpochSecond();
             double fragmentOfSecond = ((Instant) source).getNano() / 1_000_000_000d;
             return secondsSinceEpoch + fragmentOfSecond;
+        } else if (source instanceof ZoneOffset) {
+            return (double) ((ZoneOffset) source).getTotalSeconds();
+        } else if (source instanceof DateTimeDelta) {
+            Duration duration = ((DateTimeDelta) source).toCollapsedDuration();
+            return duration.getSeconds() + (0.000_000_001 * duration.getNano());
+        } else if (source instanceof Duration) {
+            Duration duration = (Duration) source;
+            return duration.getSeconds() + (0.000_000_001 * duration.getNano());
+        } else if (source instanceof Period) {
+            Period period = (Period) source;
+            return (period.getYears() * 365d) + (period.getMonths() * 30d) + (period.getDays());
+        } else if (source instanceof ByteString) {
+            return ((ByteString) source).reader().readDouble();
+        } else if (source instanceof BlobValue) {
+            return ((BlobValue) source).contentAccess().get().reader().readDouble();
         } else if (source instanceof CustomValue) {
             return convert(((CustomValue) source).get());
         } else {

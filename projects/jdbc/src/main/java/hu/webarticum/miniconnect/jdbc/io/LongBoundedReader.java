@@ -14,7 +14,7 @@ public class LongBoundedReader extends Reader {
 
     private int position = 0;
 
-    
+
     public LongBoundedReader(Reader target, long limit) {
         this.target = target;
         this.limit = limit;

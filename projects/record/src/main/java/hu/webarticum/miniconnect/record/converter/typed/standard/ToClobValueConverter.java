@@ -8,7 +8,7 @@ import hu.webarticum.miniconnect.record.lob.BlobValue;
 import hu.webarticum.miniconnect.record.lob.ClobValue;
 
 public class ToClobValueConverter implements TypedConverter<ClobValue> {
-    
+
     @Override
     public Class<ClobValue> targetClazz() {
         return ClobValue.class;
@@ -23,8 +23,9 @@ public class ToClobValueConverter implements TypedConverter<ClobValue> {
         } else if (source instanceof CustomValue) {
             return convert(((CustomValue) source).get());
         } else {
-            ByteString bytes = new ToByteStringConverter().convert(source);
-            return ClobValue.of(new StoredContentAccess(bytes));
+            String stringContent = new ToStringConverter().convert(source);
+            ByteString bytes = ByteString.of(stringContent);
+            return ClobValue.of(StoredContentAccess.of(bytes));
         }
     }
 

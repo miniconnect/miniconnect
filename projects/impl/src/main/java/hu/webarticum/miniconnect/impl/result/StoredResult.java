@@ -17,55 +17,69 @@ public final class StoredResult implements MiniResult, Serializable {
 
     private final StoredError error;
 
-    private final ImmutableList<MiniError> warnings;
+    private final ImmutableList<StoredError> warnings;
 
     private final boolean hasResultSet;
 
     private final StoredResultSetData resultSetData;
 
 
-    public StoredResult() {
-        this(
-                true, StoredError.PLACEHOLDER, ImmutableList.empty(),
-                false, new StoredResultSetData());
-    }
-
-    public StoredResult(MiniError error) {
-        this(
-                false, StoredError.of(error), ImmutableList.empty(),
-                false, new StoredResultSetData());
-    }
-
-    public StoredResult(StoredResultSetData resultSetData) {
-        this(
-                true, StoredError.PLACEHOLDER, ImmutableList.empty(),
-                true, resultSetData);
-    }
-
-    public StoredResult(
+    private StoredResult(
             boolean success,
             StoredError error,
-            ImmutableList<? extends MiniError> warnings,
+            ImmutableList<StoredError> warnings,
             boolean hasResultSet,
             StoredResultSetData resultSetData) {
         this.success = success;
         this.error = error;
-        this.warnings = warnings.map(StoredError::of);
+        this.warnings = warnings;
         this.hasResultSet = hasResultSet;
         this.resultSetData = resultSetData;
     }
 
-    public static StoredResult of(MiniResult result) throws IOException {
+    public static StoredResult of(
+            boolean success,
+            StoredError error,
+            ImmutableList<StoredError> warnings,
+            boolean hasResultSet,
+            StoredResultSetData resultSetData) {
+        return new StoredResult(success, error, warnings, hasResultSet, resultSetData);
+    }
+
+    public static StoredResult ofSuccess() {
+        return of(true, StoredError.PLACEHOLDER, ImmutableList.empty(), false, StoredResultSetData.empty());
+    }
+
+    public static StoredResult ofError(StoredError error) {
+        return of(false, error, ImmutableList.empty(), false, StoredResultSetData.empty());
+    }
+
+    public static StoredResult of(StoredResultSetData resultSetData) {
+        return of(true, StoredError.PLACEHOLDER, ImmutableList.empty(), true, resultSetData);
+    }
+
+    public static StoredResult from(
+            boolean success,
+            MiniError error,
+            ImmutableList<MiniError> warnings,
+            boolean hasResultSet,
+            MiniResultSet resultSet) throws IOException {
+        return StoredResult.of(success, StoredError.from(error),
+                warnings.map(w -> StoredError.from(w)),
+                hasResultSet,
+                StoredResultSetData.from(resultSet));
+    }
+
+    public static StoredResult from(MiniResult result) throws IOException {
         if (result instanceof StoredResult) {
             return (StoredResult) result;
         }
-        
-        return new StoredResult(
-                result.success(),
-                StoredError.of(result.error()),
-                result.warnings().map(StoredError::of),
-                result.hasResultSet(),
-                StoredResultSetData.of(result));
+
+        return from(result.success(), result.error(), result.warnings(), result.hasResultSet(), result.resultSet());
+    }
+
+    public static StoredResult fromError(MiniError error) {
+        return of(false, StoredError.from(error), ImmutableList.empty(), false, StoredResultSetData.empty());
     }
 
 
@@ -79,9 +93,10 @@ public final class StoredResult implements MiniResult, Serializable {
         return error;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public ImmutableList<MiniError> warnings() {
-        return warnings;
+        return (ImmutableList<MiniError>) (ImmutableList<?>) warnings;
     }
 
     @Override
@@ -91,7 +106,7 @@ public final class StoredResult implements MiniResult, Serializable {
 
     @Override
     public MiniResultSet resultSet() {
-        return new StoredResultSet(resultSetData);
+        return StoredResultSet.of(resultSetData);
     }
 
 }

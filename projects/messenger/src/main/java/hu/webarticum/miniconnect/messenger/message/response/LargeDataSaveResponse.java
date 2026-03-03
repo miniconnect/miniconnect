@@ -8,7 +8,7 @@ import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 public final class LargeDataSaveResponse implements Response, ExchangeMessage {
 
     private static final long serialVersionUID = 2835387537304211456L;
-    
+
 
     private final long sessionId;
 
@@ -60,7 +60,7 @@ public final class LargeDataSaveResponse implements Response, ExchangeMessage {
     public String sqlState() {
         return sqlState;
     }
-    
+
     public String errorMessage() {
         return errorMessage;
     }
@@ -79,7 +79,7 @@ public final class LargeDataSaveResponse implements Response, ExchangeMessage {
         } else if (!(other instanceof LargeDataSaveResponse)) {
             return false;
         }
-        
+
         LargeDataSaveResponse otherLargeDataSaveResponse = (LargeDataSaveResponse) other;
         return
                 sessionId == otherLargeDataSaveResponse.sessionId &&

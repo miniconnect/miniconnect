@@ -11,20 +11,20 @@ import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
 
 public class StructSchema implements Schema {
-    
+
     public static final byte FLAG = (byte) 'S';
-    
-    
+
+
     private final ImmutableMap<String, Schema> schemas;
-    
+
     private final ImmutableList<String> keyOrder;
-    
-    
+
+
     public StructSchema(ImmutableMap<String, Schema> schemas, ImmutableList<String> keyOrder) {
         this.schemas = schemas;
         this.keyOrder = keyOrder;
     }
-    
+
 
     public static StructSchema readMainFrom(InputStream in) {
         int structSize = StreamUtil.readInt(in);
@@ -41,7 +41,7 @@ public class StructSchema implements Schema {
                 ImmutableList.fromCollection(keyOrderBuilder));
     }
 
-    
+
     @Override
     public void writeTo(OutputStream out) {
         int structSize = keyOrder.size();

@@ -11,57 +11,53 @@ public final class StoredValue implements MiniValue, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    
-    public static final StoredValueDefinition DEFAULT_DEFINITION =
-            new StoredValueDefinition(ByteString.class.getName());
-    
+
+    public static final StoredValueDefinition DEFAULT_DEFINITION = StoredValueDefinition.of(ByteString.class.getName());
 
 
     private final StoredValueDefinition definition;
-    
+
     private final boolean isNull;
 
-    private final MiniContentAccess contentAccess; // NOSONAR by default its serializable
+    private final StoredContentAccess contentAccess;
 
 
-    public StoredValue() {
-        this(true, ByteString.empty());
-    }
-
-    public StoredValue(ByteString content) {
-        this(false, content);
-    }
-
-    public StoredValue(boolean isNull, ByteString content) {
-        this(DEFAULT_DEFINITION, isNull, content);
-    }
-    
-    public StoredValue(MiniValueDefinition definition, boolean isNull, ByteString content) {
-        this(definition, isNull, new StoredContentAccess(content));
-    }
-
-    public StoredValue(
-            MiniValueDefinition definition, boolean isNull, MiniContentAccess contentAccess) {
-        this.definition = StoredValueDefinition.of(definition);
+    private StoredValue(StoredValueDefinition definition, boolean isNull, StoredContentAccess contentAccess) {
+        this.definition = definition;
         this.isNull = isNull;
         this.contentAccess = contentAccess;
     }
 
-    public static StoredValue of(MiniValue value) {
+    public static StoredValue of(StoredValueDefinition definition, boolean isNull, StoredContentAccess contentAccess) {
+        return new StoredValue(definition, isNull, contentAccess);
+    }
+
+    public static StoredValue of(StoredValueDefinition definition, boolean isNull, ByteString content) {
+        return of(definition, isNull, StoredContentAccess.of(content));
+    }
+
+    public static StoredValue of(boolean isNull, ByteString content) {
+        return of(DEFAULT_DEFINITION, isNull, content);
+    }
+
+    public static StoredValue of(ByteString content) {
+        return of(false, content);
+    }
+
+    public static StoredValue empty() {
+        return of(true, ByteString.empty());
+    }
+
+    public static StoredValue from(MiniValueDefinition definition, boolean isNull, MiniContentAccess contentAccess) {
+        return new StoredValue( StoredValueDefinition.from(definition), isNull, StoredContentAccess.from(contentAccess));
+    }
+
+    public static StoredValue from(MiniValue value) {
         if (value instanceof StoredValue) {
             return (StoredValue) value;
         }
 
-        MiniContentAccess contentAccess = value.contentAccess();
-        if (contentAccess.isLarge()) {
-            throw new IllegalArgumentException(
-                    "Content is too large to store in memory");
-        }
-        
-        return new StoredValue(
-                StoredValueDefinition.of(value.definition()),
-                value.isNull(),
-                contentAccess.get());
+        return from(value.definition(), value.isNull(), value.contentAccess());
     }
 
 

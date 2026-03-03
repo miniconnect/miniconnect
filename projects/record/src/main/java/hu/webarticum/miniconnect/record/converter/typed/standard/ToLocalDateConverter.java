@@ -4,11 +4,20 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAmount;
 
+import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.record.converter.UnsupportedConversionException;
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
+import hu.webarticum.miniconnect.record.custom.CustomValue;
+import hu.webarticum.miniconnect.record.lob.BlobValue;
+import hu.webarticum.miniconnect.record.lob.ClobValue;
+import hu.webarticum.miniconnect.record.util.Temporals;
 
 public class ToLocalDateConverter implements TypedConverter<LocalDate> {
 
@@ -25,14 +34,34 @@ public class ToLocalDateConverter implements TypedConverter<LocalDate> {
             return ((LocalDateTime) source).toLocalDate();
         } else if (source instanceof OffsetDateTime) {
             return ((OffsetDateTime) source).toLocalDate();
+        } else if (source instanceof ZonedDateTime) {
+            return ((ZonedDateTime) source).toLocalDate();
         } else if (source instanceof Timestamp) {
             return convert(((Timestamp) source).toLocalDateTime().toLocalDate());
         } else if (source instanceof Instant) {
             return LocalDateTime.ofInstant((Instant) source, ZoneOffset.UTC).toLocalDate();
+        } else if (source instanceof LocalTime) {
+            return LocalDate.ofEpochDay(0);
+        } else if (source instanceof OffsetTime) {
+            return LocalDate.ofEpochDay(0);
+        } else if (source instanceof ZoneOffset) {
+            return LocalDate.ofEpochDay(0);
+        } else if (source instanceof TemporalAmount) {
+            return LocalDate.ofEpochDay(0).atStartOfDay().plus((TemporalAmount) source).toLocalDate();
         } else if (source instanceof Number) {
             return LocalDate.ofEpochDay(((Number) source).longValue());
+        } else if (source instanceof ByteString) {
+            return LocalDate.ofEpochDay(((ByteString) source).reader().readLong());
+        } else if (source instanceof BlobValue) {
+            return LocalDate.ofEpochDay(((BlobValue) source).contentAccess().get().reader().readLong());
         } else if (source instanceof String) {
-            return LocalDate.parse((String) source);
+            return convert(Temporals.parse((String) source));
+        } else if (source instanceof ClobValue) {
+            return convert(Temporals.parse(((ClobValue) source).toString()));
+        } else if (source instanceof Boolean) {
+            return LocalDate.ofEpochDay((Boolean) source ? 1 : 0);
+        } else if (source instanceof CustomValue) {
+            return convert(((CustomValue) source).get());
         } else {
             throw new UnsupportedConversionException(source, targetClazz());
         }

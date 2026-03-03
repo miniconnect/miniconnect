@@ -4,5 +4,5 @@ package hu.webarticum.miniconnect.transfer;
 public interface PacketTarget {
 
     public void receive(Packet packet);
-    
+
 }

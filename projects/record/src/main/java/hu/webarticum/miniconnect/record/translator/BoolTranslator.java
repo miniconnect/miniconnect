@@ -7,30 +7,30 @@ import hu.webarticum.miniconnect.lang.ByteString;
 public class BoolTranslator implements ValueTranslator {
 
     public static final String NAME = "BOOL"; // NOSONAR same name is OK
-    
+
 
     private static final BoolTranslator INSTANCE = new BoolTranslator();
-    
-    
+
+
     private BoolTranslator() {
         // singleton
     }
-    
+
     public static BoolTranslator instance() {
         return INSTANCE;
     }
-    
+
 
     @Override
     public String name() {
         return NAME;
     }
-    
+
     @Override
     public int length() {
         return 1;
     }
-    
+
     @Override
     public Object decode(MiniContentAccess contentAccess) {
         return
@@ -42,12 +42,12 @@ public class BoolTranslator implements ValueTranslator {
     public MiniContentAccess encode(Object value) {
         byte b = (value == Boolean.TRUE) ? (byte) 1 : (byte) 0;
         ByteString bytes = ByteString.of(new byte[] { b });
-        return new StoredContentAccess(bytes);
+        return StoredContentAccess.of(bytes);
     }
 
     @Override
     public String assuredClazzName() {
         return Boolean.class.getName();
     }
-    
+
 }

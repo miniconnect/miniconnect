@@ -8,11 +8,11 @@ import hu.webarticum.miniconnect.api.MiniResult;
 import hu.webarticum.miniconnect.api.MiniSession;
 
 public class MockSession implements MiniSession {
-    
+
     private final Function<String, MiniResult> resultProvider;
-    
+
     private final PutLargeDataFunction putLargeDataFunction;
-    
+
 
     public MockSession(Function<String, MiniResult> resultSupplier) {
         this(resultSupplier, null);
@@ -24,8 +24,8 @@ public class MockSession implements MiniSession {
         this.resultProvider = resultProvider;
         this.putLargeDataFunction = putLargeDataFunction;
     }
-    
-    
+
+
     @Override
     public MiniResult execute(String query) {
         return resultProvider.apply(query);
@@ -37,7 +37,7 @@ public class MockSession implements MiniSession {
         if (putLargeDataFunction == null) {
             throw new UnsupportedOperationException();
         }
-        
+
         return putLargeDataFunction.putLargeData(variableName, length, dataSource);
     }
 
@@ -45,13 +45,13 @@ public class MockSession implements MiniSession {
     public void close() {
         // nothing to do
     }
-    
+
     @Override
     public boolean isClosed() {
         return false;
     }
-    
-    
+
+
     @FunctionalInterface
     public interface PutLargeDataFunction {
 

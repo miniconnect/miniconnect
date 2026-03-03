@@ -65,9 +65,9 @@ class LimitingIteratorTest {
         LimitingIterator<Integer> limitingIterator = new LimitingIterator<>(baseIterator, -5);
         assertThat(iterableOf(limitingIterator)).isEmpty();
     }
-    
+
     private <T> Iterable<T> iterableOf(Iterator<T> iterator) {
         return () -> iterator;
     }
-    
+
 }

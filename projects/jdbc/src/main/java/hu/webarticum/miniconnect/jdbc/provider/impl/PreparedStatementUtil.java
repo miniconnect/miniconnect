@@ -27,12 +27,12 @@ public final class PreparedStatementUtil {
             .withDelimiter("'")
             .withEscaping('\\', true)
             .build();
-    
+
     private static final BeeFragment DOUBLE_QUOTED_FRAGMENT = StringLiteralFragment.builder()
             .withDelimiter("\"")
             .withEscaping('\\', true)
             .build();
-    
+
     private static final BeeFragment TWODOLLARS_QUOTED_FRAGMENT = StringLiteralFragment.builder()
             .withDelimiter("$$")
             .withoutAnyEscaping()
@@ -44,13 +44,13 @@ public final class PreparedStatementUtil {
             .or(TWODOLLARS_QUOTED_FRAGMENT)
             .or(Bee.fixed("?"))
             .toPattern();
-    
-    
+
+
     private PreparedStatementUtil() {
         // nothing to do
     }
-    
-    
+
+
     public static String[] compileSql(String sql) {
         Matcher matcher = STRING_OR_QUESTION_MARK_PATTERN.matcher(sql);
         List<Integer> positions = new ArrayList<>();
@@ -75,7 +75,7 @@ public final class PreparedStatementUtil {
         if (parameterValue == null || !parameterValue.managed()) {
             return;
         }
-        
+
         Object value = parameterValue.value();
         try {
             if (value instanceof Blob) {
@@ -109,7 +109,7 @@ public final class PreparedStatementUtil {
             throw new MiniErrorException(result.error());
         }
     }
-    
+
     public static void putBlob(MiniSession session, String variableName, Blob blob) {
         MiniLargeDataSaveResult result;
         try {
@@ -122,5 +122,5 @@ public final class PreparedStatementUtil {
             throw new MiniErrorException(result.error());
         }
     }
-    
+
 }

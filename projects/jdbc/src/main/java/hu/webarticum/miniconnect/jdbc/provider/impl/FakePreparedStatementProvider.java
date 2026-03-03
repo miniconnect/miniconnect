@@ -9,20 +9,20 @@ import hu.webarticum.miniconnect.jdbc.provider.PreparedStatementProvider;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 
 public class FakePreparedStatementProvider implements PreparedStatementProvider {
-    
+
     private final DatabaseProvider databaseProvider;
 
     private final MiniSession session;
-    
+
     private final String sql;
-    
+
     private final String[] sqlParts;
-    
+
     private final ImmutableList<ParameterDefinition> parameters;
-    
+
     private final ParameterValue[] parameterValues;
-    
-    
+
+
     public FakePreparedStatementProvider(DatabaseProvider databaseProvider, MiniSession session, String sql) {
         this.databaseProvider = databaseProvider;
         this.session = session;
@@ -32,13 +32,13 @@ public class FakePreparedStatementProvider implements PreparedStatementProvider 
         this.parameters = ImmutableList.fill(parameterCount, i -> new ParameterDefinition());
         this.parameterValues = new ParameterValue[parameterCount];
     }
-    
+
 
     @Override
     public String sql() {
         return sql;
     }
-    
+
     @Override
     public ImmutableList<ParameterDefinition> parameters() {
         return parameters;
@@ -56,7 +56,7 @@ public class FakePreparedStatementProvider implements PreparedStatementProvider 
             PreparedStatementUtil.closeIfNecessary(parameterValue);
         }
     }
-    
+
     @Override
     public MiniResult execute() {
         return session.execute(substitute());
@@ -72,10 +72,10 @@ public class FakePreparedStatementProvider implements PreparedStatementProvider 
         resultBuilder.append(sqlParts[expectedParameterCount]);
         return resultBuilder.toString();
     }
-    
+
     @Override
     public void close() {
         // nothing to do
     }
-    
+
 }

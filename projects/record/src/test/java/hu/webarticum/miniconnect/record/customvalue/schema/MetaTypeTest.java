@@ -14,5 +14,5 @@ class MetaTypeTest {
                 .extracting(t -> t.flag())
                 .doesNotHaveDuplicates();
     }
-    
+
 }

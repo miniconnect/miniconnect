@@ -6,16 +6,16 @@ import java.io.UncheckedIOException;
 import java.net.Socket;
 
 public class SocketPacketTarget implements PacketTarget {
-    
+
     private final Socket socket;
-    
+
     private final PacketWriter packetWriter = new PacketWriter();
-    
-    
+
+
     public SocketPacketTarget(Socket socket) {
         this.socket = socket;
     }
-    
+
 
     @Override
     public void receive(Packet packet) {

@@ -11,7 +11,7 @@ import hu.webarticum.miniconnect.impl.mock.MockSession.PutLargeDataFunction;
 public class MockSessionManager implements MiniSessionManager {
 
     private final Supplier<MiniSession> sessionFactory;
-    
+
 
     public MockSessionManager(Function<String, MiniResult> resultProvider) {
         this(() -> new MockSession(resultProvider));
@@ -26,8 +26,8 @@ public class MockSessionManager implements MiniSessionManager {
     public MockSessionManager(Supplier<MiniSession> sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
-    
-    
+
+
     @Override
     public MiniSession openSession() {
         return sessionFactory.get();

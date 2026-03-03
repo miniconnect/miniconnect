@@ -13,7 +13,7 @@ import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse.CellData;
 
 class ResultResponseTest {
-    
+
     @Test
     void testHashCodeAndEquals() {
         ResultSetRowsResponse instance1 = buildResultSetRowsResponse1();

@@ -10,16 +10,16 @@ final class TranslatorUtil {
     private TranslatorUtil() {
         // utility class
     }
-    
+
 
     public static boolean readBoolean(ByteString.Reader reader) {
         return reader.read() != (byte) 0;
     }
-    
+
     public static String readString(ByteString.Reader reader) {
         return new String(readSized(reader), StandardCharsets.UTF_8);
     }
-    
+
     public static byte[] readSized(ByteString.Reader reader) {
         int length = reader.readInt();
         return reader.read(length);
@@ -40,12 +40,12 @@ final class TranslatorUtil {
                 .put(content.asBuffer())
                 .array();
     }
-    
+
     public static byte[] encodeSized(byte[] content) {
         return ByteBuffer.allocate(Integer.BYTES + content.length)
                 .putInt(content.length)
                 .put(content)
                 .array();
     }
-    
+
 }

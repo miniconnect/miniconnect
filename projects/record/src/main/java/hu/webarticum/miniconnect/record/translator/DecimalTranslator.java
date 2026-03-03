@@ -14,27 +14,27 @@ public class DecimalTranslator implements ValueTranslator {
 
 
     private static final DecimalTranslator INSTANCE = new DecimalTranslator();
-    
-    
+
+
     private DecimalTranslator() {
         // singleton
     }
-    
+
     public static DecimalTranslator instance() {
         return INSTANCE;
     }
-    
+
 
     @Override
     public String name() {
         return NAME;
     }
-    
+
     @Override
     public int length() {
         return MiniValueDefinition.DYNAMIC_LENGTH;
     }
-    
+
     @Override
     public Object decode(MiniContentAccess contentAccess) {
         ByteString.Reader reader = contentAccess.get().reader();
@@ -50,12 +50,12 @@ public class DecimalTranslator implements ValueTranslator {
         builder.appendInt(bigDecimalValue.scale());
         builder.append(bigDecimalValue.unscaledValue().toByteArray());
         ByteString bytes = builder.build();
-        return new StoredContentAccess(bytes);
+        return StoredContentAccess.of(bytes);
     }
 
     @Override
     public String assuredClazzName() {
         return BigDecimal.class.getName();
     }
-    
+
 }

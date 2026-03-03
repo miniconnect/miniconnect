@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 
 class HeaderDataTest {
-    
+
     @Test
     void testHashCodeAndEquals() {
         HeaderData instance1 = HeaderData.of(MessageType.QUERY_REQUEST, 584279845L, 347268);

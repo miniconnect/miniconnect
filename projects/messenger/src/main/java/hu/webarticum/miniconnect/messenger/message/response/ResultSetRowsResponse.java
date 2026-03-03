@@ -14,7 +14,7 @@ import hu.webarticum.miniconnect.messenger.message.ExchangeMessage;
 public final class ResultSetRowsResponse implements Response, ExchangeMessage {
 
     private static final long serialVersionUID = -5437671020483220931L;
-    
+
 
     private final long sessionId;
 
@@ -85,7 +85,7 @@ public final class ResultSetRowsResponse implements Response, ExchangeMessage {
         } else if (!(other instanceof ResultSetRowsResponse)) {
             return false;
         }
-        
+
         ResultSetRowsResponse otherResultSetRowsResponse = (ResultSetRowsResponse) other;
         return
                 sessionId == otherResultSetRowsResponse.sessionId &&
@@ -112,7 +112,7 @@ public final class ResultSetRowsResponse implements Response, ExchangeMessage {
     public static final class CellData implements Serializable {
 
         private static final long serialVersionUID = 3638994211688920120L;
-        
+
 
         private final boolean isNull;
 
@@ -126,7 +126,7 @@ public final class ResultSetRowsResponse implements Response, ExchangeMessage {
             this.fullLength = fullLength;
             this.content = Objects.requireNonNull(content);
         }
-        
+
         public static CellData of(MiniValue value) {
             return of(value.isNull(), value.contentAccess());
         }
@@ -162,7 +162,7 @@ public final class ResultSetRowsResponse implements Response, ExchangeMessage {
             } else if (!(other instanceof CellData)) {
                 return false;
             }
-            
+
             CellData otherCellData = (CellData) other;
             return
                     isNull == otherCellData.isNull &&

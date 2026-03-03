@@ -5,11 +5,15 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.function.Function;
 
 import hu.webarticum.miniconnect.lang.ByteString;
+import hu.webarticum.miniconnect.lang.DateTimeDelta;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.custom.CustomValue;
@@ -29,6 +33,7 @@ import hu.webarticum.miniconnect.record.translator.DecimalTranslator;
 import hu.webarticum.miniconnect.record.translator.DoubleTranslator;
 import hu.webarticum.miniconnect.record.translator.FloatTranslator;
 import hu.webarticum.miniconnect.record.translator.IntTranslator;
+import hu.webarticum.miniconnect.record.translator.IntervalTranslator;
 import hu.webarticum.miniconnect.record.translator.LongTranslator;
 import hu.webarticum.miniconnect.record.translator.NullTranslator;
 import hu.webarticum.miniconnect.record.translator.OffsetDateTimeTranslator;
@@ -37,48 +42,56 @@ import hu.webarticum.miniconnect.record.translator.ShortTranslator;
 import hu.webarticum.miniconnect.record.translator.StringTranslator;
 import hu.webarticum.miniconnect.record.translator.TimeTranslator;
 import hu.webarticum.miniconnect.record.translator.TimestampTranslator;
+import hu.webarticum.miniconnect.record.translator.TimezoneTranslator;
 import hu.webarticum.miniconnect.record.translator.ValueTranslator;
+import hu.webarticum.miniconnect.record.translator.ZonedDateTimeTranslator;
 
 public enum StandardValueType implements ValueType {
 
     NULL(ByteString.of("NUL"), Void.class, NullTranslator.instance()),
-    
+
     BOOL(ByteString.of("BOL"), Boolean.class, BoolTranslator.instance()),
-    
+
     BYTE(ByteString.of("BYT"), Byte.class, ByteTranslator.instance()),
-    
+
     CHAR(ByteString.of("CHR"), Character.class, CharTranslator.instance()),
-    
+
     SHORT(ByteString.of("SHT"), Short.class, ShortTranslator.instance()),
-    
+
     INT(ByteString.of("INT"), Integer.class, IntTranslator.instance()),
-    
+
     LONG(ByteString.of("LNG"), Long.class, LongTranslator.instance()),
-    
+
     FLOAT(ByteString.of("FLT"), Float.class, FloatTranslator.instance()),
-    
+
     DOUBLE(ByteString.of("DBL"), Double.class, DoubleTranslator.instance()),
-    
+
     BIGINT(ByteString.of("BNT"), LargeInteger.class, BigintTranslator.instance()),
-    
+
     DECIMAL(ByteString.of("DEC"), BigDecimal.class, DecimalTranslator.instance()),
-    
+
     BINARY(ByteString.of("BIN"), ByteString.class, BinaryTranslator.instance()),
-    
+
     STRING(ByteString.of("STR"), String.class, StringTranslator::of),
-    
+
     TIME(ByteString.of("TIM"), LocalTime.class, TimeTranslator.instance()),
-    
+
     OFFSETTIME(ByteString.of("OTM"), OffsetTime.class, OffsetTimeTranslator.instance()),
-    
+
     DATE(ByteString.of("DAT"), LocalDate.class, DateTranslator.instance()),
 
     DATETIME(ByteString.of("DTM"), LocalDateTime.class, DateTimeTranslator.instance()),
-    
-    OFFSETDATETIME(ByteString.of("ODT"), OffsetTime.class, OffsetDateTimeTranslator.instance()),
-    
+
+    OFFSETDATETIME(ByteString.of("ODT"), OffsetDateTime.class, OffsetDateTimeTranslator.instance()),
+
+    ZONEDDATETIME(ByteString.of("ZDT"), ZonedDateTime.class, ZonedDateTimeTranslator.instance()),
+
     TIMESTAMP(ByteString.of("TSP"), Instant.class, TimestampTranslator.instance()),
-    
+
+    TIMEZONE(ByteString.of("TMZ"), ZoneOffset.class, TimezoneTranslator.instance()),
+
+    INTERVAL(ByteString.of("ITV"), DateTimeDelta.class, IntervalTranslator.instance()),
+
     BLOB(ByteString.of("BLB"), BlobValue.class, BlobTranslator.instance()),
 
     CLOB(ByteString.of("CLB"), ClobValue.class, ClobTranslator::of),
@@ -86,22 +99,22 @@ public enum StandardValueType implements ValueType {
     CUSTOM(ByteString.of("CUS"), CustomValue.class, CustomTranslator::of),
 
     ;
-    
-    
+
+
     public static final int FLAG_LENGTH = 3;
-    
-    
+
+
     private final ByteString flag;
-    
+
     private final Class<?> clazz;
-    
+
     private final Function<ImmutableMap<String, ByteString>, ValueTranslator> translatorProvider;
-    
-    
+
+
     private StandardValueType(ByteString flag, Class<?> clazz, ValueTranslator translator) {
         this(flag, clazz, p -> translator);
     }
-    
+
     private StandardValueType(
             ByteString flag,
             Class<?> clazz,
@@ -126,9 +139,14 @@ public enum StandardValueType implements ValueType {
                 return Optional.of(member);
             }
         }
+        for (StandardValueType member : values()) {
+            if (member.clazz.isAssignableFrom(clazz)) {
+                return Optional.of(member);
+            }
+        }
         return Optional.empty();
     }
-    
+
 
     public ByteString flag() {
         return flag;
@@ -143,5 +161,5 @@ public enum StandardValueType implements ValueType {
     public ValueTranslator translatorFor(ImmutableMap<String, ByteString> properties) {
         return translatorProvider.apply(properties);
     }
-    
+
 }

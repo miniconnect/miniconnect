@@ -13,7 +13,6 @@ MiniConnect consists of several separated components:
 | :electric_plug:&nbsp; `jdbc-adapter` | MiniConnect implementation backed by JDBC |
 | :envelope:&nbsp; `messenger` | Default solution for messaging with message definitions |
 | :fast_forward:&nbsp; `record` | Easy-to-use wrapper for result sets |
-| :postbox:&nbsp; `rest` | Simple REST service for MiniConnect |
 | :desktop_computer:&nbsp; `server` | Lightweight and transparent MiniConnect server and client |
 | :truck:&nbsp; `transfer` | Simple networking framework |
 | :hammer_and_wrench:&nbsp; `util` | Common utilities |

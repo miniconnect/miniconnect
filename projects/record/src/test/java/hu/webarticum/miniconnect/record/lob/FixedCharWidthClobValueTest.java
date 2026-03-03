@@ -17,19 +17,19 @@ class FixedCharWidthClobValueTest {
     @Test
     void testEmpty() throws IOException {
         FixedCharWidthClobValue emptyClob = new FixedCharWidthClobValue(
-                        new StoredContentAccess(ByteString.empty()),
-                        StandardCharsets.US_ASCII,
-                        1);
+                StoredContentAccess.of(ByteString.empty()),
+                StandardCharsets.US_ASCII,
+                1);
         assertThat(emptyClob.length()).isZero();
         assertThat(emptyClob.get(0L, 0)).isEmpty();
         assertThat(IOUtils.toString(emptyClob.reader())).isEmpty();
     }
-    
+
     @Test
     void testAscii() throws IOException {
         Charset charset = StandardCharsets.US_ASCII;
         FixedCharWidthClobValue asciiClob = new FixedCharWidthClobValue(
-                new StoredContentAccess(ByteString.of("abcdefghijk", charset)),
+                StoredContentAccess.of(ByteString.of("abcdefghijk", charset)),
                 charset,
                 1);
         assertThat(asciiClob.length()).isEqualTo(11L);
@@ -43,7 +43,7 @@ class FixedCharWidthClobValueTest {
     void testUtf16() throws IOException {
         Charset charset = StandardCharsets.UTF_16BE;
         FixedCharWidthClobValue asciiClob = new FixedCharWidthClobValue(
-                new StoredContentAccess(ByteString.of("árvíztűrő", charset)),
+                StoredContentAccess.of(ByteString.of("árvíztűrő", charset)),
                 charset,
                 2);
         assertThat(asciiClob.length()).isEqualTo(9L);
@@ -52,5 +52,5 @@ class FixedCharWidthClobValueTest {
         assertThat(IOUtils.toString(asciiClob.reader(2L, 3L))).isEqualTo("víz");
         assertThat(IOUtils.toString(asciiClob.reader())).isEqualTo("árvíztűrő");
     }
-    
+
 }

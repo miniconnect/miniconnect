@@ -16,13 +16,13 @@ class DynamicCharWidthClobValueTest {
     @Test
     void testEmpty() throws IOException {
         DynamicCharWidthClobValue emptyClob = new DynamicCharWidthClobValue(
-                        new StoredContentAccess(ByteString.empty()),
-                        StandardCharsets.UTF_8);
+                StoredContentAccess.of(ByteString.empty()),
+                StandardCharsets.UTF_8);
         assertThat(emptyClob.length()).isZero();
         assertThat(emptyClob.get(0L, 0)).isEmpty();
         assertThat(IOUtils.toString(emptyClob.reader())).isEmpty();
     }
-    
+
     @Test
     void testLength() throws IOException {
         DynamicCharWidthClobValue utf8Clob = createUtf8Clob("árvíztűrő");
@@ -52,7 +52,7 @@ class DynamicCharWidthClobValueTest {
         DynamicCharWidthClobValue utf8Clob = createUtf8Clob("árvíztűrő");
         assertThat(IOUtils.toString(utf8Clob.reader())).isEqualTo("árvíztűrő");
     }
-    
+
     @Test
     void testContentInSequence() throws IOException {
         DynamicCharWidthClobValue utf8Clob = createUtf8Clob("árvíztűrő");
@@ -62,12 +62,12 @@ class DynamicCharWidthClobValueTest {
         assertThat(IOUtils.toString(utf8Clob.reader(2L, 3L))).isEqualTo("víz");
         assertThat(IOUtils.toString(utf8Clob.reader())).isEqualTo("árvíztűrő");
     }
-    
+
     private DynamicCharWidthClobValue createUtf8Clob(String content) {
         return new DynamicCharWidthClobValue(
-                new StoredContentAccess(ByteString.of("árvíztűrő", StandardCharsets.UTF_8)),
+                StoredContentAccess.of(ByteString.of("árvíztűrő", StandardCharsets.UTF_8)),
                 StandardCharsets.UTF_8,
                 3);
     }
-    
+
 }

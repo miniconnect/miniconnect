@@ -8,11 +8,11 @@ import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.jdbc.provider.TransactionIsolationLevel;
 
 public class H2DatabaseProvider extends AbstractBlanketDatabaseProvider {
-    
+
     private static final String DATABASE_PRODUCT_NAME = "H2";
-    
+
     private static final String SAVEPOINT_PREFIX = "MINICONNECT_H2_SAVEPOINT_";
-    
+
     private static final Map<String, TransactionIsolationLevel> ADDITIONAL_TRANSACTION_ISOLATION_LEVELS =
             new HashMap<>();
     static {

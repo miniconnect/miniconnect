@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import hu.webarticum.miniconnect.lang.ByteString;
 
 class LargeDataHeadRequestTest {
-    
+
     @Test
     void testHashCodeAndEquals() {
         LargeDataPartRequest instance1 = new LargeDataPartRequest(4L, 9, 12L, ByteString.of("123"));

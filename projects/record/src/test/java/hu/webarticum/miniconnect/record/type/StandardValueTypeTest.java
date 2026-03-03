@@ -23,5 +23,5 @@ class StandardValueTypeTest {
                         t -> t.defaultTranslator().name().equals(t.name()),
                         "Standard value type name must match with associated enum contant name");
     }
-    
+
 }

@@ -14,10 +14,10 @@ public class CustomTranslator implements ValueTranslator {
     public static final String NAME = "CUSTOM"; // NOSONAR same name is OK
 
     public static final String SCHEMA_KEY = "schema";
-    
-    
+
+
     private final Schema schema;
-    
+
 
     private CustomTranslator(Schema schema) {
         this.schema = schema;
@@ -26,7 +26,7 @@ public class CustomTranslator implements ValueTranslator {
     public static CustomTranslator of(Schema schema) {
         return new CustomTranslator(schema);
     }
-    
+
     public static CustomTranslator of(ImmutableMap<String, ByteString> properties) {
         Schema schema;
         if (properties.containsKey(SCHEMA_KEY)) {
@@ -36,18 +36,18 @@ public class CustomTranslator implements ValueTranslator {
         }
         return new CustomTranslator(schema);
     }
-    
+
 
     @Override
     public String name() {
         return NAME;
     }
-    
+
     @Override
     public int length() {
         return MiniValueDefinition.DYNAMIC_LENGTH;
     }
-    
+
     @Override
     public Object decode(MiniContentAccess contentAccess) {
         Object dynamicValue = schema.readValueFrom(contentAccess.inputStream());
@@ -65,5 +65,5 @@ public class CustomTranslator implements ValueTranslator {
     public String assuredClazzName() {
         return CustomValue.class.getName();
     }
-    
+
 }

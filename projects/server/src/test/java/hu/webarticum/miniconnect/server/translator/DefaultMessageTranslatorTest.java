@@ -33,7 +33,7 @@ import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsRespons
 import hu.webarticum.miniconnect.server.MessageType;
 
 class DefaultMessageTranslatorTest {
-    
+
     @Test
     void testAllBackAndForth() {
         DefaultMessageTranslator translator = new DefaultMessageTranslator();
@@ -61,7 +61,7 @@ class DefaultMessageTranslatorTest {
         assertThat(messageTypes).contains(MessageType.values());
         assertThat(recoveredMessages).isEqualTo(messages);
     }
-    
+
     private Message createSessionInitRequest() {
         return new SessionInitRequest();
     }
@@ -107,7 +107,7 @@ class DefaultMessageTranslatorTest {
                         "description", false, dynamicLength, "TEXT", properties));
         return new ResultResponse(4L, 3, false, error, warnings, true, columnHeaders);
     }
-    
+
     private Message createResultSetRowsResponse() {
         ImmutableList<Integer> nullables = ImmutableList.of(2, 3);
         Map<Integer, Integer> fixedSizesBuilder = new HashMap<>();
@@ -123,15 +123,15 @@ class DefaultMessageTranslatorTest {
                         new CellData(true, 0, ByteString.empty())));
         return new ResultSetRowsResponse(5L, 9, 12L, nullables, fixedSizes, rows);
     }
-    
+
     private Message createResultSetValuePartResponse() {
         return new ResultSetValuePartResponse(3L, 11, 52L, 3, 0L, ByteString.of("lorem"));
     }
-    
+
     private Message createResultSetEofResponse() {
-        return new ResultSetEofResponse(2L, 12, 54L);   
+        return new ResultSetEofResponse(2L, 12, 54L);
     }
-    
+
     private Message createLargeDataSaveResponse() {
         return new LargeDataSaveResponse(2L, 3, false, 1, "00001", "Error");
     }

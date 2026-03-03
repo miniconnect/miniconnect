@@ -24,22 +24,22 @@ import hu.webarticum.miniconnect.jdbc.io.LongBoundedReader;
 public class BlobClob implements NClob {
 
     private final Blob blob;
-    
+
     private final Charset blobCharset;
-    
+
     private final int blobCharWidth;
-    
+
     private final Charset targetCharset;
-    
+
     private final boolean lengthIsCachable;
-    
+
     private volatile long cachedLength = -1;
-    
+
 
     public BlobClob() {
         this(StandardCharsets.UTF_8);
     }
-    
+
     public BlobClob(Charset targetCharset) {
         this(new WriteableBlob(), StandardCharsets.UTF_16BE, 2, targetCharset);
     }
@@ -55,7 +55,7 @@ public class BlobClob implements NClob {
     public BlobClob(Blob blob, Charset blobCharset, int blobCharWidth, Charset targetCharset) {
         this(blob, blobCharset, blobCharWidth, targetCharset, false);
     }
-    
+
     public BlobClob(
             Blob blob,
             Charset blobCharset,
@@ -68,7 +68,7 @@ public class BlobClob implements NClob {
         this.targetCharset = targetCharset;
         this.lengthIsCachable = lengthIsCachable;
     }
-    
+
 
     public Blob getBlob() {
         return blob;
@@ -85,7 +85,7 @@ public class BlobClob implements NClob {
     public Charset getTargetCharset() {
         return targetCharset;
     }
-    
+
     @Override
     public long length() throws SQLException {
         if (cachedLength >= 0) {
@@ -93,13 +93,13 @@ public class BlobClob implements NClob {
         } else if (!lengthIsCachable) {
             return calculateLength();
         }
-        
+
         synchronized (this) {
             cachedLength = calculateLength();
             return cachedLength;
         }
     }
-    
+
     private long calculateLength() throws SQLException {
         if (blobCharWidth > 0) {
             return blob.length() / blobCharWidth;
@@ -107,7 +107,7 @@ public class BlobClob implements NClob {
             return countCharactersIn(getCharacterStream());
         }
     }
-    
+
     private static long countCharactersIn(Reader reader) throws SQLException {
         try {
             return reader.skip(Long.MAX_VALUE - 1000L);
@@ -176,12 +176,18 @@ public class BlobClob implements NClob {
 
     @Override
     public InputStream getAsciiStream() throws SQLException {
+        InputStream blobInputStream = blob.getBinaryStream();
         if (blobCharset == targetCharset) {
-            return blob.getBinaryStream();
-        } else {
-            return new ReaderInputStream(
-                    new InputStreamReader(blob.getBinaryStream(), blobCharset),
-                    targetCharset);
+            return blobInputStream;
+        }
+
+        try {
+            return ReaderInputStream.builder()
+                    .setReader(new InputStreamReader(blobInputStream, blobCharset))
+                    .setCharset(targetCharset)
+                    .get();
+        } catch (IOException e) {
+            throw new SQLException(e);
         }
     }
 
@@ -211,13 +217,18 @@ public class BlobClob implements NClob {
     @Override
     public OutputStream setAsciiStream(long pos) throws SQLException {
         long bytePos = findBytePos(pos);
+        OutputStream blobOutputStream = blob.setBinaryStream(bytePos);
         if (blobCharset == targetCharset) {
-            return blob.setBinaryStream(bytePos);
-        } else {
-            OutputStream byteStream = blob.setBinaryStream(bytePos);
-            return new WriterOutputStream(
-                    new OutputStreamWriter(byteStream, blobCharset),
-                    targetCharset);
+            return blobOutputStream;
+        }
+
+        try {
+            return WriterOutputStream.builder()
+                    .setWriter(new OutputStreamWriter(blobOutputStream, blobCharset))
+                    .setCharset(targetCharset)
+                    .get();
+        } catch (IOException e) {
+            throw new SQLException(e);
         }
     }
 
@@ -237,7 +248,7 @@ public class BlobClob implements NClob {
     public void free() throws SQLException {
         blob.free();
     }
-    
+
     private long findBytePos(long charPos) throws SQLException {
         if (charPos == 1L) {
             return 1L;
@@ -252,7 +263,7 @@ public class BlobClob implements NClob {
             }
         }
     }
-    
+
     // TODO: find a more efficient solution
     private long countReaderBytesUntil(Reader reader, long until) throws IOException {
         long result = 0L;
@@ -270,5 +281,5 @@ public class BlobClob implements NClob {
         }
         return result;
     }
-    
+
 }

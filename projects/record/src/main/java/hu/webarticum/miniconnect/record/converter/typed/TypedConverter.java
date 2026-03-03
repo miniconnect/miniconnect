@@ -18,6 +18,7 @@ import hu.webarticum.miniconnect.record.converter.typed.standard.ToByteStringCon
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToCharacterConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToClobValueConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToCustomValueConverter;
+import hu.webarticum.miniconnect.record.converter.typed.standard.ToDateTimeDeltaConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToDoubleConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToFloatConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToInstantConverter;
@@ -32,14 +33,17 @@ import hu.webarticum.miniconnect.record.converter.typed.standard.ToOffsetDateTim
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToOffsetTimeConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToShortConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToStringConverter;
+import hu.webarticum.miniconnect.record.converter.typed.standard.ToTimestampConverter;
+import hu.webarticum.miniconnect.record.converter.typed.standard.ToZoneOffsetConverter;
+import hu.webarticum.miniconnect.record.converter.typed.standard.ToZonedDateTimeConverter;
 
 public interface TypedConverter<T> {
 
     public Class<T> targetClazz();
-    
+
     public T convert(Object source);
-    
-    
+
+
     public static Collection<TypedConverter<?>> defaultConverters() { // NOSONAR wildcard is OK
         return new ArrayList<>(Arrays.asList(new TypedConverter<?>[] { // NOSONAR for trailing comma
                 new ToNullConverter(),
@@ -61,7 +65,11 @@ public interface TypedConverter<T> {
                 new ToLocalDateConverter(),
                 new ToLocalDateTimeConverter(),
                 new ToOffsetDateTimeConverter(),
+                new ToZonedDateTimeConverter(),
                 new ToInstantConverter(),
+                new ToTimestampConverter(),
+                new ToZoneOffsetConverter(),
+                new ToDateTimeDeltaConverter(),
                 new ToBlobValueConverter(),
                 new ToClobValueConverter(),
                 new ToCustomValueConverter(),
@@ -72,5 +80,5 @@ public interface TypedConverter<T> {
                 new ToReaderConverter(),
                 }));
     }
-    
+
 }

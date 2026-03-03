@@ -5,22 +5,22 @@ import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 
 public class FilteringIterator<T> implements Iterator<T> {
-    
+
     private final Iterator<T> baseIterator;
-    
+
     private final Predicate<T> predicate;
-    
+
     private T next;
-    
+
 
     public FilteringIterator(Iterator<T> baseIterator, Predicate<T> predicate) {
         this.baseIterator = baseIterator;
         this.predicate = predicate;
-        
+
         fetch();
     }
-    
-    
+
+
     @Override
     public boolean hasNext() {
         return next != null;
@@ -35,7 +35,7 @@ public class FilteringIterator<T> implements Iterator<T> {
         fetch();
         return result;
     }
-    
+
     private void fetch() {
         while (baseIterator.hasNext()) {
             T potentialNext = baseIterator.next();

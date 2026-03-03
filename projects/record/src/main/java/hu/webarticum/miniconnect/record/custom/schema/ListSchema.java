@@ -8,24 +8,24 @@ import java.util.List;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 
 public class ListSchema implements Schema {
-    
+
     public static final byte FLAG = (byte) 'L';
-    
-    
+
+
     private final Schema itemSchema;
 
 
     public ListSchema(Schema itemSchema) {
         this.itemSchema = itemSchema;
     }
-    
+
 
     public static ListSchema readMainFrom(InputStream in) {
         Schema itemSchema = Schema.readFrom(in);
         return new ListSchema(itemSchema);
     }
 
-    
+
     @Override
     public void writeTo(OutputStream out) {
         StreamUtil.write(out, FLAG);

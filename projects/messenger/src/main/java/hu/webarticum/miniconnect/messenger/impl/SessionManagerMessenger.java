@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 
 import hu.webarticum.miniconnect.api.MiniSession;
 import hu.webarticum.miniconnect.api.MiniSessionManager;
+import hu.webarticum.miniconnect.lang.ReachabilityGuard;
 import hu.webarticum.miniconnect.messenger.Messenger;
 import hu.webarticum.miniconnect.messenger.message.SessionMessage;
 import hu.webarticum.miniconnect.messenger.message.request.Request;
@@ -21,22 +22,22 @@ import hu.webarticum.miniconnect.messenger.message.response.SessionInitResponse;
 public class SessionManagerMessenger implements Messenger {
 
     private final MiniSessionManager sessionManager;
-    
+
     private final AtomicLong sessionIdCounter = new AtomicLong(0L);
 
     private final Map<Long, SessionMessenger> sessionMessengers =
             Collections.synchronizedMap(new HashMap<>());
-    
+
     private final ExecutorService sessionInitExecutorService = Executors.newCachedThreadPool();
-    
-    
+
+
     public SessionManagerMessenger(MiniSessionManager sessionManager) {
         this.sessionManager = sessionManager;
     }
-    
-    
+
+
     @Override
-    public void accept(Request request, Consumer<Response> responseConsumer) {
+    public ReachabilityGuard accept(Request request, Consumer<Response> responseConsumer) {
         if (request instanceof SessionInitRequest) {
             sessionInitExecutorService.submit(() -> invokeOpenSession(responseConsumer));
         } else if (request instanceof SessionMessage) {
@@ -58,8 +59,9 @@ public class SessionManagerMessenger implements Messenger {
         } else {
             // FIXME: log?
         }
+        return ReachabilityGuard.of(responseConsumer);
     }
-    
+
     private void invokeOpenSession(Consumer<Response> responseConsumer) {
         long sessionId = sessionIdCounter.incrementAndGet();
         MiniSession session = sessionManager.openSession();

@@ -28,7 +28,7 @@ public class BlanketHibernateMetadataBuilderInitializer implements MetadataBuild
             }
         }
     }
-    
+
     // FIXME this is for hibernate 6 (which requires java 11 at runtime, so can't be the default)
     private void addResolverForHibernate6(DialectResolverSet dialectResolverSet, DialectResolver dialectResolverItem) {
         try {

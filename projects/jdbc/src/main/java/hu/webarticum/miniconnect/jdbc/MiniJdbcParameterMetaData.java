@@ -9,21 +9,21 @@ import hu.webarticum.miniconnect.jdbc.provider.ParameterDefinition;
 import hu.webarticum.miniconnect.lang.ImmutableList;
 
 public class MiniJdbcParameterMetaData implements ParameterMetaData {
-    
+
     private final ImmutableList<ParameterDefinition> parameters;
-    
-    
+
+
     public MiniJdbcParameterMetaData(ImmutableList<ParameterDefinition> parameters) {
         this.parameters = parameters;
     }
-    
+
 
     @Override
     public <T> T unwrap(Class<T> type) throws SQLException {
         if (!isWrapperFor(type)) {
             throw new SQLException(String.format("Unable to convert %s to %s", getClass(), type));
         }
-        
+
         @SuppressWarnings("unchecked")
         T result = (T) this;
         return result;

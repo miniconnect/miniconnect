@@ -38,31 +38,31 @@ import hu.webarticum.miniconnect.jdbc.provider.ParameterValue;
 import hu.webarticum.miniconnect.jdbc.provider.PreparedStatementProvider;
 
 public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements PreparedStatement {
-    
+
     private final PreparedStatementProvider preparedStatementProvider;
 
     private final Object closeLock = new Object();
-    
+
     private volatile boolean closed = false;
-    
-    
+
+
     MiniJdbcPreparedStatement(MiniJdbcConnection connection, String sql) {
         super(connection);
         this.preparedStatementProvider =
                 connection.getDatabaseProvider().prepareStatement(connection.getMiniSession(), sql);
     }
-    
+
 
     // --- METADATA ---
     // [start]
-    
+
     @Override
     public ResultSetMetaData getMetaData() throws SQLException {
         ResultSet resultSet = getResultSet();
         if (resultSet == null) {
             return null; // FIXME try to parse?
         }
-        
+
         return resultSet.getMetaData();
     }
 
@@ -82,7 +82,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     }
 
     // [end]
-    
+
 
     // --- EXECUTE ---
     // [start]
@@ -114,23 +114,23 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
                     error.sqlState(),
                     error.code());
         }
-        
+
         MiniJdbcResultSet jdbcResultSet =
                 result.hasResultSet() ?
                 new MiniJdbcResultSet(this, result.resultSet()) :
                 null;
         ResultHolder resultHolder = new ResultHolder(result, jdbcResultSet);
         handleExecuteCompleted(preparedStatementProvider.sql(), resultHolder);
-        
+
         return resultHolder;
     }
 
     // [end]
-    
+
 
     // --- BATCH ---
     // [start]
-    
+
     @Override
     public void addBatch() throws SQLException {
         throw new SQLFeatureNotSupportedException();
@@ -148,10 +148,10 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
 
     // [end]
 
-    
+
     // --- SETTERS ---
     // [start]
-    
+
     @Override
     public void setRowId(int parameterIndex, RowId x) throws SQLException {
         throw new SQLFeatureNotSupportedException();
@@ -231,7 +231,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     public void setDate(int parameterIndex, Date x, Calendar cal) throws SQLException {
         setParameter(parameterIndex, new ParameterValue(Date.class, x, Types.OTHER, null, cal));
     }
-    
+
     @Override
     public void setTime(int parameterIndex, Time x) throws SQLException {
         setParameter(parameterIndex, new ParameterValue(Time.class, x));
@@ -396,7 +396,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     public void setObject(int parameterIndex, Object x, int targetSqlType, int scaleOrLength) throws SQLException {
         setParameter(parameterIndex, new ParameterValue(Object.class, x, targetSqlType, null, scaleOrLength));
     }
-    
+
     private synchronized void setParameter(int parameterIndex, ParameterValue parameter) {
         int zeroBasedIndex = parameterIndex - 1;
         preparedStatementProvider.setParameterValue(zeroBasedIndex, parameter);
@@ -408,11 +408,11 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     }
 
     // [end]
-    
+
 
     // --- NON PREPARED METHODS ---
     // [start]
-    
+
     @Override
     public boolean execute(String sql) throws SQLException {
         throw createMethodNotAllowedException();
@@ -464,16 +464,16 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     }
 
     // [end]
-    
-    
+
+
     // --- CLOSE ---
     // [start]
-    
+
     @Override
     public boolean isClosed() throws SQLException {
         return closed;
     }
-    
+
     @Override
     public void close() throws SQLException {
         synchronized (closeLock) {
@@ -512,15 +512,15 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
             }
         }
     }
-    
+
     // [end]
-    
+
 
     private Blob blobOf(InputStream inputStream, long length) throws SQLException {
         InputStream boundedInputStream = createBoundedInputStream(inputStream, length);
         return blobOf(boundedInputStream);
     }
-    
+
     private InputStream createBoundedInputStream(InputStream inputStream, long length) throws SQLException {
         try {
             return BoundedInputStream.builder().setInputStream(inputStream).setMaxCount(length).get();
@@ -528,7 +528,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
             throw new SQLException(e);
         }
     }
-    
+
     private Blob blobOf(InputStream inputStream) throws SQLException {
         WriteableBlob blob = new WriteableBlob();
         OutputStream blobOutputStream = blob.setBinaryStream(1);
@@ -543,7 +543,7 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     private NClob clobOf(Reader reader, long length) throws SQLException {
         return clobOf(new LongBoundedReader(reader, length));
     }
-    
+
     private NClob clobOf(Reader reader) throws SQLException {
         BlobClob clob = getConnection().createUtf8BlobClob();
         Writer clobWriter = clob.setCharacterStream(1);
@@ -558,5 +558,5 @@ public class MiniJdbcPreparedStatement extends AbstractJdbcStatement implements 
     private SQLException createMethodNotAllowedException() {
         return new SQLException("Method not allowed for prepared statement");
     }
-    
+
 }

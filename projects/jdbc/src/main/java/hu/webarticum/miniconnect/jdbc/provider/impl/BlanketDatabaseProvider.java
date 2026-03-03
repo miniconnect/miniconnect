@@ -8,7 +8,7 @@ public class BlanketDatabaseProvider extends AbstractBlanketDatabaseProvider {
     public static final String DATABASE_PRODUCT_NAME = "MINICONNECT-BLANKET";
 
     public static final String DATABASE_FULL_VERSION = "1.0.0";
-    
+
 
     @Override
     public String getDatabaseProductName(MiniSession session) {

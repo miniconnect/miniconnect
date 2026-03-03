@@ -3,7 +3,7 @@ package hu.webarticum.miniconnect.jdbc.hibernate;
 import org.hibernate.dialect.identity.IdentityColumnSupportImpl;
 
 public class BlanketIdentityColumnSupport extends IdentityColumnSupportImpl {
-    
+
     @Override
     public boolean supportsIdentityColumns() {
         return true;
@@ -23,5 +23,5 @@ public class BlanketIdentityColumnSupport extends IdentityColumnSupportImpl {
     public String getIdentityInsertString() {
         return "NULL";
     }
-    
+
 }

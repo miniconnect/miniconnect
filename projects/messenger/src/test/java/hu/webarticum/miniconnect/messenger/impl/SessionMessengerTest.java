@@ -36,22 +36,22 @@ import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsRespons
 import hu.webarticum.miniconnect.messenger.message.response.ResultSetRowsResponse.CellData;
 
 class SessionMessengerTest {
-    
+
     private static final String JDBC_URL = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
-    
+
     private static final String JDBC_USERNAME = "";
-    
+
     private static final String JDBC_PASSWORD = "";
-    
+
     private static final String SET_STATEMENT = "SET @%s = ?";
-    
+
     private static final String SELECT_STATEMENT = "SELECT UTF8TOSTRING(@%s) AS data";
-    
-    
+
+
     private Connection jdbcConnection;
-    
+
     private MiniSession session;
-    
+
 
     @Test
     void testExecute() throws Exception {
@@ -73,34 +73,34 @@ class SessionMessengerTest {
                     responses.put(r.getClass(), r);
                     responseCountDownLatch.countDown();
                 });
-        
+
         responseCountDownLatch.await(10, TimeUnit.SECONDS);
-        
+
         Response rawResultResponse = responses.get(ResultResponse.class);
         assertThat(rawResultResponse).isInstanceOf(ResultResponse.class);
-        
+
         ResultResponse resultResponse = (ResultResponse) rawResultResponse;
         assertThat(resultResponse.columnHeaders().size()).isEqualTo(2);
         assertThat(resultResponse.hasResultSet()).isTrue();
 
         Response rawResultSetRowsResponse = responses.get(ResultSetRowsResponse.class);
         assertThat(rawResultSetRowsResponse).isInstanceOf(ResultSetRowsResponse.class);
-        
+
         ResultSetRowsResponse resultSetRowsResponse =
                 (ResultSetRowsResponse) rawResultSetRowsResponse;
         assertThat(resultSetRowsResponse.sessionId()).isEqualTo(2L);
         assertThat(resultSetRowsResponse.exchangeId()).isEqualTo(5);
         assertThat(resultSetRowsResponse.rowOffset()).isEqualTo(0L);
-        
+
         ImmutableList<ImmutableList<CellData>> rows = resultSetRowsResponse.rows();
         assertThat(rows.size()).isEqualTo(1);
-        
+
         ImmutableList<CellData> row = rows.get(0);
         assertThat(row.size()).isEqualTo(2);
-        
+
         CellData idCell = row.get(0);
         assertThat(idCell.content().asBuffer().getInt()).isEqualTo(7);
-        
+
         CellData labelCell = row.get(1);
         assertThat(labelCell.content().toString(StandardCharsets.UTF_8)).isEqualTo("seven-\u0171!");
 
@@ -111,7 +111,7 @@ class SessionMessengerTest {
                 (ResultSetEofResponse) rawResultSetEofResponse;
         assertThat(resultSetEofResponse.endOffset()).isEqualTo(1L);
     }
-    
+
     @Test
     void testPutLargeData() throws Exception {
         long sessionId = 3L;
@@ -122,7 +122,7 @@ class SessionMessengerTest {
         String fullContent = contentPart1 + contentPart2;
         ByteString contentBytesPart1 = ByteString.wrap(contentPart1.getBytes(StandardCharsets.UTF_8));
         ByteString contentBytesPart2 = ByteString.wrap(contentPart2.getBytes(StandardCharsets.UTF_8));
-        
+
         long fullLength = contentBytesPart1.length() + contentBytesPart2.length();
         CompletableFuture<Response> responseFuture = new CompletableFuture<>();
         SessionMessenger messenger = new SessionMessenger(sessionId, session);
@@ -134,14 +134,14 @@ class SessionMessengerTest {
         messenger.accept(new LargeDataPartRequest(
                 sessionId, exchangeId, contentBytesPart1.length(), contentBytesPart2));
         Response response = responseFuture.get(10, TimeUnit.SECONDS);
-        
+
         assertThat(response).isInstanceOf(LargeDataSaveResponse.class);
-        
+
         LargeDataSaveResponse saveResponse = (LargeDataSaveResponse) response;
         assertThat(saveResponse.success()).isTrue();
         assertThat(saveResponse.sessionId()).isEqualTo(sessionId);
         assertThat(saveResponse.exchangeId()).isEqualTo(exchangeId);
-        
+
         String selectedValue;
         try (Statement statement = jdbcConnection.createStatement()) {
             String selectQuery = String.format(SELECT_STATEMENT, variableName);
@@ -152,7 +152,7 @@ class SessionMessengerTest {
         }
         assertThat(selectedValue).isEqualTo(fullContent);
     }
-    
+
     @BeforeEach
     void init() throws SQLException {
         jdbcConnection = DriverManager.getConnection(

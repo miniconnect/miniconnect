@@ -26,6 +26,7 @@ import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.lob.BlobValue;
 import hu.webarticum.miniconnect.record.lob.ClobValue;
+import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
 
@@ -61,26 +62,26 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
         TYPE_MAPPING.put(BlobValue.class.getName(), JDBCType.BLOB);
         TYPE_MAPPING.put(ClobValue.class.getName(), JDBCType.CLOB);
     }
-    
-    
+
+
     private final ImmutableList<MiniColumnHeader> columnHeaders;
 
     private final ImmutableList<String> columnClassNames;
-    
-    
+
+
     public MiniJdbcResultSetMetaData(
             ImmutableList<MiniColumnHeader> columnHeaders, ImmutableList<String> columnClassNames) {
         this.columnHeaders = columnHeaders;
         this.columnClassNames = columnClassNames;
     }
-    
-    
+
+
     @Override
     public <T> T unwrap(Class<T> type) throws SQLException {
         if (!isWrapperFor(type)) {
             throw new SQLException(String.format("Unable to convert %s to %s", getClass(), type));
         }
-        
+
         @SuppressWarnings("unchecked")
         T result = (T) this;
         return result;
@@ -102,7 +103,7 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
         if (!TYPE_MAPPING.containsKey(columnClassName)) {
             return Types.JAVA_OBJECT;
         }
-        
+
         return TYPE_MAPPING.get(columnClassName).getVendorTypeNumber();
     }
 
@@ -112,7 +113,7 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
         if (!TYPE_MAPPING.containsKey(columnClassName)) {
             return "JAVA_OBJECT";
         }
-        
+
         return TYPE_MAPPING.get(columnClassName).getName();
     }
 
@@ -185,11 +186,11 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
         MiniValueDefinition valueDefinition = columnHeaders.get(column - 1).valueDefinition();
         Class<?> clazz;
         try {
-            clazz = Class.forName(valueDefinition.type());
+            clazz = StandardValueType.valueOf(valueDefinition.type()).clazz();
         } catch (Exception e) {
             return 0;
         }
-        
+
         if (clazz == String.class || clazz == ByteString.class || clazz == byte[].class) {
             return Math.max(0, valueDefinition.length());
         } else if (clazz == Boolean.class || clazz == Byte.class || clazz == Character.class) {
@@ -216,7 +217,7 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
         MiniValueDefinition valueDefinition = columnHeaders.get(column - 1).valueDefinition();
         Class<?> clazz;
         try {
-            clazz = Class.forName(valueDefinition.type());
+            clazz = StandardValueType.valueOf(valueDefinition.type()).clazz();
         } catch (Exception e) {
             return 0;
         }
@@ -258,5 +259,5 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
                 columnHeaders.get(column - 1).name().length(),
                 getPrecision(column));
     }
-    
+
 }

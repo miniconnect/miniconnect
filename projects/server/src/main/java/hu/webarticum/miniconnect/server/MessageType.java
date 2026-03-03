@@ -19,13 +19,13 @@ public enum MessageType {
     SESSION_INIT_REQUEST('I', SessionInitRequest.class),
 
     QUERY_REQUEST('Q', QueryRequest.class),
-    
+
     LARGE_DATA_HEAD_REQUEST('L', LargeDataHeadRequest.class),
-    
+
     LARGE_DATA_PART_REQUEST('D', LargeDataPartRequest.class),
-    
+
     SESSION_CLOSE_REQUEST('C', SessionCloseRequest.class),
-    
+
 
     SESSION_INIT_RESPONSE('i', SessionInitResponse.class),
 
@@ -38,32 +38,32 @@ public enum MessageType {
     RESULT_SET_EOF_RESPONSE('f', ResultSetEofResponse.class),
 
     LARGE_DATA_SAVE_RESPONSE('l', LargeDataSaveResponse.class),
-    
+
     SESSION_CLOSE_RESPONSE('c', SessionCloseResponse.class),
 
     ;
-    
-    
+
+
     private final char symbol;
-    
+
     private final Class<? extends Message> messageClazz;
-    
+
 
     private MessageType(char symbol, Class<? extends Message> messageClazz) {
         this.symbol = symbol;
         this.messageClazz = messageClazz;
     }
-    
+
     public static MessageType ofSymbol(char symbol) {
         for (MessageType messageType : values()) {
             if (messageType.symbol == symbol) {
                 return messageType;
             }
         }
-        
+
         throw new IllegalArgumentException("No message type for symbol: " + symbol);
     }
-    
+
     public static MessageType ofMessage(Message message) {
         Class<? extends Message> clazzToCheck = message.getClass();
         for (MessageType messageType : values()) {
@@ -71,17 +71,17 @@ public enum MessageType {
                 return messageType;
             }
         }
-        
+
         throw new IllegalArgumentException("No message type for class: " + clazzToCheck);
     }
-    
+
 
     public char symbol() {
         return symbol;
     }
-    
+
     public Class<? extends Message> messageClazz() {
         return messageClazz;
     }
-    
+
 }

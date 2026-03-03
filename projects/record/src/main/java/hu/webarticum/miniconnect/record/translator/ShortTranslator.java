@@ -10,45 +10,45 @@ public class ShortTranslator implements ValueTranslator {
 
 
     private static final ShortTranslator INSTANCE = new ShortTranslator();
-    
-    
+
+
     private ShortTranslator() {
         // singleton
     }
-    
+
     public static ShortTranslator instance() {
         return INSTANCE;
     }
-    
+
 
     @Override
     public String name() {
         return NAME;
     }
-    
+
     @Override
     public int length() {
         return Short.BYTES;
     }
-    
+
     @Override
     public Object decode(MiniContentAccess contentAccess) {
         if (contentAccess.length() < Short.BYTES) {
             return Short.valueOf((short) 0);
         }
-        
+
         return contentAccess.get(0, Short.BYTES).asBuffer().getShort();
     }
 
     @Override
     public MiniContentAccess encode(Object value) {
         ByteString bytes = ByteString.ofShort((Short) value);
-        return new StoredContentAccess(bytes);
+        return StoredContentAccess.of(bytes);
     }
 
     @Override
     public String assuredClazzName() {
         return Short.class.getName();
     }
-    
+
 }

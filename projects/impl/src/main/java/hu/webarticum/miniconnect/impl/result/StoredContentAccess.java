@@ -9,13 +9,27 @@ import hu.webarticum.miniconnect.lang.ByteString;
 public final class StoredContentAccess implements MiniContentAccess, Serializable {
 
     private static final long serialVersionUID = 1L;
-    
-    
+
+
     private final ByteString content;
-    
-    
-    public StoredContentAccess(ByteString content) {
+
+
+    private StoredContentAccess(ByteString content) {
         this.content = content;
+    }
+
+    public static StoredContentAccess of(ByteString content) {
+        return new StoredContentAccess(content);
+    }
+
+    public static StoredContentAccess from(MiniContentAccess contentAccess) {
+        if (contentAccess instanceof StoredContentAccess) {
+            return (StoredContentAccess) contentAccess;
+        } else if (contentAccess.isLarge()) {
+            throw new IllegalArgumentException("Content is too large to store in memory");
+        }
+
+        return of(contentAccess.get());
     }
 
 
@@ -38,7 +52,7 @@ public final class StoredContentAccess implements MiniContentAccess, Serializabl
     public ByteString get() {
         return content;
     }
-    
+
     @Override
     public ByteString get(long start, int length) {
         long contentLength = content.length();
@@ -64,10 +78,10 @@ public final class StoredContentAccess implements MiniContentAccess, Serializabl
             throw new IndexOutOfBoundsException(
                     "offset " + offset + ", end " + end + ", contentLength " + contentLength);
         }
-        
+
         return content.inputStream((int) offset, (int) length);
     }
-    
+
     @Override
     public void close() {
         // nothing to do
@@ -77,5 +91,5 @@ public final class StoredContentAccess implements MiniContentAccess, Serializabl
     public boolean isClosed() {
         return false;
     }
-    
+
 }

@@ -8,17 +8,17 @@ public final class Packet {
 
     private final ByteString payload;
 
-    
+
     private Packet(ByteString header, ByteString payload) {
         this.header = header;
         this.payload = payload;
     }
-    
+
     public static Packet of(ByteString header, ByteString payload) {
         return new Packet(header, payload);
     }
-    
-    
+
+
     public ByteString header() {
         return header;
     }
@@ -26,13 +26,13 @@ public final class Packet {
     public ByteString payload() {
         return payload;
     }
-    
+
 
     @Override
     public int hashCode() {
         return header.hashCode() ^ payload.hashCode();
     }
-    
+
     @Override
     public boolean equals(Object other) {
         if (this == other) {
@@ -42,11 +42,11 @@ public final class Packet {
         } else if (!(other instanceof Packet)) {
             return false;
         }
-        
+
         Packet otherPacket = (Packet) other;
         return header.equals(otherPacket.header) && payload.equals(otherPacket.payload);
     }
-    
+
     @Override
     public String toString() {
         StringBuilder resultBuilder = new StringBuilder();
@@ -57,5 +57,5 @@ public final class Packet {
         resultBuilder.append('}');
         return resultBuilder.toString();
     }
-    
+
 }

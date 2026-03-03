@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 
 class SessionInitRequestTest {
-    
+
     @Test
     void testHashCodeAndEquals() {
         SessionInitRequest instance1 = new SessionInitRequest();

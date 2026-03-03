@@ -6,7 +6,7 @@ import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToBlobValueConverter;
 
 public class ToInputStreamConverter implements TypedConverter<InputStream> {
-    
+
     @Override
     public Class<InputStream> targetClazz() {
         return InputStream.class;

@@ -16,7 +16,7 @@ class ContentAccessBlobTest {
 
     @Test
     void testContents() throws Exception {
-        MiniContentAccess contentAccess = new StoredContentAccess(ByteString.of("abcdefghijk"));
+        MiniContentAccess contentAccess = StoredContentAccess.of(ByteString.of("abcdefghijk"));
         Blob blob = new ContentAccessBlob(contentAccess);
 
         assertThat(blob.length()).isEqualTo(11L);
@@ -29,9 +29,9 @@ class ContentAccessBlobTest {
 
     @Test
     void testReadOnly() throws Exception {
-        MiniContentAccess contentAccess = new StoredContentAccess(ByteString.of("abcdefghijk"));
+        MiniContentAccess contentAccess = StoredContentAccess.of(ByteString.of("abcdefghijk"));
         Blob blob = new ContentAccessBlob(contentAccess);
-        
+
         assertThatThrownBy(() -> blob.setBytes(1, ByteString.of("xyz").extract()))
                 .isInstanceOf(SQLException.class);
         assertThatThrownBy(() -> blob.setBytes(1, ByteString.of("xyz").extract(), 1, 2))

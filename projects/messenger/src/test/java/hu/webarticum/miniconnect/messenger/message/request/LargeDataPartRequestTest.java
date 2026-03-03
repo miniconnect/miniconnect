@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 
 class LargeDataPartRequestTest {
-    
+
     @Test
     void testHashCodeAndEquals() {
         LargeDataHeadRequest instance1 = new LargeDataHeadRequest(7L, 3, "lorem", 42);

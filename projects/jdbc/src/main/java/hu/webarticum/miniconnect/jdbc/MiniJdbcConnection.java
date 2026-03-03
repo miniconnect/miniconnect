@@ -32,7 +32,7 @@ import hu.webarticum.miniconnect.jdbc.provider.DatabaseProvider;
 import hu.webarticum.miniconnect.jdbc.provider.TransactionIsolationLevel;
 
 public class MiniJdbcConnection implements Connection {
-    
+
     private static final Map<Integer, TransactionIsolationLevel> TRANSACTION_ISOLATION_LEVEL_MAP = new HashMap<>();
     static {
         TRANSACTION_ISOLATION_LEVEL_MAP.put(TRANSACTION_NONE, TransactionIsolationLevel.NONE);
@@ -41,33 +41,33 @@ public class MiniJdbcConnection implements Connection {
         TRANSACTION_ISOLATION_LEVEL_MAP.put(TRANSACTION_REPEATABLE_READ, TransactionIsolationLevel.REPEATABLE_READ);
         TRANSACTION_ISOLATION_LEVEL_MAP.put(TRANSACTION_SERIALIZABLE, TransactionIsolationLevel.SERIALIZABLE);
     }
-    
+
 
     private final MiniSession miniSession;
-    
+
     private final DatabaseProvider databaseProvider;
-    
+
     private final String connectionUrl;
-    
+
     private final Runnable closeCallback;
-    
+
     private final MiniJdbcDatabaseMetaData metaData;
-    
+
     private final Map<String, String> clientInfo = Collections.synchronizedMap(new HashMap<>());
-    
+
     private volatile SQLWarning currentWarningHead = null; // NOSONAR
-    
+
     private volatile boolean closed = false;
-    
+
     private final Object closeLock = new Object();
-    
+
     private final CopyOnWriteArrayList<Statement> activeStatements = new CopyOnWriteArrayList<>();
-    
+
 
     public MiniJdbcConnection(MiniSession session, DatabaseProvider databaseProvider) {
         this(session, databaseProvider, null);
     }
-    
+
     public MiniJdbcConnection(MiniSession session, DatabaseProvider databaseProvider, String connectionUrl) {
         this(session, databaseProvider, connectionUrl, null);
     }
@@ -84,8 +84,8 @@ public class MiniJdbcConnection implements Connection {
 
     // --- METADATA ---
     // [start]
-    
-    
+
+
     public MiniSession getMiniSession() {
         return miniSession;
     }
@@ -97,7 +97,7 @@ public class MiniJdbcConnection implements Connection {
     public DatabaseProvider getDatabaseProvider() {
         return databaseProvider;
     }
-    
+
     public void registerActiveStatement(Statement statement) {
         activeStatements.add(statement);
     }
@@ -105,13 +105,13 @@ public class MiniJdbcConnection implements Connection {
     public void unregisterActiveStatement(Statement statement) {
         activeStatements.remove(statement);
     }
-    
+
     @Override
     public <T> T unwrap(Class<T> type) throws SQLException {
         if (!isWrapperFor(type)) {
             throw new SQLException(String.format("Unable to convert %s to %s", getClass(), type));
         }
-        
+
         @SuppressWarnings("unchecked")
         T result = (T) this;
         return result;
@@ -138,7 +138,7 @@ public class MiniJdbcConnection implements Connection {
             throw new SQLException("Only empty map is supported");
         }
     }
-    
+
     void setCurrentWarningHead(SQLWarning warning) {
         currentWarningHead = warning;
     }
@@ -181,8 +181,8 @@ public class MiniJdbcConnection implements Connection {
     }
 
     // [end]
-    
-    
+
+
     // --- CLIENT STATUS ---
     // [start]
 
@@ -241,8 +241,8 @@ public class MiniJdbcConnection implements Connection {
     }
 
     // [end]
-    
-    
+
+
     // --- STATEMENTS ---
     // [start]
 
@@ -271,11 +271,11 @@ public class MiniJdbcConnection implements Connection {
         if (resultSetHoldability != ResultSet.HOLD_CURSORS_OVER_COMMIT) {
             throw new SQLException("Only HOLD_CURSORS_OVER_COMMIT result sets are supported");
         }
-        
+
         return new MiniJdbcStatement(this);
     }
 
-    
+
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
         return new MiniJdbcPreparedStatement(this, sql);
@@ -312,7 +312,7 @@ public class MiniJdbcConnection implements Connection {
         return prepareStatement(sql);
     }
 
-    
+
     @Override
     public CallableStatement prepareCall(String sql) throws SQLException {
         throw new SQLFeatureNotSupportedException();
@@ -332,7 +332,7 @@ public class MiniJdbcConnection implements Connection {
     }
 
     // [end]
-    
+
 
     // --- UTILITY ---
     // [start]
@@ -343,7 +343,7 @@ public class MiniJdbcConnection implements Connection {
     }
 
     // [end]
-    
+
 
     // --- FACTORY ---
     // [start]
@@ -383,8 +383,8 @@ public class MiniJdbcConnection implements Connection {
     }
 
     // [end]
-    
-    
+
+
     // --- TRANSACTIONS ---
     // [start]
 
@@ -484,7 +484,7 @@ public class MiniJdbcConnection implements Connection {
         if (level == -1) {
             return;
         }
-        
+
         try {
             databaseProvider.setTransactionIsolationLevel(
                     miniSession,
@@ -516,8 +516,8 @@ public class MiniJdbcConnection implements Connection {
     }
 
     // [end]
-    
-    
+
+
     // --- CONNECTION STATE ---
     // [start]
 
@@ -530,11 +530,11 @@ public class MiniJdbcConnection implements Connection {
                 closed = true;
             }
         }
-        
+
         for (Statement activeStatement : activeStatements) {
             activeStatement.close();
         }
-        
+
         try {
             miniSession.close();
         } catch (Exception e) {
@@ -543,12 +543,12 @@ public class MiniJdbcConnection implements Connection {
             runCloseCallbackSilently();
         }
     }
-    
+
     private void runCloseCallbackSilently() {
         if (closeCallback == null) {
             return;
         }
-        
+
         try {
             closeCallback.run();
         } catch (Exception e) {
@@ -585,8 +585,8 @@ public class MiniJdbcConnection implements Connection {
     public int getNetworkTimeout() throws SQLException {
         return 0;
     }
-    
+
     // [end]
-    
-    
+
+
 }

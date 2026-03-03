@@ -4,17 +4,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class AnySchema implements Schema {
-    
+
     public static final byte FLAG = (byte) 0;
-    
-    
+
+
     private static final AnySchema INSTANCE = new AnySchema();
-    
-    
+
+
     private AnySchema() {
         // singleton
     }
-    
+
 
     public static AnySchema instance() {
         return INSTANCE;
@@ -31,12 +31,12 @@ public class AnySchema implements Schema {
         Schema adHocSchema = Schema.readFrom(in);
         return adHocSchema.readValueFrom(in);
     }
-    
+
     @Override
     public void writeValueTo(Object value, OutputStream out) {
         Schema adHocSchema = Schema.buildAdHocFor(value);
         adHocSchema.writeTo(out);
         adHocSchema.writeValueTo(value, out);
     }
-    
+
 }

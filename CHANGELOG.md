@@ -1,6 +1,30 @@
 # Changelog
 
 
+## Version 0.8.0
+
+Released on *2026-03-03*
+
+### Fixed:
+
+- Fix some minor issues with `MiniJdbcDatabaseMetaData`
+
+### Improved:
+
+- Improved conversions between types
+- Improved creator methods for the stored result types
+- Start using `ReachabilityGuard` instead of `Blackhole`
+
+### Removed:
+
+- Removed the `rest` project (launched the PhantomAPI project instead)
+
+### Development:
+
+- Updated to gradle 9 and improved build
+- Change to dedicated ByteString assertions
+
+
 ## Version 0.7.0
 
 Released on *2025-09-29*

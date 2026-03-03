@@ -8,5 +8,5 @@ import hu.webarticum.miniconnect.server.MessageEncoder;
 interface TranslatorDriver extends MessageEncoder {
 
     public Message decode(HeaderData headerData, ByteString payload);
-    
+
 }

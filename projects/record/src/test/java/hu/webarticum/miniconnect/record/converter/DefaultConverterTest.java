@@ -25,12 +25,12 @@ class DefaultConverterTest {
         Object actual = converter.convert(customValue, SimpleMappableValue.class);
         assertThat(actual).isEqualTo(new SimpleMappableValue("dolor", 9));
     }
-    
+
 
     private static class SimpleMappableValue {
 
         private final String lorem;
-        
+
         private final int ipsum;
 
 
@@ -41,13 +41,13 @@ class DefaultConverterTest {
             this.lorem = lorem;
             this.ipsum = ipsum;
         }
-        
-        
+
+
         @Override
         public int hashCode() {
             return Objects.hash(lorem, ipsum);
         }
-        
+
         @Override
         public boolean equals(Object other) {
             if (this == other) {
@@ -57,7 +57,7 @@ class DefaultConverterTest {
             } else if (!(other instanceof SimpleMappableValue)) {
                 return false;
             }
-            
+
             SimpleMappableValue otherSimpleMappableValue = (SimpleMappableValue) other;
             return
                     lorem.equals(otherSimpleMappableValue.lorem) &&
@@ -71,7 +71,7 @@ class DefaultConverterTest {
                     .add("ipsum", ipsum)
                     .build();
         }
-        
+
     }
-    
+
 }

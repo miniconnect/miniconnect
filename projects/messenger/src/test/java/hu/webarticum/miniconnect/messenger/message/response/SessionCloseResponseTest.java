@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 
 class SessionCloseResponseTest {
-    
+
     @Test
     void testHashCodeAndEquals() {
         SessionCloseResponse instance1 = new SessionCloseResponse(2L, 5);

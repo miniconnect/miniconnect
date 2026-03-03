@@ -10,34 +10,34 @@ import hu.webarticum.miniconnect.impl.result.StoredContentAccess;
 import hu.webarticum.miniconnect.lang.ByteString;
 
 public class DynamicContentAccessBuilder {
-    
+
 
     private DynamicContentAccessBuilder() {
         // use open() instead
     }
-    
+
     public static DynamicContentAccessBuilder open() {
         return new DynamicContentAccessBuilder();
     }
-    
-    
+
+
     public DynamicContentAccessFinalBuilder writing(DynamicContentAccessBuilderWriter writer) {
         return new DynamicContentAccessFinalBuilder(writer);
     }
-    
-    
+
+
     public static class DynamicContentAccessFinalBuilder {
-        
+
         private final DynamicContentAccessBuilderWriter writer;
-        
+
         private volatile ByteString computedBytes = null; // NOSONAR
-        
-        
+
+
         private DynamicContentAccessFinalBuilder(DynamicContentAccessBuilderWriter writer) {
             this.writer = writer;
         }
-        
-        
+
+
         public MiniContentAccess build() {
             try {
                 return buildThrowing();
@@ -45,24 +45,24 @@ public class DynamicContentAccessBuilder {
                 throw new UncheckedIOException(e);
             }
         }
-        
+
         public MiniContentAccess buildThrowing() throws IOException {
             if (computedBytes == null) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 writer.write(out);
                 computedBytes = ByteString.wrap(out.toByteArray());
             }
-            return new StoredContentAccess(computedBytes);
+            return StoredContentAccess.of(computedBytes);
         }
-        
+
     }
-    
-    
+
+
     @FunctionalInterface
     public interface DynamicContentAccessBuilderWriter {
-        
+
         public void write(OutputStream out) throws IOException;
-        
+
     }
-    
+
 }

@@ -9,19 +9,19 @@ import hu.webarticum.miniconnect.lang.ImmutableMap;
 import hu.webarticum.miniconnect.lang.ToStringBuilder;
 
 public class CustomValue {
-    
+
     private final Object value;
-    
-    
+
+
     public CustomValue(Object value) {
         this.value = value;
     }
-    
+
 
     public Object get() {
         return value;
     }
-    
+
     @Override
     public int hashCode() {
         return Objects.hashCode(value);
@@ -36,23 +36,23 @@ public class CustomValue {
         } else if (!(other instanceof CustomValue)) {
             return false;
         }
-        
+
         CustomValue otherCustomValue = (CustomValue) other;
         return Objects.equals(value, otherCustomValue.value);
     }
-    
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .add("value", value)
                 .build();
     }
-    
+
     @JsonValue
     public Object getForJson() {
         return mapForJson(value);
     }
-    
+
     private Object mapForJson(Object value) {
         if (value instanceof ImmutableList) {
             return ((ImmutableList<?>) value).map(this::mapForJson).toArrayList();
@@ -62,5 +62,5 @@ public class CustomValue {
             return value;
         }
     }
-    
+
 }

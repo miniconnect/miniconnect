@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
@@ -16,7 +17,7 @@ import hu.webarticum.miniconnect.record.lob.BlobValue;
 import hu.webarticum.miniconnect.record.lob.ClobValue;
 
 public class ToStringConverter implements TypedConverter<String> {
-    
+
     @Override
     public Class<String> targetClazz() {
         return String.class;
@@ -24,8 +25,8 @@ public class ToStringConverter implements TypedConverter<String> {
 
     @Override
     public String convert(Object source) {
-        if (source instanceof CustomValue) {
-            return convert(((CustomValue) source).get());
+        if (source instanceof String) {
+            return (String) source;
         } else if (source instanceof ClobValue) {
             ClobValue clobValue = (ClobValue) source;
             MiniContentAccess contentAccess = clobValue.contentAccess();
@@ -39,20 +40,24 @@ public class ToStringConverter implements TypedConverter<String> {
                 throw new IllegalArgumentException("Too large BLOB");
             }
             return contentAccess.get().toString();
-        } else if (source instanceof LocalDate) {
-            return ((LocalDate) source).format(DateTimeFormatter.ISO_LOCAL_DATE);
         } else if (source instanceof LocalTime) {
             return ((LocalTime) source).format(DateTimeFormatter.ISO_LOCAL_TIME);
-        } else if (source instanceof LocalDateTime) {
-            return ((LocalDateTime) source).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         } else if (source instanceof OffsetTime) {
             return ((OffsetTime) source).format(DateTimeFormatter.ISO_OFFSET_TIME);
+        } else if (source instanceof LocalDate) {
+            return ((LocalDate) source).format(DateTimeFormatter.ISO_LOCAL_DATE);
+        } else if (source instanceof LocalDateTime) {
+            return ((LocalDateTime) source).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         } else if (source instanceof OffsetDateTime) {
             return ((OffsetDateTime) source).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        } else if (source instanceof ZonedDateTime) {
+            return ((ZonedDateTime) source).format(DateTimeFormatter.ISO_ZONED_DATE_TIME);
         } else if (source instanceof Timestamp) {
             return convert(((Timestamp) source).toInstant());
         } else if (source instanceof Instant) {
             return ((Instant) source).toString();
+        } else if (source instanceof CustomValue) {
+            return convert(((CustomValue) source).get());
         } else {
             return source.toString();
         }

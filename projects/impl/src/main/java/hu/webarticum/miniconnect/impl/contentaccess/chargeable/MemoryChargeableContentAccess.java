@@ -3,9 +3,9 @@ package hu.webarticum.miniconnect.impl.contentaccess.chargeable;
 import hu.webarticum.miniconnect.lang.ByteString;
 
 public class MemoryChargeableContentAccess extends AbstractChargeableContentAccess {
-    
+
     private final byte[] content;
-    
+
 
     public MemoryChargeableContentAccess(int length) {
         super((long) length);
@@ -37,10 +37,10 @@ public class MemoryChargeableContentAccess extends AbstractChargeableContentAcce
     protected void savePart(long start, ByteString part) {
         part.extractTo(content, (int) start, 0, part.length());
     }
-    
+
     @Override
     public boolean isClosed() {
         return false;
     }
-    
+
 }

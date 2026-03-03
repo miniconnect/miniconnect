@@ -61,9 +61,9 @@ class ChainedIteratorTest {
         ChainedIterator<Integer> chainedIterator = ChainedIterator.over(iteratorIterator);
         assertThat(iterableOf(chainedIterator)).containsExactly(9, 2, 3, 6, 2, 3);
     }
-    
+
     private <T> Iterable<T> iterableOf(Iterator<T> iterator) {
         return () -> iterator;
     }
-    
+
 }

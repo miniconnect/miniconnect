@@ -14,15 +14,15 @@ public class StringTranslator implements ValueTranslator {
     public static final String NAME = "STRING"; // NOSONAR same name is OK
 
     public static final String CHARSET_KEY = "charset";
-    
-    
+
+
     private static final StringTranslator UTF8_INSTANCE =
             new StringTranslator(StandardCharsets.UTF_8);
-    
+
 
     private final Charset charset;
-    
-    
+
+
     private StringTranslator(Charset charset) {
         this.charset = charset;
     }
@@ -30,7 +30,7 @@ public class StringTranslator implements ValueTranslator {
     public static StringTranslator utf8Instance() {
         return UTF8_INSTANCE;
     }
-    
+
     public static StringTranslator of(Charset charset) {
         if (charset == StandardCharsets.UTF_8) {
             return UTF8_INSTANCE;
@@ -38,7 +38,7 @@ public class StringTranslator implements ValueTranslator {
             return new StringTranslator(charset);
         }
     }
-    
+
     public static StringTranslator of(ImmutableMap<String, ByteString> properties) {
         ByteString charsetValue = properties.get(CHARSET_KEY);
         Charset charset;
@@ -59,12 +59,12 @@ public class StringTranslator implements ValueTranslator {
     public String name() {
         return NAME;
     }
-    
+
     @Override
     public int length() {
         return MiniValueDefinition.DYNAMIC_LENGTH;
     }
-    
+
     @Override
     public Object decode(MiniContentAccess contentAccess) {
         return contentAccess.get().toString(charset);
@@ -73,7 +73,7 @@ public class StringTranslator implements ValueTranslator {
     @Override
     public MiniContentAccess encode(Object value) {
         ByteString bytes = ByteString.of(value.toString(), charset);
-        return new StoredContentAccess(bytes);
+        return StoredContentAccess.of(bytes);
     }
 
     @Override
@@ -89,5 +89,5 @@ public class StringTranslator implements ValueTranslator {
     public String assuredClazzName() {
         return String.class.getName();
     }
-    
+
 }

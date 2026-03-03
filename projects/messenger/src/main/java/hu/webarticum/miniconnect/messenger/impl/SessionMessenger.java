@@ -3,6 +3,7 @@ package hu.webarticum.miniconnect.messenger.impl;
 import java.util.function.Consumer;
 
 import hu.webarticum.miniconnect.api.MiniSession;
+import hu.webarticum.miniconnect.lang.ReachabilityGuard;
 import hu.webarticum.miniconnect.messenger.Messenger;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataHeadRequest;
 import hu.webarticum.miniconnect.messenger.message.request.LargeDataPartRequest;
@@ -13,23 +14,23 @@ import hu.webarticum.miniconnect.messenger.message.response.Response;
 import hu.webarticum.miniconnect.messenger.message.response.SessionCloseResponse;
 
 public class SessionMessenger implements Messenger {
-    
+
     private final MiniSession session;
-    
+
     private final QueryPartial queryPartial;
-    
+
     private final LargeDataPartial largeDataPartial;
-    
-    
+
+
     public SessionMessenger(long sessionId, MiniSession session) {
         this.session = session;
         this.queryPartial = new QueryPartial(sessionId, session);
         this.largeDataPartial = new LargeDataPartial(sessionId, session);
     }
-    
-    
+
+
     @Override
-    public synchronized void accept(Request request, Consumer<Response> responseConsumer) {
+    public synchronized ReachabilityGuard accept(Request request, Consumer<Response> responseConsumer) {
         if (request instanceof QueryRequest) {
             queryPartial.acceptQueryRequest((QueryRequest) request, responseConsumer);
         } else if (request instanceof LargeDataHeadRequest) {
@@ -43,6 +44,7 @@ public class SessionMessenger implements Messenger {
                     "Unsupported request type: %s",
                     request.getClass().getSimpleName()));
         }
+        return ReachabilityGuard.of(responseConsumer);
     }
 
     private void handleClose(
@@ -61,5 +63,5 @@ public class SessionMessenger implements Messenger {
             responseConsumer.accept(new SessionCloseResponse(sessionId, exchangeId));
         }
     }
-    
+
 }

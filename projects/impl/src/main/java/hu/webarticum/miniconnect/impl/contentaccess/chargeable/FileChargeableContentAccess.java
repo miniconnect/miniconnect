@@ -10,34 +10,34 @@ import java.nio.file.Files;
 import hu.webarticum.miniconnect.lang.ByteString;
 
 public class FileChargeableContentAccess extends AbstractChargeableContentAccess {
-    
+
     private static final long MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8L;
 
     private static final String FILE_ACCESS_MODE = "rw";
-    
+
 
     private final File file;
-    
+
     private final RandomAccessFile randomAccessFile;
 
     private final Object fileAccessLock = new Object();
 
     private final Object closeLock = new Object();
-    
-    
+
+
     private volatile boolean closed = false;
-    
+
 
     public FileChargeableContentAccess(long length) {
         this(length, createTemporaryFile());
     }
-    
+
     public FileChargeableContentAccess(long length, File file) {
         super(length);
         this.file = file;
         this.randomAccessFile = createRandomAccessFile(file);
     }
-    
+
     private static File createTemporaryFile() {
         try {
             return Files.createTempFile("miniconnect-", ".blob").toFile();
@@ -45,7 +45,7 @@ public class FileChargeableContentAccess extends AbstractChargeableContentAccess
             throw new UncheckedIOException(e);
         }
     }
-    
+
     private static RandomAccessFile createRandomAccessFile(File file) {
         try {
             return new RandomAccessFile(file, FILE_ACCESS_MODE);
@@ -53,7 +53,7 @@ public class FileChargeableContentAccess extends AbstractChargeableContentAccess
             throw new UncheckedIOException(e);
         }
     }
-    
+
 
     @Override
     public boolean isLarge() {
@@ -92,7 +92,7 @@ public class FileChargeableContentAccess extends AbstractChargeableContentAccess
         randomAccessFile.readFully(bytes);
         return bytes;
     }
-    
+
     @Override
     protected void savePart(long start, ByteString part) {
         synchronized (fileAccessLock) {
@@ -103,7 +103,7 @@ public class FileChargeableContentAccess extends AbstractChargeableContentAccess
             }
         }
     }
-    
+
     private void savePartUnsafe(long start, ByteString part) throws IOException {
         randomAccessFile.seek(start);
         randomAccessFile.write(part.extract());
@@ -117,9 +117,9 @@ public class FileChargeableContentAccess extends AbstractChargeableContentAccess
             }
             closed = true;
         }
-        
+
         super.close();
-        
+
         try {
             randomAccessFile.close();
             Files.delete(file.toPath());
@@ -127,10 +127,10 @@ public class FileChargeableContentAccess extends AbstractChargeableContentAccess
             throw new UncheckedIOException(e);
         }
     }
-    
+
     @Override
     public boolean isClosed() {
         return closed;
     }
-    
+
 }
