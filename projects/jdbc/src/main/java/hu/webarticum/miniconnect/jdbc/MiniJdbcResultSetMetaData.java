@@ -26,6 +26,7 @@ import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.lob.BlobValue;
 import hu.webarticum.miniconnect.record.lob.ClobValue;
+import hu.webarticum.miniconnect.record.type.StandardValueType;
 
 public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
 
@@ -185,7 +186,7 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
         MiniValueDefinition valueDefinition = columnHeaders.get(column - 1).valueDefinition();
         Class<?> clazz;
         try {
-            clazz = Class.forName(valueDefinition.type());
+            clazz = StandardValueType.valueOf(valueDefinition.type()).clazz();
         } catch (Exception e) {
             return 0;
         }
@@ -216,7 +217,7 @@ public class MiniJdbcResultSetMetaData implements ResultSetMetaData {
         MiniValueDefinition valueDefinition = columnHeaders.get(column - 1).valueDefinition();
         Class<?> clazz;
         try {
-            clazz = Class.forName(valueDefinition.type());
+            clazz = StandardValueType.valueOf(valueDefinition.type()).clazz();
         } catch (Exception e) {
             return 0;
         }
