@@ -8,6 +8,7 @@ import java.time.ZoneOffset;
 import java.time.temporal.Temporal;
 import java.util.regex.Pattern;
 
+import hu.webarticum.miniconnect.lang.BitString;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.DateTimeDelta;
 import hu.webarticum.miniconnect.lang.LargeInteger;
@@ -48,6 +49,8 @@ public class ToBooleanConverter implements TypedConverter<Boolean> {
             return !delta.isZero();
         } else if (source instanceof ZoneOffset) {
             return ((ZoneOffset) source).getTotalSeconds() == 0;
+        } else if (source instanceof BitString) {
+            return ((BitString) source).hasZerosOnly();
         } else if (source instanceof ByteString) {
             ByteString byteStringValue = (ByteString) source;
             return !byteStringValue.isEmpty() && byteStringValue.byteAt(0) != 0;

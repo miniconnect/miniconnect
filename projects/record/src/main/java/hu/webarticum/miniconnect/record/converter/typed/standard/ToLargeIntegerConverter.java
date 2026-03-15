@@ -14,6 +14,7 @@ import java.time.Period;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
+import hu.webarticum.miniconnect.lang.BitString;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.DateTimeDelta;
 import hu.webarticum.miniconnect.lang.LargeInteger;
@@ -40,6 +41,13 @@ public class ToLargeIntegerConverter implements TypedConverter<LargeInteger> {
             return LargeInteger.of(((Number) source).longValue());
         } else if (source instanceof Boolean) {
             return ((boolean) source) ? LargeInteger.ONE: LargeInteger.ZERO;
+        } else if (source instanceof BitString) {
+            BitString bitStringValue = (BitString) source;
+            if (bitStringValue.size() <= 64) {
+                return LargeInteger.ofUnsignedLong(bitStringValue.toLong());
+            } else {
+                return LargeInteger.of(bitStringValue.toUnsignedBigInteger());
+            }
         } else if (source instanceof ByteString) {
             return LargeInteger.of(((ByteString) source).extract());
         } else if (source instanceof BlobValue) {

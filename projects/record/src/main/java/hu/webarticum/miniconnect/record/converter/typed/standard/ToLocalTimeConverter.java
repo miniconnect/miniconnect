@@ -13,6 +13,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
 
+import hu.webarticum.miniconnect.lang.BitString;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.converter.UnsupportedConversionException;
@@ -66,6 +67,8 @@ public class ToLocalTimeConverter implements TypedConverter<LocalTime> {
                 long nanosOfDay = bigDecimalValue.unscaledValue().longValue();
                 return LocalTime.ofNanoOfDay(nanosOfDay);
             }
+        } else if (source instanceof BitString) {
+            return convert(new ToLargeIntegerConverter().convert(source));
         } else if (source instanceof ByteString) {
             return LocalTime.ofNanoOfDay(((ByteString) source).reader().readLong());
         } else if (source instanceof BlobValue) {

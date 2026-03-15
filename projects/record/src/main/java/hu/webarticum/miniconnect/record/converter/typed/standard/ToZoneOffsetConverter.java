@@ -8,6 +8,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
 
+import hu.webarticum.miniconnect.lang.BitString;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.DateTimeDelta;
 import hu.webarticum.miniconnect.record.converter.UnsupportedConversionException;
@@ -42,6 +43,8 @@ public class ToZoneOffsetConverter implements TypedConverter<ZoneOffset> {
             }
         } else if (source instanceof Number) {
             return ZoneOffset.ofTotalSeconds(((Number) source).intValue());
+        } else if (source instanceof BitString) {
+            return convert(new ToLargeIntegerConverter().convert(source));
         } else if (source instanceof ByteString) {
             return ZoneOffset.ofTotalSeconds(((ByteString) source).reader().readInt());
         } else if (source instanceof BlobValue) {

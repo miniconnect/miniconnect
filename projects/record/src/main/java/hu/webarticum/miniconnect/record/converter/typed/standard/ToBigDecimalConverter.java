@@ -14,6 +14,7 @@ import java.time.Period;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
+import hu.webarticum.miniconnect.lang.BitString;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.DateTimeDelta;
 import hu.webarticum.miniconnect.lang.LargeInteger;
@@ -42,6 +43,8 @@ public class ToBigDecimalConverter implements TypedConverter<BigDecimal> {
             return BigDecimal.valueOf(((Number) source).doubleValue());
         } else if (source instanceof Boolean) {
             return ((boolean) source) ? BigDecimal.ONE: BigDecimal.ZERO;
+        } else if (source instanceof BitString) {
+            return convert(new ToLargeIntegerConverter().convert(source));
         } else if (source instanceof ByteString) {
             ByteString.Reader reader = ((ByteString) source).reader();
             int scale = reader.readInt();
