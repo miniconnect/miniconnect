@@ -43,7 +43,7 @@ public class ToLargeIntegerConverter implements TypedConverter<LargeInteger> {
             return ((boolean) source) ? LargeInteger.ONE: LargeInteger.ZERO;
         } else if (source instanceof BitString) {
             BitString bitStringValue = (BitString) source;
-            if (bitStringValue.size() <= 64) {
+            if (bitStringValue.length() <= 64) {
                 return LargeInteger.ofUnsignedLong(bitStringValue.toLong());
             } else {
                 return LargeInteger.of(bitStringValue.toUnsignedBigInteger());
