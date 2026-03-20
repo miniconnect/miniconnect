@@ -12,6 +12,7 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.function.Function;
 
+import hu.webarticum.miniconnect.lang.BitString;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.DateTimeDelta;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
@@ -21,6 +22,7 @@ import hu.webarticum.miniconnect.record.lob.BlobValue;
 import hu.webarticum.miniconnect.record.lob.ClobValue;
 import hu.webarticum.miniconnect.record.translator.BigintTranslator;
 import hu.webarticum.miniconnect.record.translator.BinaryTranslator;
+import hu.webarticum.miniconnect.record.translator.BitTranslator;
 import hu.webarticum.miniconnect.record.translator.BlobTranslator;
 import hu.webarticum.miniconnect.record.translator.BoolTranslator;
 import hu.webarticum.miniconnect.record.translator.ByteTranslator;
@@ -69,6 +71,8 @@ public enum StandardValueType implements ValueType {
     BIGINT(ByteString.of("BNT"), LargeInteger.class, BigintTranslator.instance()),
 
     DECIMAL(ByteString.of("DEC"), BigDecimal.class, DecimalTranslator.instance()),
+
+    BIT(ByteString.of("BIT"), BitString.class, BitTranslator.instance()),
 
     BINARY(ByteString.of("BIN"), ByteString.class, BinaryTranslator.instance()),
 
