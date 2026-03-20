@@ -37,8 +37,13 @@ public class ToBigDecimalConverter implements TypedConverter<BigDecimal> {
             return new BigDecimal((BigInteger) source);
         } else if (source instanceof BigDecimal) {
             return (BigDecimal) source;
-        } else if (source instanceof Long) {
-            return BigDecimal.valueOf((Long) source);
+        } else if (
+            source instanceof Long ||
+            source instanceof Integer ||
+            source instanceof Short ||
+            source instanceof Byte
+        ) {
+            return BigDecimal.valueOf(((Number) source).longValue());
         } else if (source instanceof Number) {
             return BigDecimal.valueOf(((Number) source).doubleValue());
         } else if (source instanceof Boolean) {
