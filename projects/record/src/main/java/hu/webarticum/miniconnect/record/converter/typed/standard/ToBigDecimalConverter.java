@@ -63,45 +63,61 @@ public class ToBigDecimalConverter implements TypedConverter<BigDecimal> {
         } else if (source instanceof Character) {
             return BigDecimal.valueOf((long) (char) source); // NOSONAR it's better to be explicit
         } else if (source instanceof LocalTime) {
-            return BigDecimal.valueOf(((LocalTime) source).toNanoOfDay() / 1_000_000_000d);
+            return localTimeToBigDecimal((LocalTime) source);
         } else if (source instanceof OffsetTime) {
-            return convert(((OffsetTime) source).toLocalTime());
+            return localTimeToBigDecimal(((OffsetTime) source).toLocalTime());
         } else if (source instanceof LocalDate) {
             return BigDecimal.valueOf(((LocalDate) source).toEpochDay());
         } else if (source instanceof LocalDateTime) {
-            long secondsSinceEpoch = ((LocalDateTime) source).toEpochSecond(ZoneOffset.UTC);
-            double fragmentOfSecond = ((LocalDateTime) source).getNano() / 1_000_000_000d;
-            return BigDecimal.valueOf(secondsSinceEpoch + fragmentOfSecond);
+            return instantToBigDecimal(((LocalDateTime) source).toInstant(ZoneOffset.UTC));
         } else if (source instanceof OffsetDateTime) {
-            return convert(((OffsetDateTime) source).toInstant());
+            return instantToBigDecimal(((OffsetDateTime) source).toInstant());
         } else if (source instanceof ZonedDateTime) {
-            return convert(((ZonedDateTime) source).toInstant());
+            return instantToBigDecimal(((ZonedDateTime) source).toInstant());
         } else if (source instanceof Timestamp) {
-            return convert(((Timestamp) source).toInstant());
+            return instantToBigDecimal(((Timestamp) source).toInstant());
         } else if (source instanceof Instant) {
-            long secondsSinceEpoch = ((Instant) source).getEpochSecond();
-            double fragmentOfSecond = ((Instant) source).getNano() / 1_000_000_000d;
-            return BigDecimal.valueOf(secondsSinceEpoch + fragmentOfSecond);
+            return instantToBigDecimal((Instant) source);
         } else if (source instanceof ZoneOffset) {
             return BigDecimal.valueOf(((ZoneOffset) source).getTotalSeconds());
         } else if (source instanceof DateTimeDelta) {
-            Duration duration = ((DateTimeDelta) source).toCollapsedDuration();
-            BigDecimal bigDecimalSeconds = BigDecimal.valueOf(duration.getSeconds());
-            return bigDecimalSeconds.add(new BigDecimal(BigInteger.valueOf(duration.getNano()), 9));
+            return durationToBigDecimal(((DateTimeDelta) source).toCollapsedDuration());
         } else if (source instanceof Duration) {
-            Duration duration = (Duration) source;
-            BigDecimal bigDecimalSeconds = BigDecimal.valueOf(duration.getSeconds());
-            return bigDecimalSeconds.add(new BigDecimal(BigInteger.valueOf(duration.getNano()), 9));
+            return durationToBigDecimal((Duration) source);
         } else if (source instanceof Period) {
-            Period period = (Period) source;
-            return BigDecimal.valueOf(period.getYears() * 365)
-                    .add(BigDecimal.valueOf(period.getMonths() * 30))
-                    .add(BigDecimal.valueOf(period.getDays()));
+            return periodToBigDecimal((Period) source);
         } else if (source instanceof CustomValue) {
             return convert(((CustomValue) source).get());
         } else {
             return new BigDecimal(source.toString());
         }
+    }
+
+    private BigDecimal instantToBigDecimal(Instant instant) {
+        return temporalToBigDecimal(instant.getEpochSecond(), instant.getNano());
+    }
+
+    private BigDecimal localTimeToBigDecimal(LocalTime time) {
+        return temporalToBigDecimal(time.toSecondOfDay(), time.getNano());
+    }
+
+    private BigDecimal durationToBigDecimal(Duration duration) {
+        return temporalToBigDecimal(duration.getSeconds(), duration.getNano());
+    }
+
+    private BigDecimal temporalToBigDecimal(long seconds, int nanos) {
+        BigDecimal result = BigDecimal.valueOf(seconds);
+        if (nanos != 0) {
+            result = result.add(new BigDecimal(BigInteger.valueOf(nanos), 9).stripTrailingZeros());
+        }
+        return result;
+    }
+
+    private BigDecimal periodToBigDecimal(Period period) {
+        BigDecimal result = BigDecimal.valueOf(period.getYears() * 365L);
+        result = result.add(BigDecimal.valueOf(period.getMonths() * 30L));
+        result = result.add(BigDecimal.valueOf(period.getDays()));
+        return result;
     }
 
 }
