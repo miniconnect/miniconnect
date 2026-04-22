@@ -4,6 +4,10 @@ plugins {
 
 description = "Obvious implementations of some api pieces"
 
+tasks.withType(JavaCompile).configureEach {
+    options.release = 8
+}
+
 dependencies {
     api "hu.webarticum.miniconnect.api:api:${miniConnectApiVersion}"
 
