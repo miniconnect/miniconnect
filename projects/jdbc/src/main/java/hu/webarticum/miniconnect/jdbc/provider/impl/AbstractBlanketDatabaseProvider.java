@@ -1,5 +1,7 @@
 package hu.webarticum.miniconnect.jdbc.provider.impl;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -146,6 +148,19 @@ public abstract class AbstractBlanketDatabaseProvider implements DatabaseProvide
         Object value = parameterValue.value();
         if (value == null) {
             return "NULL";
+        } else if (value instanceof Number) {
+            if (
+                    value instanceof Byte ||
+                    value instanceof Short ||
+                    value instanceof Integer ||
+                    value instanceof Long ||
+                    value instanceof BigInteger ||
+                    value instanceof LargeInteger ||
+                    value instanceof BigDecimal) {
+                return "" + value.toString();
+            } else {
+                return Double.toString(((Number) value).doubleValue());
+            }
         } else {
             return quoteString(new ToStringConverter().convert(value));
         }
