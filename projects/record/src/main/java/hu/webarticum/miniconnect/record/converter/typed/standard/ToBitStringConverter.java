@@ -56,17 +56,14 @@ public class ToBitStringConverter implements TypedConverter<BitString> {
             byteBuffer.asLongBuffer().put((long) source);
             return BitString.of(byteBuffer.array());
         } else if (source instanceof LargeInteger) {
-            LargeInteger largeIntegerValue = (LargeInteger) source;
-            int bitLength = largeIntegerValue.bitLength();
-            if (largeIntegerValue.isNegative()) {
+            LargeInteger largeInteger = (LargeInteger) source;
+            int bitLength = largeInteger.bitLength();
+            if (largeInteger.isNegative()) {
                 bitLength++;
             }
-            BitString result = BitString.of(largeIntegerValue.toByteArray());
-            int shift = bitLength & 7;
-            if (shift != 0) {
-                result = result.substring(shift, bitLength - shift);
-            }
-            return result;
+            BitString converted = BitString.of(largeInteger.toByteArray());
+            int convertedSize = converted.length();
+            return converted.substring(convertedSize - bitLength, convertedSize);
         } else if (source instanceof CustomValue) {
             return convert(((CustomValue) source).get());
         } else {

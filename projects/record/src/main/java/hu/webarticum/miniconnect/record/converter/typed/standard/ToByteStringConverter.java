@@ -67,7 +67,7 @@ public class ToByteStringConverter implements TypedConverter<ByteString> {
             return ByteString.of(((LargeInteger) source).toByteArray());
         } else if (source instanceof BigInteger) {
             return ByteString.of(((BigInteger) source).toByteArray());
-        } else if (source instanceof LocalDate) {
+        } else if (source instanceof Float) {
             return ByteString.ofFloat((Float) source);
         } else if (source instanceof Double) {
             return ByteString.ofDouble((Double) source);

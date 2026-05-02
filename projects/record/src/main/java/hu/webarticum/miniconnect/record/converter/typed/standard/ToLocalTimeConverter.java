@@ -77,8 +77,6 @@ public class ToLocalTimeConverter implements TypedConverter<LocalTime> {
             return convert(Temporals.parse((String) source));
         } else if (source instanceof ClobValue) {
             return convert(Temporals.parse(((ClobValue) source).toString()));
-        } else if (source instanceof TemporalAmount) {
-            return LocalDate.ofEpochDay(0).atStartOfDay().plus((TemporalAmount) source).toLocalTime();
         } else if (source instanceof Boolean) {
             return LocalTime.ofSecondOfDay((Boolean) source ? 1 : 0);
         } else if (source instanceof CustomValue) {

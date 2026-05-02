@@ -50,7 +50,7 @@ public class ToOffsetDateTimeConverter implements TypedConverter<OffsetDateTime>
         } else if (source instanceof LocalTime) {
             return LocalDate.ofEpochDay(0).atTime((LocalTime) source).atOffset(ZoneOffset.UTC);
         } else if (source instanceof ZoneOffset) {
-            return LocalDate.ofEpochDay(0).atStartOfDay().atOffset(ZoneOffset.UTC);
+            return LocalDate.ofEpochDay(0).atStartOfDay().atOffset((ZoneOffset) source);
         } else if (source instanceof TemporalAmount) {
             return LocalDate.ofEpochDay(0).atStartOfDay().atOffset(ZoneOffset.UTC).plus((TemporalAmount) source);
         } else if (source instanceof Number) {
