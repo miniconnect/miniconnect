@@ -1,10 +1,8 @@
 package hu.webarticum.miniconnect.record.custom.schema;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.io.UncheckedIOException;
 
 import hu.webarticum.miniconnect.lang.ImmutableList;
 import hu.webarticum.miniconnect.lang.ImmutableMap;
@@ -20,12 +18,8 @@ public interface Schema {
 
 
     public static Schema readFrom(InputStream in) {
-        try {
-            MetaType metaType = MetaType.ofFlag((byte) in.read());
-            return metaType.alreadyMetaTypedSchemaReader().apply(in);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        MetaType metaType = MetaType.ofFlag(StreamUtil.read(in));
+        return metaType.alreadyMetaTypedSchemaReader().apply(in);
     }
 
     public static Schema buildAdHocFor(Object value) {
