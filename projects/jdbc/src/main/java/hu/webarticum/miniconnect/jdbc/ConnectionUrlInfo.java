@@ -71,7 +71,7 @@ public class ConnectionUrlInfo {
 
 
     public static boolean isUrlSupported(String url) {
-        return url.startsWith(URL_PREFIX);
+        return url != null && url.startsWith(URL_PREFIX);
     }
 
 
