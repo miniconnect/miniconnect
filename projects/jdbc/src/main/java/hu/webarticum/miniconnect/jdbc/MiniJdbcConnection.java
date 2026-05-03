@@ -155,16 +155,22 @@ public class MiniJdbcConnection implements Connection {
 
     @Override
     public void setClientInfo(String name, String value) throws SQLClientInfoException {
-        clientInfo.put(name, value);
+        if (value != null) {
+            clientInfo.put(name, value);
+        } else {
+            clientInfo.remove(name);
+        }
     }
 
     @Override
     public void setClientInfo(Properties properties) throws SQLClientInfoException {
         Map<String, String> replacements = new HashMap<>();
-        properties.forEach((k, v) -> replacements.put(
-                k != null ? k.toString() : null,
-                v != null ? v.toString() : null));
-        clientInfo.keySet().forEach(k -> replacements.putIfAbsent(k, null));
+        properties.forEach((k, v) -> {
+            if (v != null) {
+                replacements.put(k != null ? k.toString() : null, v.toString());
+            }
+        });
+        clientInfo.clear();
         clientInfo.putAll(replacements);
     }
 
