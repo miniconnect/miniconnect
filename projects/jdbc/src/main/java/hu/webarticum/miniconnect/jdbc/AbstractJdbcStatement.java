@@ -76,7 +76,7 @@ public abstract class AbstractJdbcStatement implements Statement {
 
     @Override
     public void setQueryTimeout(int seconds) throws SQLException {
-       // not supported
+        // not supported
     }
 
     @Override

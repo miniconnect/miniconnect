@@ -579,12 +579,12 @@ public class MiniJdbcConnection implements Connection {
 
     @Override
     public void abort(Executor executor) throws SQLException {
-       // not supported
+        // not supported
     }
 
     @Override
     public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
-       // not supported
+        // not supported
     }
 
     @Override

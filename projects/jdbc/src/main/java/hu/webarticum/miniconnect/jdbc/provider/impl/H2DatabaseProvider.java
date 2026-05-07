@@ -85,7 +85,7 @@ public class H2DatabaseProvider extends AbstractBlanketDatabaseProvider {
 
     @Override
     public void releaseSavepoint(MiniSession session, int id) {
-       // nothing to do
+        // nothing to do
     }
 
     @Override
