@@ -1,6 +1,30 @@
 # Changelog
 
 
+## Version 0.9.0
+
+Released on *2026-05-11*
+
+### Fixed:
+
+- Made leading zero optional when parsing temporal strings
+- Fixed handling of numeric prepared parameters
+- Fixed some conversion issues
+
+### Added:
+
+- Added support for `BitString`
+
+### Improved:
+
+- Extended the `ResultRecord` API
+
+### Development:
+
+- Upgraded to gradle 9.5.0 and improved build
+- Added CONTRIBUTING.md and CODE_OF_CONDUCT.md
+
+
 ## Version 0.8.0
 
 Released on *2026-03-03*
