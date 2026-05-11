@@ -73,7 +73,7 @@ public class H2DatabaseProvider extends AbstractBlanketDatabaseProvider {
     @Override
     public void rollbackToSavepoint(MiniSession session, int id) {
         String name = SAVEPOINT_PREFIX + id;
-        String sql = "SAVEPOINT " + quoteIdentifier(name);
+        String sql = "ROLLBACK TO SAVEPOINT " + quoteIdentifier(name);
         checkResult(session.execute(sql));
     }
 
@@ -85,7 +85,7 @@ public class H2DatabaseProvider extends AbstractBlanketDatabaseProvider {
 
     @Override
     public void releaseSavepoint(MiniSession session, int id) {
-       // nothing to do
+        // nothing to do
     }
 
     @Override

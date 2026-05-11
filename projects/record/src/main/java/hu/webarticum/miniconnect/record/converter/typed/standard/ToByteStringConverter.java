@@ -16,6 +16,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
 import hu.webarticum.miniconnect.api.MiniContentAccess;
+import hu.webarticum.miniconnect.lang.BitString;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.DateTimeDelta;
 import hu.webarticum.miniconnect.lang.LargeInteger;
@@ -36,6 +37,8 @@ public class ToByteStringConverter implements TypedConverter<ByteString> {
     public ByteString convert(Object source) {
         if (source instanceof ByteString) {
             return (ByteString) source;
+        } else if (source instanceof BitString) {
+            return ByteString.wrap(((BitString) source).toByteArrayRightAligned());
         } else if (source instanceof String) {
             return ByteString.of((String) source);
         } else if (source instanceof BlobValue) {
@@ -64,7 +67,7 @@ public class ToByteStringConverter implements TypedConverter<ByteString> {
             return ByteString.of(((LargeInteger) source).toByteArray());
         } else if (source instanceof BigInteger) {
             return ByteString.of(((BigInteger) source).toByteArray());
-        } else if (source instanceof LocalDate) {
+        } else if (source instanceof Float) {
             return ByteString.ofFloat((Float) source);
         } else if (source instanceof Double) {
             return ByteString.ofDouble((Double) source);

@@ -4,6 +4,10 @@ plugins {
 
 description = "Lightweight and transparent MiniConnect server and client"
 
+tasks.withType(JavaCompile).configureEach {
+    options.release = 8
+}
+
 dependencies {
     api project(':messenger')
     api "hu.webarticum.miniconnect.api:api:${miniConnectApiVersion}"
@@ -12,8 +16,8 @@ dependencies {
     implementation project(':util')
     implementation 'org.slf4j:slf4j-api:2.0.17'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.14.3'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.14.3'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.14.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.14.4'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.14.4'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.14.4'
     testImplementation 'org.assertj:assertj-core:3.27.7'
 }

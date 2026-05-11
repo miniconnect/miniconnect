@@ -9,6 +9,7 @@ import java.time.Period;
 import java.time.ZoneOffset;
 import java.time.temporal.Temporal;
 
+import hu.webarticum.miniconnect.lang.BitString;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.DateTimeDelta;
 import hu.webarticum.miniconnect.lang.LargeInteger;
@@ -57,6 +58,8 @@ public class ToDateTimeDeltaConverter implements TypedConverter<DateTimeDelta> {
             return DateTimeDelta.of(0, 0, 0, seconds, nanos);
         } else if (source instanceof Temporal) {
             return DateTimeDelta.between(LocalDate.ofEpochDay(0).atStartOfDay(ZoneOffset.UTC), (Temporal) source);
+        } else if (source instanceof BitString) {
+            return convert(new ToLargeIntegerConverter().convert(source));
         } else if (source instanceof ByteString) {
             ByteString.Reader reader = ((ByteString) source).reader();
             int years = reader.readInt();

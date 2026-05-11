@@ -13,6 +13,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
 
+import hu.webarticum.miniconnect.lang.BitString;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.converter.UnsupportedConversionException;
@@ -68,6 +69,8 @@ public class ToLocalDateTimeConverter implements TypedConverter<LocalDateTime> {
                 Instant instantValue = Instant.ofEpochSecond(secondsSinceEpoch, nanoOfSecond);
                 return instantValue.atOffset(ZoneOffset.UTC).toLocalDateTime();
             }
+        } else if (source instanceof BitString) {
+            return convert(new ToLargeIntegerConverter().convert(source));
         } else if (source instanceof ByteString) {
             ByteString.Reader reader = ((ByteString) source).reader();
             long daysSinceEpoch = reader.readLong();

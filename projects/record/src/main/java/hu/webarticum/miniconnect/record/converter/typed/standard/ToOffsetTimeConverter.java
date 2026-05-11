@@ -13,6 +13,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
 
+import hu.webarticum.miniconnect.lang.BitString;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.LargeInteger;
 import hu.webarticum.miniconnect.record.converter.UnsupportedConversionException;
@@ -49,7 +50,7 @@ public class ToOffsetTimeConverter implements TypedConverter<OffsetTime> {
         } else if (source instanceof Instant) {
             return ((Instant) source).atOffset(ZoneOffset.UTC).toOffsetTime();
         } else if (source instanceof ZoneOffset) {
-            return LocalTime.MIN.atOffset(ZoneOffset.UTC);
+            return LocalTime.MIN.atOffset((ZoneOffset) source);
         } else if (source instanceof TemporalAmount) {
             return LocalDate.ofEpochDay(0).atStartOfDay().atOffset(ZoneOffset.UTC).plus((TemporalAmount) source).toOffsetTime();
         } else if (source instanceof Number) {
@@ -63,9 +64,11 @@ public class ToOffsetTimeConverter implements TypedConverter<OffsetTime> {
                 return LocalTime.ofSecondOfDay(((Number) source).longValue()).atOffset(ZoneOffset.UTC);
             } else {
                 BigDecimal bigDecimalValue = Numbers.toBigDecimal((Number) source, 9);
-                long nanosOfDay= bigDecimalValue.unscaledValue().longValue();
+                long nanosOfDay = bigDecimalValue.unscaledValue().longValue();
                 return LocalTime.ofNanoOfDay(nanosOfDay).atOffset(ZoneOffset.UTC);
             }
+        } else if (source instanceof BitString) {
+            return convert(new ToLargeIntegerConverter().convert(source));
         } else if (source instanceof ByteString) {
             ByteString.Reader reader = ((ByteString) source).reader();
             long nanoOfDay = reader.readLong();
@@ -77,8 +80,6 @@ public class ToOffsetTimeConverter implements TypedConverter<OffsetTime> {
             return convert(Temporals.parse((String) source));
         } else if (source instanceof ClobValue) {
             return convert(Temporals.parse(((ClobValue) source).toString()));
-        } else if (source instanceof TemporalAmount) {
-            return LocalDate.ofEpochDay(0).atStartOfDay().plus((TemporalAmount) source).atOffset(ZoneOffset.UTC).toOffsetTime();
         } else if (source instanceof Boolean) {
             return LocalTime.ofSecondOfDay((Boolean) source ? 1 : 0).atOffset(ZoneOffset.UTC);
         } else if (source instanceof CustomValue) {

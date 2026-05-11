@@ -73,6 +73,10 @@ public class MiniJdbcDriver implements Driver {
 
     @Override
     public Connection connect(String url, Properties info) throws SQLException {
+        if (!acceptsURL(url)) {
+            return null;
+        }
+
         ConnectionUrlInfo urlInfo = ConnectionUrlInfo.parse(url, info);
         ImmutableMap<String, String> properties = urlInfo.properties();
         String schema = urlInfo.schema();

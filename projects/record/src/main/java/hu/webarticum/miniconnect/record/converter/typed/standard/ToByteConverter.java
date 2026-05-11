@@ -2,6 +2,7 @@ package hu.webarticum.miniconnect.record.converter.typed.standard;
 
 import java.math.BigDecimal;
 
+import hu.webarticum.miniconnect.lang.BitString;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
 import hu.webarticum.miniconnect.record.lob.BlobValue;
@@ -21,6 +22,8 @@ public class ToByteConverter implements TypedConverter<Byte> {
             return ((Number) source).byteValue();
         } else if (source instanceof Boolean) {
             return (boolean) source ? (byte) 1 : (byte) 0;
+        } else if (source instanceof BitString) {
+            return convert(new ToLargeIntegerConverter().convert(source));
         } else if (source instanceof ByteString) {
             ByteString byteStringValue = (ByteString) source;
             return byteStringValue.isEmpty() ? (byte) 0 : byteStringValue.byteAt(0);

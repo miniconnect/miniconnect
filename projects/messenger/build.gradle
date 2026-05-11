@@ -16,6 +16,10 @@ configurations {
     labRuntimeOnly.extendsFrom runtimeOnly
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.release = 8
+}
+
 dependencies {
     api "hu.webarticum.miniconnect.api:api:${miniConnectApiVersion}"
 
@@ -24,9 +28,9 @@ dependencies {
     implementation project(':util')
 
     testImplementation project(':jdbc-adapter')
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.14.3'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.14.3'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.14.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.14.4'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.14.4'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.14.4'
     testImplementation 'org.assertj:assertj-core:3.27.7'
-    testRuntimeOnly 'com.h2database:h2:2.3.232'
+    testRuntimeOnly 'com.h2database:h2:2.4.240'
 }

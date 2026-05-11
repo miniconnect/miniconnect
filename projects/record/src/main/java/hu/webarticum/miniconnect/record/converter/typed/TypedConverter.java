@@ -11,6 +11,7 @@ import hu.webarticum.miniconnect.record.converter.typed.extra.ToInputStreamConve
 import hu.webarticum.miniconnect.record.converter.typed.extra.ToReaderConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToBigDecimalConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToBigIntegerConverter;
+import hu.webarticum.miniconnect.record.converter.typed.standard.ToBitStringConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToBlobValueConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToBooleanConverter;
 import hu.webarticum.miniconnect.record.converter.typed.standard.ToByteConverter;
@@ -58,6 +59,7 @@ public interface TypedConverter<T> {
                 new ToLargeIntegerConverter(),
                 new ToBigIntegerConverter(),
                 new ToBigDecimalConverter(),
+                new ToBitStringConverter(),
                 new ToByteStringConverter(),
                 new ToStringConverter(),
                 new ToLocalTimeConverter(),

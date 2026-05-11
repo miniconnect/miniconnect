@@ -4,6 +4,10 @@ plugins {
 
 description = "MiniConnect implementation backed by JDBC"
 
+tasks.withType(JavaCompile).configureEach {
+    options.release = 8
+}
+
 dependencies {
     api project(':record')
     api "hu.webarticum.miniconnect.api:api:${miniConnectApiVersion}"

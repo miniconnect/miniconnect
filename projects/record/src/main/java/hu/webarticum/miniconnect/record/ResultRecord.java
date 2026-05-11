@@ -1,7 +1,9 @@
 package hu.webarticum.miniconnect.record;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
@@ -41,7 +43,14 @@ public class ResultRecord {
 
     @JsonValue
     public ImmutableMap<String, Object> rowMap() {
-        return columnHeaders.map(MiniColumnHeader::name).assign(k -> get(k).get());
+        Map<String, Object> resultBuilder = new HashMap<>();
+        int rowSize = columnHeaders.size();
+        for (int i = 0; i < rowSize; i++) {
+            String columnLabel = columnHeaders.get(i).name();
+            Object value = value(i);
+            resultBuilder.put(columnLabel, value);
+        }
+        return ImmutableMap.fromMap(resultBuilder);
     }
 
     public ImmutableList<ResultField> getAll() {
@@ -61,14 +70,38 @@ public class ResultRecord {
     }
 
     public ResultField get(String columnLabel) {
+        return get(indexOfColumnLabel(columnLabel));
+    }
+
+    public ImmutableList<Object> values() {
+        int size = row.size();
+        List<Object> resultBuilder = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            resultBuilder.add(value(i));
+        }
+        return ImmutableList.fromCollection(resultBuilder);
+    }
+
+    public Object value(int zeroBasedIndex) {
+        MiniValue value = row.get(zeroBasedIndex);
+        ValueTranslator translator = valueTranslators.get(zeroBasedIndex);
+        return value.isNull() ? null : translator.decode(value.contentAccess());
+    }
+
+    public Object value(String columnLabel) {
+        return value(indexOfColumnLabel(columnLabel));
+    }
+
+    private int indexOfColumnLabel(String columnLabel) {
         int i = 0;
         for (MiniColumnHeader columnHeader : columnHeaders) {
             if (columnHeader.name().equals(columnLabel)) {
-                return get(i);
+                return i;
             }
             i++;
         }
         throw new IllegalArgumentException("No such column: " + columnLabel);
     }
+
 
 }

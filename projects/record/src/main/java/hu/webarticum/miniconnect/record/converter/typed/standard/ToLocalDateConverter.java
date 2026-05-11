@@ -11,6 +11,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
 
+import hu.webarticum.miniconnect.lang.BitString;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.record.converter.UnsupportedConversionException;
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
@@ -50,6 +51,8 @@ public class ToLocalDateConverter implements TypedConverter<LocalDate> {
             return LocalDate.ofEpochDay(0).atStartOfDay().plus((TemporalAmount) source).toLocalDate();
         } else if (source instanceof Number) {
             return LocalDate.ofEpochDay(((Number) source).longValue());
+        } else if (source instanceof BitString) {
+            return convert(new ToLargeIntegerConverter().convert(source));
         } else if (source instanceof ByteString) {
             return LocalDate.ofEpochDay(((ByteString) source).reader().readLong());
         } else if (source instanceof BlobValue) {

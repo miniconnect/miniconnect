@@ -13,6 +13,7 @@ import java.time.Period;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 
+import hu.webarticum.miniconnect.lang.BitString;
 import hu.webarticum.miniconnect.lang.ByteString;
 import hu.webarticum.miniconnect.lang.DateTimeDelta;
 import hu.webarticum.miniconnect.record.converter.typed.TypedConverter;
@@ -67,6 +68,8 @@ public class ToDoubleConverter implements TypedConverter<Double> {
         } else if (source instanceof Period) {
             Period period = (Period) source;
             return (period.getYears() * 365d) + (period.getMonths() * 30d) + (period.getDays());
+        } else if (source instanceof BitString) {
+            return convert(new ToLargeIntegerConverter().convert(source));
         } else if (source instanceof ByteString) {
             return ((ByteString) source).reader().readDouble();
         } else if (source instanceof BlobValue) {
