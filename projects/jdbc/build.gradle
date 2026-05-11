@@ -16,17 +16,17 @@ dependencies {
     implementation project(':messenger')
     implementation project(':server')
     implementation project(':util')
-    implementation 'commons-io:commons-io:2.21.0'
+    implementation 'commons-io:commons-io:2.22.0'
     implementation 'hu.webarticum:regexbee:0.4.1'
 
     // TODO: provide separate drivers for newer hibernate major versions
-    compileOnly 'org.hibernate:hibernate-core:5.4.31.Final'
+    compileOnly 'org.hibernate:hibernate-core:5.6.15.Final'
 
     testImplementation project(':jdbc-adapter')
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.14.3'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.14.3'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.14.3'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.14.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.14.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.14.4'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.14.4'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.14.4'
     testImplementation 'org.assertj:assertj-core:3.27.7'
-    testRuntimeOnly 'com.h2database:h2:2.3.232'
+    testRuntimeOnly 'com.h2database:h2:2.4.240'
 }
