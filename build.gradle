@@ -44,7 +44,7 @@ allprojects {
     group = groupName
     version = automaticVersion
 
-    ext.miniConnectApiVersion = '0.6.0'
+    ext.miniConnectApiVersion = '0.6.1-SNAPSHOT'
 
     repositories {
         mavenCentral()
